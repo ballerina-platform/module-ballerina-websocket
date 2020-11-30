@@ -150,6 +150,7 @@ task copyToLib(type: Copy) {
 task updateTomlFile {
     doLast {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
+        def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
         def stdlibDependentIoVersion = project.stdlibIoVersion.split("-")[0]
         def stdlibDependentHttpVersion = project.stdlibHttpVersion.split("-")[0]
         def stdlibDependentLogVersion = project.stdlibLogVersion.split("-")[0]
@@ -190,6 +191,7 @@ task updateTomlFile {
         newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
         newConfig = newConfig.replace("@stdlib.task.version@", stdlibDependentTaskVersion)
         newConfig = newConfig.replace("@stdlib.mimenative.version@", stdlibDependentMimeNativeVersion)
+        newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)
         newConfig = newConfig.replace("@netty.version@", stdlibDependentNettyVersion)
         newConfig = newConfig.replace("@commmon.pool.version@", stdlibDependentWso2CommonsPoolVersion)
         newConfig = newConfig.replace("@snakeyaml.version@", stdlibDependentWso2SnakeYamlVersion)

@@ -80,10 +80,10 @@ artifactId = "websocket"
 version = "@project.version@"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-1.0.2-SNAPSHOT.jar"
+path = "./lib/http-native-@stdlib.httpnative.version@.jar"
 groupId = "ballerina"
 artifactId = "http"
-version = "1.0.2-SNAPSHOT"
+version = "@stdlib.httpnative.version@"
 
 [[platform.java11.dependency]]
 path = "./lib/mime-native-@stdlib.mimenative.version@.jar"
