@@ -20,8 +20,7 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.types.MemberFunctionType;
-//import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.types.AttachedFunctionType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
@@ -46,7 +45,7 @@ public class Register extends AbstractWebsocketNativeFunction {
         Runtime runtime = env.getRuntime();
 
         Type param;
-        MemberFunctionType[] resourceList = service.getType().getAttachedFunctions();
+        AttachedFunctionType[] resourceList = service.getType().getAttachedFunctions();
         try {
             if (resourceList.length > 0 && (param = resourceList[0].getParameterTypes()[0]) != null) {
                 String callerType = param.getQualifiedName();

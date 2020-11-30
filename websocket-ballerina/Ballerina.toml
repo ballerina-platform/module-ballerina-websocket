@@ -1,0 +1,182 @@
+[package]
+org = "ballerina"
+name = "websocket"
+version = "@toml.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "io"
+version = "@stdlib.io.version@"
+
+#[[dependency]]
+#org = "ballerina"
+#name = "cache"
+#version = "@stdlib.cache.version@"
+#
+#[[dependency]]
+#org = "ballerina"
+#name = "file"
+#version = "@stdlib.file.version@"
+
+#[[dependency]]
+#org = "ballerina"
+#name = "auth"
+#version = "@stdlib.auth.version@"
+#
+#[[dependency]]
+#org = "ballerina"
+#name = "crypto"
+#version = "@stdlib.crypto.version@"
+#
+#[[dependency]]
+#org = "ballerina"
+#name = "mime"
+#version = "@stdlib.mime.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "time"
+version = "@stdlib.time.version@"
+
+#[[dependency]]
+#org = "ballerina"
+#name = "runtime"
+#version = "@stdlib.runtime.version@"
+
+#[[dependency]]
+#org = "ballerina"
+#name = "log"
+#version = "@stdlib.log.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "http"
+version = "@stdlib.http.version@"
+
+#[[dependency]]
+#org = "ballerina"
+#name = "system"
+#version = "@stdlib.system.version@"
+
+#[[dependency]]
+#org = "ballerina"
+#name = "reflect"
+#version = "@stdlib.reflect.version@"
+#
+#[[dependency]]
+#org = "ballerina"
+#name = "stringutils"
+#version = "@stdlib.stringutils.version@"
+#
+#[[dependency]]
+#org = "ballerina"
+#name = "task"
+#version = "@stdlib.task.version@"
+
+[[platform.java11.dependency]]
+path = "../websocket-native/build/libs/websocket-native-@project.version@.jar"
+groupId = "ballerina"
+artifactId = "websocket"
+version = "@project.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/http-native-1.0.2-SNAPSHOT.jar"
+groupId = "ballerina"
+artifactId = "http"
+version = "1.0.2-SNAPSHOT"
+
+[[platform.java11.dependency]]
+path = "./lib/mime-native-@stdlib.mimenative.version@.jar"
+groupId = "ballerina"
+artifactId = "mime-native"
+version = "@stdlib.mimenative.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-common-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-common"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-buffer-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-buffer"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-transport-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-transport"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-resolver-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-resolver"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-handler-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-handler"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-codec-http-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-codec-http"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-codec-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-codec"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-handler-proxy-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-handler-proxy"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-codec-http2-@netty.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-codec-http2"
+version = "@netty.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/commons-pool-@commmon.pool.version@.jar"
+groupId = "commons-pool.wso2"
+artifactId = "commons-pool"
+version = "@commmon.pool.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/snakeyaml-@snakeyaml.version@.jar"
+groupId = "org.wso2.orbit.org.yaml"
+artifactId = "snakeyaml"
+version = "@snakeyaml.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/bcprov-jdk15on-@bouncycastle.version@.jar"
+groupId = "org.bouncycastle"
+artifactId = "bcprov-jdk15on"
+version = "@bouncycastle.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/bcpkix-jdk15on-@bouncycastle.version@.jar"
+groupId = "org.bouncycastle"
+artifactId = "bcpkix-jdk15on"
+version = "@bouncycastle.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-tcnative-boringssl-static-@tcnative.version@.jar"
+groupId = "io.netty"
+artifactId = "netty-tcnative-boringssl-static"
+version = "@tcnative.version@"
+
+[[platform.java11.dependency]]
+path = "./lib/mimepull-@mimepull.version@.jar"
+groupId = "org.jvnet.mimepull"
+artifactId = "mimepull"
+version = "@mimepull.version@"

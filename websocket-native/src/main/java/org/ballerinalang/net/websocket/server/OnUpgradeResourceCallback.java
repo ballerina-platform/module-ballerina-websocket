@@ -42,7 +42,7 @@ public class OnUpgradeResourceCallback implements Callback {
     }
 
     @Override
-    public void notifySuccess(Object result) {
+    public void notifySuccess() {
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
             ServerHandshakeFuture future = webSocketHandshaker.handshake(
                     wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
@@ -80,4 +80,3 @@ public class OnUpgradeResourceCallback implements Callback {
         }
     }
 }
-

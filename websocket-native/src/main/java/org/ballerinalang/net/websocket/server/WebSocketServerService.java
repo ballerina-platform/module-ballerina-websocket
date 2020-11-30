@@ -56,11 +56,11 @@ public class WebSocketServerService extends WebSocketService {
     }
 
     private void setBasePathWithUpgradePath(String httpBasePath, HttpResource upgradeResource) {
-        //        BMap resourceConfigAnnotation = HttpResource.getResourceConfigAnnotation(upgradeResource.getBalResource());
-        //        BMap webSocketConfig =
-        //                resourceConfigAnnotation.getMapValue(HttpConstants.ANN_CONFIG_ATTR_WEBSOCKET_UPGRADE);
-        //        String upgradePath = webSocketConfig.getStringValue(HttpConstants.ANN_WEBSOCKET_ATTR_UPGRADE_PATH).getValue();
-        //        setBasePathToServiceObj(httpBasePath.concat(upgradePath));
+        BMap resourceConfigAnnotation = HttpResource.getResourceConfigAnnotation(upgradeResource.getBalResource());
+        BMap webSocketConfig =
+                resourceConfigAnnotation.getMapValue(HttpConstants.ANN_CONFIG_ATTR_WEBSOCKET_UPGRADE);
+        String upgradePath = webSocketConfig.getStringValue(HttpConstants.ANN_WEBSOCKET_ATTR_UPGRADE_PATH).getValue();
+        setBasePathToServiceObj(httpBasePath.concat(upgradePath));
     }
 
     private void populateConfigs() {

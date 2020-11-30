@@ -41,7 +41,7 @@ public class WebSocketResourceCallback implements Callback {
     }
 
     @Override
-    public void notifySuccess(Object result) {
+    public void notifySuccess() {
         webSocketConnection.readNextFrame();
     }
 

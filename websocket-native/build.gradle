@@ -21,7 +21,7 @@ plugins {
     id 'com.github.spotbugs'
 }
 
-description = 'Ballerina - HTTP/WS Java Utils'
+description = 'Ballerina - Websocket Java Utils'
 
 dependencies {
     checkstyle project(':build-config:checkstyle')
@@ -36,6 +36,7 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
 
     compile group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}"
+    compile group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}"
     compile group: 'org.ballerinalang', name: 'mime-native', version: "${stdlibMimeVersion}"
 
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
@@ -112,7 +113,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerina-http")
+            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerina-websocket")
             credentials {
                 username = System.getenv("packageUser")
                 password = System.getenv("packagePAT")
