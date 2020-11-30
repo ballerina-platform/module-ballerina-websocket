@@ -209,7 +209,6 @@ task revertTomlFile {
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
     finalizedBy(revertTomlFile)
-    finalizedBy(':websocket-tests:build')
 
     doLast {
         // Build and populate caches
