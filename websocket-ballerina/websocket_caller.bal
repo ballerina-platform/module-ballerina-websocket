@@ -14,8 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-
 # Represents a WebSocket caller.
 public client class WebSocketCaller {
 
@@ -81,7 +79,6 @@ public client class WebSocketCaller {
     # + return - An `error` if an error occurs when sending
     public remote isolated function close(int? statusCode = 1000, string? reason = (),
         int timeoutInSeconds = 60) returns WebSocketError? {
-        io:println("Close called in caller");
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 

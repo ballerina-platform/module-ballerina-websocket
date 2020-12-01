@@ -16,7 +16,6 @@
 
 import ballerina/lang.'string as strings;
 import ballerina/java;
-import ballerina/io;
 
 # Represents a WebSocket connection in Ballerina. This includes all connection-oriented operations.
 class WebSocketConnector {
@@ -92,7 +91,6 @@ class WebSocketConnector {
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
     public isolated function close(int? statusCode = 1000, string? reason = (), int timeoutInSecs = 60) returns WebSocketError? {
-        io:println("Close called in connector");
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {

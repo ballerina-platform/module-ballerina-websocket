@@ -17,7 +17,7 @@
 import ballerina/java;
 //import ballerina/cache;
 import ballerina/crypto;
-import ballerina/io;
+//import ballerina/io;
 import ballerina/lang.'object as lang;
 //import ballerina/runtime;
 import ballerina/http;
@@ -39,7 +39,6 @@ public class Listener {
     #
     # + return - An `error` if an error occurred during the listener starting process
     public isolated function __start() returns error? {
-        io:println("Stating the listener");
         return self.startEndpoint();
     }
 
@@ -64,7 +63,6 @@ public class Listener {
     # + name - Name of the service
     # + return - An `error` an error occurred during the service attachment process or else nil
     public isolated function __attach(service s, string? name = ()) returns error? {
-        io:println("Attaching the listener");
         return self.register(s, name);
     }
 
@@ -82,7 +80,6 @@ public class Listener {
     # + port - Listening port of the HTTP service listener
     # + config - Configurations for the HTTP service listener
     public isolated function init(int port, ListenerConfiguration? config = ()) {
-        io:println("Init the listener");
         self.instanceId = uuid();
         self.config = config ?: {};
         self.port = port;
@@ -105,7 +102,6 @@ public class Listener {
     }
 
     public isolated function initEndpoint() returns error? {
-        io:println("initEndpoint-------");
         return externInitEndpoint(self);
     }
 

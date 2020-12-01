@@ -18,7 +18,6 @@ import ballerina/java;
 import ballerina/lang.array;
 import ballerina/time;
 import ballerina/http;
-import ballerina/io;
 
 # Represents a WebSocket client endpoint.
 public client class WebSocketClient {
@@ -39,7 +38,6 @@ public client class WebSocketClient {
     # + url - URL of the target service
     # + config - The configurations to be used when initializing the client
     public isolated function init(string url, WebSocketClientConfiguration? config = ()) {
-        io:println("executing init");
         self.url = url;
         if (config is WebSocketClientConfiguration) {
             addCookies(config);
@@ -50,7 +48,6 @@ public client class WebSocketClient {
 
     # Initializes the endpoint.
     public isolated function initEndpoint() {
-        io:println("executing initEndpoint");
         var retryConfig = self.config?.retryConfig;
         if (retryConfig is WebSocketRetryConfig) {
             return externRetryInitEndpoint(self);

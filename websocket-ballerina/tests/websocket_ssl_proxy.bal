@@ -160,10 +160,10 @@ public function testSslProxySendText() {
     checkpanic wsClient->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       log:printError("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   log:printError("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests sending and receiving of binary frames in WebSocket.
@@ -182,8 +182,8 @@ public function testSslProxySendBinary() {
     checkpanic wsClient->pushBinary(binaryData);
     runtime:sleep(500);
     test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       log:printError("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   log:printError("Error occurred when closing connection", result);
+    //}
 }

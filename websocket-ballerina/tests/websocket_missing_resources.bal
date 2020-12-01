@@ -16,7 +16,7 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/io;
+//import ballerina/io;
 //import ballerina/websocket;
 
 string expectedData = "";
@@ -65,10 +65,10 @@ public function testMissingOnText() {
     checkpanic wsClient->pushBinary(binaryData);
     runtime:sleep(500);
     test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
-    error? result = wsClient->close();
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests behavior when onPong resource is missing and a pong is received
@@ -83,10 +83,10 @@ public function testMissingOnPong() {
     checkpanic wsClient->pushBinary(binaryData);
     runtime:sleep(500);
     test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
-    error? result = wsClient->close();
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests behavior when onBinary resource is missing and binary message is received
@@ -103,10 +103,10 @@ public function testMissingOnBinary() {
     checkpanic wsClient->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
-    error? result = wsClient->close();
-    if (result is WebSocketError) {
-        io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //    io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests behavior when onBinary resource is missing and binary message is received
@@ -118,8 +118,8 @@ public function testMissingOnIdleTimeout() {
     checkpanic wsClient->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-        io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //    io:println("Error occurred when closing connection", result);
+    //}
 }

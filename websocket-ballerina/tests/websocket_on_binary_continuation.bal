@@ -16,7 +16,7 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/io;
+//import ballerina/io;
 //import ballerina/websocket;
 
 byte[] content = [];
@@ -68,8 +68,8 @@ public function testBinaryContinuation() {
     runtime:sleep(500);
     string|error value = 'string:fromBytes(binaryContent);
     test:assertEquals(value.toString(), msg, msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }

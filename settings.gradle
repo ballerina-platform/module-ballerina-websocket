@@ -13,7 +13,7 @@ plugins {
 
 rootProject.name = 'websocket'
 include(':build-config:checkstyle')
-include ':websocket-native', ':websocket-ballerina', ':websocket-tests'
+include ':websocket-native', ':websocket-ballerina'
 
 gradleEnterprise {
     buildScan {

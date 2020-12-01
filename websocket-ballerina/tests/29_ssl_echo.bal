@@ -16,7 +16,7 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/io;
+//import ballerina/io;
 //import ballerina/websocket;
 
 string expectedString = "";
@@ -55,7 +55,7 @@ service sslEchoCallbackService = @WebSocketServiceConfig {} service {
     }
 
     resource function onClose(WebSocketClient wsEp, int statusCode, string reason) {
-        var returnVal = wsEp->close(statusCode = statusCode, reason = reason);
+        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
         if (returnVal is WebSocketError) {
             panic <error>returnVal;
         }
@@ -78,10 +78,10 @@ public function sslBinaryEcho() {
     checkpanic wsClient->pushBinary(binaryData);
     runtime:sleep(500);
     test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests sending and receiving of text frames in WebSockets.
@@ -99,8 +99,8 @@ public function sslTextEcho() {
     checkpanic wsClient->pushText("Hi madam");
     runtime:sleep(500);
     test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }

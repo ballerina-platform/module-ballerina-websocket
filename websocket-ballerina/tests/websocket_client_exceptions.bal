@@ -101,20 +101,20 @@ public function testLongFrameError() {
     } else {
         test:assertFail("Mismatched output");
     }
-    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       log:printError("Error occurred when closing connection", result);
-    }
+    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   log:printError("Error occurred when closing connection", result);
+    //}
 }
 
 // Close the connection and push text
 @test:Config {}
 public function testConnectionClosedError() {
     WebSocketClient wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
-    error? result = wsClientEp->close();
-    if (result is WebSocketError) {
-       log:printError("Error occurred when closing connection", result);
-    }
+    error? result = wsClientEp->close(timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   log:printError("Error occurred when closing connection", result);
+    //}
     runtime:sleep(2000);
     var err = wsClientEp->pushText("some");
     if (err is error) {

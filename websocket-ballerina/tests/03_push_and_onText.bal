@@ -29,8 +29,6 @@ type WebSocketPerson record {|
 service onTextString on new Listener(21003) {
 
     resource function onText(WebSocketCaller caller, string data, boolean finalFrame) {
-        io:println("data");
-        io:println(data);
         checkpanic caller->pushText(data);
     }
 }
@@ -38,8 +36,6 @@ service onTextString on new Listener(21003) {
 service onTextJSON on new Listener(21023) {
 
     resource function onText(WebSocketCaller caller, json data) {
-        io:println("data");
-        io:println(data);
         checkpanic caller->pushText(data);
     }
 }
@@ -79,9 +75,7 @@ service onTextByteArray on new Listener(21026) {
 service clientPushCallbackService = @WebSocketServiceConfig {} service {
 
     resource function onText(WebSocketClient wsEp, string text) {
-        io:println("text came");
         data = <@untainted>text;
-        io:println(data);
     }
 
     resource function onError(WebSocketClient wsEp, error err) {
@@ -94,12 +88,9 @@ service clientPushCallbackService = @WebSocketServiceConfig {} service {
 public function testString() {
     WebSocketClient wsClient = new("ws://localhost:21003/onTextString", {callbackService: clientPushCallbackService});
     checkpanic wsClient->pushText("Hi");
-    io:println("sent message");
     runtime:sleep(500);
-    io:println("Slept 500");
     test:assertEquals(data, "Hi", msg = "Failed pushtext");
-    io:println("Asserted");
-    checkpanic wsClient->close(statusCode = 1000, reason = "Close the connection");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
 // Tests JSON support for pushText and onText
@@ -110,11 +101,10 @@ public function testJson() {
     checkpanic wsClient->pushText("{\"name\":\"Riyafa\", \"age\":23}");
     runtime:sleep(500);
     test:assertEquals(data, expectedMsg, msg = "Failed pushtext");
-    io:println("asserted");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests XML support for pushText and onText
@@ -125,10 +115,10 @@ public function testXml() {
     var output = wsClient->pushText(msg);
     runtime:sleep(500);
     test:assertEquals(data, msg, msg = "");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests Record support for pushText and onText
@@ -139,10 +129,10 @@ public function testRecord() {
     var output = wsClient->pushText("{\"name\":\"Riyafa\", \"age\":23}");
     runtime:sleep(500);
     test:assertEquals(data, expectedMsg, msg = "");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests byte array support for pushText and onText
@@ -154,8 +144,8 @@ public function testByteArray() {
     var output = wsClient->pushText(msg);
     runtime:sleep(500);
     test:assertEquals(data, msg, msg = "");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }

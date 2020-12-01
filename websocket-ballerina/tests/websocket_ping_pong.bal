@@ -16,7 +16,7 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/io;
+//import ballerina/io;
 //import ballerina/websocket;
 
 byte[] expectedPongData = [];
@@ -64,10 +64,10 @@ public function testPingToBallerinaServer() {
     checkpanic wsClient->ping(pongData);
     runtime:sleep(500);
     test:assertEquals(expectedPongData, pongData);
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests pong to Ballerina WebSocket server
@@ -79,8 +79,8 @@ public function testPingFromRemoteServerToBallerinaClient() {
     checkpanic wsClient->pong(pongData);
     runtime:sleep(500);
     test:assertEquals(expectedPongData1, pongData);
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }

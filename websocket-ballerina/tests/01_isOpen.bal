@@ -16,8 +16,6 @@
 
 import ballerina/runtime;
 import ballerina/test;
-//import ballerina/http;
-import ballerina/io;
 
 listener Listener socketListener = new (21001);
 string output = "";
@@ -44,7 +42,6 @@ service isOpen on socketListener {
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() {
-    io:println("executing test testIsOpenCloseCalled");
     WebSocketClient wsClient = new("ws://localhost:21001");
     checkpanic wsClient->pushText("Hi");
     runtime:sleep(500);

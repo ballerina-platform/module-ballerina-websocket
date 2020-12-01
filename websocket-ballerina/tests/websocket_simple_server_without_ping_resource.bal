@@ -42,8 +42,8 @@ public function testAutoPingPongSupport() {
     checkpanic wsClient->ping(pingData);
     runtime:sleep(500);
     test:assertEquals(expectedAutoPongData, pingData, msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-        io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //    io:println("Error occurred when closing connection", result);
+    //}
 }

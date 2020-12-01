@@ -33,7 +33,7 @@ service pushTextFailureService on new Listener(21008) {
 // Checks for the log that is printed when pushText fails.
 @test:Config {}
 public function pushTextFailure() {
-    WebSocketClient wsClient = new ("ws://localhost:21008/pushTextFailureService");
+    WebSocketClient wsClient = new("ws://localhost:21008/pushTextFailureService");
     runtime:sleep(500);
     test:assertEquals(errorMsg, "ConnectionClosureError: Close frame already sent. Cannot push text data!",
         msg = "Data mismatched");

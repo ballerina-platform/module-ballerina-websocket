@@ -86,7 +86,6 @@ service attachService = @WebSocketServiceConfig {} service {
 @test:Config {}
 public function attachClientService() {
     WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-    io:println("Attaching the service test");
     checkpanic wsClientEp->pushText("client_attach");
     runtime:sleep(500);
     test:assertEquals(attDettServerOutput, "GenericError: Client service cannot be attached to the Listener");
@@ -99,10 +98,10 @@ public function detachFirst() {
     checkpanic wsClientEp->pushText("detach");
     runtime:sleep(500);
     test:assertEquals(attDettServerOutput, "GenericError: Cannot detach service. Service has not been registered");
-    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Tests echoed text message from the attached servers
@@ -128,11 +127,11 @@ public function attachSuccess() {
     if (result1 is WebSocketError) {
        io:println("Error occurred when closing connection", result1);
     }
-    error? result2 = attachClient->close(statusCode = 1000, reason = "Close the connection");
+    error? result2 = attachClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
     if (result2 is WebSocketError) {
        io:println("Error occurred when closing connection", result2);
     }
-    error? result3 = pathClient->close(statusCode = 1000, reason = "Close the connection");
+    error? result3 = pathClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
     if (result3 is WebSocketError) {
        io:println("Error occurred when closing connection", result3);
     }
@@ -148,10 +147,10 @@ public function detachSuccess() {
     WebSocketClient attachClient = new ("ws://localhost:21032", {callbackService: attachService});
     runtime:sleep(500);
     test:assertEquals(attDettExpectedErr, "error(\"InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found\")");
-    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Attach twice to the service
@@ -163,10 +162,10 @@ public function attachTwice() {
     checkpanic wsClientEp->pushText("attach");
     runtime:sleep(500);
     test:assertEquals(attDettServerOutput, "GenericError: Two services have the same addressable URI");
-    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
 
 // Detach from the service twice
@@ -178,8 +177,8 @@ public function detachTwice() {
     checkpanic wsClientEp->pushText("detach");
     runtime:sleep(500);
     test:assertEquals(attDettServerOutput, "GenericError: Cannot detach service. Service has not been registered");
-    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection");
-    if (result is WebSocketError) {
-       io:println("Error occurred when closing connection", result);
-    }
+    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    //if (result is WebSocketError) {
+    //   io:println("Error occurred when closing connection", result);
+    //}
 }
