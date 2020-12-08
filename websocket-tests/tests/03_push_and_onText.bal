@@ -28,7 +28,7 @@ type WebSocketPerson record {|
 |};
 service onTextString on new websocket:Listener(21003) {
 
-    resource function onText(websocket:WebSocketCaller caller, string data, boolean finalFrame) {
+    resource function onText(websocket:Caller caller, string data, boolean finalFrame) {
         io:println("data");
         io:println(data);
         checkpanic caller->pushText(data);
@@ -37,7 +37,7 @@ service onTextString on new websocket:Listener(21003) {
 
 service onTextJSON on new websocket:Listener(21023) {
 
-    resource function onText(websocket:WebSocketCaller caller, json data) {
+    resource function onText(websocket:Caller caller, json data) {
         io:println("data");
         io:println(data);
         checkpanic caller->pushText(data);
@@ -46,14 +46,14 @@ service onTextJSON on new websocket:Listener(21023) {
 
 service onTextXML on new websocket:Listener(21024) {
 
-    resource function onText(websocket:WebSocketCaller caller, xml data) {
+    resource function onText(websocket:Caller caller, xml data) {
         checkpanic caller->pushText(data);
     }
 }
 
 service onTextRecord on new websocket:Listener(21025) {
 
-    resource function onText(websocket:WebSocketCaller caller, WebSocketPerson data) {
+    resource function onText(websocket:Caller caller, WebSocketPerson data) {
         var personData = data.cloneWithType(json);
         if (personData is error) {
             panic personData;
@@ -68,7 +68,7 @@ service onTextRecord on new websocket:Listener(21025) {
 
 service onTextByteArray on new websocket:Listener(21026) {
 
-    resource function onText(websocket:WebSocketCaller caller, byte[] data) {
+    resource function onText(websocket:Caller caller, byte[] data) {
         var returnVal = caller->pushText(data);
         if (returnVal is websocket:WebSocketError) {
             panic <error>returnVal;

@@ -36,7 +36,7 @@ public client class WebSocketFailoverClient {
     # + config - The `WebSocketFailoverClientConfiguration` of the endpoint
     public isolated function init(WebSocketFailoverClientConfiguration config) {
         self.url = config.targetUrls[0];
-        addCookies(config);
+        //addCookies(config);
         self.config = config;
         return externFailoverInit(self);
     }
@@ -47,7 +47,7 @@ public client class WebSocketFailoverClient {
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data,
+    remote isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data,
     boolean finalFrame = true) returns WebSocketError? {
         return self.conn.pushText(data, finalFrame);
     }
@@ -58,7 +58,7 @@ public client class WebSocketFailoverClient {
     # + data - Binary data to be sent
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function pushBinary(byte[] data, boolean finalFrame = true) returns WebSocketError? {
+    remote isolated function pushBinary(byte[] data, boolean finalFrame = true) returns WebSocketError? {
         return self.conn.pushBinary(data, finalFrame);
     }
 
@@ -66,7 +66,7 @@ public client class WebSocketFailoverClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function ping(byte[] data) returns WebSocketError? {
+    remote isolated function ping(byte[] data) returns WebSocketError? {
         return self.conn.ping(data);
     }
 
@@ -75,7 +75,7 @@ public client class WebSocketFailoverClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function pong(byte[] data) returns WebSocketError? {
+    remote isolated function pong(byte[] data) returns WebSocketError? {
         return self.conn.pong(data);
     }
 
@@ -89,7 +89,7 @@ public client class WebSocketFailoverClient {
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the webSocket connection
-    public remote isolated function close(int? statusCode = 1000, string? reason = (),
+    remote isolated function close(int? statusCode = 1000, string? reason = (),
     int timeoutInSeconds = 60) returns WebSocketError? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
@@ -98,7 +98,7 @@ public client class WebSocketFailoverClient {
     # WebSocketListener, it can be called only in the `upgrade` or `onOpen` resources.
     #
     # + return - An `error` if an error occurs while checking the connection state
-    public remote isolated function ready() returns WebSocketError? {
+    remote isolated function ready() returns WebSocketError? {
         return self.conn.ready();
     }
 

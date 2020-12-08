@@ -20,10 +20,12 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.types.MemberFunctionType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
@@ -39,24 +41,26 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_CALLE
  */
 public class Register extends AbstractWebsocketNativeFunction {
     public static Object register(Environment env, BObject serviceEndpoint, BObject service,
-            Object annotationData) {
+            Object serviceName) {
 
         WebSocketServicesRegistry webSocketServicesRegistry = getWebSocketServicesRegistry(serviceEndpoint);
         Runtime runtime = env.getRuntime();
+        String[] basePathArr = ((BArray) serviceName).getStringArray();
 
         Type param;
-        AttachedFunctionType[] resourceList = service.getType().getAttachedFunctions();
+        MemberFunctionType[] resourceList = service.getType().getAttachedFunctions();
         try {
             if (resourceList.length > 0 && (param = resourceList[0].getParameterTypes()[0]) != null) {
                 String callerType = param.getQualifiedName();
-                if (WEBSOCKET_CALLER_NAME.equals(callerType)) {
-                    webSocketServicesRegistry.registerService(new WebSocketServerService(service, runtime));
+                if (WEBSOCKET_CALLER_NAME.equals(callerType) || HttpConstants.HTTP_CALLER_NAME.equals(callerType)) {
+                    webSocketServicesRegistry
+                            .registerService(new WebSocketServerService(service, runtime, basePathArr));
                 } else if (FULL_WEBSOCKET_CLIENT_NAME.equals(callerType)) {
                     return WebSocketUtil.getWebSocketError(
                             "Client service cannot be attached to the Listener", null,
                             WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
                 } else {
-                    return HttpUtil.createHttpError("Invalid http Service");
+                    return HttpUtil.createHttpError("Invalid websocket Service");
                 }
             }
         } catch (BError ex) {

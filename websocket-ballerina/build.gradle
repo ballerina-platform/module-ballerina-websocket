@@ -220,6 +220,7 @@ task ballerinaBuild {
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build -c && exit %%ERRORLEVEL%%"
             } else {
+//                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --debug 5005"
                 commandLine 'sh', '-c', "$distributionBinPath/ballerina build -c"
             }
         }

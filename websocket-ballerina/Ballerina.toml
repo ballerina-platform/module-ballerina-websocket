@@ -28,10 +28,10 @@ version = "@stdlib.io.version@"
 #name = "crypto"
 #version = "@stdlib.crypto.version@"
 #
-#[[dependency]]
-#org = "ballerina"
-#name = "mime"
-#version = "@stdlib.mime.version@"
+[[dependency]]
+org = "ballerina"
+name = "mime"
+version = "@stdlib.mime.version@"
 
 [[dependency]]
 org = "ballerina"

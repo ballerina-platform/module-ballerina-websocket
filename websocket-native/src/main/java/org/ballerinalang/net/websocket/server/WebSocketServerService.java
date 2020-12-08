@@ -19,6 +19,7 @@
 package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.types.MemberFunctionType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -43,27 +44,27 @@ public class WebSocketServerService extends WebSocketService {
     private int idleTimeoutInSeconds = 0;
     private HttpResource upgradeResource;
 
-    public WebSocketServerService(BObject service, Runtime runtime) {
+    public WebSocketServerService(BObject service, Runtime runtime, String[] basePathArr) {
         super(service, runtime);
-        populateConfigs();
+        populateConfigs(basePathArr);
     }
 
-    public WebSocketServerService(String httpBasePath, HttpResource upgradeResource, BObject service,
-            Runtime runtime) {
-        this(service, runtime);
-        setBasePathWithUpgradePath(httpBasePath, upgradeResource);
-        this.upgradeResource = upgradeResource;
-    }
+//    public WebSocketServerService(String httpBasePath, HttpResource upgradeResource, BObject service,
+//            Runtime runtime) {
+//        this(service, runtime);
+//        setBasePathWithUpgradePath(httpBasePath, upgradeResource);
+//        this.upgradeResource = upgradeResource;
+//    }
 
-    private void setBasePathWithUpgradePath(String httpBasePath, HttpResource upgradeResource) {
-        BMap resourceConfigAnnotation = HttpResource.getResourceConfigAnnotation(upgradeResource.getBalResource());
-        BMap webSocketConfig =
-                resourceConfigAnnotation.getMapValue(HttpConstants.ANN_CONFIG_ATTR_WEBSOCKET_UPGRADE);
-        String upgradePath = webSocketConfig.getStringValue(HttpConstants.ANN_WEBSOCKET_ATTR_UPGRADE_PATH).getValue();
-        setBasePathToServiceObj(httpBasePath.concat(upgradePath));
-    }
+//    private void setBasePathWithUpgradePath(String httpBasePath, HttpResource upgradeResource) {
+//        BMap resourceConfigAnnotation = HttpResource.getResourceConfigAnnotation(upgradeResource.getBalResource());
+//        BMap webSocketConfig =
+//                resourceConfigAnnotation.getMapValue(HttpConstants.ANN_CONFIG_ATTR_WEBSOCKET_UPGRADE);
+//        String upgradePath = webSocketConfig.getStringValue(HttpConstants.ANN_WEBSOCKET_ATTR_UPGRADE_PATH).getValue();
+//        setBasePathToServiceObj(httpBasePath.concat(upgradePath));
+//    }
 
-    private void populateConfigs() {
+    private void populateConfigs(String[] basePathArr) {
         BMap<BString, Object> configAnnotation = getServiceConfigAnnotation();
         if (configAnnotation != null) {
             negotiableSubProtocols = WebSocketUtil.findNegotiableSubProtocols(configAnnotation);
@@ -72,7 +73,7 @@ public class WebSocketServerService extends WebSocketService {
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
         }
         // This will be overridden if there is an upgrade path
-        setBasePathToServiceObj(findFullWebSocketUpgradePath(configAnnotation));
+        setBasePathToServiceObj(findFullWebSocketUpgradePath(basePathArr));
     }
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
@@ -100,6 +101,17 @@ public class WebSocketServerService extends WebSocketService {
         return upgradeResource;
     }
 
+    public boolean getUpgradeRemoteFunction(WebSocketServerService wsService) {
+        MemberFunctionType[] attFunctions = wsService.getBalService().getType()
+                .getAttachedFunctions();
+        for (MemberFunctionType remoteFunc : attFunctions) {
+            if (remoteFunc.getName().equals("onUpgrade")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int getIdleTimeoutInSeconds() {
         return idleTimeoutInSeconds;
     }
@@ -117,10 +129,11 @@ public class WebSocketServerService extends WebSocketService {
         return basePath;
     }
 
-    private String findFullWebSocketUpgradePath(BMap config) {
+    private String findFullWebSocketUpgradePath(String[] basePathArr) {
         String path = null;
-        if (config != null) {
-            String basePathVal = config.getStringValue(WebSocketConstants.ANNOTATION_ATTR_PATH).getValue();
+        if (basePathArr != null) {
+            String basePathVal = String.join("/", basePathArr);
+//            String basePathVal = config.getStringValue(WebSocketConstants.ANNOTATION_ATTR_PATH).getValue();
             if (!basePathVal.trim().isEmpty()) {
                 path = HttpUtil.sanitizeBasePath(basePathVal);
             }

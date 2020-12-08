@@ -23,7 +23,7 @@ int expectedStatusCode = 0;
     path: "/"
 }
 service clientClose on new websocket:Listener(21004) {
-    resource function onClose(websocket:WebSocketCaller wsEp, int statusCode, string reason) {
+    resource function onClose(websocket:Caller wsEp, int statusCode, string reason) {
         expectedStatusCode = <@untainted>statusCode;
     }
 

@@ -43,7 +43,7 @@
 //}
 //service upgradedServ = @websocket:WebSocketServiceConfig {} service {
 //
-//    resource function onOpen(websocket:WebSocketCaller caller) {
+//    resource function onOpen(websocket:Caller caller) {
 //        io:println("onOpen: " + caller.getConnectionId());
 //    }
 //};

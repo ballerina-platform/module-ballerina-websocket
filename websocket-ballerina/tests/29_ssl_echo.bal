@@ -16,91 +16,93 @@
 
 import ballerina/runtime;
 import ballerina/test;
-//import ballerina/io;
-//import ballerina/websocket;
+import ballerina/http;
+import ballerina/io;
 
 string expectedString = "";
 byte[] expectedBinaryData = [];
-service sslEcho on new Listener(21029, {
-        secureSocket: {
-            keyStore: {
-                path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                password: "ballerina"
-            }
-        }
-    }) {
 
-    resource function onText(WebSocketCaller caller, string data, boolean finalFrame) {
-        var returnVal = caller->pushText(data, finalFrame);
-        if (returnVal is WebSocketError) {
-            panic <error>returnVal;
-        }
-    }
-
-    resource function onBinary(WebSocketCaller caller, byte[] data, boolean finalFrame) {
-        var returnVal = caller->pushBinary(data, finalFrame);
-        if (returnVal is WebSocketError) {
-            panic <error>returnVal;
-        }
+service UpgradeService /sslEcho on new Listener(21029, {
+       secureSocket: {
+           keyStore: {
+               path: "tests/certsAndKeys/ballerinaKeystore.p12",
+               password: "ballerina"
+           }
+       }
+   }) {
+   remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
+       io:println("Dispatched to SSL upgrade resource");
+       return new WsService6();
     }
 }
 
-service sslEchoCallbackService = @WebSocketServiceConfig {} service {
-    resource function onText(WebSocketClient wsEp, string text) {
-        expectedString = <@untainted>text;
-    }
+service class WsService6 {
+  *Service;
+  remote function onText(Caller caller, string data, boolean finalFrame) {
+       var returnVal = caller->pushText(data, finalFrame);
+       if (returnVal is WebSocketError) {
+           panic <error>returnVal;
+       }
+   }
 
-    resource function onBinary(WebSocketClient wsEp, byte[] data) {
-        expectedBinaryData = <@untainted>data;
-    }
+   remote function onBinary(Caller caller, byte[] data, boolean finalFrame) {
+       var returnVal = caller->pushBinary(data, finalFrame);
+       if (returnVal is WebSocketError) {
+           panic <error>returnVal;
+       }
+   }
+}
 
-    resource function onClose(WebSocketClient wsEp, int statusCode, string reason) {
-        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-        if (returnVal is WebSocketError) {
-            panic <error>returnVal;
-        }
-    }
+service object {} sslEchoCallbackService = @WebSocketServiceConfig {} service object {
+   remote function onText(WebSocketClient wsEp, string text) {
+       expectedString = <@untainted>text;
+   }
+
+   remote function onBinary(WebSocketClient wsEp, byte[] data) {
+       expectedBinaryData = <@untainted>data;
+   }
+
+   remote function onClose(WebSocketClient wsEp, int statusCode, string reason) {
+       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
+       if (returnVal is WebSocketError) {
+           panic <error>returnVal;
+       }
+   }
 };
 
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
 public function sslBinaryEcho() {
-    WebSocketClient wsClient = new ("wss://localhost:21029/sslEcho", {
-            callbackService: sslEchoCallbackService,
-            secureSocket: {
-                trustStore: {
-                    path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                    password: "ballerina"
-                }
-            }
-        });
-    byte[] binaryData = [5, 24, 56];
-    checkpanic wsClient->pushBinary(binaryData);
-    runtime:sleep(500);
-    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-    //if (result is WebSocketError) {
-    //   io:println("Error occurred when closing connection", result);
-    //}
+   WebSocketClient wsClient = new ("wss://localhost:21029/sslEcho", {
+           callbackService: sslEchoCallbackService,
+           secureSocket: {
+               trustStore: {
+                   path: "tests/certsAndKeys/ballerinaTruststore.p12",
+                   password: "ballerina"
+               }
+           }
+       });
+   byte[] binaryData = [5, 24, 56];
+   checkpanic wsClient->pushBinary(binaryData);
+   runtime:sleep(500);
+   test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
 public function sslTextEcho() {
-    WebSocketClient wsClient = new ("wss://localhost:21029/sslEcho", {
-            callbackService: sslEchoCallbackService,
-            secureSocket: {
-                trustStore: {
-                    path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                    password: "ballerina"
-                }
-            }
-        });
-    checkpanic wsClient->pushText("Hi madam");
-    runtime:sleep(500);
-    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-    //if (result is WebSocketError) {
-    //   io:println("Error occurred when closing connection", result);
-    //}
+   WebSocketClient wsClient = new ("wss://localhost:21029/sslEcho", {
+           callbackService: sslEchoCallbackService,
+           secureSocket: {
+               trustStore: {
+                   path: "tests/certsAndKeys/ballerinaTruststore.p12",
+                   password: "ballerina"
+               }
+           }
+       });
+   checkpanic wsClient->pushText("Hi madam");
+   runtime:sleep(500);
+   test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

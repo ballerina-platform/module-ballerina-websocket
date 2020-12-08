@@ -60,7 +60,7 @@ public class WebSocketServicesRegistry {
             throw WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.WsGenericError.
                     errorCode(), null);
         }
-        logger.info("WebSocketService deployed : {} with context {}", service.getName(), basePath);
+        logger.info("WebSocketService deployed with context {}", basePath);
     }
 
     public WebSocketServerService findMatching(String path, HttpResourceArguments pathParams,

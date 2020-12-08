@@ -20,7 +20,6 @@ package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.values.BMap;
 import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpResource;
 import org.ballerinalang.net.http.HttpResourceArguments;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
@@ -73,8 +72,9 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
         }
         setCarbonMessageProperties(pathParams, requestUri, webSocketHandshaker.getHttpCarbonRequest());
 
-        HttpResource onUpgradeResource = wsService.getUpgradeResource();
-        if (onUpgradeResource != null) {
+//        HttpResource onUpgradeResource = wsService.getUpgradeResource();
+        boolean onUpgradeResource = wsService.getUpgradeRemoteFunction(wsService);
+        if (onUpgradeResource) {
             WebSocketResourceDispatcher.dispatchUpgrade(webSocketHandshaker, wsService, httpEndpointConfig,
                     connectionManager);
         } else {
@@ -100,13 +100,13 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
         WebSocketResourceDispatcher.dispatchOnText(
-                getConnectionInfo(webSocketTextMessage), webSocketTextMessage);
+                getConnectionInfo(webSocketTextMessage), webSocketTextMessage, true);
     }
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
         WebSocketResourceDispatcher.dispatchOnBinary(
-                getConnectionInfo(webSocketBinaryMessage), webSocketBinaryMessage);
+                getConnectionInfo(webSocketBinaryMessage), webSocketBinaryMessage, true);
     }
 
     @Override

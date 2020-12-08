@@ -16,34 +16,37 @@
 
 import ballerina/runtime;
 import ballerina/test;
+import ballerina/io;
+import ballerina/http;
 
-listener Listener socketListener = new (21001);
+listener Listener socketListener = new(21001);
 string output = "";
 
-@WebSocketServiceConfig {
-    path: "/"
+service UpgradeService /isOpen/abc on socketListener {
+    remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
+       io:println(req.rawPath);
+       io:println("Dispatched to onUpgrade");
+       return new MyWSService();
+    }
 }
-service isOpen on socketListener {
 
-    resource function onText(WebSocketCaller caller, string text) {
-        WebSocketError? err = caller->close(timeoutInSeconds = 0);
-        output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
-    }
-
-    resource function onClose(WebSocketCaller caller, int code, string reason) {
-        output = <@untainted>("In onClose isOpen " + caller.isOpen().toString());
-    }
-
-    resource function onError(WebSocketCaller caller, error err) {
-        output = <@untainted>("In onError isOpen " + caller.isOpen().toString());
-    }
+service class MyWSService {
+  *Service;
+  remote function onText(Caller caller, string text) {
+      io:println("Dispatched to onText");
+      WebSocketError? err = caller->close(timeoutInSeconds = 0);
+      output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
+  }
 }
 
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() {
-    WebSocketClient wsClient = new("ws://localhost:21001");
+    io:println("testIsOpenCloseCalled");
+    WebSocketClient wsClient = new("ws://localhost:21001/isOpen/abc");
+    io:println("Client created");
     checkpanic wsClient->pushText("Hi");
+    io:println("Text pushed");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 }

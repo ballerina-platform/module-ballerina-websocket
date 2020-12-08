@@ -42,11 +42,12 @@ public class OnUpgradeResourceCallback implements Callback {
     }
 
     @Override
-    public void notifySuccess() {
+    public void notifySuccess(Object result) {
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
             ServerHandshakeFuture future = webSocketHandshaker.handshake(
                     wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
                     wsService.getMaxFrameSize());
+            wsService.setDispatchingService(result);
             future.setHandshakeListener(new UpgradeListener(wsService, connectionManager));
         } else {
             // If the acceptWebSocketUpgrade function has not been called inside the upgrade resource

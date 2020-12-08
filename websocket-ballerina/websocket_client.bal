@@ -15,9 +15,10 @@
 // under the License.
 
 import ballerina/java;
-import ballerina/lang.array;
-import ballerina/time;
+//import ballerina/lang.array;
+//import ballerina/time;
 import ballerina/http;
+import ballerina/mime;
 
 # Represents a WebSocket client endpoint.
 public client class WebSocketClient {
@@ -39,9 +40,9 @@ public client class WebSocketClient {
     # + config - The configurations to be used when initializing the client
     public isolated function init(string url, WebSocketClientConfiguration? config = ()) {
         self.url = url;
-        if (config is WebSocketClientConfiguration) {
-            addCookies(config);
-        }
+        //if (config is WebSocketClientConfiguration) {
+        //    addCookies(config);
+        //}
         self.config = config ?: {};
         self.initEndpoint();
     }
@@ -62,7 +63,7 @@ public client class WebSocketClient {
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data,
+    remote isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data,
     boolean finalFrame = true) returns WebSocketError? {
         return self.conn.pushText(data, finalFrame);
     }
@@ -73,7 +74,7 @@ public client class WebSocketClient {
     # + data - Binary data to be sent
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function pushBinary(byte[] data, boolean finalFrame = true) returns WebSocketError? {
+    remote isolated function pushBinary(byte[] data, boolean finalFrame = true) returns WebSocketError? {
         return self.conn.pushBinary(data, finalFrame);
     }
 
@@ -81,7 +82,7 @@ public client class WebSocketClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function ping(byte[] data) returns WebSocketError? {
+    remote isolated function ping(byte[] data) returns WebSocketError? {
         return self.conn.ping(data);
     }
 
@@ -90,7 +91,7 @@ public client class WebSocketClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public remote isolated function pong(byte[] data) returns WebSocketError? {
+    remote isolated function pong(byte[] data) returns WebSocketError? {
         return self.conn.pong(data);
     }
 
@@ -104,7 +105,7 @@ public client class WebSocketClient {
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
-    public remote isolated function close(int? statusCode = 1000, string? reason = (),
+    remote isolated function close(int? statusCode = 1000, string? reason = (),
         int timeoutInSeconds = 60) returns WebSocketError? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
@@ -113,7 +114,7 @@ public client class WebSocketClient {
     # WebSocketListener, it can be called only in the `upgrade` or `onOpen` resources.
     #
     # + return - an `error` if an error occurs while checking the connection state
-    public remote isolated function ready() returns WebSocketError? {
+    remote isolated function ready() returns WebSocketError? {
         return self.conn.ready();
     }
 
@@ -217,9 +218,9 @@ public type WebSocketClientConfiguration record {|
 # + handShakeTimeoutInSeconds - Time (in seconds) that a connection waits to get the response of
 #                               the webSocket handshake. If the timeout exceeds, then the connection is terminated with
 #                               an error.If the value < 0, then the value sets to the default value(300).
-# + cookies - An Array of `http:Cookie`
+//# + cookies - An Array of `http:Cookie`
 public type CommonWebSocketClientConfiguration record {|
-    service? callbackService = ();
+    CallbackService? callbackService = ();
     string[] subProtocols = [];
     map<string> customHeaders = {};
     int idleTimeoutInSeconds = -1;
@@ -228,40 +229,40 @@ public type CommonWebSocketClientConfiguration record {|
     int maxFrameSize = 0;
     boolean webSocketCompressionEnabled = true;
     int handShakeTimeoutInSeconds = 300;
-    http:Cookie[] cookies?;
+    //http:Cookie[] cookies?;
 |};
 
-# Adds cookies to the custom header.
-#
-# + config - Represents the cookies to be added
-public isolated function addCookies(WebSocketClientConfiguration|WebSocketFailoverClientConfiguration config) {
-    string cookieHeader = "";
-    var cookiesToAdd = config["cookies"];
-    if (cookiesToAdd is http:Cookie[]) {
-        http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
-            var cookiePath = c.path;
-            int l = 0;
-            if (cookiePath is string) {
-                l = cookiePath.length();
-            }
-            return l;
-        });
-        foreach var cookie in sortedCookies {
-            var cookieName = cookie.name;
-            var cookieValue = cookie.value;
-            if (cookieName is string && cookieValue is string) {
-                cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
-            }
-            cookie.lastAccessedTime = time:currentTime();
-        }
-        if (cookieHeader != "") {
-            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
-            map<string> headers = config["customHeaders"];
-            headers["Cookie"] = cookieHeader;
-            config["customHeaders"] = headers;
-        }
-    }
-}
+//# Adds cookies to the custom header.
+//#
+//# + config - Represents the cookies to be added
+//public isolated function addCookies(WebSocketClientConfiguration|WebSocketFailoverClientConfiguration config) {
+//    string cookieHeader = "";
+//    var cookiesToAdd = config["cookies"];
+//    if (cookiesToAdd is http:Cookie[]) {
+//        http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
+//            var cookiePath = c.path;
+//            int l = 0;
+//            if (cookiePath is string) {
+//                l = cookiePath.length();
+//            }
+//           return l;
+//        });
+//        foreach var cookie in sortedCookies {
+//            var cookieName = cookie.name;
+//            var cookieValue = cookie.value;
+//            if (cookieName is string && cookieValue is string) {
+//                cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
+//            }
+//            cookie.lastAccessedTime = time:currentTime();
+//        }
+//        if (cookieHeader != "") {
+//            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
+//            map<string> headers = config["customHeaders"];
+//            headers["Cookie"] = cookieHeader;
+//            config["customHeaders"] = headers;
+//        }
+//    }
+//}
 
 # Retry configurations for WebSocket.
 #
@@ -280,6 +281,7 @@ public type WebSocketRetryConfig record {|
 const EQUALS = "=";
 const SPACE = " ";
 const SEMICOLON = ";";
+string dummy = mime:MULTIPART_MIXED;
 
 isolated function externWSInitEndpoint(WebSocketClient wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",

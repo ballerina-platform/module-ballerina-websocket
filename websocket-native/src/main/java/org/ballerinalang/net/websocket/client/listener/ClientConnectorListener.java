@@ -48,12 +48,12 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-        WebSocketResourceDispatcher.dispatchOnText(connectionInfo, webSocketTextMessage);
+        WebSocketResourceDispatcher.dispatchOnText(connectionInfo, webSocketTextMessage, false);
     }
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-        WebSocketResourceDispatcher.dispatchOnBinary(connectionInfo, webSocketBinaryMessage);
+        WebSocketResourceDispatcher.dispatchOnBinary(connectionInfo, webSocketBinaryMessage, false);
     }
 
     @Override

@@ -28,7 +28,7 @@ string output = "";
 }
 service isOpen on socketListener {
 
-    resource function onText(websocket:WebSocketCaller caller, string text) {
+    resource function onText(websocket:Caller caller, string text) {
         io:println("onText resource executed");
         io:println(text);
         io:println(caller.isOpen().toString());
@@ -37,11 +37,11 @@ service isOpen on socketListener {
         output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
     }
 
-    resource function onClose(websocket:WebSocketCaller caller, int code, string reason) {
+    resource function onClose(websocket:Caller caller, int code, string reason) {
         output = <@untainted>("In onClose isOpen " + caller.isOpen().toString());
     }
 
-    resource function onError(websocket:WebSocketCaller caller, error err) {
+    resource function onError(websocket:Caller caller, error err) {
         output = <@untainted>("In onError isOpen " + caller.isOpen().toString());
     }
 }
