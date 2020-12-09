@@ -101,16 +101,10 @@ public class WebSocketResourceDispatcher {
         MemberFunctionType balResource = null;
         MemberFunctionType[] attFunctions = wsService.getBalService().getType().getAttachedFunctions();
         for (MemberFunctionType remoteFunc : attFunctions) {
-            if (remoteFunc.getName().equals("onUpgrade")) {
+            if (remoteFunc.getName().equals(RESOURCE_NAME_UPGRADE)) {
                 balResource = remoteFunc;
             }
         }
-//        HttpResource onUpgradeResource = wsService.getUpgradeResource();
-//        webSocketHandshaker.getHttpCarbonRequest().setProperty(HttpConstants.RESOURCES_CORS,
-//                onUpgradeResource.getCorsHeaders());
-//        MemberFunctionType balResource = onUpgradeResource.getBalResource();
-//        Object[] signatureParams = HttpDispatcher.getSignatureParameters(onUpgradeResource, webSocketHandshaker
-//                .getHttpCarbonRequest(), httpEndpointConfig);
         BObject httpCaller = ValueCreatorUtils.createCallerObject();
         BObject inRequest = ValueCreatorUtils.createRequestObject();
         BObject inRequestEntity = ValueCreatorUtils.createEntityObject();
@@ -119,7 +113,6 @@ public class WebSocketResourceDispatcher {
         enrichHttpCallerWithNativeData(httpCaller, httpCarbonMessage);
         HttpUtil.populateInboundRequest(inRequest, inRequestEntity, httpCarbonMessage);
 
-//        BObject httpCaller = (BObject) signatureParams[0];
         httpCaller.addNativeData(WebSocketConstants.WEBSOCKET_HANDSHAKER, webSocketHandshaker);
         httpCaller.addNativeData(WebSocketConstants.WEBSOCKET_SERVICE, wsService);
         httpCaller.addNativeData(HttpConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_MANAGER, connectionManager);
@@ -141,15 +134,25 @@ public class WebSocketResourceDispatcher {
 
     public static void dispatchOnOpen(WebSocketConnection webSocketConnection, BObject webSocketCaller,
             WebSocketServerService wsService) {
-        MemberFunctionType onOpenResource = wsService.getResourceByName(RESOURCE_NAME_ON_OPEN);
+        MemberFunctionType onOpenResource = null;
+        MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                .getType())).getAttachedFunctions();
+        BObject balservice = (BObject) (wsService.getDispatchingService());
+        for (MemberFunctionType remoteFunc : remoteFunctions) {
+            if (remoteFunc.getName().equals(RESOURCE_NAME_ON_OPEN)) {
+                onOpenResource = remoteFunc;
+                break;
+            }
+        }
         if (onOpenResource != null) {
-            executeOnOpenResource(wsService, onOpenResource, webSocketCaller, webSocketConnection);
+            executeOnOpenResource(wsService, balservice, onOpenResource, webSocketCaller, webSocketConnection);
         } else {
             webSocketConnection.readNextFrame();
         }
     }
 
-    private static void executeOnOpenResource(WebSocketService wsService, MemberFunctionType onOpenResource,
+    private static void executeOnOpenResource(WebSocketService wsService, BObject balService,
+            MemberFunctionType onOpenResource,
             BObject webSocketEndpoint, WebSocketConnection webSocketConnection) {
         Type[] parameterTypes = onOpenResource.getParameterTypes();
         Object[] bValues = new Object[parameterTypes.length * 2];
@@ -172,7 +175,7 @@ public class WebSocketResourceDispatcher {
                         RESOURCE_NAME_ON_OPEN, error.getMessage());
             }
         };
-        executeResource(wsService, wsService.getBalService(), onOpenCallback, bValues, connectionInfo,
+        executeResource(wsService, balService, onOpenCallback, bValues, connectionInfo,
                 RESOURCE_NAME_ON_OPEN, ON_OPEN_METADATA);
     }
 
@@ -599,7 +602,7 @@ public class WebSocketResourceDispatcher {
         WebSocketObservabilityUtil.observeResourceInvocation(connectionInfo, resource);
     }
 
-    public static void enrichHttpCallerWithConnectionInfo(BObject httpCaller, HttpCarbonMessage inboundMsg,
+    private static void enrichHttpCallerWithConnectionInfo(BObject httpCaller, HttpCarbonMessage inboundMsg,
             BMap config) {
         BMap<BString, Object> remote = ValueCreatorUtils.createHTTPRecordValue("Remote");
         BMap<BString, Object> local = ValueCreatorUtils.createHTTPRecordValue("Local");
@@ -625,8 +628,8 @@ public class WebSocketResourceDispatcher {
         httpCaller.set(HttpConstants.LOCAL_STRUCT_INDEX, local);
         httpCaller.set(HttpConstants.SERVICE_ENDPOINT_PROTOCOL_FIELD,
                 StringUtils.fromString((String) inboundMsg.getProperty("PROTOCOL")));
+        // TODO: can't add the following as it looks for an http:Listener config. Check this.
         //        httpCaller.set(HttpConstants.SERVICE_ENDPOINT_CONFIG_FIELD, config);
-//        httpCaller.addNativeData("HTTP_SERVICE", httpResource.getParentService());
         httpCaller.addNativeData("remoteSocketAddress", remoteSocketAddress);
     }
 }

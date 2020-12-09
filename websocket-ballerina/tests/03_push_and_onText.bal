@@ -28,58 +28,53 @@ public type WebSocketPerson record {|
 |};
 
 service UpgradeService /onTextString on new Listener(21003) {
-   remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
+   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
        return new WsService1();
    }
 }
 
 service class WsService1 {
   *Service;
-  remote function onText(Caller caller, string data, boolean finalFrame) {
-      io:println("Dispatched to onText");
+  remote isolated function onText(Caller caller, string data, boolean finalFrame) {
       checkpanic caller->pushText(data);
   }
 }
 
 service UpgradeService /onTextJSON on new Listener(21023) {
-   remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
+   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
        return new WsService2();
    }
 }
 
 service class WsService2 {
   *Service;
-  remote function onText(Caller caller, json data) {
-      io:println("Dispatched to onText");
+  remote isolated function onText(Caller caller, json data) {
       checkpanic caller->pushText(data);
   }
 }
 
 service UpgradeService /onTextXML on new Listener(21024) {
-   remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
-       io:println("Dispatched to onTextXML upgrade resource");
+   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
        return new WsService3();
    }
 }
 
 service class WsService3 {
   *Service;
-  remote function onText(Caller caller, xml data) {
-      io:println("Dispatched to onTextXML");
+  remote isolated function onText(Caller caller, xml data) {
       checkpanic caller->pushText(data);
   }
 }
 
 service UpgradeService /onTextRecord on new Listener(21025) {
-    remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
-       io:println("Dispatched to onTextRecord upgrade resource");
+    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
        return new WsService4();
    }
 }
 
 service class WsService4 {
   *Service;
-  remote function onText(Caller caller, WebSocketPerson data) {
+  remote isolated function onText(Caller caller, WebSocketPerson data) {
        var personData = data.cloneWithType(json);
        if (personData is error) {
            panic personData;
@@ -93,15 +88,14 @@ service class WsService4 {
 }
 
 service UpgradeService /onTextByteArray on new Listener(21026) {
-    remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
-        io:println("Dispatched to onTextByteArray upgrade resource");
+    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
        return new WsService5();
     }
 }
 
 service class WsService5 {
   *Service;
-  remote function onText(Caller caller, byte[] data) {
+  remote isolated function onText(Caller caller, byte[] data) {
        var returnVal = caller->pushText(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -111,12 +105,10 @@ service class WsService5 {
 
 service object {} clientPushCallbackService = service object {
     remote function onText(WebSocketClient wsEp, string text) {
-        io:println("Executing testString Ontext");
-        io:println(text);
         data = <@untainted>text;
     }
 
-    remote function onError(WebSocketClient wsEp, error err) {
+    remote isolated function onError(WebSocketClient wsEp, error err) {
         io:println(err);
     }
 };
@@ -124,7 +116,6 @@ service object {} clientPushCallbackService = service object {
 // Tests string support for pushText and onText
 @test:Config {}
 public function testString() {
-   io:println("Executing testString");
    WebSocketClient wsClient = new("ws://localhost:21003/onTextString", {callbackService: clientPushCallbackService});
    checkpanic wsClient->pushText("Hi");
    runtime:sleep(500);
@@ -141,9 +132,6 @@ public function testJson() {
    runtime:sleep(500);
    test:assertEquals(data, expectedMsg, msg = "Failed pushtext");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests XML support for pushText and onText
@@ -155,9 +143,6 @@ public function testXml() {
    runtime:sleep(500);
    test:assertEquals(data, msg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests Record support for pushText and onText
@@ -169,9 +154,6 @@ public function testRecord() {
    runtime:sleep(500);
    test:assertEquals(data, expectedMsg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests byte array support for pushText and onText
@@ -184,7 +166,4 @@ public function testByteArray() {
    runtime:sleep(500);
    test:assertEquals(data, msg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }

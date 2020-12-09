@@ -181,13 +181,13 @@ public type Local record {|
 # Provides a set of configurations for HTTP service endpoints.
 #
 # + host - The host name/IP of the endpoint
-//# + http1Settings - Configurations related to HTTP/1.x protocol
+# + http1Settings - Configurations related to HTTP/1.x protocol
 # + secureSocket - The SSL configurations for the service endpoint. This needs to be configured in order to
 #                  communicate through HTTPS.
 # + httpVersion - Highest HTTP version supported by the endpoint
 //# + filters - If any pre-processing needs to be done to the request before dispatching the request to the
 #             resource, filters can applied
-//# + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation. Use value 0 to
+# + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation. Use value 0 to
 #                   disable timeout
 //# + auth - Listener authenticaton configurations
 # + server - The server name which should appear as a response header
@@ -256,15 +256,15 @@ public type ListenerHttp1Settings record {|
 # + keyFile - A file containing the private key of the server
 # + keyPassword - Password of the private key if it is encrypted
 # + trustedCertFile - A file containing a list of certificates or a single certificate that the server trusts
-//# + protocol - SSL/TLS protocol related options
-//# + certValidation - Certificate validation against CRL or OCSP related options
+# + protocol - SSL/TLS protocol related options
+# + certValidation - Certificate validation against CRL or OCSP related options
 # + ciphers - List of ciphers to be used (e.g.: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 #             TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA)
 # + sslVerifyClient - The type of client certificate verification. (e.g.: "require" or "optional")
 # + shareSession - Enable/disable new SSL session creation
 # + handshakeTimeoutInSeconds - SSL handshake time out
 # + sessionTimeoutInSeconds - SSL session time out
-//# + ocspStapling - Enable/disable OCSP stapling
+# + ocspStapling - Enable/disable OCSP stapling
 public type ListenerSecureSocket record {|
     crypto:TrustStore? trustStore = ();
     crypto:KeyStore? keyStore = ();

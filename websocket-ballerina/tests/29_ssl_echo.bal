@@ -17,7 +17,6 @@
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
-import ballerina/io;
 
 string expectedString = "";
 byte[] expectedBinaryData = [];
@@ -30,22 +29,21 @@ service UpgradeService /sslEcho on new Listener(21029, {
            }
        }
    }) {
-   remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
-       io:println("Dispatched to SSL upgrade resource");
+   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service {
        return new WsService6();
-    }
+   }
 }
 
 service class WsService6 {
   *Service;
-  remote function onText(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onText(Caller caller, string data, boolean finalFrame) {
        var returnVal = caller->pushText(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBinary(Caller caller, byte[] data, boolean finalFrame) {
+   remote isolated function onBinary(Caller caller, byte[] data, boolean finalFrame) {
        var returnVal = caller->pushBinary(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -62,7 +60,7 @@ service object {} sslEchoCallbackService = @WebSocketServiceConfig {} service ob
        expectedBinaryData = <@untainted>data;
    }
 
-   remote function onClose(WebSocketClient wsEp, int statusCode, string reason) {
+   remote isolated function onClose(WebSocketClient wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;

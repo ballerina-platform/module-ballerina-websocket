@@ -16,16 +16,13 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/io;
 import ballerina/http;
 
 listener Listener socketListener = new(21001);
 string output = "";
 
 service UpgradeService /isOpen/abc on socketListener {
-    remote function onUpgrade(http:Caller caller, http:Request req) returns Service {
-       io:println(req.rawPath);
-       io:println("Dispatched to onUpgrade");
+    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
        return new MyWSService();
     }
 }
@@ -33,7 +30,6 @@ service UpgradeService /isOpen/abc on socketListener {
 service class MyWSService {
   *Service;
   remote function onText(Caller caller, string text) {
-      io:println("Dispatched to onText");
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
   }
@@ -42,11 +38,8 @@ service class MyWSService {
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() {
-    io:println("testIsOpenCloseCalled");
     WebSocketClient wsClient = new("ws://localhost:21001/isOpen/abc");
-    io:println("Client created");
     checkpanic wsClient->pushText("Hi");
-    io:println("Text pushed");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 }

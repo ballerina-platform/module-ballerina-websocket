@@ -22,7 +22,6 @@ import io.ballerina.runtime.api.values.BMap;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpResourceArguments;
 import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketCloseMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
@@ -38,6 +37,9 @@ import org.ballerinalang.net.websocket.observability.WebSocketObservabilityConst
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 
 import java.net.URI;
+
+//import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
+//import org.ballerinalang.net.websocket.WebSocketException;
 
 /**
  * Ballerina Connector listener for WebSocket.
@@ -78,10 +80,12 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
             WebSocketResourceDispatcher.dispatchUpgrade(webSocketHandshaker, wsService, httpEndpointConfig,
                     connectionManager);
         } else {
-            ServerHandshakeFuture future = webSocketHandshaker.handshake(
-                    wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
-                    wsService.getMaxFrameSize());
-            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager));
+            String errMsg = "No remote function found to handle the upgrade request";
+            webSocketHandshaker.cancelHandshake(404, errMsg);
+//            ServerHandshakeFuture future = webSocketHandshaker.handshake(
+//                    wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
+//                    wsService.getMaxFrameSize());
+//            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager));
         }
     }
 
