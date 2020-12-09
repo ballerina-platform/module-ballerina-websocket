@@ -22,7 +22,7 @@ import ballerina/websocket;
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     path: "/sslEcho"
 }
 service on new websocket:Listener(21027,
@@ -74,7 +74,7 @@ service on new websocket:Listener(21027,
     }
 }
 
-service sslClientService = @websocket:WebSocketServiceConfig {} service {
+service sslClientService = @websocket:ServiceConfig {} service {
     resource function onText(websocket:WebSocketClient wsEp, string text) {
         var returnVal = wsEp->pushText(text);
         if (returnVal is websocket:WebSocketError) {
@@ -97,7 +97,7 @@ service sslClientService = @websocket:WebSocketServiceConfig {} service {
     }
 };
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     path: "/websocket"
 }
 service sslProxyServer on new websocket:Listener(21028, {
@@ -128,7 +128,7 @@ service sslProxyServer on new websocket:Listener(21028, {
     }
 }
 
-service sslProxyCallbackService = @websocket:WebSocketServiceConfig {} service {
+service sslProxyCallbackService = @websocket:ServiceConfig {} service {
     resource function onText(websocket:WebSocketClient wsEp, string text) {
         proxyData = <@untainted>text;
     }

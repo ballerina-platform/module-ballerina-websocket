@@ -21,7 +21,7 @@ import ballerina/websocket;
 
 string serverOutput = "";
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     path: "/server/errors"
 }
 service serverError on new websocket:Listener(21031) {

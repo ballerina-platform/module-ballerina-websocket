@@ -21,7 +21,7 @@
 //
 //string expectedError41 = "";
 //
-//@websocket:WebSocketServiceConfig {
+//@websocket:ServiceConfig {
 //}
 //service on new websocket:Listener(21041) {
 //
@@ -45,7 +45,7 @@
 //    }
 //}
 //
-//service unAuthenticationService = @websocket:WebSocketServiceConfig {} service {
+//service unAuthenticationService = @websocket:ServiceConfig {} service {
 //
 //    resource function onError(websocket:WebSocketClient conn, error err) {
 //        expectedError41 = <@untainted>err.message();

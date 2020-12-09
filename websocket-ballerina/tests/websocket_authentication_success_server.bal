@@ -42,7 +42,7 @@
 //        log:printInfo("WS upgrade resource");
 //    }
 //}
-//service upgradedService = @websocket:WebSocketServiceConfig {} service {
+//service upgradedService = @websocket:ServiceConfig {} service {
 //
 //    resource function onOpen(websocket:WebSocketCaller caller) {
 //        io:println("onOpen: " + caller.getConnectionId());

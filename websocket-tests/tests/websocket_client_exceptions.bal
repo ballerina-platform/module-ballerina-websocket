@@ -23,7 +23,7 @@ string errMessage = "";
 
 websocket:WebSocketClientConfiguration config = {callbackService: errorResourceService, subProtocols: ["xml"]};
 
-service errorResourceService = @websocket:WebSocketServiceConfig {} service {
+service errorResourceService = @websocket:ServiceConfig {} service {
     resource function onError(websocket:WebSocketClient clientCaller, error err) {
         errMessage = <@untainted>err.message();
     }

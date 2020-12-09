@@ -25,7 +25,7 @@
 //string attDettExpectedErr = "";
 //
 //listener Listener attachDetachEp = new (21032);
-//@WebSocketServiceConfig {
+//@ServiceConfig {
 //    path: "/attach/detach"
 //}
 //service attachDetach on attachDetachEp {
@@ -45,20 +45,20 @@
 //    }
 //}
 //
-//service wsWithPath = @WebSocketServiceConfig {path: "/hello"} service {
+//service wsWithPath = @ServiceConfig {path: "/hello"} service {
 //    resource function onText(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
 //        check conn->pushText(text);
 //    }
 //};
 //
-//service wsNoPath = @WebSocketServiceConfig {} service {
+//service wsNoPath = @ServiceConfig {} service {
 //
 //    resource function onText(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
 //        check conn->pushText(text);
 //    }
 //};
 //
-//service wsClientService = @WebSocketServiceConfig {} service {
+//service wsClientService = @ServiceConfig {} service {
 //
 //    resource function onText(WebSocketClient conn, string text, boolean finalFrame) returns error? {
 //        check conn->pushText(text);
@@ -72,7 +72,7 @@
 //    }
 //}
 //
-//service attachService = @WebSocketServiceConfig {} service {
+//service attachService = @ServiceConfig {} service {
 //    resource function onText(WebSocketClient caller, string text) {
 //        attDettExpectedData = <@untainted>text;
 //    }

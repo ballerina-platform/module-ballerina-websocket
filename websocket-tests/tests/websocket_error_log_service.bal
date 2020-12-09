@@ -18,7 +18,7 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/websocket;
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     path: "/error/ws"
 }
 service errorService on new websocket:Listener(21013) {

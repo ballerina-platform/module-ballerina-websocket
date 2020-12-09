@@ -22,7 +22,7 @@
 //string arrivedData = "";
 //boolean isClientConnectionOpen = false;
 //
-//@WebSocketServiceConfig {
+//@ServiceConfig {
 //    path: "/client/service"
 //}
 //service clientFailure200 on new Listener(21021) {
@@ -32,11 +32,11 @@
 //    }
 //}
 //
-//service callback200 = @WebSocketServiceConfig {} service {
+//service callback200 = @ServiceConfig {} service {
 //    resource function onText(WebSocketCaller caller, string text) {
 //    }
 //};
-//service ClientService200 = @WebSocketServiceConfig {} service {
+//service ClientService200 = @ServiceConfig {} service {
 //    resource function onText(WebSocketClient caller, string text) {
 //    }
 //};

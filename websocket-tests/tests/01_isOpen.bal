@@ -23,7 +23,7 @@ import ballerina/websocket;
 listener websocket:Listener socketListener = new (21001);
 string output = "";
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     path: "/isOpen"
 }
 service isOpen on socketListener {

@@ -39,7 +39,7 @@ public class WebSocketConstants {
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
     public static final String WEBSOCKET_CALLER = "Caller";
-    public static final String WEBSOCKET_CLIENT = "WebSocketClient";
+    public static final String WEBSOCKET_CLIENT = "Client";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
     public static final String WSS_SCHEME = "wss";
@@ -50,7 +50,7 @@ public class WebSocketConstants {
     public static final String FULL_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CLIENT;
 
-    public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "WebSocketServiceConfig";
+    public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeoutInSeconds");

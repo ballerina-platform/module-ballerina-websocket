@@ -23,7 +23,7 @@ string expectedData = "";
 byte[] expectedBinData = [];
 byte[] expectedPingBinaryData = [];
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     idleTimeoutInSeconds: 10
 }
 service onlyOnBinary on new websocket:Listener(21005) {
@@ -38,7 +38,7 @@ service onlyOnText on new websocket:Listener(21006) {
     }
 }
 
-service callbackService = @websocket:WebSocketServiceConfig {} service {
+service callbackService = @websocket:ServiceConfig {} service {
 
     resource function onText(websocket:WebSocketClient wsEp, string text) {
         expectedData = <@untainted>text;

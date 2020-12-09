@@ -45,7 +45,7 @@ service sslEcho on new websocket:Listener(21029, {
     }
 }
 
-service sslEchoCallbackService = @websocket:WebSocketServiceConfig {} service {
+service sslEchoCallbackService = @websocket:ServiceConfig {} service {
     resource function onText(websocket:WebSocketClient wsEp, string text) {
         expectedString = <@untainted>text;
     }

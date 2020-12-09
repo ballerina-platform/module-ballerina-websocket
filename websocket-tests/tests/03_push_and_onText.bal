@@ -76,7 +76,7 @@ service onTextByteArray on new websocket:Listener(21026) {
     }
 }
 
-service clientPushCallbackService = @websocket:WebSocketServiceConfig {} service {
+service clientPushCallbackService = @websocket:ServiceConfig {} service {
 
     resource function onText(websocket:WebSocketClient wsEp, string text) {
         io:println("text came");

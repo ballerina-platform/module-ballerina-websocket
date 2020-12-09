@@ -40,7 +40,7 @@
 //    }
 //}
 //
-//service simpleProxy = @http:WebSocketServiceConfig {} service {
+//service simpleProxy = @http:ServiceConfig {} service {
 //    resource function onText(http:WebSocketCaller wsEp, string text) {
 //        var returnVal = wsEp->pushText(<string>wsEp.getAttribute("X-some-header"));
 //        if (returnVal is http:WebSocketError) {

@@ -22,7 +22,7 @@ import ballerina/websocket;
 string arrivedData = "";
 boolean isClientConnectionOpen = false;
 
-@websocket:WebSocketServiceConfig {
+@websocket:ServiceConfig {
     path: "/client/service"
 }
 service clientFailure200 on new websocket:Listener(21021) {

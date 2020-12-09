@@ -41,7 +41,7 @@
 //    resource function upgrader(websocket:Caller caller, websocket:Request req) {
 //    }
 //}
-//service upgradedServ = @websocket:WebSocketServiceConfig {} service {
+//service upgradedServ = @websocket:ServiceConfig {} service {
 //
 //    resource function onOpen(websocket:Caller caller) {
 //        io:println("onOpen: " + caller.getConnectionId());

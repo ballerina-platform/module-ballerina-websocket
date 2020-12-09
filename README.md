@@ -1,4 +1,4 @@
-Ballerina HTTP Library
+Ballerina Websocket Library
 ===================
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-websocket/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/actions?query=workflow%3ABuild)

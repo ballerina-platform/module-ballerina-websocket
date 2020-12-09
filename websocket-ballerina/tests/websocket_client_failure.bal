@@ -19,7 +19,7 @@
 ////import ballerina/websocket;
 //
 //string expectedErr = "";
-//service errorHandlingService = @WebSocketServiceConfig {} service {
+//service errorHandlingService = @ServiceConfig {} service {
 //    resource function onError(WebSocketClient caller, error err) {
 //        expectedErr = <@untainted>err.toString();
 //    }

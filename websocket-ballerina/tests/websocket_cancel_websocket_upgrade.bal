@@ -52,7 +52,7 @@ service UpgradeService /cannot/cancel on ep1 {
 
 service object {} resourceNotFoundCallbackService = service object {
 
-    remote function onError(WebSocketClient wsEp, error err) {
+    remote function onError(Client wsEp, error err) {
         errorMsg = <@untainted>err.message();
     }
 };
@@ -60,7 +60,7 @@ service object {} resourceNotFoundCallbackService = service object {
 // Tests resource not found scenario.
 @test:Config {}
 public function testResourceNotFound() {
-    WebSocketClient wsClient = new ("ws://localhost:21009/proxy/cancell",
+    Client wsClient = new ("ws://localhost:21009/proxy/cancell",
         {callbackService: resourceNotFoundCallbackService});
     runtime:sleep(500);
     test:assertEquals(errorMsg, "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
@@ -70,7 +70,7 @@ public function testResourceNotFound() {
 // Tests the cancelWebSocketUpgrade method.
 @test:Config {}
 public function testCancelUpgrade() {
-    WebSocketClient wsClient = new ("ws://localhost:21009/simple/cancel",
+    Client wsClient = new ("ws://localhost:21009/simple/cancel",
         {callbackService: resourceNotFoundCallbackService});
     runtime:sleep(500);
     test:assertEquals(errorMsg, "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
@@ -79,7 +79,7 @@ public function testCancelUpgrade() {
 // Tests the cancelWebSocketUpgrade method with a success status code.
 @test:Config {}
 public function testCancelUpgradeSuccessStatusCode() {
-    WebSocketClient wsClient = new ("ws://localhost:21009/cannot/cancel",
+    Client wsClient = new ("ws://localhost:21009/cannot/cancel",
         {callbackService: resourceNotFoundCallbackService});
     runtime:sleep(500);
     test:assertEquals(errorMsg, "InvalidHandshakeError: Invalid handshake response getStatus: 400 Bad Request");

@@ -18,7 +18,7 @@
 //import ballerina/test;
 //import ballerina/http;
 //
-//service simpleProxy8 = @http:WebSocketServiceConfig {} service {
+//service simpleProxy8 = @http:ServiceConfig {} service {
 //
 //    resource function onOpen(http:WebSocketCaller wsEp) {
 //    }

@@ -43,8 +43,8 @@ service class wsService {
    }
 }
 
-service object {} customHeaderService = @WebSocketServiceConfig {} service object {
-   remote function onText(WebSocketClient wsEp, string text) {
+service object {} customHeaderService = @ServiceConfig {} service object {
+   remote function onText(Client wsEp, string text) {
        expextedValue = <@untainted>text;
    }
 };
@@ -52,7 +52,7 @@ service object {} customHeaderService = @WebSocketServiceConfig {} service objec
 // Tests when the client sends custom headers to the server.
 @test:Config {}
 public function testClientSentCustomHeader() {
-   WebSocketClient wsClientEp = new ("ws://localhost:21011/pingpong/ws", {
+   Client wsClientEp = new ("ws://localhost:21011/pingpong/ws", {
            callbackService:
                customHeaderService,
            customHeaders: {"X-some-header": "some-header-value"}

@@ -19,7 +19,7 @@
 ////import ballerina/websocket;
 //
 //int expectedStatusCode = 0;
-//@WebSocketServiceConfig {
+//@ServiceConfig {
 //    path: "/"
 //}
 //service clientClose on new Listener(21004) {

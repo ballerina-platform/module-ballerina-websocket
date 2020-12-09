@@ -35,4 +35,4 @@ public type WSServiceConfig record {|
 |};
 
 # The annotation which is used to configure a WebSocket service.
-public annotation WSServiceConfig WebSocketServiceConfig on service;
+public annotation WSServiceConfig ServiceConfig on service;

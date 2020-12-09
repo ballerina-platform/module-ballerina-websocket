@@ -23,13 +23,13 @@ string errMessage = "";
 
 WebSocketClientConfiguration config = {callbackService: errorResourceService, subProtocols: ["xml"]};
 
-service object {} errorResourceService = @WebSocketServiceConfig {} service object {
-   remote function onError(WebSocketClient clientCaller, error err) {
+service object {} errorResourceService = @ServiceConfig {} service object {
+   remote function onError(Client clientCaller, error err) {
        errMessage = <@untainted>err.message();
    }
 };
 
-@WebSocketServiceConfig {}
+@ServiceConfig {}
 service /websocket on new Listener(21030) {
     remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
        return new ErrorServer();
@@ -77,7 +77,7 @@ service class ErrorServer {
 // Connection refused IO error.
 @test:Config {}
 public function testConnectionError() {
-   WebSocketClient wsClient = new ("ws://lmnop.ls", config);
+   Client wsClient = new ("ws://lmnop.ls", config);
    runtime:sleep(500);
    test:assertEquals(errMessage, "ConnectionError: IO Error");
 }
@@ -85,7 +85,7 @@ public function testConnectionError() {
 // SSL/TLS error
 @test:Config {}
 public function testSslError() {
-   WebSocketClient|error wsClient = new ("wss://localhost:21030/websocket", config);
+   Client|error wsClient = new ("wss://localhost:21030/websocket", config);
    runtime:sleep(500);
    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
 }
@@ -96,7 +96,7 @@ public function testLongFrameError() {
    string ping = "pingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingping"
        + "pingpingpingpingpingpingpingpingpingpingpingpingpingping";
    byte[] pingData = ping.toBytes();
-   WebSocketClient wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
+   Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
    runtime:sleep(500);
    var err = wsClientEp->ping(pingData);
    if (err is error) {
@@ -114,7 +114,7 @@ public function testLongFrameError() {
 // Close the connection and push text
 @test:Config {}
 public function testConnectionClosedError() {
-   WebSocketClient wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
+   Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
    error? result = wsClientEp->close(timeoutInSeconds = 0);
    //if (result is WebSocketError) {
    //   log:printError("Error occurred when closing connection", result);
@@ -131,7 +131,7 @@ public function testConnectionClosedError() {
 // Handshake failing because of missing subprotocol
 @test:Config {}
 public function testHandshakeError() {
-   WebSocketClient wsClientEp = new ("ws://localhost:21030/websocket", config);
+   Client wsClientEp = new ("ws://localhost:21030/websocket", config);
    runtime:sleep(500);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
 }
@@ -140,7 +140,7 @@ public function testHandshakeError() {
 // calls the `ready()` function.
 @test:Config {}
 public function testReadyOnConnect() {
-   WebSocketClient wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
+   Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
    var err = wsClientEp->ready();
    if (err is error) {
        test:assertEquals(err.message(), "GenericError: Already started reading frames");

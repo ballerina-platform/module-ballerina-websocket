@@ -84,7 +84,7 @@
 //        }
 //    }
 //}
-//service cookieService = @http:WebSocketServiceConfig {subProtocols: ["xml", "json"]} service {
+//service cookieService = @http:ServiceConfig {subProtocols: ["xml", "json"]} service {
 //
 //    resource function onOpen(http:WebSocketCaller caller) {
 //        io:println("New WebSocket connection: " + caller.getConnectionId());

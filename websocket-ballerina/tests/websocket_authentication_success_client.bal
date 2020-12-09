@@ -23,7 +23,7 @@
 //string expectedOutput39 = "";
 //string expectedError39 = "";
 //
-//@websocket:WebSocketServiceConfig {
+//@websocket:ServiceConfig {
 //}
 //service on new websocket:Listener(21039) {
 //
@@ -47,7 +47,7 @@
 //    }
 //}
 //
-//service authenticationService = @websocket:WebSocketServiceConfig {} service {
+//service authenticationService = @websocket:ServiceConfig {} service {
 //
 //    resource function onText(websocket:WebSocketClient conn, string text, boolean finalFrame) {
 //        expectedOutput39 = <@untainted>text;
