@@ -73,7 +73,7 @@ public class FailoverHandshakeListener implements ExtendedHandshakeListener {
         if (!(throwable instanceof IOException && WebSocketUtil.failover(webSocketClient, wsService))) {
             // Calls the `countDown()` function to initialize the count down latch of the connection.
             WebSocketUtil.countDownForHandshake(webSocketClient);
-            WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable);
+            WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable, false);
         }
     }
 

@@ -58,22 +58,22 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onMessage(WebSocketControlMessage webSocketControlMessage) {
-        WebSocketResourceDispatcher.dispatchOnPingOnPong(connectionInfo, webSocketControlMessage);
+        WebSocketResourceDispatcher.dispatchOnPingOnPong(connectionInfo, webSocketControlMessage, false);
     }
 
     @Override
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
-        WebSocketResourceDispatcher.dispatchOnClose(connectionInfo, webSocketCloseMessage);
+        WebSocketResourceDispatcher.dispatchOnClose(connectionInfo, webSocketCloseMessage, false);
     }
 
     @Override
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
-        WebSocketResourceDispatcher.dispatchOnError(connectionInfo, throwable);
+        WebSocketResourceDispatcher.dispatchOnError(connectionInfo, throwable, false);
     }
 
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
-        WebSocketResourceDispatcher.dispatchOnIdleTimeout(connectionInfo);
+        WebSocketResourceDispatcher.dispatchOnIdleTimeout(connectionInfo, false);
     }
 
     @Override

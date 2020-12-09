@@ -68,7 +68,7 @@ public class RetryHandshakeListener implements ExtendedHandshakeListener {
         if (throwable instanceof IOException && WebSocketUtil.reconnect(getWebSocketClient(), wsService)) {
             return;
         }
-        WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable);
+        WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable, false);
     }
 
     @Override

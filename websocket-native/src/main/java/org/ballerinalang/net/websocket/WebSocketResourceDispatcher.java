@@ -79,7 +79,12 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.ON_TEXT_METADAT
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_TIMEOUT_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_UPGRADE_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_BINARY;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CLOSE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_ERROR;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PING;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PONG;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_TEXT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_UPGRADE;
 
@@ -359,21 +364,36 @@ public class WebSocketResourceDispatcher {
     }
 
     public static void dispatchOnPingOnPong(WebSocketConnectionInfo connectionInfo,
-            WebSocketControlMessage controlMessage) {
+            WebSocketControlMessage controlMessage, boolean server) {
         if (controlMessage.getControlSignal() == WebSocketControlSignal.PING) {
-            WebSocketResourceDispatcher.dispatchOnPing(connectionInfo, controlMessage);
+            WebSocketResourceDispatcher.dispatchOnPing(connectionInfo, controlMessage, server);
         } else if (controlMessage.getControlSignal() == WebSocketControlSignal.PONG) {
-            WebSocketResourceDispatcher.dispatchOnPong(connectionInfo, controlMessage);
+            WebSocketResourceDispatcher.dispatchOnPong(connectionInfo, controlMessage, server);
         }
     }
 
-    private static void dispatchOnPing(WebSocketConnectionInfo connectionInfo, WebSocketControlMessage controlMessage) {
+    private static void dispatchOnPing(WebSocketConnectionInfo connectionInfo, WebSocketControlMessage controlMessage,
+            boolean server) {
         WebSocketObservabilityUtil.observeOnMessage(WebSocketObservabilityConstants.MESSAGE_TYPE_PING,
                 connectionInfo);
         try {
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onPingMessageResource = wsService.getResourceByName(
-                    WebSocketConstants.RESOURCE_NAME_ON_PING);
+            MemberFunctionType onPingMessageResource = null;
+            BObject balservice = null;
+            if (server) {
+                balservice = (BObject) (wsService.getDispatchingService());
+                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getAttachedFunctions();
+                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_PING)) {
+                        onPingMessageResource = remoteFunc;
+                        break;
+                    }
+                }
+            } else {
+                balservice = wsService.getBalService();
+                onPingMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_PING);
+            }
             if (onPingMessageResource == null) {
                 pongAutomatically(controlMessage);
                 return;
@@ -384,7 +404,7 @@ public class WebSocketResourceDispatcher {
             bValues[1] = true;
             bValues[2] = ValueCreator.createArrayValue(controlMessage.getByteArray());
             bValues[3] = true;
-            executeResource(wsService, wsService.getBalService(), new WebSocketResourceCallback(
+            executeResource(wsService, balservice, new WebSocketResourceCallback(
                             connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, ON_PING_METADATA);
         } catch (Exception e) {
@@ -396,14 +416,29 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    private static void dispatchOnPong(WebSocketConnectionInfo connectionInfo, WebSocketControlMessage controlMessage) {
+    private static void dispatchOnPong(WebSocketConnectionInfo connectionInfo, WebSocketControlMessage controlMessage,
+            boolean server) {
         WebSocketObservabilityUtil.observeOnMessage(WebSocketObservabilityConstants.MESSAGE_TYPE_PONG,
                 connectionInfo);
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onPongMessageResource = wsService.getResourceByName(
-                    WebSocketConstants.RESOURCE_NAME_ON_PONG);
+            MemberFunctionType onPongMessageResource = null;
+            BObject balservice = null;
+            if (server) {
+                balservice = (BObject) (wsService.getDispatchingService());
+                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getAttachedFunctions();
+                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_PONG)) {
+                        onPongMessageResource = remoteFunc;
+                        break;
+                    }
+                }
+            } else {
+                balservice = wsService.getBalService();
+                onPongMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_PONG);
+            }
             if (onPongMessageResource == null) {
                 webSocketConnection.readNextFrame();
                 return;
@@ -414,9 +449,9 @@ public class WebSocketResourceDispatcher {
             bValues[1] = true;
             bValues[2] = ValueCreator.createArrayValue(controlMessage.getByteArray());
             bValues[3] = true;
-            executeResource(wsService, wsService.getBalService(), new WebSocketResourceCallback(
-                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG),
-                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, ON_PONG_METADATA);
+            executeResource(wsService, balservice, new WebSocketResourceCallback(
+                            connectionInfo, RESOURCE_NAME_ON_PONG),
+                    bValues, connectionInfo, RESOURCE_NAME_ON_PONG, ON_PONG_METADATA);
         } catch (Exception e) {
             WebSocketObservabilityUtil.observeError(connectionInfo,
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
@@ -425,18 +460,32 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    public static void dispatchOnClose(WebSocketConnectionInfo connectionInfo, WebSocketCloseMessage closeMessage) {
+    public static void dispatchOnClose(WebSocketConnectionInfo connectionInfo, WebSocketCloseMessage closeMessage,
+            boolean server) {
         WebSocketObservabilityUtil.observeOnMessage(WebSocketObservabilityConstants.MESSAGE_TYPE_CLOSE,
                 connectionInfo);
         try {
             WebSocketUtil.setListenerOpenField(connectionInfo);
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onCloseResource = wsService.getResourceByName(
-                    WebSocketConstants.RESOURCE_NAME_ON_CLOSE);
+            MemberFunctionType onCloseResource = null;
             int closeCode = closeMessage.getCloseCode();
             String closeReason = closeMessage.getCloseReason();
-
+            BObject balservice = null;
+            if (server) {
+                balservice = (BObject) (wsService.getDispatchingService());
+                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getAttachedFunctions();
+                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_CLOSE)) {
+                        onCloseResource = remoteFunc;
+                        break;
+                    }
+                }
+            } else {
+                balservice = wsService.getBalService();
+                onCloseResource = wsService.getResourceByName(RESOURCE_NAME_ON_CLOSE);
+            }
             if (onCloseResource == null) {
                 finishConnectionClosureIfOpen(webSocketConnection, closeCode, connectionInfo);
                 return;
@@ -467,7 +516,7 @@ public class WebSocketResourceDispatcher {
                             error.getMessage());
                 }
             };
-            executeResource(wsService, wsService.getBalService(), onCloseCallback,
+            executeResource(wsService, balservice, onCloseCallback,
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_CLOSE, ON_CLOSE_METADATA);
         } catch (Exception e) {
             WebSocketObservabilityUtil.observeError(connectionInfo,
@@ -490,21 +539,35 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    public static void dispatchOnError(WebSocketConnectionInfo connectionInfo, Throwable throwable) {
+    public static void dispatchOnError(WebSocketConnectionInfo connectionInfo, Throwable throwable, boolean server) {
         try {
             WebSocketUtil.setListenerOpenField(connectionInfo);
         } catch (IllegalAccessException e) {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
         }
         WebSocketService webSocketService = connectionInfo.getService();
-        MemberFunctionType onErrorResource = webSocketService.getResourceByName(
-                WebSocketConstants.RESOURCE_NAME_ON_ERROR);
+        MemberFunctionType onErrorResource = null;
         if (isUnexpectedError(throwable)) {
             log.error("Unexpected error", throwable);
             WebSocketObservabilityUtil.observeError(connectionInfo,
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
                     "Unexpected error");
+        }
+        BObject balservice = null;
+        if (server) {
+            balservice = (BObject) (webSocketService.getDispatchingService());
+            MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) webSocketService.getDispatchingService())
+                    .getType())).getAttachedFunctions();
+            for (MemberFunctionType remoteFunc : remoteFunctions) {
+                if (remoteFunc.getName().equals(RESOURCE_NAME_ON_ERROR)) {
+                    onErrorResource = remoteFunc;
+                    break;
+                }
+            }
+        } else {
+            balservice = webSocketService.getBalService();
+            onErrorResource = webSocketService.getResourceByName(RESOURCE_NAME_ON_ERROR);
         }
         if (onErrorResource == null) {
             ErrorCreator.createError(throwable.getCause()).printStackTrace();
@@ -526,24 +589,38 @@ public class WebSocketResourceDispatcher {
                 error.printStackTrace();
                 WebSocketObservabilityUtil.observeError(
                         connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION,
-                        WebSocketConstants.RESOURCE_NAME_ON_ERROR,
+                        RESOURCE_NAME_ON_ERROR,
                         error.getMessage());
             }
         };
-        executeResource(webSocketService, webSocketService.getBalService(), onErrorCallback,
-                bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_ERROR, ON_ERROR_METADATA);
+        executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo, RESOURCE_NAME_ON_ERROR,
+                ON_ERROR_METADATA);
     }
 
     private static boolean isUnexpectedError(Throwable throwable) {
         return !(throwable instanceof CorruptedFrameException);
     }
 
-    public static void dispatchOnIdleTimeout(WebSocketConnectionInfo connectionInfo) {
+    public static void dispatchOnIdleTimeout(WebSocketConnectionInfo connectionInfo, boolean server) {
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onIdleTimeoutResource = wsService.getResourceByName(
-                    WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT);
+            MemberFunctionType onIdleTimeoutResource = null;
+            BObject balservice = null;
+            if (server) {
+                balservice = (BObject) (wsService.getDispatchingService());
+                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getAttachedFunctions();
+                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_IDLE_TIMEOUT)) {
+                        onIdleTimeoutResource = remoteFunc;
+                        break;
+                    }
+                }
+            } else {
+                balservice = wsService.getBalService();
+                onIdleTimeoutResource = wsService.getResourceByName(RESOURCE_NAME_ON_IDLE_TIMEOUT);
+            }
             if (onIdleTimeoutResource == null) {
                 return;
             }
@@ -564,9 +641,8 @@ public class WebSocketResourceDispatcher {
                     WebSocketUtil.closeDuringUnexpectedCondition(webSocketConnection);
                 }
             };
-            executeResource(wsService, wsService.getBalService(), onIdleTimeoutCallback,
-                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT,
-                    ON_TIMEOUT_METADATA);
+            executeResource(wsService, balservice, onIdleTimeoutCallback, bValues, connectionInfo,
+                    RESOURCE_NAME_ON_IDLE_TIMEOUT, ON_TIMEOUT_METADATA);
         } catch (Exception e) {
             log.error("Error on idle timeout", e);
             WebSocketObservabilityUtil.observeError(connectionInfo,

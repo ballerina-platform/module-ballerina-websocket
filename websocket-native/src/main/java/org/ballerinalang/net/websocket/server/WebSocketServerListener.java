@@ -116,13 +116,13 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
     @Override
     public void onMessage(WebSocketControlMessage webSocketControlMessage) {
         WebSocketResourceDispatcher.dispatchOnPingOnPong(
-                getConnectionInfo(webSocketControlMessage), webSocketControlMessage);
+                getConnectionInfo(webSocketControlMessage), webSocketControlMessage, true);
     }
 
     @Override
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
         WebSocketResourceDispatcher.dispatchOnClose(
-                getConnectionInfo(webSocketCloseMessage), webSocketCloseMessage);
+                getConnectionInfo(webSocketCloseMessage), webSocketCloseMessage, true);
     }
 
     @Override
@@ -138,13 +138,12 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
 
     @Override
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
-        WebSocketResourceDispatcher.dispatchOnError(
-                getConnectionInfo(webSocketConnection), throwable);
+        WebSocketResourceDispatcher.dispatchOnError(getConnectionInfo(webSocketConnection), throwable, true);
     }
 
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
-        WebSocketResourceDispatcher.dispatchOnIdleTimeout(getConnectionInfo(controlMessage));
+        WebSocketResourceDispatcher.dispatchOnIdleTimeout(getConnectionInfo(controlMessage), true);
     }
 
     private String getConnectionId(WebSocketMessage webSocketMessage) {

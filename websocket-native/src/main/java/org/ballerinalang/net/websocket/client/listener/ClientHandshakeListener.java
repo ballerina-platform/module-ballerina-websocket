@@ -47,7 +47,7 @@ public class ClientHandshakeListener implements ExtendedHandshakeListener {
     public void onError(Throwable throwable, HttpCarbonResponse response) {
         handshakeListener.onError(throwable, response);
         WebSocketUtil.countDownForHandshake(getWebSocketClient());
-        WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable);
+        WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable, false);
     }
 
     @Override
