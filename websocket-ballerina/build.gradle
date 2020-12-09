@@ -208,6 +208,34 @@ task revertTomlFile {
     }
 }
 
+task ballerinaTest {
+    dependsOn(":websocket-native:build")
+    dependsOn(unpackJballerinaTools)
+    dependsOn(updateTomlFile)
+    finalizedBy(revertTomlFile)
+
+    def debugParams = ""
+    if (project.hasProperty("debug")) {
+        debugParams = "--debug ${project.findProperty("debug")}"
+    }
+
+    doLast {
+        exec {
+            workingDir project.projectDir
+            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat test ${debugParams} && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina test ${debugParams}"
+            }
+        }
+    }
+}
+
+test {
+    dependsOn(ballerinaTest)
+}
+
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
     finalizedBy(revertTomlFile)
@@ -218,10 +246,9 @@ task ballerinaBuild {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build -c && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build --skip-tests -c && exit %%ERRORLEVEL%%"
             } else {
-//                commandLine 'sh', '-c', "$distributionBinPath/ballerina test --debug 5005"
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina build -c"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina build --skip-tests -c"
             }
         }
         copy {
@@ -250,19 +277,19 @@ task ballerinaBuild {
 
         }
         // Doc creation and packing
-//        exec {
-//            workingDir project.projectDir
-//            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
-//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc --offline ${moduleName} && exit %%ERRORLEVEL%%"
-//            } else {
-//                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc --offline ${moduleName}"
-//            }
-//        }
-//        copy {
-//            from file("$project.projectDir/target/apidocs/${moduleName}")
-//            into file("$project.projectDir/build/docs_parent/docs/${moduleName}")
-//        }
+        exec {
+            workingDir project.projectDir
+            environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat doc && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina doc"
+            }
+        }
+        copy {
+            from file("$project.projectDir/target/apidocs/${packageName}")
+            into file("$project.projectDir/build/docs_parent/docs/${packageName}")
+        }
     }
 
     outputs.dir artifactCacheParent

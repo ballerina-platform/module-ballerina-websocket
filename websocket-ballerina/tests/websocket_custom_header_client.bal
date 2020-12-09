@@ -38,7 +38,7 @@ service UpgradeService /pingpong/ws on new Listener(21011) {
 
 service class wsService {
   *Service;
-  remote function onOpen(Caller caller) {
+  remote isolated function onOpen(Caller caller) {
       checkpanic caller->pushText("some-header-value");
    }
 }

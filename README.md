@@ -1,16 +1,16 @@
 Ballerina HTTP Library
 ===================
 
-  [![Build](https://github.com/ballerina-platform/module-ballerina-http/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-http/actions?query=workflow%3ABuild)
-  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-http.svg)](https://github.com/ballerina-platform/module-ballerina-http/commits/master)
-    [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/http.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fhttp)
+  [![Build](https://github.com/ballerina-platform/module-ballerina-websocket/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/actions?query=workflow%3ABuild)
+  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-websocket.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/commits/master)
+    [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/http.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fwebsocket)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-The HTTP library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina</a> language.
+The Websocket library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina</a> language.
 
-It provides an implementation for connecting and interacting with HTTP, HTTP2, and WebSocket endpoints over the network.
+It provides an implementation for connecting and interacting with WebSocket endpoints over the network.
 
-For more information go to [The HTTP Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/http/index.html).
+For more information go to [The Websocket Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/websocket/index.html).
 
 For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/swan-lake/learn/by-example/).
 
