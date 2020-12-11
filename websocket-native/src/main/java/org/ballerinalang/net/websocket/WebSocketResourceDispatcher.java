@@ -705,6 +705,7 @@ public class WebSocketResourceDispatcher {
         httpCaller.set(HttpConstants.SERVICE_ENDPOINT_PROTOCOL_FIELD,
                 StringUtils.fromString((String) inboundMsg.getProperty("PROTOCOL")));
         // TODO: can't add the following as it looks for an http:Listener config. Check this.
+        // check if we can use the http module's function.
         //        httpCaller.set(HttpConstants.SERVICE_ENDPOINT_CONFIG_FIELD, config);
         httpCaller.addNativeData("remoteSocketAddress", remoteSocketAddress);
     }
