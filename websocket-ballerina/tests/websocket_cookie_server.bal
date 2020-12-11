@@ -47,7 +47,7 @@
 //                    response.setTextPayload("Login succeeded");
 //                    var result = caller->respond(response);
 //                    if (result is error) {
-//                        log:printError("Failed to respond", result);
+//                        log:printError("Failed to respond", err = result);
 //                    }
 //                }
 //            }
@@ -69,17 +69,17 @@
 //        if (usernameCookie.length() > 0) {
 //            string? user = usernameCookie[0].value;
 //            if (user is string) {
-//                log:printInfo("WebSocket connection made successfully");
+//                log:print("WebSocket connection made successfully");
 //            } else {
 //                var result = caller->cancelWebSocketUpgrade(401, "Unauthorized request. Please login");
 //                if (result is error) {
-//                    log:printError("Failed to cancel the WebSocket upgrade", result);
+//                    log:printError("Failed to cancel the WebSocket upgrade", err = result);
 //                }
 //            }
 //        } else {
 //            var result = caller->cancelWebSocketUpgrade(401, "Unauthorized request. Please login");
 //            if (result is error) {
-//                log:printError("Failed to cancel the WebSocket upgrade", result);
+//                log:printError("Failed to cancel the WebSocket upgrade", err = result);
 //            }
 //        }
 //    }
@@ -95,6 +95,6 @@
 //    }
 //
 //    resource function onError(http:WebSocketCaller caller, error err) {
-//        log:printError("Error occurred ", err);
+//        log:printError("Error occurred ", err = err);
 //    }
 //};
