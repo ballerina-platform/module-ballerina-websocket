@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.websocket.WebSocketConstants;
@@ -45,7 +46,7 @@ public class Register extends AbstractWebsocketNativeFunction {
 
         WebSocketServicesRegistry webSocketServicesRegistry = getWebSocketServicesRegistry(serviceEndpoint);
         Runtime runtime = env.getRuntime();
-        String[] basePathArr = ((BArray) serviceName).getStringArray();
+        String basePath = getBasePath(serviceName);
 
         Type param;
         MemberFunctionType[] resourceList = service.getType().getAttachedFunctions();
@@ -54,7 +55,7 @@ public class Register extends AbstractWebsocketNativeFunction {
                 String callerType = param.getQualifiedName();
                 if (WEBSOCKET_CALLER_NAME.equals(callerType) || HttpConstants.HTTP_CALLER_NAME.equals(callerType)) {
                     webSocketServicesRegistry
-                            .registerService(new WebSocketServerService(service, runtime, basePathArr));
+                            .registerService(new WebSocketServerService(service, runtime, basePath));
                 } else if (FULL_WEBSOCKET_CLIENT_NAME.equals(callerType)) {
                     return WebSocketUtil.getWebSocketError(
                             "Client service cannot be attached to the Listener", null,
@@ -67,5 +68,17 @@ public class Register extends AbstractWebsocketNativeFunction {
             return ex;
         }
         return null;
+    }
+
+    private static String getBasePath(Object serviceName) {
+        if (serviceName instanceof BArray) {
+            String basePath = String.join("/", ((BArray) serviceName).getStringArray());
+            return HttpUtil.sanitizeBasePath(basePath);
+        } else if (serviceName instanceof BString) {
+            String basePath = ((BString) serviceName).getValue();
+            return HttpUtil.sanitizeBasePath(basePath);
+        } else {
+            return HttpConstants.DEFAULT_BASE_PATH;
+        }
     }
 }

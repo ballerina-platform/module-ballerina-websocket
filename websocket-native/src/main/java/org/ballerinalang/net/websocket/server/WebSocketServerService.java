@@ -44,9 +44,9 @@ public class WebSocketServerService extends WebSocketService {
     private int idleTimeoutInSeconds = 0;
     private HttpResource upgradeResource;
 
-    public WebSocketServerService(BObject service, Runtime runtime, String[] basePathArr) {
+    public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
-        populateConfigs(basePathArr);
+        populateConfigs(basePath);
     }
 
 //    public WebSocketServerService(String httpBasePath, HttpResource upgradeResource, BObject service,
@@ -64,7 +64,7 @@ public class WebSocketServerService extends WebSocketService {
 //        setBasePathToServiceObj(httpBasePath.concat(upgradePath));
 //    }
 
-    private void populateConfigs(String[] basePathArr) {
+    private void populateConfigs(String basePath) {
         BMap<BString, Object> configAnnotation = getServiceConfigAnnotation();
         if (configAnnotation != null) {
             negotiableSubProtocols = WebSocketUtil.findNegotiableSubProtocols(configAnnotation);
@@ -73,7 +73,7 @@ public class WebSocketServerService extends WebSocketService {
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
         }
         // This will be overridden if there is an upgrade path
-        setBasePathToServiceObj(findFullWebSocketUpgradePath(basePathArr));
+        setBasePathToServiceObj(basePath);
     }
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
