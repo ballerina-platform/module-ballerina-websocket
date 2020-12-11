@@ -1,0 +1,79 @@
+/*
+ *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
+package org.ballerinalang.net.websocket;
+
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.values.BObject;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * WebSocket service for service dispatching.
+ */
+public class WebSocketService {
+
+    protected final BObject service;
+    protected Runtime runtime;
+    private final Map<String, MemberFunctionType> resourcesMap = new ConcurrentHashMap<>();
+    private Object dispatchingService = null;
+
+    public WebSocketService(Runtime runtime) {
+        this.runtime = runtime;
+        service = null;
+    }
+
+    public WebSocketService(BObject service, Runtime runtime) {
+        this.runtime = runtime;
+        this.service = service;
+        populateResourcesMap(service);
+        registerDispatchingService();
+    }
+
+    private void populateResourcesMap(BObject service) {
+        for (MemberFunctionType resource : service.getType().getAttachedFunctions()) {
+            resourcesMap.put(resource.getName(), resource);
+        }
+    }
+
+    public MemberFunctionType getResourceByName(String resourceName) {
+        return resourcesMap.get(resourceName);
+    }
+
+    public BObject getBalService() {
+        return service;
+    }
+
+    public void registerDispatchingService() {
+        MemberFunctionType onUpgradeFunction = getResourceByName("onUpgrade");
+    }
+
+    public Runtime getRuntime() {
+        return runtime;
+    }
+
+    public void setDispatchingService(Object service) {
+        this.dispatchingService = service;
+    }
+
+    public Object getDispatchingService() {
+        return dispatchingService;
+    }
+}
