@@ -6,7 +6,7 @@ This module provides an implementation for connecting and interacting with WebSo
 
 This module also provides support for WebSockets. There are two types of WebSocket endpoints: `WebSocketClient` and `WebSocketListener`. Both endpoints support all WebSocket frames. The `WebSocketClient` has a callback service.
 
-There are two types of services for WebSockets. The service of the server has the `WebSockerCaller` as the resource parameter and the callback service of the client has `WebSocketClient` as the resource parameter. The WebSocket services have a fixed set of resources that do not have a resource config. The incoming messages are passed to these resources.
+There are two types of services for WebSockets. The service of the server has the `WebSocketCaller` as the resource parameter and the callback service of the client has `WebSocketClient` as the resource parameter. The WebSocket services have a fixed set of resources that do not have a resource config. The incoming messages are passed to these resources.
 
 **WebSocket upgrade**: During a WebSocket upgrade, the initial message received is an HTTP request. To intercept this request and perform the upgrade explicitly with custom headers, the user must create an HTTP resource with WebSocket-specific configurations as follows:
 
