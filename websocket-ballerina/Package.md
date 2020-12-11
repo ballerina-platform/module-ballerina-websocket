@@ -2,7 +2,7 @@
 
 This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates two types of network entry points as ‘Client’ and ‘Listener’.
 
-### WebSocket
+### WebSocket Module
 
 This module also provides support for WebSockets. There are two types of WebSocket endpoints: `WebSocketClient` and `WebSocketListener`. Both endpoints support all WebSocket frames. The `WebSocketClient` has a callback service.
 
