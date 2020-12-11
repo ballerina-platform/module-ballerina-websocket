@@ -39,7 +39,7 @@ service /websocket on new Listener(21030) {
 service class ErrorServer {
   *Service;
    remote isolated function onOpen(Caller caller) {
-       log:printInfo("The Connection ID: " + caller.getConnectionId());
+       log:print("The Connection ID: " + caller.getConnectionId());
    }
 
    remote isolated function onPing(Caller caller, byte[] localData) {
@@ -59,7 +59,7 @@ service class ErrorServer {
    remote isolated function onText(Caller caller, string text, boolean finalFrame) {
        var err = caller->pushText(text, finalFrame);
        if (err is WebSocketError) {
-           log:printError("Error occurred when sending text message", err);
+           log:printError("Error occurred when sending text message", err = err);
        }
    }
 
@@ -107,7 +107,7 @@ public function testLongFrameError() {
    }
    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
    //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", result);
+   //   log:printError("Error occurred when closing connection", err = result);
    //}
 }
 
@@ -117,7 +117,7 @@ public function testConnectionClosedError() {
    Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
    error? result = wsClientEp->close(timeoutInSeconds = 0);
    //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", result);
+   //   log:printError("Error occurred when closing connection", err = result);
    //}
    runtime:sleep(2000);
    var err = wsClientEp->pushText("some");

@@ -35,7 +35,7 @@
 //    WebSocketClient wsClient = new ("ws://localhost:21004");
 //    error? result = wsClient->close(1001, "Close the connection", timeoutInSeconds = 0);
 //    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", result);
+//    //   log:printError("Error occurred when closing connection", err = result);
 //    //}
 //    test:assertEquals(expectedStatusCode, 1001, msg = "status code mismatched");
 //}
@@ -46,7 +46,7 @@
 //    WebSocketClient wsClient = new ("ws://localhost:21004");
 //    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 //    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", result);
+//    //   log:printError("Error occurred when closing connection", err = result);
 //    //}
 //    test:assertEquals(expectedStatusCode, 1000, msg = "status code mismatched");
 //}

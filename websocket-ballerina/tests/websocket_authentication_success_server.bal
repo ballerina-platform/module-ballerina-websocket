@@ -39,7 +39,7 @@
 //        }
 //    }
 //    resource function upgrader(websocket:Caller caller, websocket:Request req) {
-//        log:printInfo("WS upgrade resource");
+//        log:print("WS upgrade resource");
 //    }
 //}
 //service upgradedService = @websocket:ServiceConfig {} service {

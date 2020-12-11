@@ -66,13 +66,13 @@
 //service proxyServer on new Listener(21019) {
 //
 //    resource function onOpen(WebSocketCaller caller) {
-//        log:printInfo("The Connection ID: " + caller.getConnectionId());
+//        log:print("The Connection ID: " + caller.getConnectionId());
 //    }
 //
 //    resource function onText(WebSocketCaller caller, string text, boolean finalFrame) {
 //        var err = caller->pushText(text, finalFrame);
 //        if (err is WebSocketError) {
-//            log:printError("Error occurred when sending text message", err);
+//            log:printError("Error occurred when sending text message", err = err);
 //        }
 //    }
 //
@@ -134,7 +134,7 @@
 //    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
 //    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 //    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", result);
+//    //   log:printError("Error occurred when closing connection", err = result);
 //    //}
 //}
 //
@@ -148,6 +148,6 @@
 //    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
 //    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 //    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", result);
+//    //   log:printError("Error occurred when closing connection", err = result);
 //    //}
 //}

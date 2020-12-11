@@ -23,7 +23,7 @@
 //}
 //service errorService on new Listener(21013) {
 //    resource function onOpen(WebSocketCaller ep) {
-//        log:printInfo("connection open");
+//        log:print("connection open");
 //    }
 //
 //    resource function onText(WebSocketCaller ep, string text) {
