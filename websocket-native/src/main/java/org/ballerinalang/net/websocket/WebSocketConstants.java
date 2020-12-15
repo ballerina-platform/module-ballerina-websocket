@@ -34,7 +34,7 @@ public class WebSocketConstants {
     public static final String BALLERINA_ORG = "ballerina";
     public static final String PACKAGE_HTTP = "http";
     public static final String PACKAGE_WEBSOCKET = "websocket";
-    public static final String WEBSOCKET_MODULE_VERSION = "1.0.4";
+    public static final String WEBSOCKET_MODULE_VERSION = "1.1.0";
     public static final String SEPARATOR = ":";
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
