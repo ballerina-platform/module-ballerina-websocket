@@ -176,6 +176,10 @@ public client class Client {
     public isolated function getHttpResponse() returns http:Response? {
         return self.response;
     }
+
+    public function gracefulStop() returns error? {
+       // Nothing to do.
+    }
 }
 
 # Configurations for the WebSocket client.
