@@ -48,11 +48,6 @@ public class InitEndpoint {
         String remoteUrl = webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
         WebSocketService wsService = WebSocketUtil.validateAndCreateWebSocketService(env.getRuntime(),
                 clientEndpointConfig);
-        Object clientService = clientEndpointConfig.get(WebSocketConstants.CLIENT_SERVICE_CONFIG);
-        // Check if there is a service attached as the callback, if so register a dynamic listener.
-        if (clientService != null) {
-            env.getRuntime().registerListener(webSocketClient);
-        }
         HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
         WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
         String scheme = URI.create(remoteUrl).getScheme();
