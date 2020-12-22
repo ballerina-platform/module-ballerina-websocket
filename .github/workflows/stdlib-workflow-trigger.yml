@@ -3,7 +3,7 @@ name: Stdlib Dependency Update
 on:
   push:
     branches:
-      - master
+      - main
     paths:
     - 'build.gradle'
     - 'gradle.properties'

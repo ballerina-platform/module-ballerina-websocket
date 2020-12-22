@@ -100,27 +100,6 @@ checkstyleMain.dependsOn(":build-config:checkstyle:downloadMultipleFiles")
 //    enabled = false
 //}
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId "http-native"
-            version = project.version
-            artifact jar
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerina-websocket")
-            credentials {
-                username = System.getenv("packageUser")
-                password = System.getenv("packagePAT")
-            }
-        }
-    }
-}
 
 compileJava {
     doFirst {
