@@ -17,19 +17,38 @@
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
+import ballerina/io;
 
 listener Listener socketListener = new(21001);
 string output = "";
+int x = 0;
 
 service UpgradeService /isOpen/abc on socketListener {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
-       return new MyWSService();
+    remote function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
+       if (x < 1) {
+          x = x + 1;
+          return new MyWSService();
+       } else {
+          return new MyWSService2();
+       }
     }
 }
 
 service class MyWSService {
   *Service;
   remote function onText(Caller caller, string text) {
+      io:println("Service 1");
+      io:println(caller.getConnectionId());
+      WebSocketError? err = caller->close(timeoutInSeconds = 0);
+      output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
+  }
+}
+
+service class MyWSService2 {
+  *Service;
+  remote function onText(Caller caller, string text) {
+      io:println("Service 2");
+      io:println(caller.getConnectionId());
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
   }
@@ -40,6 +59,16 @@ service class MyWSService {
 public function testIsOpenCloseCalled() {
     Client wsClient = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient->pushText("Hi");
+    runtime:sleep(500);
+    test:assertEquals(output, "In onText isOpen false");
+
+    Client wsClient2 = new("ws://localhost:21001/isOpen/abc");
+    checkpanic wsClient2->pushText("Hi");
+    runtime:sleep(500);
+    test:assertEquals(output, "In onText isOpen false");
+
+    Client wsClient3 = new("ws://localhost:21001/isOpen/abc");
+    checkpanic wsClient3->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 }

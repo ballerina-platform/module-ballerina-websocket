@@ -34,17 +34,21 @@ class UpgradeListener implements ServerHandshakeListener {
     private static final Logger logger = LoggerFactory.getLogger(UpgradeListener.class);
 
     private final WebSocketServerService wsService;
+    private final Object dispatchingService;
     private final WebSocketConnectionManager connectionManager;
 
-    UpgradeListener(WebSocketServerService wsService, WebSocketConnectionManager connectionManager) {
+    UpgradeListener(WebSocketServerService wsService, WebSocketConnectionManager connectionManager,
+            Object dispatchingService) {
         this.wsService = wsService;
         this.connectionManager = connectionManager;
+        this.dispatchingService = dispatchingService;
     }
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection) {
         BObject webSocketCaller = WebSocketUtil.createAndPopulateWebSocketCaller(webSocketConnection, wsService,
                 connectionManager);
+        wsService.addWsService(webSocketConnection.getChannelId(), dispatchingService);
         WebSocketResourceDispatcher.dispatchOnOpen(webSocketConnection, webSocketCaller, wsService);
     }
 

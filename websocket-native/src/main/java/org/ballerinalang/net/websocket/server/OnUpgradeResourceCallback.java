@@ -20,6 +20,7 @@ package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
@@ -47,8 +48,7 @@ public class OnUpgradeResourceCallback implements Callback {
             ServerHandshakeFuture future = webSocketHandshaker.handshake(
                     wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
                     wsService.getMaxFrameSize());
-            wsService.setDispatchingService(result);
-            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager));
+            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager, result));
         } else {
             // If the acceptWebSocketUpgrade function has not been called inside the upgrade resource
             if (!webSocketHandshaker.isCancelled()) {

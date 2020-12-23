@@ -33,7 +33,7 @@ public class WebSocketService {
     protected final BObject service;
     protected Runtime runtime;
     private final Map<String, MemberFunctionType> resourcesMap = new ConcurrentHashMap<>();
-    private Object dispatchingService = null;
+    private Map<String, Object> wsServices = new ConcurrentHashMap<>();
 
     public WebSocketService(Runtime runtime) {
         this.runtime = runtime;
@@ -44,7 +44,6 @@ public class WebSocketService {
         this.runtime = runtime;
         this.service = service;
         populateResourcesMap(service);
-        registerDispatchingService();
     }
 
     private void populateResourcesMap(BObject service) {
@@ -61,19 +60,15 @@ public class WebSocketService {
         return service;
     }
 
-    public void registerDispatchingService() {
-        MemberFunctionType onUpgradeFunction = getResourceByName("onUpgrade");
-    }
-
     public Runtime getRuntime() {
         return runtime;
     }
 
-    public void setDispatchingService(Object service) {
-        this.dispatchingService = service;
+    public void addWsService(String channelId, Object dispatchingService) {
+        this.wsServices.put(channelId, dispatchingService);
     }
 
-    public Object getDispatchingService() {
-        return dispatchingService;
+    public Object getWsService(String key) {
+        return this.wsServices.get(key);
     }
 }
