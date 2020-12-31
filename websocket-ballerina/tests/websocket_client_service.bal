@@ -40,14 +40,14 @@ service object {} callback200 = service object {
 };
 
 service object {} ClientService200 = service object {
-   remote function onText(Client caller, string text) {
+   remote function onText(AsyncClient caller, string text) {
    }
 };
 
 // Tests the client initialization without a callback service.
 @test:Config {}
 public function testClientSuccessWithoutService() {
-   Client wsClient = new ("ws://localhost:21021/client/service");
+   AsyncClient wsClient = new ("ws://localhost:21021/client/service");
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -60,7 +60,7 @@ public function testClientSuccessWithoutService() {
 @test:Config {}
 public function testClientSuccessWithWebSocketClientService() {
    isClientConnectionOpen = false;
-   Client wsClient = new ("ws://localhost:21021/client/service", {callbackService: ClientService200});
+   AsyncClient wsClient = new ("ws://localhost:21021/client/service", {callbackService: ClientService200});
    checkpanic wsClient->pushText("Client worked");
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
@@ -74,7 +74,7 @@ public function testClientSuccessWithWebSocketClientService() {
 @test:Config {}
 public function testClientFailureWithWebSocketService() {
    isClientConnectionOpen = false;
-   Client|error wsClientEp = trap new ("ws://localhost:21021/client/service",
+   AsyncClient|error wsClientEp = trap new ("ws://localhost:21021/client/service",
        {callbackService: callback200});
    runtime:sleep(500);
    if (wsClientEp is error) {

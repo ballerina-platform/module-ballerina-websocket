@@ -21,7 +21,7 @@ import ballerina/http;
 import ballerina/mime;
 
 # Represents a WebSocket client endpoint.
-public client class Client {
+public client class AsyncClient {
 
     private string id = "";
     private string? negotiatedSubProtocol = ();
@@ -283,12 +283,12 @@ const SPACE = " ";
 const SEMICOLON = ";";
 string dummy = mime:MULTIPART_MIXED;
 
-isolated function externWSInitEndpoint(Client wsClient) = @java:Method {
+isolated function externWSInitEndpoint(AsyncClient wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
     name: "initEndpoint"
 } external;
 
-isolated function externRetryInitEndpoint(Client wsClient) = @java:Method {
+isolated function externRetryInitEndpoint(AsyncClient wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
     name: "initEndpoint"
 } external;

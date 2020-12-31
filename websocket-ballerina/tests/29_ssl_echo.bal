@@ -52,15 +52,15 @@ service class WsService6 {
 }
 
 service object {} sslEchoCallbackService = @ServiceConfig {} service object {
-   remote function onText(Client wsEp, string text) {
+   remote function onText(AsyncClient wsEp, string text) {
        expectedString = <@untainted>text;
    }
 
-   remote function onBinary(Client wsEp, byte[] data) {
+   remote function onBinary(AsyncClient wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
-   remote isolated function onClose(Client wsEp, int statusCode, string reason) {
+   remote isolated function onClose(AsyncClient wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -71,7 +71,7 @@ service object {} sslEchoCallbackService = @ServiceConfig {} service object {
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
 public function sslBinaryEcho() {
-   Client wsClient = new ("wss://localhost:21029/sslEcho", {
+   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", {
            callbackService: sslEchoCallbackService,
            secureSocket: {
                trustStore: {
@@ -90,7 +90,7 @@ public function sslBinaryEcho() {
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
 public function sslTextEcho() {
-   Client wsClient = new ("wss://localhost:21029/sslEcho", {
+   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", {
            callbackService: sslEchoCallbackService,
            secureSocket: {
                trustStore: {

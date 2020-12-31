@@ -39,7 +39,7 @@ service class clientCloseService {
 // Test client closing the connection with a close code
 @test:Config {}
 public function testCloseWithCloseCode() {
-   Client wsClient = new ("ws://localhost:21004/clientClose");
+   AsyncClient wsClient = new ("ws://localhost:21004/clientClose");
    error? result = wsClient->close(1001, "Close the connection", timeoutInSeconds = 0);
    runtime:sleep(500);
    //if (result is WebSocketError) {
@@ -51,7 +51,7 @@ public function testCloseWithCloseCode() {
 // Test client sending a close frame without a close code
 @test:Config {}
 public function testCloseWithoutCloseCode() {
-   Client wsClient = new ("ws://localhost:21004/clientClose");
+   AsyncClient wsClient = new ("ws://localhost:21004/clientClose");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
    runtime:sleep(5000);
    //if (result is WebSocketError) {

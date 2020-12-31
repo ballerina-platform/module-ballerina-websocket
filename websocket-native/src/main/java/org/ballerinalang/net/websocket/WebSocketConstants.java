@@ -39,7 +39,7 @@ public class WebSocketConstants {
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
     public static final String WEBSOCKET_CALLER = "Caller";
-    public static final String WEBSOCKET_CLIENT = "Client";
+    public static final String WEBSOCKET_CLIENT = "AsyncClient";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
     public static final String WSS_SCHEME = "wss";

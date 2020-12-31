@@ -57,17 +57,17 @@ service class MyWSService2 {
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() {
-    Client wsClient = new("ws://localhost:21001/isOpen/abc");
+    AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 
-    Client wsClient2 = new("ws://localhost:21001/isOpen/abc");
+    AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient2->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 
-    Client wsClient3 = new("ws://localhost:21001/isOpen/abc");
+    AsyncClient wsClient3 = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient3->pushText("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
@@ -77,7 +77,7 @@ public function testIsOpenCloseCalled() {
 // Disable due to https://github.com/ballerina-platform/module-ballerina-http/issues/71#issuecomment-707017984
 @test:Config {enable : false}
 public function testIsOpenCloseFrameReceived() {
-    Client wsClient = new ("ws://localhost:21001");
+    AsyncClient wsClient = new ("ws://localhost:21001");
     checkpanic wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
     runtime:sleep(500);
     test:assertEquals(output, "In onClose isOpen true");

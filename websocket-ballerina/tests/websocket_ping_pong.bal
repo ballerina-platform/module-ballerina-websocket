@@ -50,11 +50,11 @@ service class PingPongService {
 
 service object {} pingPongCallbackService = @ServiceConfig {} service object {
 
-   remote function onPing(Client wsEp, byte[] localData) {
+   remote function onPing(AsyncClient wsEp, byte[] localData) {
        expectedPongData1 = <@untainted>localData;
    }
 
-   remote function onPong(Client wsEp, byte[] localData) {
+   remote function onPong(AsyncClient wsEp, byte[] localData) {
        expectedPongData = <@untainted>localData;
    }
 };
@@ -62,7 +62,7 @@ service object {} pingPongCallbackService = @ServiceConfig {} service object {
 // Tests ping to Ballerina WebSocket server
 @test:Config {}
 public function testPingToBallerinaServer() {
-   Client wsClient = new ("ws://localhost:21014/pingpong/ws",
+   AsyncClient wsClient = new ("ws://localhost:21014/pingpong/ws",
        {callbackService: pingPongCallbackService});
    byte[] pongData = [5, 24, 56, 243];
    checkpanic wsClient->ping(pongData);
@@ -74,7 +74,7 @@ public function testPingToBallerinaServer() {
 // Tests pong to Ballerina WebSocket server
 @test:Config {}
 public function testPingFromRemoteServerToBallerinaClient() {
-   Client wsClient = new ("ws://localhost:21014/pingpong/ws",
+   AsyncClient wsClient = new ("ws://localhost:21014/pingpong/ws",
        {callbackService: pingPongCallbackService});
    byte[] pongData = [5, 24, 34];
    checkpanic wsClient->pong(pongData);
