@@ -98,10 +98,6 @@ service class sslClientService {
    }
 }
 
-// @WebSocketServiceConfig {
-//    path: "/websocket"
-// }
-
 service UpgradeService /websocket on new Listener(21028, {
        secureSocket: {
            keyStore: {
@@ -168,9 +164,6 @@ public function testSslProxySendText() {
    runtime:sleep(500);
    test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
 }
 
 // Tests sending and receiving of binary frames in WebSocket.
@@ -189,7 +182,4 @@ public function testSslProxySendBinary() {
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
 }

@@ -17,15 +17,14 @@
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
-import ballerina/io;
 
-listener Listener socketListener = new(21001);
+http:Listener hl = new(21001);
+listener Listener socketListener = new(hl);
 string output = "";
 int x = 0;
 
 service UpgradeService /isOpen/abc on socketListener {
     remote function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
-    io:println(req);
        if (x < 1) {
           x = x + 1;
           return new MyWSService();
@@ -38,20 +37,16 @@ service UpgradeService /isOpen/abc on socketListener {
 service class MyWSService {
   *Service;
   remote function onString(Caller caller, string text) {
-      io:println("Service 1");
-      io:println(caller.getConnectionId());
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
-      output = <@untainted>("In onString isOpen " + caller.isOpen().toString());
+      output = <@untainted>("In service 1 onString isOpen " + caller.isOpen().toString());
   }
 }
 
 service class MyWSService2 {
   *Service;
   remote function onString(Caller caller, string text) {
-      io:println("Service 2");
-      io:println(caller.getConnectionId());
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
-      output = <@untainted>("In onString isOpen " + caller.isOpen().toString());
+      output = <@untainted>("In service 2 onString isOpen " + caller.isOpen().toString());
   }
 }
 
@@ -61,17 +56,17 @@ public function testIsOpenCloseCalled() {
     AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In onString isOpen false");
+    test:assertEquals(output, "In service 1 onString isOpen false");
 
     AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient2->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In onString isOpen false");
+    test:assertEquals(output, "In service 2 onString isOpen false");
 
     AsyncClient wsClient3 = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient3->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In onString isOpen false");
+    test:assertEquals(output, "In service 2 onString isOpen false");
 }
 
 // Test isOpen when a close frame is received

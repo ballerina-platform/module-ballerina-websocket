@@ -17,7 +17,6 @@
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
-//import ballerina/io;
 
 string expectedData = "";
 byte[] expectedBinData = [];

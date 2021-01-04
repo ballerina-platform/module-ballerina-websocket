@@ -62,52 +62,12 @@ service class ProxyService {
 
 }
 
-// service on new Listener(21018) {
-
-//    resource function onOpen(WebSocketCaller wsEp) {
-//        WebSocketClient wsClientEp = new ("ws://localhost:21019/websocket", {
-//                callbackService:
-//                    clientCallbackService9,
-//                readyOnConnect: false
-//            });
-//        var returnVal = wsClientEp->ready();
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-
-//    resource function onString(WebSocketCaller wsEp, string text) {
-//        var returnVal = wsEp->writeString(text);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-
-//    resource function onBytes(WebSocketCaller wsEp, byte[] data) {
-//        var returnVal = wsEp->writeBytes(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-
-//    resource function onClose(WebSocketCaller wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-
-// }
-
 service UpgradeService /websocket on new Listener(21019) {
    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
        return new ProxyService2();
    }
 }
 
-// @WebSocketServiceConfig {
-//    path: "/websocket"
-// }
 service class ProxyService2 {
    *Service;
    remote function onOpen(Caller caller) {
@@ -180,9 +140,6 @@ public function testSendText() {
    runtime:sleep(500);
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
 }
 
 // Tests sending and receiving of binary frames in WebSocket.
@@ -194,7 +151,4 @@ public function testSendBinary() {
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
 }

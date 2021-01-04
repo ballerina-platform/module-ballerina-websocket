@@ -38,6 +38,8 @@ public client class AsyncClient {
     # Initializes the client when called.
     #
     # + url - URL of the target service
+    # + callbackService - The callback service of the client. Resources in this service gets called on the
+    #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
     public isolated function init(string url, CallbackService? callbackService = (), WebSocketClientConfiguration? config = ()) {
         self.url = url;
@@ -204,8 +206,6 @@ public type WebSocketClientConfiguration record {|
 
 # Common client configurations for WebSocket clients.
 #
-# + callbackService - The callback service of the client. Resources in this service gets called on the
-#                     receipt of messages from the server
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
 # + idleTimeoutInSeconds - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)

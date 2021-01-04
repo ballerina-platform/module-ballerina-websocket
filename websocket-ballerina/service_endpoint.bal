@@ -75,12 +75,16 @@ public class Listener {
 
     # Gets invoked during module initialization to initialize the listener.
     #
-    # + port - Listening port of the HTTP service listener
-    # + config - Configurations for the HTTP service listener
-    public isolated function init(int port, ListenerConfiguration? config = ()) {
+    # + port - Listening port of the websocket service listener
+    # + config - Configurations for the websocket service listener
+    public isolated function init(int|http:Listener listenerPort, ListenerConfiguration? config = ()) {
         self.instanceId = uuid();
         self.config = config ?: {};
-        self.port = port;
+        if (listenerPort is http:Listener) {
+           self.port = listenerPort.port;
+        } else {
+           self.port = listenerPort;
+        }
         //ListenerAuth? auth = self.config["auth"];
         //if (auth is ListenerAuth) {
         //    if (auth.mandateSecureSocket) {

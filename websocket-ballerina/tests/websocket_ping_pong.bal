@@ -21,7 +21,6 @@ import ballerina/http;
 byte[] expectedPongData = [];
 byte[] expectedPongData1 = [];
 
-//@ServiceConfig {}
 service UpgradeService /pingpong/ws on new Listener(21014) {
     remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
        return new PingPongService();
