@@ -51,7 +51,8 @@ service class WsService6 {
    }
 }
 
-service object {} sslEchoCallbackService = @ServiceConfig {} service object {
+service class sslEchoCallbackService {
+   *CallbackService;
    remote function onText(AsyncClient wsEp, string text) {
        expectedString = <@untainted>text;
    }
@@ -66,13 +67,12 @@ service object {} sslEchoCallbackService = @ServiceConfig {} service object {
            panic <error>returnVal;
        }
    }
-};
+}
 
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
 public function sslBinaryEcho() {
-   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", {
-           callbackService: sslEchoCallbackService,
+   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
            secureSocket: {
                trustStore: {
                    path: "tests/certsAndKeys/ballerinaTruststore.p12",
@@ -90,8 +90,7 @@ public function sslBinaryEcho() {
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
 public function sslTextEcho() {
-   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", {
-           callbackService: sslEchoCallbackService,
+   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
            secureSocket: {
                trustStore: {
                    path: "tests/certsAndKeys/ballerinaTruststore.p12",

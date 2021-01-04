@@ -544,21 +544,19 @@ public class WebSocketUtil {
     /**
      * Validate and create the webSocket service.
      *
-     * @param clientEndpointConfig - a client endpoint config
+     * @param callbackService - a client endpoint config
      * @param runtime - ballerina runtime
      * @return webSocketService
      */
-    public static WebSocketService validateAndCreateWebSocketService(Runtime runtime,
-            BMap<BString, Object> clientEndpointConfig) {
-        Object clientService = clientEndpointConfig.get(WebSocketConstants.CLIENT_SERVICE_CONFIG);
-        if (clientService != null) {
-            Type param = ((BObject) clientService).getType().getAttachedFunctions()[0].getParameterTypes()[0];
+    public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
+        if (callbackService != null) {
+            Type param = (callbackService).getType().getAttachedFunctions()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a WebSocket Client Service",
                         null, WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
             }
-            return new WebSocketService((BObject) clientService, runtime);
+            return new WebSocketService(callbackService, runtime);
         } else {
             return new WebSocketService(runtime);
         }

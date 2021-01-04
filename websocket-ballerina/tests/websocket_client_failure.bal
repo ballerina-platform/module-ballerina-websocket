@@ -18,17 +18,17 @@ import ballerina/runtime;
 import ballerina/test;
 
 string expectedErr = "";
-service object {} errorHandlingService = service object {
+service class errorHandlingService {
+   *CallbackService;
    remote function onError(AsyncClient caller, error err) {
        expectedErr = <@untainted>err.toString();
    }
-};
+}
 
 // Tests the client initialization failing in a resource.
 @test:Config {}
 public function testClientEndpointFailureInResource() {
-   AsyncClient wsClientEp = new ("ws://localhost:21010/websocketxyz", {
-           callbackService: errorHandlingService,
+   AsyncClient wsClientEp = new ("ws://localhost:21010/websocketxyz", new errorHandlingService(), {
            readyOnConnect: false
        });
    var err = wsClientEp->ready();

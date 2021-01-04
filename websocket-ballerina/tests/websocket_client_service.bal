@@ -34,15 +34,17 @@ service class clientFailure200 {
    }
 }
 
-service object {} callback200 = service object {
+service class callback200 {
+   *CallbackService;
    remote function onText(Caller caller, string text) {
    }
-};
+}
 
-service object {} ClientService200 = service object {
+service class ClientService200 {
+   *CallbackService;
    remote function onText(AsyncClient caller, string text) {
    }
-};
+}
 
 // Tests the client initialization without a callback service.
 @test:Config {}
@@ -60,7 +62,7 @@ public function testClientSuccessWithoutService() {
 @test:Config {}
 public function testClientSuccessWithWebSocketClientService() {
    isClientConnectionOpen = false;
-   AsyncClient wsClient = new ("ws://localhost:21021/client/service", {callbackService: ClientService200});
+   AsyncClient wsClient = new ("ws://localhost:21021/client/service", new ClientService200());
    checkpanic wsClient->pushText("Client worked");
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
@@ -74,8 +76,7 @@ public function testClientSuccessWithWebSocketClientService() {
 @test:Config {}
 public function testClientFailureWithWebSocketService() {
    isClientConnectionOpen = false;
-   AsyncClient|error wsClientEp = trap new ("ws://localhost:21021/client/service",
-       {callbackService: callback200});
+   AsyncClient|error wsClientEp = trap new ("ws://localhost:21021/client/service", new callback200());
    runtime:sleep(500);
    if (wsClientEp is error) {
        test:assertEquals(wsClientEp.message(),

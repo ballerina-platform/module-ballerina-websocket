@@ -33,17 +33,19 @@ public client class AsyncClient {
     private WebSocketConnector conn = new;
     private string url = "";
     private WebSocketClientConfiguration config = {};
+    private CallbackService? callbackService = ();
 
     # Initializes the client when called.
     #
     # + url - URL of the target service
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, WebSocketClientConfiguration? config = ()) {
+    public isolated function init(string url, CallbackService? callbackService = (), WebSocketClientConfiguration? config = ()) {
         self.url = url;
         //if (config is WebSocketClientConfiguration) {
         //    addCookies(config);
         //}
         self.config = config ?: {};
+        self.callbackService = callbackService ?: ();
         self.initEndpoint();
     }
 
@@ -220,7 +222,6 @@ public type WebSocketClientConfiguration record {|
 #                               an error.If the value < 0, then the value sets to the default value(300).
 //# + cookies - An Array of `http:Cookie`
 public type CommonWebSocketClientConfiguration record {|
-    CallbackService? callbackService = ();
     string[] subProtocols = [];
     map<string> customHeaders = {};
     int idleTimeoutInSeconds = -1;

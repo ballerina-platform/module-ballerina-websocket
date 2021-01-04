@@ -43,18 +43,17 @@ service class wsService {
    }
 }
 
-service object {} customHeaderService = @ServiceConfig {} service object {
+service class customHeaderService {
+   *CallbackService;
    remote function onText(AsyncClient wsEp, string text) {
        expextedValue = <@untainted>text;
    }
-};
+}
 
 // Tests when the client sends custom headers to the server.
 @test:Config {}
 public function testClientSentCustomHeader() {
-   AsyncClient wsClientEp = new ("ws://localhost:21011/pingpong/ws", {
-           callbackService:
-               customHeaderService,
+   AsyncClient wsClientEp = new ("ws://localhost:21011/pingpong/ws", new customHeaderService(), {
            customHeaders: {"X-some-header": "some-header-value"}
        });
    runtime:sleep(500);
