@@ -41,7 +41,7 @@
 //}
 //
 //service simpleProxy = @http:WebSocketServiceConfig {} service {
-//    resource function onText(http:WebSocketCaller wsEp, string text) {
+//    resource function onString(http:WebSocketCaller wsEp, string text) {
 //        var returnVal = wsEp->writeString(<string>wsEp.getAttribute("X-some-header"));
 //        if (returnVal is http:WebSocketError) {
 //            panic <error>returnVal;
@@ -51,7 +51,7 @@
 //
 //service customServerHeaderService = @http:WebSocketServiceConfig {} service {
 //
-//    resource function onText(http:WebSocketClient wsEp, string text) {
+//    resource function onString(http:WebSocketClient wsEp, string text) {
 //        expextedValue = <@untainted>text;
 //    }
 //};

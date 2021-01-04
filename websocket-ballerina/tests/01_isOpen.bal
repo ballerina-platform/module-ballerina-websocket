@@ -37,21 +37,21 @@ service UpgradeService /isOpen/abc on socketListener {
 
 service class MyWSService {
   *Service;
-  remote function onText(Caller caller, string text) {
+  remote function onString(Caller caller, string text) {
       io:println("Service 1");
       io:println(caller.getConnectionId());
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
-      output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
+      output = <@untainted>("In onString isOpen " + caller.isOpen().toString());
   }
 }
 
 service class MyWSService2 {
   *Service;
-  remote function onText(Caller caller, string text) {
+  remote function onString(Caller caller, string text) {
       io:println("Service 2");
       io:println(caller.getConnectionId());
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
-      output = <@untainted>("In onText isOpen " + caller.isOpen().toString());
+      output = <@untainted>("In onString isOpen " + caller.isOpen().toString());
   }
 }
 
@@ -61,17 +61,17 @@ public function testIsOpenCloseCalled() {
     AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In onText isOpen false");
+    test:assertEquals(output, "In onString isOpen false");
 
     AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient2->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In onText isOpen false");
+    test:assertEquals(output, "In onString isOpen false");
 
     AsyncClient wsClient3 = new("ws://localhost:21001/isOpen/abc");
     checkpanic wsClient3->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In onText isOpen false");
+    test:assertEquals(output, "In onString isOpen false");
 }
 
 // Test isOpen when a close frame is received

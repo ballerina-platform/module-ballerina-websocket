@@ -33,7 +33,7 @@ service UpgradeService /onlyOnBinary on new Listener(21005) {
 }
 service class OnlyOnBinary {
   *Service;
-   remote function onBinary(Caller caller, byte[] data) {
+   remote function onBytes(Caller caller, byte[] data) {
        checkpanic caller->writeBytes(data);
    }
 }
@@ -46,18 +46,18 @@ service UpgradeService /onlyOnText on new Listener(21006) {
 
 service class OnlyOnText {
    *Service;
-   remote function onText(Caller caller, string data) {
+   remote function onString(Caller caller, string data) {
        checkpanic caller->writeString(data);
    }
 }
 
 service class callbackService {
    *CallbackService;
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        expectedData = <@untainted>text;
    }
 
-   remote function onBinary(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(AsyncClient wsEp, byte[] data) {
        expectedBinData = <@untainted>data;
    }
 
@@ -66,7 +66,7 @@ service class callbackService {
    }
 }
 
-// Tests behavior when onText resource is missing and a text message is received
+// Tests behavior when onString resource is missing and a text message is received
 @test:Config {}
 public function testMissingOnText() {
    AsyncClient wsClient = new ("ws://localhost:21005/onlyOnBinary", new callbackService());
@@ -102,7 +102,7 @@ public function testMissingOnPong() {
    //}
 }
 
-// Tests behavior when onBinary resource is missing and binary message is received
+// Tests behavior when onBytes resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnBinary() {
    AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
@@ -122,7 +122,7 @@ public function testMissingOnBinary() {
    //}
 }
 
-// Tests behavior when onBinary resource is missing and binary message is received
+// Tests behavior when onBytes resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnIdleTimeout() {
    AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());

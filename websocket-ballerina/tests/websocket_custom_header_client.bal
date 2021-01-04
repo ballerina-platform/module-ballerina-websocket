@@ -45,7 +45,7 @@ service class wsService {
 
 service class customHeaderService {
    *CallbackService;
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        expextedValue = <@untainted>text;
    }
 }

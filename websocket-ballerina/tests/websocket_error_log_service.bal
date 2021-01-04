@@ -30,7 +30,7 @@ service class ErrorService {
        log:print("connection open");
    }
 
-   remote function onText(Caller ep, string text) {
+   remote function onString(Caller ep, string text) {
        log:printError(string `text received: ${text}`);
        var returnVal = ep->writeString(text);
        if (returnVal is WebSocketError) {

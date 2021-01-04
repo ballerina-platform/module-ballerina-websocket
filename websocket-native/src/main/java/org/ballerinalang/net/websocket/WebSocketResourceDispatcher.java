@@ -85,7 +85,7 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_O
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PING;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PONG;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_TEXT;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_STRING;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_UPGRADE;
 
 /**
@@ -200,14 +200,14 @@ public class WebSocketResourceDispatcher {
                 MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType()))
                         .getAttachedFunctions();
                 for (MemberFunctionType remoteFunc : remoteFunctions) {
-                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_TEXT)) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_STRING)) {
                         onTextMessageResource = remoteFunc;
                         break;
                     }
                 }
             } else {
                 balservice = wsService.getBalService();
-                onTextMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_TEXT);
+                onTextMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_STRING);
             }
             if (onTextMessageResource == null) {
                 webSocketConnection.readNextFrame();
@@ -230,8 +230,8 @@ public class WebSocketResourceDispatcher {
                     bValues[5] = true;
                 }
                 executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_TEXT), bValues, connectionInfo,
-                        RESOURCE_NAME_ON_TEXT, ON_TEXT_METADATA);
+                        new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_STRING), bValues, connectionInfo,
+                        RESOURCE_NAME_ON_STRING, ON_TEXT_METADATA);
             } else if (isDataBindingSupported(dataTypeTag)) {
                 // During data binding the string is aggregated before it is dispatched to the resource
                 WebSocketConnectionInfo.StringAggregator stringAggregator =
@@ -244,8 +244,8 @@ public class WebSocketResourceDispatcher {
                         bValues[2] = aggregate;
                         bValues[3] = true;
                         executeResource(wsService, balservice,
-                                new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_TEXT), bValues,
-                                connectionInfo, RESOURCE_NAME_ON_TEXT, ON_TEXT_METADATA);
+                                new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_STRING), bValues,
+                                connectionInfo, RESOURCE_NAME_ON_STRING, ON_TEXT_METADATA);
                     }
                     stringAggregator.resetAggregateString();
                 } else {

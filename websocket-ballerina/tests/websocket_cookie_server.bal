@@ -90,7 +90,7 @@
 //        io:println("New WebSocket connection: " + caller.getConnectionId());
 //    }
 //
-//    resource function onText(http:WebSocketCaller caller, string text) {
+//    resource function onString(http:WebSocketCaller caller, string text) {
 //        checkpanic caller->writeString(text);
 //    }
 //

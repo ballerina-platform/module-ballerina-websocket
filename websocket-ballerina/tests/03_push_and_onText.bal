@@ -35,7 +35,7 @@ service UpgradeService /onTextString on new Listener(21003) {
 
 service class WsService1 {
   *Service;
-  remote isolated function onText(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onString(Caller caller, string data, boolean finalFrame) {
       checkpanic caller->writeString(data);
   }
 }
@@ -48,7 +48,7 @@ service UpgradeService /onTextJSON on new Listener(21023) {
 
 service class WsService2 {
   *Service;
-  remote isolated function onText(Caller caller, json data) {
+  remote isolated function onString(Caller caller, json data) {
       checkpanic caller->writeString(data);
   }
 }
@@ -61,7 +61,7 @@ service UpgradeService /onTextXML on new Listener(21024) {
 
 service class WsService3 {
   *Service;
-  remote isolated function onText(Caller caller, xml data) {
+  remote isolated function onString(Caller caller, xml data) {
       checkpanic caller->writeString(data);
   }
 }
@@ -74,7 +74,7 @@ service UpgradeService /onTextRecord on new Listener(21025) {
 
 service class WsService4 {
   *Service;
-  remote isolated function onText(Caller caller, WebSocketPerson data) {
+  remote isolated function onString(Caller caller, WebSocketPerson data) {
        var personData = data.cloneWithType(json);
        if (personData is error) {
            panic personData;
@@ -95,7 +95,7 @@ service UpgradeService /onTextByteArray on new Listener(21026) {
 
 service class WsService5 {
   *Service;
-  remote isolated function onText(Caller caller, byte[] data) {
+  remote isolated function onString(Caller caller, byte[] data) {
        var returnVal = caller->writeString(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -105,7 +105,7 @@ service class WsService5 {
 
 service class clientPushCallbackService {
     *CallbackService;
-    remote function onText(AsyncClient wsEp, string text) {
+    remote function onString(AsyncClient wsEp, string text) {
         data = <@untainted>text;
     }
 
@@ -114,7 +114,7 @@ service class clientPushCallbackService {
     }
 }
 
-// Tests string support for writeString and onText
+// Tests string support for writeString and onString
 @test:Config {}
 public function testString() {
    AsyncClient wsClient = new("ws://localhost:21003/onTextString", new clientPushCallbackService());
@@ -124,7 +124,7 @@ public function testString() {
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests JSON support for writeString and onText
+// Tests JSON support for writeString and onString
 @test:Config {}
 public function testJson() {
    AsyncClient wsClient = new("ws://localhost:21023/onTextJSON", new clientPushCallbackService());
@@ -134,7 +134,7 @@ public function testJson() {
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests XML support for writeString and onText
+// Tests XML support for writeString and onString
 @test:Config {}
 public function testXml() {
    AsyncClient wsClient = new ("ws://localhost:21024/onTextXML", new clientPushCallbackService());
@@ -145,7 +145,7 @@ public function testXml() {
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests Record support for writeString and onText
+// Tests Record support for writeString and onString
 @test:Config {}
 public function testRecord() {
    AsyncClient wsClient = new ("ws://localhost:21025/onTextRecord", new clientPushCallbackService());
@@ -155,7 +155,7 @@ public function testRecord() {
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests byte array support for writeString and onText
+// Tests byte array support for writeString and onString
 @test:Config {}
 public function testByteArray() {
    AsyncClient wsClient = new ("ws://localhost:21026/onTextByteArray", new clientPushCallbackService());

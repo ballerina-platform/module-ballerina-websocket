@@ -68,7 +68,7 @@
 //
 //service CookieService = @websocket:WebSocketServiceConfig {} service {
 //
-//    resource function onText(websocket:WebSocketClient conn, string text, boolean finalFrame) {
+//    resource function onString(websocket:WebSocketClient conn, string text, boolean finalFrame) {
 //        expectedOutput37 = <@untainted>text;
 //    }
 //};

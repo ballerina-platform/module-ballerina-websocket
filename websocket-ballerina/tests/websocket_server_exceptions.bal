@@ -28,7 +28,7 @@ service UpgradeService /server/errors on new Listener(21031) {
 }
 service class ServerError {
    *Service;
-   remote function onText(Caller caller, string text) {
+   remote function onString(Caller caller, string text) {
        checkpanic caller->writeString("Hello World!", false);
        string hello = "hello";
        byte[] data = hello.toBytes();
@@ -40,7 +40,7 @@ service class ServerError {
        }
    }
 
-   remote function onBinary(Caller caller, byte[] data, boolean finalFrame) {
+   remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
        var returnVal = caller->writeBytes(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;

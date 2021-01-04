@@ -39,14 +39,14 @@ service class ProxyService {
        }
    }
 
-   remote function onText(Caller wsEp, string text) {
+   remote function onString(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBinary(Caller wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -76,14 +76,14 @@ service class ProxyService {
 //        }
 //    }
 
-//    resource function onText(WebSocketCaller wsEp, string text) {
+//    resource function onString(WebSocketCaller wsEp, string text) {
 //        var returnVal = wsEp->writeString(text);
 //        if (returnVal is WebSocketError) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    resource function onBinary(WebSocketCaller wsEp, byte[] data) {
+//    resource function onBytes(WebSocketCaller wsEp, byte[] data) {
 //        var returnVal = wsEp->writeBytes(data);
 //        if (returnVal is WebSocketError) {
 //            panic <error>returnVal;
@@ -114,14 +114,14 @@ service class ProxyService2 {
        log:print("The Connection ID: " + caller.getConnectionId());
    }
 
-   remote function onText(Caller caller, string text, boolean finalFrame) {
+   remote function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
            log:printError("Error occurred when sending text message", err = err);
        }
    }
 
-   remote function onBinary(Caller caller, byte[] data) {
+   remote function onBytes(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -131,7 +131,7 @@ service class ProxyService2 {
 
 service class clientCallbackService9 {
    *CallbackService;
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        //http:WebSocketCaller serviceEp = getAssociatedListener(wsEp);
        var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
@@ -139,7 +139,7 @@ service class clientCallbackService9 {
        }
    }
 
-   remote function onBinary(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(AsyncClient wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -156,11 +156,11 @@ service class clientCallbackService9 {
 
 service class proxyCallbackService {
    *CallbackService;
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        proxyData = <@untainted>text;
    }
 
-   remote function onBinary(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(AsyncClient wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 

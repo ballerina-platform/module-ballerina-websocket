@@ -39,13 +39,13 @@
 //        io:println("onOpen: " + caller.getConnectionId());
 //    }
 //
-//    resource function onText(http:WebSocketCaller caller, string text, boolean finalFrame) {
+//    resource function onString(http:WebSocketCaller caller, string text, boolean finalFrame) {
 //        checkpanic caller->writeString(text);
 //    }
 //};
 //
 //service retryClientCallbackService = @http:WebSocketServiceConfig {} service {
-//    resource function onText(http:WebSocketClient wsEp, string text) {
+//    resource function onString(http:WebSocketClient wsEp, string text) {
 //        expectedOutput34 = <@untainted>text;
 //    }
 //};

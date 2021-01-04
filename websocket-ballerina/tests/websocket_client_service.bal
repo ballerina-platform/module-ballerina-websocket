@@ -36,13 +36,13 @@ service class clientFailure200 {
 
 service class callback200 {
    *CallbackService;
-   remote function onText(Caller caller, string text) {
+   remote function onString(Caller caller, string text) {
    }
 }
 
 service class ClientService200 {
    *CallbackService;
-   remote function onText(AsyncClient caller, string text) {
+   remote function onString(AsyncClient caller, string text) {
    }
 }
 

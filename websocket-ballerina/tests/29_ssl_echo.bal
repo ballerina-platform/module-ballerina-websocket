@@ -36,14 +36,14 @@ service UpgradeService /sslEcho on new Listener(21029, {
 
 service class WsService6 {
   *Service;
-  remote isolated function onText(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onString(Caller caller, string data, boolean finalFrame) {
        var returnVal = caller->writeString(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onBinary(Caller caller, byte[] data, boolean finalFrame) {
+   remote isolated function onBytes(Caller caller, byte[] data, boolean finalFrame) {
        var returnVal = caller->writeBytes(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -53,11 +53,11 @@ service class WsService6 {
 
 service class sslEchoCallbackService {
    *CallbackService;
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        expectedString = <@untainted>text;
    }
 
-   remote function onBinary(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(AsyncClient wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 

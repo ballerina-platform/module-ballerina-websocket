@@ -48,7 +48,7 @@
 //        io:println("onOpen: " + caller.getConnectionId());
 //    }
 //
-//    resource function onText(websocket:WebSocketCaller caller, string text, boolean finalFrame) {
+//    resource function onString(websocket:WebSocketCaller caller, string text, boolean finalFrame) {
 //        checkpanic caller->writeString(text);
 //    }
 //

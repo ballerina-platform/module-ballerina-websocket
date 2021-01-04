@@ -57,14 +57,14 @@ service class ErrorServer {
        }
    }
 
-   remote isolated function onText(Caller caller, string text, boolean finalFrame) {
+   remote isolated function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
            log:printError("Error occurred when sending text message", err = err);
        }
    }
 
-   remote isolated function onBinary(Caller caller, byte[] data) {
+   remote isolated function onBytes(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;

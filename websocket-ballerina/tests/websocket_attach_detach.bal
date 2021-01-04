@@ -29,7 +29,7 @@
 //    path: "/attach/detach"
 //}
 //service attachDetach on attachDetachEp {
-//    resource function onText(WebSocketCaller caller, string data, boolean finalFrame) returns error? {
+//    resource function onString(WebSocketCaller caller, string data, boolean finalFrame) returns error? {
 //        if (data == "attach") {
 //            var err = attachDetachEp.__attach(wsNoPath);
 //            handleError(err, caller);
@@ -46,21 +46,21 @@
 //}
 //
 //service wsWithPath = @ServiceConfig {path: "/hello"} service {
-//    resource function onText(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
+//    resource function onString(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
 //        check conn->writeString(text);
 //    }
 //};
 //
 //service wsNoPath = @ServiceConfig {} service {
 //
-//    resource function onText(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
+//    resource function onString(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
 //        check conn->writeString(text);
 //    }
 //};
 //
 //service wsClientService = @ServiceConfig {} service {
 //
-//    resource function onText(WebSocketClient conn, string text, boolean finalFrame) returns error? {
+//    resource function onString(WebSocketClient conn, string text, boolean finalFrame) returns error? {
 //        check conn->writeString(text);
 //    }
 //};
@@ -73,7 +73,7 @@
 //}
 //
 //service attachService = @ServiceConfig {} service {
-//    resource function onText(WebSocketClient caller, string text) {
+//    resource function onString(WebSocketClient caller, string text) {
 //        attDettExpectedData = <@untainted>text;
 //    }
 //    resource function onError(WebSocketClient caller, error err) {

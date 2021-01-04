@@ -24,9 +24,9 @@ The `upgradeService` is a server callback service.
 
 **onOpen resource**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` resource is dispatched. This resource is only available in the service of the server.
 
-**onText resource**: The received text messages are dispatched to this resource.
+**onString resource**: The received text messages are dispatched to this resource.
 
-**onBinary resource**: The received binary messages are dispatched to this resource.
+**onBytes resource**: The received binary messages are dispatched to this resource.
 
 **onPing and onPong resources**: The received ping and pong messages are dispatched to these resources respectively.
 

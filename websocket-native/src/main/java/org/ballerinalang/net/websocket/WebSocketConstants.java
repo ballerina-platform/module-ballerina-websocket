@@ -57,8 +57,8 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
-    public static final String RESOURCE_NAME_ON_TEXT = "onText";
-    public static final String RESOURCE_NAME_ON_BINARY = "onBinary";
+    public static final String RESOURCE_NAME_ON_STRING = "onString";
+    public static final String RESOURCE_NAME_ON_BINARY = "onBytes";
     public static final String RESOURCE_NAME_ON_PING = "onPing";
     public static final String RESOURCE_NAME_ON_PONG = "onPong";
     public static final String RESOURCE_NAME_ON_CLOSE = "onClose";
@@ -143,7 +143,7 @@ public class WebSocketConstants {
     public static final StrandMetadata ON_OPEN_METADATA =
             new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_OPEN);
     public static final StrandMetadata ON_TEXT_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_TEXT);
+            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_STRING);
     public static final StrandMetadata ON_BINARY_METADATA =
             new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_BINARY);
     public static final StrandMetadata ON_PING_METADATA =

@@ -28,7 +28,7 @@ service UpgradeService /onBinaryContinuation on new Listener(21007) {
 }
 service class OnBinaryContinuation {
    *Service;
-   remote function onBinary(Caller caller, byte[] data, boolean finalFrame) {
+   remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
        if (finalFrame) {
            appendToArray(<@untainted> data, content);
            var returnVal = caller->writeBytes(content);
@@ -52,7 +52,7 @@ function appendToArray(byte[] src, byte[] dest) {
 
 service class continuationService {
    *CallbackService;
-   remote function onBinary(AsyncClient caller, byte[] data, boolean finalFrame) {
+   remote function onBytes(AsyncClient caller, byte[] data, boolean finalFrame) {
        binaryContent = <@untainted>data;
    }
 }

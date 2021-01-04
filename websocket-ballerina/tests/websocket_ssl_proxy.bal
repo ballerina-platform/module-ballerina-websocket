@@ -52,14 +52,14 @@ service class SslProxy {
        }
    }
 
-   remote function onText(Caller wsEp, string text) {
+   remote function onString(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBinary(Caller wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -76,14 +76,14 @@ service class SslProxy {
 
 service class sslClientService {
    *CallbackService;
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBinary(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(AsyncClient wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -121,14 +121,14 @@ service class SslProxyServer {
        log:print("The Connection ID: " + caller.getConnectionId());
    }
 
-   remote function onText(Caller caller, string text, boolean finalFrame) {
+   remote function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
            log:printError("Error occurred when sending text message", err = err);
        }
    }
 
-   remote function onBinary(Caller caller, byte[] data) {
+   remote function onBytes(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -137,11 +137,11 @@ service class SslProxyServer {
 }
 
 service class sslProxyCallbackService {
-   remote function onText(AsyncClient wsEp, string text) {
+   remote function onString(AsyncClient wsEp, string text) {
        proxyData = <@untainted>text;
    }
 
-   remote function onBinary(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(AsyncClient wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
