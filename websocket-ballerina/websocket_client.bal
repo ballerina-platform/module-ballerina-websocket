@@ -76,8 +76,8 @@ public client class AsyncClient {
     # + data - Binary data to be sent
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    remote isolated function pushBinary(byte[] data, boolean finalFrame = true) returns WebSocketError? {
-        return self.conn.pushBinary(data, finalFrame);
+    remote isolated function writeBytes(byte[] data, boolean finalFrame = true) returns WebSocketError? {
+        return self.conn.writeBytes(data, finalFrame);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.

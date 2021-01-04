@@ -47,7 +47,7 @@ service class ProxyService {
    }
 
    remote function onBinary(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->pushBinary(data);
+       var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -84,7 +84,7 @@ service class ProxyService {
 //    }
 
 //    resource function onBinary(WebSocketCaller wsEp, byte[] data) {
-//        var returnVal = wsEp->pushBinary(data);
+//        var returnVal = wsEp->writeBytes(data);
 //        if (returnVal is WebSocketError) {
 //            panic <error>returnVal;
 //        }
@@ -122,7 +122,7 @@ service class ProxyService2 {
    }
 
    remote function onBinary(Caller caller, byte[] data) {
-       var returnVal = caller->pushBinary(data);
+       var returnVal = caller->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -140,7 +140,7 @@ service class clientCallbackService9 {
    }
 
    remote function onBinary(AsyncClient wsEp, byte[] data) {
-       var returnVal = wsEp->pushBinary(data);
+       var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -190,7 +190,7 @@ public function testSendText() {
 public function testSendBinary() {
    AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
    byte[] binaryData = [5, 24, 56, 243];
-   checkpanic wsClient->pushBinary(binaryData);
+   checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

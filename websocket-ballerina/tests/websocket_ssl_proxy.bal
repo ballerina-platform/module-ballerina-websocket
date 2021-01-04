@@ -60,7 +60,7 @@ service class SslProxy {
    }
 
    remote function onBinary(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->pushBinary(data);
+       var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -84,7 +84,7 @@ service class sslClientService {
    }
 
    remote function onBinary(AsyncClient wsEp, byte[] data) {
-       var returnVal = wsEp->pushBinary(data);
+       var returnVal = wsEp->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -129,7 +129,7 @@ service class SslProxyServer {
    }
 
    remote function onBinary(Caller caller, byte[] data) {
-       var returnVal = caller->pushBinary(data);
+       var returnVal = caller->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -185,7 +185,7 @@ public function testSslProxySendBinary() {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   checkpanic wsClient->pushBinary(binaryData);
+   checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

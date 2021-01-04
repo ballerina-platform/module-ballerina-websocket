@@ -44,7 +44,7 @@ service class WsService6 {
    }
 
    remote isolated function onBinary(Caller caller, byte[] data, boolean finalFrame) {
-       var returnVal = caller->pushBinary(data, finalFrame);
+       var returnVal = caller->writeBytes(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -81,7 +81,7 @@ public function sslBinaryEcho() {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   checkpanic wsClient->pushBinary(binaryData);
+   checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

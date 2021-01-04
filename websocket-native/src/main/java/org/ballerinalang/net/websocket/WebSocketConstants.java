@@ -67,8 +67,8 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_CLOSE = "close";
     public static final String RESOURCE_NAME_PING = "ping";
     public static final String RESOURCE_NAME_PONG = "pong";
-    public static final String RESOURCE_NAME_PUSH_BINARY = "pushBinary";
-    public static final String RESOURCE_NAME_PUSH_TEXT = "pushText";
+    public static final String RESOURCE_NAME_PUSH_BINARY = "writeBytes";
+    public static final String RESOURCE_NAME_PUSH_TEXT = "writeString";
     public static final String RESOURCE_NAME_READY = "ready";
     public static final String RESOURCE_NAME_UPGRADE = "onUpgrade";
 

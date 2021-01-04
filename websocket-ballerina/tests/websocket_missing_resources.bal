@@ -34,7 +34,7 @@ service UpgradeService /onlyOnBinary on new Listener(21005) {
 service class OnlyOnBinary {
   *Service;
    remote function onBinary(Caller caller, byte[] data) {
-       checkpanic caller->pushBinary(data);
+       checkpanic caller->writeBytes(data);
    }
 }
 
@@ -75,7 +75,7 @@ public function testMissingOnText() {
    checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
-   checkpanic wsClient->pushBinary(binaryData);
+   checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -93,7 +93,7 @@ public function testMissingOnPong() {
    checkpanic wsClient->pong(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedPingBinaryData, expectedBinData, msg = "Data mismatched");
-   checkpanic wsClient->pushBinary(binaryData);
+   checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -110,7 +110,7 @@ public function testMissingOnBinary() {
    expectedBinData = [];
    byte[] expectedBinData = [];
    expectedData = "";
-   checkpanic wsClient->pushBinary(binaryData);
+   checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
    checkpanic wsClient->writeString("Hi");

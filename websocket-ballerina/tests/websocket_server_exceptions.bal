@@ -32,7 +32,7 @@ service class ServerError {
        checkpanic caller->writeString("Hello World!", false);
        string hello = "hello";
        byte[] data = hello.toBytes();
-       var err = caller->pushBinary(data, false);
+       var err = caller->writeBytes(data, false);
        if (err is error) {
            serverOutput = <@untainted>err.message();
        } else {
@@ -41,7 +41,7 @@ service class ServerError {
    }
 
    remote function onBinary(Caller caller, byte[] data, boolean finalFrame) {
-       var returnVal = caller->pushBinary(data, finalFrame);
+       var returnVal = caller->writeBytes(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }

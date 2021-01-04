@@ -31,7 +31,7 @@ service class OnBinaryContinuation {
    remote function onBinary(Caller caller, byte[] data, boolean finalFrame) {
        if (finalFrame) {
            appendToArray(<@untainted> data, content);
-           var returnVal = caller->pushBinary(content);
+           var returnVal = caller->writeBytes(content);
            if (returnVal is WebSocketError) {
                panic <error> returnVal;
            }
@@ -64,9 +64,9 @@ public function testBinaryContinuation() {
    string[] values = ["<note>", "<to>", "Tove", "</to>"];
    AsyncClient wsClient = new ("ws://localhost:21007/onBinaryContinuation", new continuationService());
    foreach string value in values {
-       checkpanic wsClient->pushBinary(value.toBytes(), false);
+       checkpanic wsClient->writeBytes(value.toBytes(), false);
    }
-   checkpanic wsClient->pushBinary("</note>".toBytes(), true);
+   checkpanic wsClient->writeBytes("</note>".toBytes(), true);
    runtime:sleep(500);
    string|error value = 'string:fromBytes(binaryContent);
    test:assertEquals(value.toString(), msg, msg = "Data mismatched");

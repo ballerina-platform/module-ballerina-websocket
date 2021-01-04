@@ -59,7 +59,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    public static Object pushBinary(Environment env, BObject wsConnection, BArray binaryData,
+    public static Object writeBytes(Environment env, BObject wsConnection, BArray binaryData,
             boolean finalFrame) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection

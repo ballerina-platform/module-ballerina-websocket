@@ -65,7 +65,7 @@ service class ErrorServer {
    }
 
    remote isolated function onBinary(Caller caller, byte[] data) {
-       var returnVal = caller->pushBinary(data);
+       var returnVal = caller->writeBytes(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
