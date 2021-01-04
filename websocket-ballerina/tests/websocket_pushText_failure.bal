@@ -30,14 +30,14 @@ service class PushTextFailureService {
    *Service;
    remote function onOpen(Caller caller) {
        WebSocketError? err1 = caller->close(timeoutInSeconds = 0);
-       var err = caller->pushText("hey");
+       var err = caller->writeString("hey");
        if (err is WebSocketError) {
            errorMsg2 = <@untainted>err.message();
        }
    }
 }
 
-// Checks for the log that is printed when pushText fails.
+// Checks for the log that is printed when writeString fails.
 @test:Config {}
 public function pushTextFailure() {
    AsyncClient wsClient = new("ws://localhost:21008/pushTextFailureService");

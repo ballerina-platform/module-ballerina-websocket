@@ -25,6 +25,7 @@ int x = 0;
 
 service UpgradeService /isOpen/abc on socketListener {
     remote function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
+    io:println(req);
        if (x < 1) {
           x = x + 1;
           return new MyWSService();
@@ -58,17 +59,17 @@ service class MyWSService2 {
 @test:Config {}
 public function testIsOpenCloseCalled() {
     AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc");
-    checkpanic wsClient->pushText("Hi");
+    checkpanic wsClient->writeString("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 
     AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc");
-    checkpanic wsClient2->pushText("Hi");
+    checkpanic wsClient2->writeString("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 
     AsyncClient wsClient3 = new("ws://localhost:21001/isOpen/abc");
-    checkpanic wsClient3->pushText("Hi");
+    checkpanic wsClient3->writeString("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In onText isOpen false");
 }

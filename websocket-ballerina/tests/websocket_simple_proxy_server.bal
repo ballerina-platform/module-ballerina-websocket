@@ -40,7 +40,7 @@ service class ProxyService {
    }
 
    remote function onText(Caller wsEp, string text) {
-       var returnVal = wsEp->pushText(text);
+       var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -77,7 +77,7 @@ service class ProxyService {
 //    }
 
 //    resource function onText(WebSocketCaller wsEp, string text) {
-//        var returnVal = wsEp->pushText(text);
+//        var returnVal = wsEp->writeString(text);
 //        if (returnVal is WebSocketError) {
 //            panic <error>returnVal;
 //        }
@@ -115,7 +115,7 @@ service class ProxyService2 {
    }
 
    remote function onText(Caller caller, string text, boolean finalFrame) {
-       var err = caller->pushText(text, finalFrame);
+       var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
            log:printError("Error occurred when sending text message", err = err);
        }
@@ -133,7 +133,7 @@ service class clientCallbackService9 {
    *CallbackService;
    remote function onText(AsyncClient wsEp, string text) {
        //http:WebSocketCaller serviceEp = getAssociatedListener(wsEp);
-       var returnVal = wsEp->pushText(text);
+       var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -176,7 +176,7 @@ service class proxyCallbackService {
 @test:Config {}
 public function testSendText() {
    AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
-   checkpanic wsClient->pushText("Hi kalai");
+   checkpanic wsClient->writeString("Hi kalai");
    runtime:sleep(500);
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

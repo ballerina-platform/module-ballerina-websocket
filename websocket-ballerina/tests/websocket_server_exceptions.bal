@@ -29,7 +29,7 @@ service UpgradeService /server/errors on new Listener(21031) {
 service class ServerError {
    *Service;
    remote function onText(Caller caller, string text) {
-       checkpanic caller->pushText("Hello World!", false);
+       checkpanic caller->writeString("Hello World!", false);
        string hello = "hello";
        byte[] data = hello.toBytes();
        var err = caller->pushBinary(data, false);
@@ -56,7 +56,7 @@ service class ServerError {
 @test:Config {}
 public function testContinuationFrameError() {
    AsyncClient wsClientEp = new ("ws://localhost:21031/server/errors");
-   var err = trap wsClientEp->pushText("Hi kalai");
+   var err = trap wsClientEp->writeString("Hi kalai");
    runtime:sleep(500);
    test:assertEquals(serverOutput, "InvalidContinuationFrameError: Cannot interrupt WebSocket" +
        " text frame continuation");

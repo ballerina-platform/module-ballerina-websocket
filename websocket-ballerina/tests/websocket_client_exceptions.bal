@@ -58,7 +58,7 @@ service class ErrorServer {
    }
 
    remote isolated function onText(Caller caller, string text, boolean finalFrame) {
-       var err = caller->pushText(text, finalFrame);
+       var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
            log:printError("Error occurred when sending text message", err = err);
        }
@@ -121,7 +121,7 @@ public function testConnectionClosedError() {
    //   log:printError("Error occurred when closing connection", err = result);
    //}
    runtime:sleep(2000);
-   var err = wsClientEp->pushText("some");
+   var err = wsClientEp->writeString("some");
    if (err is error) {
        test:assertEquals(err.message(), "ConnectionClosureError: Close frame already sent. Cannot push text data!");
    } else {

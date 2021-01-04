@@ -47,7 +47,7 @@ service UpgradeService /onlyOnText on new Listener(21006) {
 service class OnlyOnText {
    *Service;
    remote function onText(Caller caller, string data) {
-       checkpanic caller->pushText(data);
+       checkpanic caller->writeString(data);
    }
 }
 
@@ -72,7 +72,7 @@ public function testMissingOnText() {
    AsyncClient wsClient = new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    expectedData = "";
    byte[] binaryData = [5, 24, 56, 243];
-   checkpanic wsClient->pushText("Hi");
+   checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
    checkpanic wsClient->pushBinary(binaryData);
@@ -113,7 +113,7 @@ public function testMissingOnBinary() {
    checkpanic wsClient->pushBinary(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
-   checkpanic wsClient->pushText("Hi");
+   checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -128,7 +128,7 @@ public function testMissingOnIdleTimeout() {
    AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
    expectedData = "";
    runtime:sleep(500);
-   checkpanic wsClient->pushText("Hi");
+   checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

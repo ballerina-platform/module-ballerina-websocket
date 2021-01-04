@@ -43,7 +43,7 @@
 //                }
 //            }
 //            );
-//        checkpanic wsClient->pushText("Hello World!");
+//        checkpanic wsClient->writeString("Hello World!");
 //    }
 //}
 //

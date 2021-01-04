@@ -40,7 +40,7 @@
 //    }
 //
 //    resource function onText(http:WebSocketCaller caller, string text, boolean finalFrame) {
-//        checkpanic caller->pushText(text);
+//        checkpanic caller->writeString(text);
 //    }
 //};
 //
@@ -60,7 +60,7 @@
 //                    retryClientCallbackService,
 //                retryConfig: {}
 //            });
-//        var returnVal = wsClientEp->pushText("Hi madam");
+//        var returnVal = wsClientEp->writeString("Hi madam");
 //        if (returnVal is http:WebSocketError) {
 //            panic <error>returnVal;
 //        }

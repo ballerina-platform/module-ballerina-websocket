@@ -55,7 +55,7 @@
 //                http:Cookie[] cookies = loginResp.getCookies();
 //                http:WebSocketClient wsClientEp = new ("ws://localhost:21036/cookie-demo/ws",
 //                    config = {callbackService: CookieService, cookies: cookies});
-//                var err = wsClientEp->pushText("Hello World!");
+//                var err = wsClientEp->writeString("Hello World!");
 //                if (err is error) {
 //                    io:println(err);
 //                }
@@ -78,7 +78,7 @@
 //@test:Config {enable : false}
 //public function testCookieSupport() {
 //    websocket:WebSocketClient wsClientEp = new ("ws://localhost:21037");
-//    checkpanic wsClientEp->pushText("Hi");
+//    checkpanic wsClientEp->writeString("Hi");
 //    runtime:sleep(500);
 //    test:assertEquals(expectedOutput37, "Hello World!");
 //    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection");

@@ -81,7 +81,7 @@ public class WebSocketUtil {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketUtil.class);
     private static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
     private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeoutInSeconds");
-    private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_HTTP +
+    private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_WEBSOCKET +
             WebSocketConstants.SEPARATOR + WebSocketConstants.FAILOVER_WEBSOCKET_CLIENT;
     public static final String ERROR_MESSAGE = "Error occurred: ";
     public static final String LOG_MESSAGE = "{} {}";

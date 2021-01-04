@@ -36,7 +36,7 @@ service UpgradeService /onTextString on new Listener(21003) {
 service class WsService1 {
   *Service;
   remote isolated function onText(Caller caller, string data, boolean finalFrame) {
-      checkpanic caller->pushText(data);
+      checkpanic caller->writeString(data);
   }
 }
 
@@ -49,7 +49,7 @@ service UpgradeService /onTextJSON on new Listener(21023) {
 service class WsService2 {
   *Service;
   remote isolated function onText(Caller caller, json data) {
-      checkpanic caller->pushText(data);
+      checkpanic caller->writeString(data);
   }
 }
 
@@ -62,7 +62,7 @@ service UpgradeService /onTextXML on new Listener(21024) {
 service class WsService3 {
   *Service;
   remote isolated function onText(Caller caller, xml data) {
-      checkpanic caller->pushText(data);
+      checkpanic caller->writeString(data);
   }
 }
 
@@ -79,7 +79,7 @@ service class WsService4 {
        if (personData is error) {
            panic personData;
        } else {
-           var returnVal = caller->pushText(personData);
+           var returnVal = caller->writeString(personData);
            if (returnVal is WebSocketError) {
                panic <error>returnVal;
            }
@@ -96,7 +96,7 @@ service UpgradeService /onTextByteArray on new Listener(21026) {
 service class WsService5 {
   *Service;
   remote isolated function onText(Caller caller, byte[] data) {
-       var returnVal = caller->pushText(data);
+       var returnVal = caller->writeString(data);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -114,53 +114,53 @@ service class clientPushCallbackService {
     }
 }
 
-// Tests string support for pushText and onText
+// Tests string support for writeString and onText
 @test:Config {}
 public function testString() {
    AsyncClient wsClient = new("ws://localhost:21003/onTextString", new clientPushCallbackService());
-   checkpanic wsClient->pushText("Hi");
+   checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
-   test:assertEquals(data, "Hi", msg = "Failed pushtext");
+   test:assertEquals(data, "Hi", msg = "Failed writeString");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests JSON support for pushText and onText
+// Tests JSON support for writeString and onText
 @test:Config {}
 public function testJson() {
    AsyncClient wsClient = new("ws://localhost:21023/onTextJSON", new clientPushCallbackService());
-   checkpanic wsClient->pushText("{\"name\":\"Riyafa\", \"age\":23}");
+   checkpanic wsClient->writeString("{\"name\":\"Riyafa\", \"age\":23}");
    runtime:sleep(500);
-   test:assertEquals(data, expectedMsg, msg = "Failed pushtext");
+   test:assertEquals(data, expectedMsg, msg = "Failed writeString");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests XML support for pushText and onText
+// Tests XML support for writeString and onText
 @test:Config {}
 public function testXml() {
    AsyncClient wsClient = new ("ws://localhost:21024/onTextXML", new clientPushCallbackService());
    string msg = "<note><to>Tove</to></note>";
-   var output = wsClient->pushText(msg);
+   var output = wsClient->writeString(msg);
    runtime:sleep(500);
    test:assertEquals(data, msg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests Record support for pushText and onText
+// Tests Record support for writeString and onText
 @test:Config {}
 public function testRecord() {
    AsyncClient wsClient = new ("ws://localhost:21025/onTextRecord", new clientPushCallbackService());
-   var output = wsClient->pushText("{\"name\":\"Riyafa\", \"age\":23}");
+   var output = wsClient->writeString("{\"name\":\"Riyafa\", \"age\":23}");
    runtime:sleep(500);
    test:assertEquals(data, expectedMsg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
-// Tests byte array support for pushText and onText
+// Tests byte array support for writeString and onText
 @test:Config {}
 public function testByteArray() {
    AsyncClient wsClient = new ("ws://localhost:21026/onTextByteArray", new clientPushCallbackService());
    string msg = "Hello";
-   var output = wsClient->pushText(msg);
+   var output = wsClient->writeString(msg);
    runtime:sleep(500);
    test:assertEquals(data, msg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

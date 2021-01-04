@@ -42,7 +42,7 @@
 //
 //service simpleProxy = @http:WebSocketServiceConfig {} service {
 //    resource function onText(http:WebSocketCaller wsEp, string text) {
-//        var returnVal = wsEp->pushText(<string>wsEp.getAttribute("X-some-header"));
+//        var returnVal = wsEp->writeString(<string>wsEp.getAttribute("X-some-header"));
 //        if (returnVal is http:WebSocketError) {
 //            panic <error>returnVal;
 //        }
@@ -82,7 +82,7 @@
 //            callbackService: customServerHeaderService,
 //            customHeaders: {"X-some-header": "some-header-value"}
 //        });
-//    checkpanic wsClient->pushText("HI");
+//    checkpanic wsClient->writeString("HI");
 //    runtime:sleep(500);
 //    test:assertEquals(expextedValue, "some-header-value");
 //    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection");

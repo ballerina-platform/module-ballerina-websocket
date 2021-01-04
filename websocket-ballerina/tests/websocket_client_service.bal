@@ -63,7 +63,7 @@ public function testClientSuccessWithoutService() {
 public function testClientSuccessWithWebSocketClientService() {
    isClientConnectionOpen = false;
    AsyncClient wsClient = new ("ws://localhost:21021/client/service", new ClientService200());
-   checkpanic wsClient->pushText("Client worked");
+   checkpanic wsClient->writeString("Client worked");
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

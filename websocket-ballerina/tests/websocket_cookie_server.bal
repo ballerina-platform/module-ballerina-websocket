@@ -91,7 +91,7 @@
 //    }
 //
 //    resource function onText(http:WebSocketCaller caller, string text) {
-//        checkpanic caller->pushText(text);
+//        checkpanic caller->writeString(text);
 //    }
 //
 //    resource function onError(http:WebSocketCaller caller, error err) {

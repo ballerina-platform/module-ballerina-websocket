@@ -53,7 +53,7 @@ service class SslProxy {
    }
 
    remote function onText(Caller wsEp, string text) {
-       var returnVal = wsEp->pushText(text);
+       var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -77,7 +77,7 @@ service class SslProxy {
 service class sslClientService {
    *CallbackService;
    remote function onText(AsyncClient wsEp, string text) {
-       var returnVal = wsEp->pushText(text);
+       var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -122,7 +122,7 @@ service class SslProxyServer {
    }
 
    remote function onText(Caller caller, string text, boolean finalFrame) {
-       var err = caller->pushText(text, finalFrame);
+       var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
            log:printError("Error occurred when sending text message", err = err);
        }
@@ -164,7 +164,7 @@ public function testSslProxySendText() {
                }
            }
        });
-   checkpanic wsClient->pushText("Hi");
+   checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

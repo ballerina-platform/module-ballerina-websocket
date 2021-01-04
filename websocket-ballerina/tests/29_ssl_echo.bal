@@ -37,7 +37,7 @@ service UpgradeService /sslEcho on new Listener(21029, {
 service class WsService6 {
   *Service;
   remote isolated function onText(Caller caller, string data, boolean finalFrame) {
-       var returnVal = caller->pushText(data, finalFrame);
+       var returnVal = caller->writeString(data, finalFrame);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
@@ -98,7 +98,7 @@ public function sslTextEcho() {
                }
            }
        });
-   checkpanic wsClient->pushText("Hi madam");
+   checkpanic wsClient->writeString("Hi madam");
    runtime:sleep(500);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

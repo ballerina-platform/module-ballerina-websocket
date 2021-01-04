@@ -65,9 +65,9 @@ public client class AsyncClient {
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    remote isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data,
+    remote isolated function writeString(string|json|xml|boolean|int|float|byte|byte[] data,
     boolean finalFrame = true) returns WebSocketError? {
-        return self.conn.pushText(data, finalFrame);
+        return self.conn.writeString(data, finalFrame);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,

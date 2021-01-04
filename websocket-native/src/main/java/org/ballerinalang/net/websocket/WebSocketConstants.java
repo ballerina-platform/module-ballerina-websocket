@@ -94,7 +94,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final String FULL_FAILOVER_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
-            PACKAGE_HTTP + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
+            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
 
     public static final String COLON = ":";
     public static final String PACKAGE = "ballerina";

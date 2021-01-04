@@ -27,7 +27,7 @@ class WebSocketConnector {
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data, boolean finalFrame)
+    public isolated function writeString(string|json|xml|boolean|int|float|byte|byte[] data, boolean finalFrame)
     returns WebSocketError? {
         string text = "";
         if (data is byte[]) {
@@ -42,7 +42,7 @@ class WebSocketConnector {
         } else {
             text = data.toString();
         }
-        return externPushText(self, text, finalFrame);
+        return externWriteString(self, text, finalFrame);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -104,7 +104,7 @@ class WebSocketConnector {
     }
 }
 
-isolated function externPushText(WebSocketConnector wsConnector, string text, boolean finalFrame) returns WebSocketError? =
+isolated function externWriteString(WebSocketConnector wsConnector, string text, boolean finalFrame) returns WebSocketError? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

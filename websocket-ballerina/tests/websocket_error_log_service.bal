@@ -32,7 +32,7 @@ service class ErrorService {
 
    remote function onText(Caller ep, string text) {
        log:printError(string `text received: ${text}`);
-       var returnVal = ep->pushText(text);
+       var returnVal = ep->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
        }
