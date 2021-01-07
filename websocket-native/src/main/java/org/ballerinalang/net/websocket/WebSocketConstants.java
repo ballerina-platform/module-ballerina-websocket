@@ -44,6 +44,7 @@ public class WebSocketConstants {
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
     public static final String WSS_SCHEME = "wss";
     public static final String WS_SCHEME = "ws";
+    public static final String BACK_SLASH = "/";
     public static final String WEBSOCKET_CALLER_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CALLER;
     public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CLIENT;
@@ -79,7 +80,7 @@ public class WebSocketConstants {
 
     public static final BString CLIENT_URL_CONFIG = StringUtils.fromString("url");
     public static final BString CLIENT_SERVICE_CONFIG = StringUtils.fromString("callbackService");
-    public static final BString CLIENT_CUSTOM_HEADERS_CONFIG = StringUtils.fromString("customHeaders");
+    public static final BString CUSTOM_HEADERS = StringUtils.fromString("customHeaders");
     public static final BString CLIENT_READY_ON_CONNECT = StringUtils.fromString("readyOnConnect");
     public static final BString WEBSOCKET_UPGRADE_SERVICE_CONFIG = StringUtils.fromString("upgradeService");
 
@@ -138,6 +139,8 @@ public class WebSocketConstants {
     public static final BString ENDPOINT_CONFIG_PORT = StringUtils.fromString("port");
     public static final String HTTP_SERVER_CONNECTOR = "HTTP_SERVER_CONNECTOR";
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
+
+    public static final String PARAM_TYPE_STRING = "string";
 
     // Strand meta data
     public static final StrandMetadata ON_OPEN_METADATA =

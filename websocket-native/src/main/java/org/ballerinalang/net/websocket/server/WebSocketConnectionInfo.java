@@ -20,8 +20,12 @@ package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * This class has WebSocket connection info for both the client and the server. Includes details
@@ -33,6 +37,8 @@ public class WebSocketConnectionInfo {
     private final BObject webSocketEndpoint;
     private final WebSocketConnection webSocketConnection;
     private StringAggregator stringAggregator = null;
+    private final boolean sync;
+    private BlockingQueue<WebSocketTextMessage> msgQueue = new SynchronousQueue<WebSocketTextMessage>();
 
     /**
      * @param webSocketService    can be the WebSocketServerService or WebSocketService
@@ -40,10 +46,11 @@ public class WebSocketConnectionInfo {
      * @param webSocketEndpoint   can be the WebSocketCaller or the WebSocketClient
      */
     public WebSocketConnectionInfo(WebSocketService webSocketService, WebSocketConnection webSocketConnection,
-            BObject webSocketEndpoint) {
+            BObject webSocketEndpoint, boolean sync) {
         this.webSocketService = webSocketService;
         this.webSocketConnection = webSocketConnection;
         this.webSocketEndpoint = webSocketEndpoint;
+        this.sync = sync;
     }
 
     public WebSocketService getService() {
@@ -54,11 +61,27 @@ public class WebSocketConnectionInfo {
         return webSocketEndpoint;
     }
 
+    public boolean isSync() {
+        return sync;
+    }
+
     public WebSocketConnection getWebSocketConnection() throws IllegalAccessException {
         if (webSocketConnection != null) {
             return webSocketConnection;
         } else {
             throw new IllegalAccessException(WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE);
+        }
+    }
+
+    public BlockingQueue<WebSocketTextMessage> getMsgQueue() {
+        return msgQueue;
+    }
+
+    public void addMessageToQueue(WebSocketTextMessage msg) {
+        try {
+            msgQueue.put(msg);
+        } catch (InterruptedException e) {
+            // ignore this.
         }
     }
 

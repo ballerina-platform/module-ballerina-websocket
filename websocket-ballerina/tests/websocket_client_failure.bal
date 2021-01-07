@@ -19,7 +19,6 @@ import ballerina/test;
 
 string expectedErr = "";
 service class errorHandlingService {
-   *CallbackService;
    remote function onError(AsyncClient caller, error err) {
        expectedErr = <@untainted>err.toString();
    }

@@ -21,8 +21,8 @@ import ballerina/http;
 byte[] content = [];
 byte[] binaryContent = [];
 
-service UpgradeService /onBinaryContinuation on new Listener(21007) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onBinaryContinuation on new Listener(21007) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new OnBinaryContinuation();
    }
 }
@@ -51,7 +51,6 @@ function appendToArray(byte[] src, byte[] dest) {
 }
 
 service class continuationService {
-   *CallbackService;
    remote function onBytes(AsyncClient caller, byte[] data, boolean finalFrame) {
        binaryContent = <@untainted>data;
    }

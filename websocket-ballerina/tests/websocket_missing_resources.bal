@@ -25,8 +25,8 @@ byte[] expectedPingBinaryData = [];
 @ServiceConfig {
    idleTimeoutInSeconds: 10
 }
-service UpgradeService /onlyOnBinary on new Listener(21005) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onlyOnBinary on new Listener(21005) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new OnlyOnBinary();
    }
 }
@@ -37,8 +37,8 @@ service class OnlyOnBinary {
    }
 }
 
-service UpgradeService /onlyOnText on new Listener(21006) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onlyOnText on new Listener(21006) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new OnlyOnText();
    }
 }
@@ -51,7 +51,6 @@ service class OnlyOnText {
 }
 
 service class callbackService {
-   *CallbackService;
    remote function onString(AsyncClient wsEp, string text) {
        expectedData = <@untainted>text;
    }

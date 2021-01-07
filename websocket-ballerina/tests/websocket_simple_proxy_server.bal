@@ -21,8 +21,8 @@ import ballerina/http;
 
 string proxyData = "";
 
-service UpgradeService / on new Listener(21018) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service / on new Listener(21018) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new ProxyService();
    }
 }
@@ -62,8 +62,8 @@ service class ProxyService {
 
 }
 
-service UpgradeService /websocket on new Listener(21019) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /websocket on new Listener(21019) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new ProxyService2();
    }
 }
@@ -90,7 +90,6 @@ service class ProxyService2 {
 }
 
 service class clientCallbackService9 {
-   *CallbackService;
    remote function onString(AsyncClient wsEp, string text) {
        //http:WebSocketCaller serviceEp = getAssociatedListener(wsEp);
        var returnVal = wsEp->writeString(text);
@@ -115,7 +114,6 @@ service class clientCallbackService9 {
 }
 
 service class proxyCallbackService {
-   *CallbackService;
    remote function onString(AsyncClient wsEp, string text) {
        proxyData = <@untainted>text;
    }

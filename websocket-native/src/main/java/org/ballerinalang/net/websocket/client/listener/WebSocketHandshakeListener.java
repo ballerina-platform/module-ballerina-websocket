@@ -109,7 +109,8 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
     private void setWebSocketOpenConnectionInfo(WebSocketConnection webSocketConnection,
             BObject webSocketConnector,
             BObject webSocketClient, WebSocketService wsService) {
-        this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient);
+        this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient,
+                webSocketClient.getType().getName().equals("SyncClient"));
         webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
         webSocketClient.set(WebSocketConstants.CLIENT_CONNECTOR_FIELD, webSocketConnector);
     }

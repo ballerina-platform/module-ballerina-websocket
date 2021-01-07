@@ -25,7 +25,6 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpResource;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
@@ -42,27 +41,11 @@ public class WebSocketServerService extends WebSocketService {
     private String basePath;
     private int maxFrameSize = WebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
     private int idleTimeoutInSeconds = 0;
-    private HttpResource upgradeResource;
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
         populateConfigs(basePath);
     }
-
-//    public WebSocketServerService(String httpBasePath, HttpResource upgradeResource, BObject service,
-//            Runtime runtime) {
-//        this(service, runtime);
-//        setBasePathWithUpgradePath(httpBasePath, upgradeResource);
-//        this.upgradeResource = upgradeResource;
-//    }
-
-//    private void setBasePathWithUpgradePath(String httpBasePath, HttpResource upgradeResource) {
-//        BMap resourceConfigAnnotation = HttpResource.getResourceConfigAnnotation(upgradeResource.getBalResource());
-//        BMap webSocketConfig =
-//                resourceConfigAnnotation.getMapValue(HttpConstants.ANN_CONFIG_ATTR_WEBSOCKET_UPGRADE);
-//        String upgradePath = webSocketConfig.getStringValue(HttpConstants.ANN_WEBSOCKET_ATTR_UPGRADE_PATH).getValue();
-//        setBasePathToServiceObj(httpBasePath.concat(upgradePath));
-//    }
 
     private void populateConfigs(String basePath) {
         BMap<BString, Object> configAnnotation = getServiceConfigAnnotation();
@@ -95,10 +78,6 @@ public class WebSocketServerService extends WebSocketService {
             return new String[0];
         }
         return negotiableSubProtocols.clone();
-    }
-
-    public HttpResource getUpgradeResource() {
-        return upgradeResource;
     }
 
     public boolean getUpgradeRemoteFunction(WebSocketServerService wsService) {

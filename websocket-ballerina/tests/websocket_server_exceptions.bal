@@ -21,8 +21,8 @@ import ballerina/http;
 
 string serverOutput = "";
 
-service UpgradeService /server/errors on new Listener(21031) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /server/errors on new Listener(21031) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new ServerError();
    }
 }

@@ -20,8 +20,9 @@ import ballerina/http;
 
 string expectedString = "";
 byte[] expectedBinaryData = [];
+string expectedRawpath = "";
 
-service UpgradeService /sslEcho on new Listener(21029, {
+service /sslEcho on new Listener(21029, {
        secureSocket: {
            keyStore: {
                path: "tests/certsAndKeys/ballerinaKeystore.p12",
@@ -29,7 +30,8 @@ service UpgradeService /sslEcho on new Listener(21029, {
            }
        }
    }) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service {
+   resource function upgrade .(http:Request req) returns Service {
+       expectedRawpath = req.rawPath;
        return new WsService6();
    }
 }
@@ -52,7 +54,6 @@ service class WsService6 {
 }
 
 service class sslEchoCallbackService {
-   *CallbackService;
    remote function onString(AsyncClient wsEp, string text) {
        expectedString = <@untainted>text;
    }
@@ -84,6 +85,7 @@ public function sslBinaryEcho() {
    checkpanic wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
+   test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
@@ -101,5 +103,6 @@ public function sslTextEcho() {
    checkpanic wsClient->writeString("Hi madam");
    runtime:sleep(500);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
+   test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

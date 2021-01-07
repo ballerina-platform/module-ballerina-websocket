@@ -24,7 +24,6 @@ string errMessage = "";
 WebSocketClientConfiguration config = {subProtocols: ["xml"]};
 
 service class errorResourceService {
-   *CallbackService;
    remote function onError(AsyncClient clientCaller, error err) {
        errMessage = <@untainted>err.message();
    }
@@ -32,7 +31,7 @@ service class errorResourceService {
 
 @ServiceConfig {}
 service /websocket on new Listener(21030) {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
+    resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError  {
        return new ErrorServer();
     }
 }

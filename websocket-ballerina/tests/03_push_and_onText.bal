@@ -27,8 +27,8 @@ public type WebSocketPerson record {|
    int age;
 |};
 
-service UpgradeService /onTextString on new Listener(21003) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onTextString on new Listener(21003) {
+   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new WsService1();
    }
 }
@@ -40,8 +40,8 @@ service class WsService1 {
   }
 }
 
-service UpgradeService /onTextJSON on new Listener(21023) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onTextJSON on new Listener(21023) {
+   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new WsService2();
    }
 }
@@ -53,8 +53,8 @@ service class WsService2 {
   }
 }
 
-service UpgradeService /onTextXML on new Listener(21024) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onTextXML on new Listener(21024) {
+   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new WsService3();
    }
 }
@@ -66,8 +66,8 @@ service class WsService3 {
   }
 }
 
-service UpgradeService /onTextRecord on new Listener(21025) {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onTextRecord on new Listener(21025) {
+    resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new WsService4();
    }
 }
@@ -87,8 +87,8 @@ service class WsService4 {
    }
 }
 
-service UpgradeService /onTextByteArray on new Listener(21026) {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /onTextByteArray on new Listener(21026) {
+    resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new WsService5();
     }
 }
@@ -104,7 +104,6 @@ service class WsService5 {
 }
 
 service class clientPushCallbackService {
-    *CallbackService;
     remote function onString(AsyncClient wsEp, string text) {
         data = <@untainted>text;
     }
@@ -117,7 +116,7 @@ service class clientPushCallbackService {
 // Tests string support for writeString and onString
 @test:Config {}
 public function testString() {
-   AsyncClient wsClient = new("ws://localhost:21003/onTextString", new clientPushCallbackService());
+   AsyncClient wsClient = new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
    checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(data, "Hi", msg = "Failed writeString");

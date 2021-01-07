@@ -20,11 +20,18 @@ package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
 import org.ballerinalang.net.websocket.WebSocketUtil;
+
+import static org.ballerinalang.net.websocket.WebSocketConstants.CUSTOM_HEADERS;
 
 /**
  * The onUpgrade resource callback.
@@ -43,10 +50,19 @@ public class OnUpgradeResourceCallback implements Callback {
 
     @Override
     public void notifySuccess(Object result) {
+        if (result instanceof BError) {
+            webSocketHandshaker.cancelHandshake(400, ((BError) result).getErrorMessage().toString());
+            return;
+        }
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
-            ServerHandshakeFuture future = webSocketHandshaker.handshake(
-                    wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
-                    wsService.getMaxFrameSize());
+            HttpHeaders headers = null;
+            if (((BObject) result).getType().getFields().get(CUSTOM_HEADERS.toString()) != null) {
+                BMap<BString, BString> headersMap = (BMap) ((BObject) result).get(CUSTOM_HEADERS);
+                headers = populateAndGetHttpHeaders(headersMap);
+            }
+            ServerHandshakeFuture future = webSocketHandshaker
+                    .handshake(wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000,
+                            headers, wsService.getMaxFrameSize());
             future.setHandshakeListener(new UpgradeListener(wsService, connectionManager, result));
         } else {
             // If the acceptWebSocketUpgrade function has not been called inside the upgrade resource
@@ -78,5 +94,14 @@ public class OnUpgradeResourceCallback implements Callback {
                 // Ignore as it is not possible have an Illegal access
             }
         }
+    }
+
+    private static DefaultHttpHeaders populateAndGetHttpHeaders(BMap<BString, BString> headers) {
+        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
+        BString[] keys = headers.getKeys();
+        for (BString key : keys) {
+            httpHeaders.add(key.toString(), headers.get(key).getValue());
+        }
+        return httpHeaders;
     }
 }

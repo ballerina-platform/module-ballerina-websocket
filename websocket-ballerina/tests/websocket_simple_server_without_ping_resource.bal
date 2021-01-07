@@ -21,8 +21,8 @@ import ballerina/http;
 
 byte[] expectedAutoPongData = [];
 
-service UpgradeService / on new Listener(21020) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service / on new Listener(21020) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new TestService();
    }
 }
@@ -35,7 +35,6 @@ service class TestService {
 }
 
 service class PongService {
-   *CallbackService;
    remote function onPong(AsyncClient wsEp, byte[] data) {
        expectedAutoPongData = <@untainted>data;
    }

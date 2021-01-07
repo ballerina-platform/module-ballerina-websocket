@@ -16,13 +16,12 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 byte[] expectedPongData = [];
 byte[] expectedPongData1 = [];
 
-service UpgradeService /pingpong/ws on new Listener(21014) {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
+service /pingpong/ws on new Listener(21014) {
+    resource isolated function onUpgrade .() returns Service|UpgradeError  {
        return new PingPongService();
     }
 }
@@ -48,8 +47,6 @@ service class PingPongService {
 }
 
 service class pingPongCallbackService {
-   *CallbackService;
-
    remote function onPing(AsyncClient wsEp, byte[] localData) {
        expectedPongData1 = <@untainted>localData;
    }

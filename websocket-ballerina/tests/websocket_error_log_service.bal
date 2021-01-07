@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerina/http;
 
 service UpgradeService /'error/ws on new Listener(21013) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new ErrorService();
    }
 }

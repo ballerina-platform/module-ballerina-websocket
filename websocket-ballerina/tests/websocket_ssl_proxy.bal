@@ -22,7 +22,7 @@ import ballerina/http;
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
 
-service UpgradeService /sslEcho on new Listener(21027, {
+service /sslEcho on new Listener(21027, {
        secureSocket: {
            keyStore: {
                path: KEYSTORE_PATH,
@@ -30,7 +30,7 @@ service UpgradeService /sslEcho on new Listener(21027, {
            }
        }
    }) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new SslProxy();
    }
 }
@@ -75,7 +75,6 @@ service class SslProxy {
 }
 
 service class sslClientService {
-   *CallbackService;
    remote function onString(AsyncClient wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
@@ -98,7 +97,7 @@ service class sslClientService {
    }
 }
 
-service UpgradeService /websocket on new Listener(21028, {
+service /websocket on new Listener(21028, {
        secureSocket: {
            keyStore: {
                path: KEYSTORE_PATH,
@@ -106,7 +105,7 @@ service UpgradeService /websocket on new Listener(21028, {
            }
        }
    }) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new SslProxyServer();
    }
 }

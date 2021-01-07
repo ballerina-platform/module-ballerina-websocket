@@ -35,6 +35,9 @@ public type WsInvalidContinuationFrameError distinct error;
 # Raised for errors not captured by the specific errors
 public type WsGenericError distinct error;
 
+# Raised when the websocket upgrade is not accepted
+public type UpgradeError distinct error;
+
 # The union of all the WebSocket related errors
 public type WebSocketError WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
-WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError;
+WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError;

@@ -20,8 +20,8 @@ import ballerina/runtime;
 
 int expectedStatusCode = 0;
 
-service UpgradeService /clientClose on new Listener(21004) {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /clientClose on new Listener(21004) {
+    resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new clientCloseService();
     }
 }

@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.ResourceFunctionType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.StructureType;
 import io.ballerina.runtime.api.types.Type;
@@ -66,9 +67,11 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.ballerinalang.net.websocket.WebSocketConstants.BACK_SLASH;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_BINARY_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_CLOSE_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_ERROR_METADATA;
@@ -78,6 +81,7 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.ON_PONG_METADAT
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_TEXT_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_TIMEOUT_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_UPGRADE_METADATA;
+import static org.ballerinalang.net.websocket.WebSocketConstants.PARAM_TYPE_STRING;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_BINARY;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CLOSE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_ERROR;
@@ -86,7 +90,6 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_O
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PING;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PONG;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_STRING;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_UPGRADE;
 
 /**
  * {@code WebSocketDispatcher} This is the web socket request dispatcher implementation which finds best matching
@@ -101,19 +104,39 @@ public class WebSocketResourceDispatcher {
     }
 
     public static void dispatchUpgrade(WebSocketHandshaker webSocketHandshaker, WebSocketServerService wsService,
-            BMap<BString, Object> httpEndpointConfig,
-            WebSocketConnectionManager connectionManager) {
-        MemberFunctionType balResource = null;
-        MemberFunctionType[] attFunctions = wsService.getBalService().getType().getAttachedFunctions();
-        for (MemberFunctionType remoteFunc : attFunctions) {
-            if (remoteFunc.getName().equals(RESOURCE_NAME_UPGRADE)) {
-                balResource = remoteFunc;
-            }
-        }
+            BMap<BString, Object> httpEndpointConfig, WebSocketConnectionManager connectionManager) {
+        ResourceFunctionType resourceFunction = ((ServiceType) wsService.getBalService().getType())
+                .getResourceFunctions()[0];
+        String[] resourceParams = resourceFunction.getResourcePath();
+
         BObject httpCaller = ValueCreatorUtils.createCallerObject();
         BObject inRequest = ValueCreatorUtils.createRequestObject();
         BObject inRequestEntity = ValueCreatorUtils.createEntityObject();
         HttpCarbonRequest httpCarbonMessage = webSocketHandshaker.getHttpCarbonRequest();
+        String errMsg = "No resource found for path " + httpCarbonMessage.getRequestUrl();
+        String subPath = (String) httpCarbonMessage.getProperty(HttpConstants.SUB_PATH);
+        String[] subPaths = new String[0];
+        ArrayList<String> pathParamArr = new ArrayList<>();
+        if (!subPath.isEmpty()) {
+            subPath = sanitizeSubPath(subPath).substring(1);
+            subPaths = subPath.split(BACK_SLASH);
+        }
+        if (!resourceParams[0].equals(".")) {
+            if (resourceParams.length != subPaths.length) {
+                webSocketHandshaker.cancelHandshake(404, errMsg);
+                return;
+            }
+            int i = 0;
+            for (String resourceParam : resourceParams) {
+                if (resourceParam.equals("*")) {
+                    pathParamArr.add(subPaths[i]);
+                } else if (!resourceParam.equals(subPaths[i])) {
+                    webSocketHandshaker.cancelHandshake(404, errMsg);
+                    return;
+                }
+                i++;
+            }
+        }
         enrichHttpCallerWithConnectionInfo(httpCaller, httpCarbonMessage, httpEndpointConfig);
         enrichHttpCallerWithNativeData(httpCaller, httpCarbonMessage);
         HttpUtil.populateInboundRequest(inRequest, inRequestEntity, httpCarbonMessage);
@@ -121,16 +144,44 @@ public class WebSocketResourceDispatcher {
         httpCaller.addNativeData(WebSocketConstants.WEBSOCKET_HANDSHAKER, webSocketHandshaker);
         httpCaller.addNativeData(WebSocketConstants.WEBSOCKET_SERVICE, wsService);
         httpCaller.addNativeData(HttpConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_MANAGER, connectionManager);
-        Type[] parameterTypes = balResource.getParameterTypes();
-        Object[] bValues = new Object[parameterTypes.length * 2];
-        bValues[0] = httpCaller;
-        bValues[1] = true;
-        bValues[2] = inRequest;
-        bValues[3] = true;
+        Type[] parameterTypes = resourceFunction.getParameterTypes();
 
+        Object[] bValues = new Object[parameterTypes.length * 2];
+        int index = 0;
+        int pathParamIndex = 0;
+        for (Type param : parameterTypes) {
+            String typeName = param.getName();
+            switch (typeName) {
+                case HttpConstants.CALLER:
+                    bValues[index++] = httpCaller;
+                    bValues[index++] = true;
+                    break;
+                case HttpConstants.REQUEST:
+                    bValues[index++] = inRequest;
+                    bValues[index++] = true;
+                    break;
+                case PARAM_TYPE_STRING:
+                    bValues[index++] = StringUtils.fromString(pathParamArr.get(pathParamIndex++));
+                    bValues[index++] = true;
+                    break;
+                default:
+                    break;
+            }
+        }
         wsService.getRuntime()
-                .invokeMethodAsync(wsService.getBalService(), RESOURCE_NAME_UPGRADE, null, ON_UPGRADE_METADATA,
+                .invokeMethodAsync(wsService.getBalService(), resourceFunction.getName(), null, ON_UPGRADE_METADATA,
                         new OnUpgradeResourceCallback(webSocketHandshaker, wsService, connectionManager), bValues);
+    }
+
+    private static String sanitizeSubPath(String subPath) {
+        if (BACK_SLASH.equals(subPath)) {
+            return subPath;
+        }
+        if (!subPath.startsWith(BACK_SLASH)) {
+            subPath = HttpConstants.DEFAULT_BASE_PATH + subPath;
+        }
+        subPath = subPath.endsWith(BACK_SLASH) ? subPath.substring(0, subPath.length() - 1) : subPath;
+        return subPath;
     }
 
     public static void enrichHttpCallerWithNativeData(BObject caller, HttpCarbonMessage inboundMsg) {
@@ -165,7 +216,7 @@ public class WebSocketResourceDispatcher {
         bValues[0] = webSocketEndpoint;
         bValues[1] = true;
         WebSocketConnectionInfo connectionInfo = new WebSocketConnectionInfo(
-                wsService, webSocketConnection, webSocketEndpoint);
+                wsService, webSocketConnection, webSocketEndpoint, false);
         Callback onOpenCallback = new Callback() {
             @Override
             public void notifySuccess(Object result) {

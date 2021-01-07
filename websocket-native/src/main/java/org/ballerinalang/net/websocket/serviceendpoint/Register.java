@@ -21,20 +21,19 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.MemberFunctionType;
-import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
+import org.ballerinalang.net.websocket.WebsocketErrorType;
 import org.ballerinalang.net.websocket.server.WebSocketServerService;
 import org.ballerinalang.net.websocket.server.WebSocketServicesRegistry;
 
-import static org.ballerinalang.net.websocket.WebSocketConstants.FULL_WEBSOCKET_CLIENT_NAME;
-import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_CALLER_NAME;
+import static org.ballerinalang.net.websocket.WebSocketConstants.BACK_SLASH;
 
 /**
  * Register a service to the listener.
@@ -48,21 +47,17 @@ public class Register extends AbstractWebsocketNativeFunction {
         Runtime runtime = env.getRuntime();
         String basePath = getBasePath(serviceName);
 
-        Type param;
-        MemberFunctionType[] resourceList = service.getType().getAttachedFunctions();
+        MemberFunctionType[] resourceList = ((ServiceType) service.getType()).getResourceFunctions();
         try {
-            if (resourceList.length > 0 && (param = resourceList[0].getParameterTypes()[0]) != null) {
-                String callerType = param.getQualifiedName();
-                if (WEBSOCKET_CALLER_NAME.equals(callerType) || HttpConstants.HTTP_CALLER_NAME.equals(callerType)) {
-                    webSocketServicesRegistry
-                            .registerService(new WebSocketServerService(service, runtime, basePath));
-                } else if (FULL_WEBSOCKET_CLIENT_NAME.equals(callerType)) {
-                    return WebSocketUtil.getWebSocketError(
-                            "Client service cannot be attached to the Listener", null,
-                            WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
-                } else {
-                    return HttpUtil.createHttpError("Invalid websocket Service");
-                }
+            if (resourceList.length == 1) {
+                webSocketServicesRegistry.registerService(new WebSocketServerService(service, runtime, basePath));
+            } else if (resourceList.length > 1) {
+                return WebSocketUtil
+                        .createWebsocketError("Invalid websocket Service. There should be only one onUpgrade resource",
+                                WebsocketErrorType.GENERIC_LISTENER_ERROR);
+            } else {
+                return WebSocketUtil
+                        .createWebsocketError("Invalid websocket Service.", WebsocketErrorType.GENERIC_LISTENER_ERROR);
             }
         } catch (BError ex) {
             return ex;
@@ -72,7 +67,7 @@ public class Register extends AbstractWebsocketNativeFunction {
 
     private static String getBasePath(Object serviceName) {
         if (serviceName instanceof BArray) {
-            String basePath = String.join("/", ((BArray) serviceName).getStringArray());
+            String basePath = String.join(BACK_SLASH, ((BArray) serviceName).getStringArray());
             return HttpUtil.sanitizeBasePath(basePath);
         } else if (serviceName instanceof BString) {
             String basePath = ((BString) serviceName).getValue();

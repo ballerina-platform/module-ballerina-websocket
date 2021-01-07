@@ -18,12 +18,6 @@
 public type Service service object {
 };
 
-# The Websocket callback service type
-public type CallbackService service object {
-
-};
-
-# The Websocket callback service type
+# The Websocket upgrade service type
 public type UpgradeService service object {
-
 };

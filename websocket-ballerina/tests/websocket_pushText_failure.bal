@@ -20,8 +20,8 @@ import ballerina/http;
 
 string errorMsg2 = "";
 
-service UpgradeService /pushTextFailureService on new Listener(21008) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /pushTextFailureService on new Listener(21008) {
+   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new PushTextFailureService();
    }
 }

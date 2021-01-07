@@ -17,10 +17,12 @@ package org.ballerinalang.net.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.netty.channel.ChannelFuture;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityConstants;
@@ -30,6 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.BlockingQueue;
+
+import static org.ballerinalang.net.websocket.WebsocketErrorType.READING_INBOUND_TEXT_FAILED;
 
 /**
  * Utilities related to websocket connector actions.
@@ -125,5 +130,17 @@ public class WebSocketConnector {
             WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
         }
         return null;
+    }
+
+    public static Object externReadString(Environment env, BObject wsConnection) {
+        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
+                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
+        BlockingQueue<WebSocketTextMessage> messages = connectionInfo.getMsgQueue();
+        try {
+            String msg = messages.take().getText();
+            return StringUtils.fromString(msg);
+        } catch (InterruptedException e) {
+            return WebSocketUtil.createWebsocketError(e.getMessage(), READING_INBOUND_TEXT_FAILED);
+        }
     }
 }

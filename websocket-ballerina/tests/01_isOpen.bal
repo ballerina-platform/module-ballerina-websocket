@@ -17,17 +17,30 @@
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
+import ballerina/io;
 
 http:Listener hl = new(21001);
 listener Listener socketListener = new(hl);
 string output = "";
+string errorMsg = "";
+string pathParam = "";
+string queryParam = "";
 int x = 0;
+final map<string> customHeaders = {"X-some-header": "some-header-value"};
 
-service UpgradeService /isOpen/abc on socketListener {
-    remote function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
+service /isOpen/abc on socketListener {
+    resource function onUpgrade barz/[string xyz]/abc/[string value](http:Caller caller, http:Request req)
+               returns Service|UpgradeError  {
+       io:println("Dispatched to /isOpen/abc");
+       pathParam = <@untainted> xyz;
+       var qParam = req.getQueryParamValue("para1");
+       if (qParam is string) {
+          queryParam = <@untainted>qParam;
+       }
+       io:println(queryParam);
        if (x < 1) {
           x = x + 1;
-          return new MyWSService();
+          return new MyWSService(customHeaders);
        } else {
           return new MyWSService2();
        }
@@ -36,15 +49,22 @@ service UpgradeService /isOpen/abc on socketListener {
 
 service class MyWSService {
   *Service;
+  map<string> customHeaders;
+  public function init(map<string> customHeaders) {
+     self.customHeaders = customHeaders;
+  }
   remote function onString(Caller caller, string text) {
+      io:println(text);
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In service 1 onString isOpen " + caller.isOpen().toString());
+      io:println("output set");
   }
 }
 
 service class MyWSService2 {
   *Service;
   remote function onString(Caller caller, string text) {
+      io:println(text);
       WebSocketError? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In service 2 onString isOpen " + caller.isOpen().toString());
   }
@@ -53,20 +73,27 @@ service class MyWSService2 {
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() {
-    AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc");
+    AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
     checkpanic wsClient->writeString("Hi");
     runtime:sleep(500);
-    test:assertEquals(output, "In service 1 onString isOpen false");
 
-    AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc");
+    test:assertEquals(output, "In service 1 onString isOpen false");
+    test:assertEquals(pathParam, "xyz");
+    test:assertEquals(queryParam, "value1");
+    io:println("Asserted");
+
+    var resp = wsClient.getHttpResponse();
+    if (resp is http:Response) {
+       test:assertEquals(resp.getHeader("X-some-header"), "some-header-value");
+    } else {
+       test:assertFail("Couldn't find the expected values");
+    }
+
+    AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
     checkpanic wsClient2->writeString("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In service 2 onString isOpen false");
-
-    AsyncClient wsClient3 = new("ws://localhost:21001/isOpen/abc");
-    checkpanic wsClient3->writeString("Hi");
-    runtime:sleep(500);
-    test:assertEquals(output, "In service 2 onString isOpen false");
+    test:assertEquals(pathParam, "tuv");
 }
 
 // Test isOpen when a close frame is received

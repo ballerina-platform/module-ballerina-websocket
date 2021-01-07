@@ -48,7 +48,16 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-        WebSocketResourceDispatcher.dispatchOnText(connectionInfo, webSocketTextMessage, false);
+        if (connectionInfo.isSync()) {
+            connectionInfo.addMessageToQueue(webSocketTextMessage);
+            try {
+                connectionInfo.getWebSocketConnection().readNextFrame();
+            } catch (IllegalAccessException e) {
+                //ignore as at this point the websocket connection has been made.
+            }
+        } else {
+            WebSocketResourceDispatcher.dispatchOnText(connectionInfo, webSocketTextMessage, false);
+        }
     }
 
     @Override

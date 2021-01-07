@@ -31,5 +31,7 @@ module io.ballerina.stdlib.websocket {
     requires java.management;
     requires org.slf4j;
     requires io.ballerina.stdlib.http;
+    requires io.netty.handler;
+    requires io.netty.codec.http;
     exports org.ballerinalang.net.websocket.server;
 }

@@ -20,6 +20,7 @@ package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpResourceArguments;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketMessage;
@@ -34,6 +35,13 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static org.ballerinalang.net.websocket.WebSocketConstants.BACK_SLASH;
 
 /**
  * Store all the WebSocket serviceEndpointsTemplate here.
@@ -41,10 +49,12 @@ import java.nio.charset.StandardCharsets;
 public class WebSocketServicesRegistry {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketServicesRegistry.class);
     private URITemplate<WebSocketServerService, WebSocketMessage> uriTemplate;
+    Map<String, WebSocketServerService> servicesByBasePath = new ConcurrentHashMap<>();
+    List<String> sortedServiceURIs = new CopyOnWriteArrayList<>();
 
     public WebSocketServicesRegistry() {
         try {
-            uriTemplate = new URITemplate<>(new Literal<>(new WebSocketDataElement(), "/"));
+            uriTemplate = new URITemplate<>(new Literal<>(new WebSocketDataElement(), BACK_SLASH));
         } catch (URITemplateException e) {
             // Ignore as it won't be thrown because token length is not zero.
         }
@@ -55,6 +65,9 @@ public class WebSocketServicesRegistry {
         try {
             basePath = URLDecoder.decode(basePath, StandardCharsets.UTF_8.name());
             uriTemplate.parse(basePath, service, new WebSocketDataElementFactory());
+            servicesByBasePath.put(basePath, service);
+            sortedServiceURIs.add(basePath);
+            sortedServiceURIs.sort((basePath1, basePath2) -> basePath2.length() - basePath1.length());
         } catch (URITemplateException | UnsupportedEncodingException e) {
             logger.error("Error when registering service", e);
             throw WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.WsGenericError.
@@ -83,6 +96,34 @@ public class WebSocketServicesRegistry {
                     errorCode(), null);
         } catch (BError e) {
             return e;
+        }
+        return null;
+    }
+
+    Map<String, WebSocketServerService> getServicesByBasePath() {
+        return servicesByBasePath;
+    }
+
+    List<String> getSortedServiceURIs() {
+        return sortedServiceURIs;
+    }
+
+    String findTheMostSpecificBasePath(String requestURIPath, Map<String, WebSocketServerService> services,
+            List<String> sortedServiceURIs) {
+        for (Object key : sortedServiceURIs) {
+            if (!requestURIPath.toLowerCase(Locale.getDefault()).contains(
+                    key.toString().toLowerCase(Locale.getDefault()))) {
+                continue;
+            }
+            if (requestURIPath.length() <= key.toString().length()) {
+                return key.toString();
+            }
+            if (requestURIPath.startsWith(key.toString().concat(BACK_SLASH))) {
+                return key.toString();
+            }
+        }
+        if (services.containsKey(HttpConstants.DEFAULT_BASE_PATH)) {
+            return HttpConstants.DEFAULT_BASE_PATH;
         }
         return null;
     }

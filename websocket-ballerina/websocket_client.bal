@@ -33,7 +33,7 @@ public client class AsyncClient {
     private WebSocketConnector conn = new;
     private string url = "";
     private WebSocketClientConfiguration config = {};
-    private CallbackService? callbackService = ();
+    private (service object {})? callbackService = ();
 
     # Initializes the client when called.
     #
@@ -41,7 +41,7 @@ public client class AsyncClient {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, CallbackService? callbackService = (), WebSocketClientConfiguration? config = ()) {
+    public isolated function init(string url, (service object {})? callbackService = (), WebSocketClientConfiguration? config = ()) {
         self.url = url;
         //if (config is WebSocketClientConfiguration) {
         //    addCookies(config);
@@ -61,7 +61,7 @@ public client class AsyncClient {
         }
     }
 
-    # Pushes text to the connection. If an error occurs while sending the text message to the connection, that message
+    # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
@@ -72,7 +72,7 @@ public client class AsyncClient {
         return self.conn.writeString(data, finalFrame);
     }
 
-    # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
+    # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent

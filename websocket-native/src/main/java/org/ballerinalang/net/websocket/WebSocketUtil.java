@@ -97,7 +97,7 @@ public class WebSocketUtil {
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
         WebSocketConnectionInfo connectionInfo =
-                new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller);
+                new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller, false);
         connectionManager.addConnection(webSocketConnection.getChannelId(), connectionInfo);
         webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO,
                 connectionInfo);
@@ -478,7 +478,7 @@ public class WebSocketUtil {
         clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
         BMap<BString, Object> headerValues = (BMap<BString, Object>) clientEndpointConfig.getMapValue(
-                WebSocketConstants.CLIENT_CUSTOM_HEADERS_CONFIG);
+                WebSocketConstants.CUSTOM_HEADERS);
         if (headerValues != null) {
             clientConnectorConfig.addHeaders(getCustomHeaders(headerValues));
         }
@@ -593,7 +593,7 @@ public class WebSocketUtil {
                 WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), null));
     }
 
-    public static BError createWebsocketError(String message, HttpErrorType errorType) {
+    public static BError createWebsocketError(String message, WebsocketErrorType errorType) {
         return ErrorCreator.createDistinctError(errorType.getErrorName(), PROTOCOL_WEBSOCKET_PKG_ID,
                 StringUtils.fromString(message));
     }

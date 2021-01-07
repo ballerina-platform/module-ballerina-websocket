@@ -22,9 +22,9 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 import io.ballerina.runtime.api.types.MemberFunctionType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BObject;
-import org.ballerinalang.net.http.HttpErrorType;
-import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.websocket.WebSocketConstants;
+import org.ballerinalang.net.websocket.WebSocketUtil;
+import org.ballerinalang.net.websocket.WebsocketErrorType;
 import org.ballerinalang.net.websocket.server.WebSocketServicesRegistry;
 
 /**
@@ -44,7 +44,7 @@ public class Detach extends AbstractWebsocketNativeFunction {
                 }
             }
         } catch (Exception ex) {
-            return HttpUtil.createHttpError(ex.getMessage(), HttpErrorType.GENERIC_LISTENER_ERROR);
+            return WebSocketUtil.createWebsocketError(ex.getMessage(), WebsocketErrorType.GENERIC_LISTENER_ERROR);
         }
         return null;
     }

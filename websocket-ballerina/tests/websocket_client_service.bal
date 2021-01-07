@@ -21,8 +21,8 @@ import ballerina/http;
 string arrivedData = "";
 boolean isClientConnectionOpen = false;
 
-service UpgradeService /'client/'service on new Listener(21021) {
-   remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError {
+service /'client/'service on new Listener(21021) {
+   resource isolated function onUpgrade bbe(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new clientFailure200();
    }
 }
@@ -35,13 +35,11 @@ service class clientFailure200 {
 }
 
 service class callback200 {
-   *CallbackService;
    remote function onString(Caller caller, string text) {
    }
 }
 
 service class ClientService200 {
-   *CallbackService;
    remote function onString(AsyncClient caller, string text) {
    }
 }
@@ -49,7 +47,7 @@ service class ClientService200 {
 // Tests the client initialization without a callback service.
 @test:Config {}
 public function testClientSuccessWithoutService() {
-   AsyncClient wsClient = new ("ws://localhost:21021/client/service");
+   AsyncClient wsClient = new ("ws://localhost:21021/client/service/bbe");
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -62,7 +60,7 @@ public function testClientSuccessWithoutService() {
 @test:Config {}
 public function testClientSuccessWithWebSocketClientService() {
    isClientConnectionOpen = false;
-   AsyncClient wsClient = new ("ws://localhost:21021/client/service", new ClientService200());
+   AsyncClient wsClient = new ("ws://localhost:21021/client/service/bbe", new ClientService200());
    checkpanic wsClient->writeString("Client worked");
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
@@ -76,7 +74,7 @@ public function testClientSuccessWithWebSocketClientService() {
 @test:Config {}
 public function testClientFailureWithWebSocketService() {
    isClientConnectionOpen = false;
-   AsyncClient|error wsClientEp = trap new ("ws://localhost:21021/client/service", new callback200());
+   AsyncClient|error wsClientEp = trap new ("ws://localhost:21021/client/service/bbe", new callback200());
    runtime:sleep(500);
    if (wsClientEp is error) {
        test:assertEquals(wsClientEp.message(),
