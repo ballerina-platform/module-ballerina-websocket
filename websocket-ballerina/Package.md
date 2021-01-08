@@ -1,32 +1,34 @@
 ## Module Overview
 
-This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates two types of network entry points as ‘AsyncClient’ and ‘Listener’.
+This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates three types of network entry points as ‘AsyncClient’, ‘SyncClient’ and ‘Listener’.
 
-### WebSocket Module
+The `AsyncClient` has a callback service that can be registered at the initialization of the client. It has a fixed set of remote methods in this service and they get called on the receipt of messages from the server. The ‘SyncClient’ also can have a callback service registered to receive control frames like ping, pong and close.
 
-This module also provides support for WebSockets. There are two types of WebSocket endpoints: `WebSocketClient` and `WebSocketListener`. Both endpoints support all WebSocket frames. The `WebSocketClient` has a callback service.
+In the server side, initial websocket service is there to handle upgrade requests. It has a single `onUpgrade` resource which takes in `http:Caller` and `http:Request` optionally. The `onUpgrade` resource returns a `websocket:Service` to which incoming messages gets dispatched after a successful websocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the websocket upgrade by returning an error.
+The returning `websocket:Service` has a fixed set of remote methods.
 
-There are two types of services for WebSockets. The service of the server has the `WebSocketCaller` as the resource parameter and the callback service of the client has `WebSocketClient` as the resource parameter. The WebSocket services have a fixed set of resources that do not have a resource config. The incoming messages are passed to these resources.
-
-**WebSocket upgrade**: During a WebSocket upgrade, the initial message received is an HTTP request. To intercept this request and perform the upgrade explicitly with custom headers, the user must create an HTTP resource with WebSocket-specific configurations as follows:
+**WebSocket upgrade**: During a WebSocket upgrade, the initial message received is an HTTP request. 
 
 ```ballerina
-@http:ResourceConfig {
-    webSocketUpgrade: {
-        upgradePath: "/{name}",
-        upgradeService: chatApp
-    }
+service /basePath on new websocket:Listener(21003) {
+    resource function onUpgrade .(http:Caller caller, http:Request req) returns websocket:Service|websocket:UpgradeError {
+        returns new WsService();
 }
-resource function upgrader(http:Caller caller, http:Request req, string name) {
-}
+        
+service class WsService {
+  *websocket:Service;
+  remote isolated function onText(websocket:Caller caller, string data) {
+      checkpanic caller->pushText(data);
+  }
+}              
 ```
 The `upgradeService` is a server callback service.
 
 **onOpen resource**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` resource is dispatched. This resource is only available in the service of the server.
 
-**onString resource**: The received text messages are dispatched to this resource.
+**onString resource**: The received text messages are dispatched to this resource. This resource is not applicable for `SyncClient`
 
-**onBytes resource**: The received binary messages are dispatched to this resource.
+**onBytes resource**: The received binary messages are dispatched to this resource. This resource is not applicable for `SyncClient`
 
 **onPing and onPong resources**: The received ping and pong messages are dispatched to these resources respectively.
 
