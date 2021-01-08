@@ -19,6 +19,7 @@
 package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.values.BObject;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
@@ -38,7 +39,8 @@ public class WebSocketConnectionInfo {
     private final WebSocketConnection webSocketConnection;
     private StringAggregator stringAggregator = null;
     private final boolean sync;
-    private BlockingQueue<WebSocketTextMessage> msgQueue = new SynchronousQueue<WebSocketTextMessage>();
+    private BlockingQueue<WebSocketTextMessage> txtMsgQueue = new SynchronousQueue<WebSocketTextMessage>();
+    private BlockingQueue<WebSocketBinaryMessage> binMsgQueue = new SynchronousQueue<>();
 
     /**
      * @param webSocketService    can be the WebSocketServerService or WebSocketService
@@ -73,13 +75,25 @@ public class WebSocketConnectionInfo {
         }
     }
 
-    public BlockingQueue<WebSocketTextMessage> getMsgQueue() {
-        return msgQueue;
+    public BlockingQueue<WebSocketTextMessage> getTxtMsgQueue() {
+        return txtMsgQueue;
     }
 
-    public void addMessageToQueue(WebSocketTextMessage msg) {
+    public void addTxtMessageToQueue(WebSocketTextMessage msg) {
         try {
-            msgQueue.put(msg);
+            txtMsgQueue.put(msg);
+        } catch (InterruptedException e) {
+            // ignore this.
+        }
+    }
+
+    public BlockingQueue<WebSocketBinaryMessage> getBinMsgQueue() {
+        return binMsgQueue;
+    }
+
+    public void addBinMessageToQueue(WebSocketBinaryMessage msg) {
+        try {
+            binMsgQueue.put(msg);
         } catch (InterruptedException e) {
             // ignore this.
         }

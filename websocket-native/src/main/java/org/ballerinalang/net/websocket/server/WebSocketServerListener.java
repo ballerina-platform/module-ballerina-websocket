@@ -93,8 +93,8 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
         return URI.create(serviceUri);
     }
 
-    private void setCarbonMessageProperties(HttpResourceArguments pathParams, URI requestUri, URI validateUri, HttpCarbonMessage msg,
-            String matchingBasePath) {
+    private void setCarbonMessageProperties(HttpResourceArguments pathParams, URI requestUri, URI validateUri,
+            HttpCarbonMessage msg, String matchingBasePath) {
         String subPath = URIUtil.getSubPath(validateUri.getRawPath(), matchingBasePath);
         msg.setProperty(HttpConstants.QUERY_STR, requestUri.getRawQuery());
         msg.setProperty(HttpConstants.RAW_QUERY_STR, requestUri.getRawQuery());

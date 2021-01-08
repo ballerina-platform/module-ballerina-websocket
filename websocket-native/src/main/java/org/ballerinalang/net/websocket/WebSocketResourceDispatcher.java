@@ -243,7 +243,7 @@ public class WebSocketResourceDispatcher {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
             MemberFunctionType onTextMessageResource = null;
-            BObject balservice = null;
+            BObject balservice;
             if (server) {
                 Object dispatchingService = wsService
                         .getWsService(connectionInfo.getWebSocketConnection().getChannelId());
@@ -377,7 +377,7 @@ public class WebSocketResourceDispatcher {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
             MemberFunctionType onBinaryMessageResource = null;
-            BObject balservice = null;
+            BObject balservice;
             if (server) {
                 Object dispatchingService = wsService
                         .getWsService(connectionInfo.getWebSocketConnection().getChannelId());

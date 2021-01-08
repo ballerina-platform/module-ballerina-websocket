@@ -23,7 +23,8 @@ public enum WebsocketErrorType {
     GENERIC_CLIENT_ERROR("GenericClientError", "{ballerina/websocket}GenericClientError"), GENERIC_LISTENER_ERROR(
             "GenericListenerError", "{ballerina/websocket}GenericListenerError"), LISTENER_STARTUP_FAILURE(
             "ListenerError", "{ballerina/websocket}ListenerStartupError"), READING_INBOUND_TEXT_FAILED(
-            "ReadingInboundTextError", "{ballerina/websocket}ReadingInboundTextFailed");
+            "ReadingInboundTextError", "{ballerina/websocket}ReadingInboundTextFailed"), READING_INBOUND_BINARY_FAILED(
+            "ReadingInboundBinaryError", "{ballerina/websocket}ReadingInboundBinaryFailed");
 
     private final String errorName;
     private final String reason;

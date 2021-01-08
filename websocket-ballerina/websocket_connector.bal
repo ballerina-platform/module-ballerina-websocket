@@ -80,12 +80,18 @@ class WebSocketConnector {
         return externReady(self);
     }
 
-    # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
-    # that message will be lost.
+    # Reads text data from the websocket connection.
     #
-    # + return  - An `error` if an error occurs when sending
+    # + return  - The text message or an `error` if an error occurs when sending
     public isolated function readString() returns string|WebSocketError {
         return externReadString(self);
+    }
+
+    # Reads text data from the websocket connection.
+    #
+    # + return  - The binary message or an `error` if an error occurs when sending
+    public isolated function readBytes() returns byte[]|WebSocketError {
+        return externReadBytes(self);
     }
 
     # Closes the connection.
@@ -147,6 +153,11 @@ isolated function externReady(WebSocketConnector wsConnector) returns WebSocketE
 } external;
 
 isolated function externReadString(WebSocketConnector wsConnector) returns string|WebSocketError =
+@java:Method {
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+} external;
+
+isolated function externReadBytes(WebSocketConnector wsConnector) returns byte[]|WebSocketError =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

@@ -17,11 +17,13 @@ package org.ballerinalang.net.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.netty.channel.ChannelFuture;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
@@ -135,10 +137,22 @@ public class WebSocketConnector {
     public static Object externReadString(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        BlockingQueue<WebSocketTextMessage> messages = connectionInfo.getMsgQueue();
+        BlockingQueue<WebSocketTextMessage> messages = connectionInfo.getTxtMsgQueue();
         try {
             String msg = messages.take().getText();
             return StringUtils.fromString(msg);
+        } catch (InterruptedException e) {
+            return WebSocketUtil.createWebsocketError(e.getMessage(), READING_INBOUND_TEXT_FAILED);
+        }
+    }
+
+    public static Object externReadBytes(Environment env, BObject wsConnection) {
+        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
+                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
+        BlockingQueue<WebSocketBinaryMessage> messages = connectionInfo.getBinMsgQueue();
+        try {
+            byte[] binaryMessage = messages.take().getByteArray();
+            return ValueCreator.createArrayValue(binaryMessage);
         } catch (InterruptedException e) {
             return WebSocketUtil.createWebsocketError(e.getMessage(), READING_INBOUND_TEXT_FAILED);
         }

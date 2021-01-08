@@ -19,7 +19,6 @@
 package org.ballerinalang.net.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -35,6 +34,8 @@ import org.ballerinalang.net.websocket.client.listener.ClientConnectorListener;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 
+import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_SERVICE_CONFIG;
+
 /**
  * Initialize the WebSocket Client.
  *
@@ -47,7 +48,7 @@ public class InitEndpoint {
         BMap<BString, Object> clientEndpointConfig =  webSocketClient.getMapValue(
                 WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
         String remoteUrl = webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
-        BObject callbackService = webSocketClient.getObjectValue(StringUtils.fromString("callbackService"));
+        BObject callbackService = webSocketClient.getObjectValue(CLIENT_SERVICE_CONFIG);
         WebSocketService wsService = WebSocketUtil
                 .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
         HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();

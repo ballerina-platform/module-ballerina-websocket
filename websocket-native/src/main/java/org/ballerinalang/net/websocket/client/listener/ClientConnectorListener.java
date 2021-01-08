@@ -49,7 +49,7 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
         if (connectionInfo.isSync()) {
-            connectionInfo.addMessageToQueue(webSocketTextMessage);
+            connectionInfo.addTxtMessageToQueue(webSocketTextMessage);
             try {
                 connectionInfo.getWebSocketConnection().readNextFrame();
             } catch (IllegalAccessException e) {
@@ -62,7 +62,16 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-        WebSocketResourceDispatcher.dispatchOnBinary(connectionInfo, webSocketBinaryMessage, false);
+        if (connectionInfo.isSync()) {
+            connectionInfo.addBinMessageToQueue(webSocketBinaryMessage);
+            try {
+                connectionInfo.getWebSocketConnection().readNextFrame();
+            } catch (IllegalAccessException e) {
+                //ignore as at this point the websocket connection has been made.
+            }
+        } else {
+            WebSocketResourceDispatcher.dispatchOnBinary(connectionInfo, webSocketBinaryMessage, false);
+        }
     }
 
     @Override
