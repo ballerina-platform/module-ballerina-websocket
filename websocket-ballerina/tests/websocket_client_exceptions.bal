@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/log;
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
+import ballerina/io;
 
 string errMessage = "";
 
@@ -39,7 +39,7 @@ service /websocket on new Listener(21030) {
 service class ErrorServer {
   *Service;
    remote isolated function onOpen(Caller caller) {
-       log:print("The Connection ID: " + caller.getConnectionId());
+       io:println("The Connection ID: " + caller.getConnectionId());
    }
 
    remote isolated function onPing(Caller caller, byte[] localData) {
@@ -59,7 +59,7 @@ service class ErrorServer {
    remote isolated function onText(Caller caller, string text, boolean finalFrame) {
        var err = caller->pushText(text, finalFrame);
        if (err is WebSocketError) {
-           log:printError("Error occurred when sending text message", err = err);
+           io:println("Error occurred when sending text message" + err.message());
        }
    }
 

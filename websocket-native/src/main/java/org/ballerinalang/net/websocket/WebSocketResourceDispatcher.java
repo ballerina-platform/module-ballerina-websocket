@@ -24,7 +24,7 @@ import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
-import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.StructureType;
 import io.ballerina.runtime.api.types.Type;
@@ -103,9 +103,9 @@ public class WebSocketResourceDispatcher {
     public static void dispatchUpgrade(WebSocketHandshaker webSocketHandshaker, WebSocketServerService wsService,
             BMap<BString, Object> httpEndpointConfig,
             WebSocketConnectionManager connectionManager) {
-        MemberFunctionType balResource = null;
-        MemberFunctionType[] attFunctions = wsService.getBalService().getType().getAttachedFunctions();
-        for (MemberFunctionType remoteFunc : attFunctions) {
+        MethodType balResource = null;
+        MethodType[] attFunctions = wsService.getBalService().getType().getMethods();
+        for (MethodType remoteFunc : attFunctions) {
             if (remoteFunc.getName().equals(RESOURCE_NAME_UPGRADE)) {
                 balResource = remoteFunc;
             }
@@ -139,11 +139,11 @@ public class WebSocketResourceDispatcher {
 
     public static void dispatchOnOpen(WebSocketConnection webSocketConnection, BObject webSocketCaller,
             WebSocketServerService wsService) {
-        MemberFunctionType onOpenResource = null;
-        MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                .getType())).getAttachedFunctions();
+        MethodType onOpenResource = null;
+        MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                .getType())).getMethods();
         BObject balservice = (BObject) (wsService.getDispatchingService());
-        for (MemberFunctionType remoteFunc : remoteFunctions) {
+        for (MethodType remoteFunc : remoteFunctions) {
             if (remoteFunc.getName().equals(RESOURCE_NAME_ON_OPEN)) {
                 onOpenResource = remoteFunc;
                 break;
@@ -157,7 +157,7 @@ public class WebSocketResourceDispatcher {
     }
 
     private static void executeOnOpenResource(WebSocketService wsService, BObject balService,
-            MemberFunctionType onOpenResource,
+            MethodType onOpenResource,
             BObject webSocketEndpoint, WebSocketConnection webSocketConnection) {
         Type[] parameterTypes = onOpenResource.getParameterTypes();
         Object[] bValues = new Object[parameterTypes.length * 2];
@@ -190,13 +190,13 @@ public class WebSocketResourceDispatcher {
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onTextMessageResource = null;
+            MethodType onTextMessageResource = null;
             BObject balservice = null;
             if (server) {
                 balservice = (BObject) (wsService.getDispatchingService());
-                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                        .getType())).getAttachedFunctions();
-                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getMethods();
+                for (MethodType remoteFunc : remoteFunctions) {
                     if (remoteFunc.getName().equals(RESOURCE_NAME_ON_TEXT)) {
                         onTextMessageResource = remoteFunc;
                         break;
@@ -322,13 +322,13 @@ public class WebSocketResourceDispatcher {
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onBinaryMessageResource = null;
+            MethodType onBinaryMessageResource = null;
             BObject balservice = null;
             if (server) {
                 balservice = (BObject) (wsService.getDispatchingService());
-                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                        .getType())).getAttachedFunctions();
-                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getMethods();
+                for (MethodType remoteFunc : remoteFunctions) {
                     if (remoteFunc.getName().equals(RESOURCE_NAME_ON_BINARY)) {
                         onBinaryMessageResource = remoteFunc;
                         break;
@@ -378,13 +378,13 @@ public class WebSocketResourceDispatcher {
                 connectionInfo);
         try {
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onPingMessageResource = null;
+            MethodType onPingMessageResource = null;
             BObject balservice = null;
             if (server) {
                 balservice = (BObject) (wsService.getDispatchingService());
-                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                        .getType())).getAttachedFunctions();
-                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getMethods();
+                for (MethodType remoteFunc : remoteFunctions) {
                     if (remoteFunc.getName().equals(RESOURCE_NAME_ON_PING)) {
                         onPingMessageResource = remoteFunc;
                         break;
@@ -423,13 +423,13 @@ public class WebSocketResourceDispatcher {
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onPongMessageResource = null;
+            MethodType onPongMessageResource = null;
             BObject balservice = null;
             if (server) {
                 balservice = (BObject) (wsService.getDispatchingService());
-                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                        .getType())).getAttachedFunctions();
-                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getMethods();
+                for (MethodType remoteFunc : remoteFunctions) {
                     if (remoteFunc.getName().equals(RESOURCE_NAME_ON_PONG)) {
                         onPongMessageResource = remoteFunc;
                         break;
@@ -468,15 +468,15 @@ public class WebSocketResourceDispatcher {
             WebSocketUtil.setListenerOpenField(connectionInfo);
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onCloseResource = null;
+            MethodType onCloseResource = null;
             int closeCode = closeMessage.getCloseCode();
             String closeReason = closeMessage.getCloseReason();
             BObject balservice = null;
             if (server) {
                 balservice = (BObject) (wsService.getDispatchingService());
-                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                        .getType())).getAttachedFunctions();
-                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getMethods();
+                for (MethodType remoteFunc : remoteFunctions) {
                     if (remoteFunc.getName().equals(RESOURCE_NAME_ON_CLOSE)) {
                         onCloseResource = remoteFunc;
                         break;
@@ -546,7 +546,7 @@ public class WebSocketResourceDispatcher {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
         }
         WebSocketService webSocketService = connectionInfo.getService();
-        MemberFunctionType onErrorResource = null;
+        MethodType onErrorResource = null;
         if (isUnexpectedError(throwable)) {
             log.error("Unexpected error", throwable);
             WebSocketObservabilityUtil.observeError(connectionInfo,
@@ -557,9 +557,9 @@ public class WebSocketResourceDispatcher {
         BObject balservice = null;
         if (server) {
             balservice = (BObject) (webSocketService.getDispatchingService());
-            MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) webSocketService.getDispatchingService())
-                    .getType())).getAttachedFunctions();
-            for (MemberFunctionType remoteFunc : remoteFunctions) {
+            MethodType[] remoteFunctions = ((ServiceType) (((BValue) webSocketService.getDispatchingService())
+                    .getType())).getMethods();
+            for (MethodType remoteFunc : remoteFunctions) {
                 if (remoteFunc.getName().equals(RESOURCE_NAME_ON_ERROR)) {
                     onErrorResource = remoteFunc;
                     break;
@@ -605,13 +605,13 @@ public class WebSocketResourceDispatcher {
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
-            MemberFunctionType onIdleTimeoutResource = null;
+            MethodType onIdleTimeoutResource = null;
             BObject balservice = null;
             if (server) {
                 balservice = (BObject) (wsService.getDispatchingService());
-                MemberFunctionType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
-                        .getType())).getAttachedFunctions();
-                for (MemberFunctionType remoteFunc : remoteFunctions) {
+                MethodType[] remoteFunctions = ((ServiceType) (((BValue) wsService.getDispatchingService())
+                        .getType())).getMethods();
+                for (MethodType remoteFunc : remoteFunctions) {
                     if (remoteFunc.getName().equals(RESOURCE_NAME_ON_IDLE_TIMEOUT)) {
                         onIdleTimeoutResource = remoteFunc;
                         break;
