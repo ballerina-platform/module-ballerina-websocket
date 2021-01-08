@@ -34,9 +34,10 @@ class WebSocketConnector {
             string|error result = strings:fromBytes(data);
 
             if (result is error) {
-                return WsGenericError("Error occurred during the text message creation", result);
+                return error WsGenericError("Error occurred during the text message creation", result);
+            } else {
+                text = result;
             }
-            text = <string> result;
         } else if (data is json) {
             text = data.toJsonString();
         } else {
@@ -95,7 +96,7 @@ class WebSocketConnector {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {
                 string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
-                return WsConnectionClosureError(errorMessage);
+                return error WsConnectionClosureError(errorMessage);
             }
             return externClose(self, statusCode, reason is () ? "" : reason, timeoutInSecs);
         } else {

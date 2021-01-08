@@ -19,7 +19,7 @@
 package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -102,9 +102,9 @@ public class WebSocketServerService extends WebSocketService {
     }
 
     public boolean getUpgradeRemoteFunction(WebSocketServerService wsService) {
-        MemberFunctionType[] attFunctions = wsService.getBalService().getType()
-                .getAttachedFunctions();
-        for (MemberFunctionType remoteFunc : attFunctions) {
+        MethodType[] attFunctions = wsService.getBalService().getType()
+                .getMethods();
+        for (MethodType remoteFunc : attFunctions) {
             if (remoteFunc.getName().equals("onUpgrade")) {
                 return true;
             }
