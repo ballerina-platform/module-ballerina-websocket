@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/log;
+//import ballerina/log;
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/http;
@@ -71,13 +71,13 @@ service /websocket on new Listener(21019) {
 service class ProxyService2 {
    *Service;
    remote function onOpen(Caller caller) {
-       log:print("The Connection ID: " + caller.getConnectionId());
+       //log:print("The Connection ID: " + caller.getConnectionId());
    }
 
    remote function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
-           log:printError("Error occurred when sending text message", err = err);
+           //log:printError("Error occurred when sending text message", err = err);
        }
    }
 

@@ -20,7 +20,7 @@ import ballerina/http;
 import ballerina/io;
 
 http:Listener hl = new(21001);
-listener Listener socketListener = new(hl);
+listener Listener socketListener = new(21001);
 string output = "";
 string errorMsg = "";
 string pathParam = "";

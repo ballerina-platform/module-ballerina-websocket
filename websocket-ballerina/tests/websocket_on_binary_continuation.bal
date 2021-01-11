@@ -68,7 +68,8 @@ public function testBinaryContinuation() {
    checkpanic wsClient->writeBytes("</note>".toBytes(), true);
    runtime:sleep(500);
    string|error value = 'string:fromBytes(binaryContent);
-   test:assertEquals(value.toString(), msg, msg = "Data mismatched");
+   string s = value is error ? value.toString() : value.toString();
+   test:assertEquals(s, msg, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
    //if (result is WebSocketError) {
    //   io:println("Error occurred when closing connection", result);

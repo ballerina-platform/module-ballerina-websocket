@@ -81,7 +81,7 @@ public class Listener {
         self.instanceId = uuid();
         self.config = config ?: {};
         if (listenerPort is http:Listener) {
-           self.port = listenerPort.port;
+           //self.port = listenerPort.port;
         } else {
            self.port = listenerPort;
         }

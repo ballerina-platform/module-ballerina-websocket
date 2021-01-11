@@ -164,7 +164,7 @@ task updateTomlFile {
         def stdlibDependentConfigVersion = project.stdlibConfigVersion.split("-")[0]
         def stdlibDependentReflectVersion = project.stdlibReflectVersion.split("-")[0]
         def stdlibDependentRuntimeVersion = project.stdlibRuntimeVersion.split("-")[0]
-        def stdlibDependentSystemVersion = project.stdlibSystemVersion.split("-")[0]
+        def stdlibDependentOsVersion = project.stdlibOsVersion.split("-")[0]
         def stdlibDependentTaskVersion = project.stdlibTaskVersion.split("-")[0]
         def stdlibDependentNettyVersion = project.nettyVersion
         def stdlibDependentWso2CommonsPoolVersion = project.wso2CommonsPoolVersion
@@ -188,7 +188,7 @@ task updateTomlFile {
         newConfig = newConfig.replace("@stdlib.config.version@", stdlibDependentConfigVersion)
         newConfig = newConfig.replace("@stdlib.reflect.version@", stdlibDependentReflectVersion)
         newConfig = newConfig.replace("@stdlib.runtime.version@", stdlibDependentRuntimeVersion)
-        newConfig = newConfig.replace("@stdlib.system.version@", stdlibDependentSystemVersion)
+        newConfig = newConfig.replace("@stdlib.os.version@", stdlibDependentOsVersion)
         newConfig = newConfig.replace("@stdlib.task.version@", stdlibDependentTaskVersion)
         newConfig = newConfig.replace("@stdlib.mimenative.version@", stdlibDependentMimeNativeVersion)
         newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)

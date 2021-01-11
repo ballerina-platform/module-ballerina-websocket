@@ -21,3 +21,12 @@ public type Service service object {
 # The Websocket upgrade service type
 public type UpgradeService service object {
 };
+
+# The type of the user-defined custom record
+type CustomRecordType record {| anydata...; |};
+
+# The types of the message that are returned by the Sync `client` after the data binding operation
+public type PayloadType string|xml|json|byte[]|CustomRecordType;
+
+# The types of data values that are expected by the Sync `client` to return after the data binding operation
+public type TargetType typedesc<string|xml|json|byte[]|CustomRecordType>;

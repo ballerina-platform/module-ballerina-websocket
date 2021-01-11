@@ -550,7 +550,7 @@ public class WebSocketUtil {
      */
     public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
         if (callbackService != null) {
-            Type param = (callbackService).getType().getAttachedFunctions()[0].getParameterTypes()[0];
+            Type param = (callbackService).getType().getMethods()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a WebSocket Client Service",
