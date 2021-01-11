@@ -84,8 +84,28 @@ class WebSocketConnector {
     # Reads text data from the websocket connection.
     #
     # + return  - The text message or an `error` if an error occurs when sending
-    public isolated function readString() returns string|WebSocketError {
-        return externReadString(self);
+    public isolated function readString(TargetType targetType) returns string|xml|json|record{}|WebSocketError {
+        if (targetType is typedesc<string>) {
+            return externReadString(self);
+        } else if (targetType is typedesc<xml>) {
+            return externReadXml(self);
+        } else if (targetType is typedesc<CustomRecordType>) {
+            var wsMessage = externReadJson(self);
+            if (wsMessage is json) {
+               var result = wsMessage.cloneWithType(targetType);
+               if (result is error) {
+                   return error ReadingInboundTextError("payload binding failed: " + result.message());
+               } else {
+                   return result;
+               }
+            } else {
+               return wsMessage;
+            }
+        } else if (targetType is typedesc<byte[]>) {
+            return externReadTextAsBytes(self);
+        } else if (targetType is typedesc<json>) {
+            return externReadJson(self);
+        }
     }
 
     # Reads text data from the websocket connection.
@@ -154,6 +174,21 @@ isolated function externReady(WebSocketConnector wsConnector) returns WebSocketE
 } external;
 
 isolated function externReadString(WebSocketConnector wsConnector) returns string|WebSocketError =
+@java:Method {
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+} external;
+
+isolated function externReadXml(WebSocketConnector wsConnector) returns xml|WebSocketError =
+@java:Method {
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+} external;
+
+isolated function externReadJson(WebSocketConnector wsConnector) returns json|WebSocketError =
+@java:Method {
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+} external;
+
+isolated function externReadTextAsBytes(WebSocketConnector wsConnector) returns byte[]|WebSocketError =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

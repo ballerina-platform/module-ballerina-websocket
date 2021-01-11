@@ -81,22 +81,10 @@ public class Listener {
         self.instanceId = uuid();
         self.config = config ?: {};
         if (listenerPort is http:Listener) {
-           //self.port = listenerPort.port;
+           self.port = listenerPort.getPort();
         } else {
            self.port = listenerPort;
         }
-        //ListenerAuth? auth = self.config["auth"];
-        //if (auth is ListenerAuth) {
-        //    if (auth.mandateSecureSocket) {
-        //        ListenerSecureSocket? secureSocket = self.config.secureSocket;
-        //        if (secureSocket is ()) {
-        //            error err = error("Secure sockets have not been configured in order to enable auth providers.");
-        //            panic err;
-        //        }
-        //    }
-        //    addAuthFilters(self.config);
-        //}
-        //addAttributeFilter(self.config);
         error? err = self.initEndpoint();
         if (err is error) {
             panic err;

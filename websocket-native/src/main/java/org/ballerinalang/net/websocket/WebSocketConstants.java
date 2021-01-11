@@ -177,7 +177,11 @@ public class WebSocketConstants {
         WsProtocolError("WsProtocolError"),
         WsConnectionError("WsConnectionError"),
         WsInvalidContinuationFrameError("WsInvalidContinuationFrameError"),
-        WsGenericError("WsGenericError");
+        WsGenericError("WsGenericError"),
+        WsGenericListenerError("GenericListenerError"),
+        WsGenericClientError("GenericClientError"),
+        ReadingInboundTextError("ReadingInboundTextError"),
+        ReadingInboundBinaryError("ReadingInboundBinaryError");
 
         private String errorCode;
 

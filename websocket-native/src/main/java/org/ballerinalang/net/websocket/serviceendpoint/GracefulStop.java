@@ -20,8 +20,8 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpConstants;
+import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
-import org.ballerinalang.net.websocket.WebsocketErrorType;
 
 /**
  * Stop the listener immediately and close the connection.
@@ -34,7 +34,8 @@ public class GracefulStop extends AbstractWebsocketNativeFunction {
             serverEndpoint.addNativeData(HttpConstants.CONNECTOR_STARTED, false);
             resetRegistry(serverEndpoint);
         } catch (Exception ex) {
-            return WebSocketUtil.createWebsocketError(ex.getMessage(), WebsocketErrorType.GENERIC_LISTENER_ERROR);
+            return WebSocketUtil
+                    .createWebsocketError(ex.getMessage(), WebSocketConstants.ErrorCode.WsGenericListenerError);
         }
         return null;
     }

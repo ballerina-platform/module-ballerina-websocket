@@ -178,8 +178,8 @@ public client class SyncClient {
     # Reads the texts in a synchronous manner
     #
     # + return  - The text data sent by the server or an `error` if an error occurs when sending
-    remote isolated function readString() returns string|WebSocketError {
-        return self.conn.readString();
+    remote isolated function readString(TargetType targetType) returns string|xml|json|record{}|WebSocketError {
+        return self.conn.readString(targetType);
     }
 }
 

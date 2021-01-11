@@ -593,8 +593,8 @@ public class WebSocketUtil {
                 WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), null));
     }
 
-    public static BError createWebsocketError(String message, WebsocketErrorType errorType) {
-        return ErrorCreator.createDistinctError(errorType.getErrorName(), PROTOCOL_WEBSOCKET_PKG_ID,
+    public static BError createWebsocketError(String message, WebSocketConstants.ErrorCode errorType) {
+        return ErrorCreator.createDistinctError(errorType.errorCode(), PROTOCOL_WEBSOCKET_PKG_ID,
                 StringUtils.fromString(message));
     }
 

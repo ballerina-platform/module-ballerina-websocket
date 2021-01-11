@@ -28,8 +28,8 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
+import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
-import org.ballerinalang.net.websocket.WebsocketErrorType;
 import org.ballerinalang.net.websocket.server.WebSocketServerService;
 import org.ballerinalang.net.websocket.server.WebSocketServicesRegistry;
 
@@ -54,10 +54,10 @@ public class Register extends AbstractWebsocketNativeFunction {
             } else if (resourceList.length > 1) {
                 return WebSocketUtil
                         .createWebsocketError("Invalid websocket Service. There should be only one onUpgrade resource",
-                                WebsocketErrorType.GENERIC_LISTENER_ERROR);
+                                WebSocketConstants.ErrorCode.WsGenericListenerError);
             } else {
-                return WebSocketUtil
-                        .createWebsocketError("Invalid websocket Service.", WebsocketErrorType.GENERIC_LISTENER_ERROR);
+                return WebSocketUtil.createWebsocketError("Invalid websocket Service.",
+                        WebSocketConstants.ErrorCode.WsGenericListenerError);
             }
         } catch (BError ex) {
             return ex;
