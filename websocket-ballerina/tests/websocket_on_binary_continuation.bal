@@ -16,13 +16,12 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 byte[] content = [];
 byte[] binaryContent = [];
 
 service /onBinaryContinuation on new Listener(21007) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new OnBinaryContinuation();
    }
 }
@@ -71,7 +70,4 @@ public function testBinaryContinuation() {
    string s = value is error ? value.toString() : value.toString();
    test:assertEquals(s, msg, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }

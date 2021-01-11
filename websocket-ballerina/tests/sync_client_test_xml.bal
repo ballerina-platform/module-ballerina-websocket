@@ -15,13 +15,12 @@
 // under the License.
 
 import ballerina/test;
-import ballerina/http;
 import ballerina/io;
 import ballerina/runtime;
 
 string aggregatedOutput = "";
 service /onTextXML on new Listener(21050) {
-   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource function onUpgrade .() returns Service|UpgradeError {
        return new WsServiceSyncXml();
    }
 }

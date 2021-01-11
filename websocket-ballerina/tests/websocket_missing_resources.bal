@@ -26,7 +26,7 @@ byte[] expectedPingBinaryData = [];
    idleTimeoutInSeconds: 10
 }
 service /onlyOnBinary on new Listener(21005) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .(http:Request req) returns Service|UpgradeError {
        return new OnlyOnBinary();
    }
 }
@@ -77,9 +77,6 @@ public function testMissingOnText() {
    runtime:sleep(500);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests behavior when onPong resource is missing and a pong is received
@@ -95,9 +92,6 @@ public function testMissingOnPong() {
    runtime:sleep(500);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests behavior when onBytes resource is missing and binary message is received
@@ -115,9 +109,6 @@ public function testMissingOnBinary() {
    runtime:sleep(500);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //    io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests behavior when onBytes resource is missing and binary message is received
@@ -130,7 +121,4 @@ public function testMissingOnIdleTimeout() {
    runtime:sleep(500);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //    io:println("Error occurred when closing connection", result);
-   //}
 }

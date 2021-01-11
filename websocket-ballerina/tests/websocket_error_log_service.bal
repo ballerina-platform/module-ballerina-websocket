@@ -15,11 +15,9 @@
 // under the License.
 
 import ballerina/io;
-//import ballerina/log;
-import ballerina/http;
 
 service UpgradeService /'error/ws on new Listener(21013) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ErrorService();
    }
 }
@@ -27,11 +25,9 @@ service UpgradeService /'error/ws on new Listener(21013) {
 service class ErrorService {
    *Service;
    remote function onOpen(Caller ep) {
-       //log:print("connection open");
    }
 
    remote function onString(Caller ep, string text) {
-       //log:printError(string `text received: ${text}`);
        var returnVal = ep->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;
@@ -43,6 +39,5 @@ service class ErrorService {
    }
 
    remote function onClose(Caller ep, int statusCode, string reason) {
-       //log:printError(string `Connection closed with ${statusCode}, ${reason}`);
    }
 }

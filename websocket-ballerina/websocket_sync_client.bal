@@ -108,14 +108,6 @@ public client class SyncClient {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `upgrade` or `onOpen` resources.
-    #
-    # + return - an `error` if an error occurs while checking the connection state
-    remote isolated function ready() returns WebSocketError? {
-        return self.conn.ready();
-    }
-
     # Sets a connection-related attribute.
     #
     # + key - The key, which identifies the attribute

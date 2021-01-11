@@ -17,12 +17,11 @@
 //import ballerina/log;
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 string proxyData = "";
 
 service / on new Listener(21018) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ProxyService();
    }
 }
@@ -63,7 +62,7 @@ service class ProxyService {
 }
 
 service /websocket on new Listener(21019) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ProxyService2();
    }
 }
@@ -91,7 +90,6 @@ service class ProxyService2 {
 
 service class clientCallbackService9 {
    remote function onString(AsyncClient wsEp, string text) {
-       //http:WebSocketCaller serviceEp = getAssociatedListener(wsEp);
        var returnVal = wsEp->writeString(text);
        if (returnVal is WebSocketError) {
            panic <error>returnVal;

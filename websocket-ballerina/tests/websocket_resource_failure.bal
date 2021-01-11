@@ -45,10 +45,10 @@
 //
 //service castErrror = @http:WebSocketServiceConfig {idleTimeoutInSeconds: 10} service {
 //
-//    resource function onString(http:WebSocketCaller wsEp, string text) {
+//    resource function onText(http:WebSocketCaller wsEp, string text) {
 //    }
 //
-//    resource function onBytes(http:WebSocketCaller wsEp, byte[] data) {
+//    resource function onBinary(http:WebSocketCaller wsEp, byte[] data) {
 //    }
 //
 //    resource function onPing(http:WebSocketCaller wsEp, byte[] data) {
@@ -86,7 +86,7 @@
 //    test:assertEquals(expectedReason, "Unexpected condition");
 //}
 //
-//// Tests failure of onString resource
+//// Tests failure of onText resource
 //@test:Config {}
 //public function testOnTextResource() {
 //    http:WebSocketClient wsClient = new ("ws://localhost:21016/resourceFailue?q1=name",
@@ -96,7 +96,7 @@
 //    test:assertEquals(expectedReason, "Unexpected condition");
 //}
 //
-//// Tests failure of onBytes resource
+//// Tests failure of onBinary resource
 //@test:Config {}
 //public function testOnBinaryResource() {
 //    http:WebSocketClient wsClient = new ("ws://localhost:21016/resourceFailue?q1=name",

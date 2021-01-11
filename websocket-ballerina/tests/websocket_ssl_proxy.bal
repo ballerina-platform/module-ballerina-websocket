@@ -17,7 +17,6 @@
 //import ballerina/log;
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
@@ -30,7 +29,7 @@ service /sslEcho on new Listener(21027, {
            }
        }
    }) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new SslProxy();
    }
 }
@@ -105,7 +104,7 @@ service /websocket on new Listener(21028, {
            }
        }
    }) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new SslProxyServer();
    }
 }

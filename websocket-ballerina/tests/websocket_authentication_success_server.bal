@@ -48,8 +48,8 @@
 //        io:println("onOpen: " + caller.getConnectionId());
 //    }
 //
-//    resource function onString(websocket:WebSocketCaller caller, string text, boolean finalFrame) {
-//        checkpanic caller->writeString(text);
+//    resource function onText(websocket:WebSocketCaller caller, string text, boolean finalFrame) {
+//        checkpanic caller->pushText(text);
 //    }
 //
 //    resource function onClose(websocket:WebSocketCaller caller, int statusCode, string reason) {

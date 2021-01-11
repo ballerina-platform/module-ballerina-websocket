@@ -33,5 +33,8 @@ module io.ballerina.stdlib.websocket {
     requires io.ballerina.stdlib.http;
     requires io.netty.handler;
     requires io.netty.codec.http;
+    requires io.netty.transport;
+    requires io.netty.codec;
+    requires io.netty.common;
     exports org.ballerinalang.net.websocket.server;
 }

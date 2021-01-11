@@ -17,7 +17,6 @@
 import ballerina/runtime;
 import ballerina/test;
 import ballerina/io;
-import ballerina/http;
 
 string data = "";
 string expectedMsg = "{\"name\":\"Riyafa\", \"age\":23}";
@@ -28,7 +27,7 @@ public type WebSocketPerson record {|
 |};
 
 service /onTextString on new Listener(21003) {
-   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService1();
    }
 }
@@ -41,7 +40,7 @@ service class WsService1 {
 }
 
 service /onTextJSON on new Listener(21023) {
-   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService2();
    }
 }
@@ -54,7 +53,7 @@ service class WsService2 {
 }
 
 service /onTextXML on new Listener(21024) {
-   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService3();
    }
 }
@@ -67,7 +66,7 @@ service class WsService3 {
 }
 
 service /onTextRecord on new Listener(21025) {
-    resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService4();
    }
 }
@@ -88,7 +87,7 @@ service class WsService4 {
 }
 
 service /onTextByteArray on new Listener(21026) {
-    resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService5();
     }
 }

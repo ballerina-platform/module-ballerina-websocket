@@ -29,7 +29,7 @@
 //    path: "/attach/detach"
 //}
 //service attachDetach on attachDetachEp {
-//    resource function onString(WebSocketCaller caller, string data, boolean finalFrame) returns error? {
+//    resource function onText(WebSocketCaller caller, string data, boolean finalFrame) returns error? {
 //        if (data == "attach") {
 //            var err = attachDetachEp.__attach(wsNoPath);
 //            handleError(err, caller);
@@ -46,22 +46,22 @@
 //}
 //
 //service wsWithPath = @ServiceConfig {path: "/hello"} service {
-//    resource function onString(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
-//        check conn->writeString(text);
+//    resource function onText(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
+//        check conn->pushText(text);
 //    }
 //};
 //
 //service wsNoPath = @ServiceConfig {} service {
 //
-//    resource function onString(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
-//        check conn->writeString(text);
+//    resource function onText(WebSocketCaller conn, string text, boolean finalFrame) returns error? {
+//        check conn->pushText(text);
 //    }
 //};
 //
 //service wsClientService = @ServiceConfig {} service {
 //
-//    resource function onString(WebSocketClient conn, string text, boolean finalFrame) returns error? {
-//        check conn->writeString(text);
+//    resource function onText(WebSocketClient conn, string text, boolean finalFrame) returns error? {
+//        check conn->pushText(text);
 //    }
 //};
 //
@@ -73,7 +73,7 @@
 //}
 //
 //service attachService = @ServiceConfig {} service {
-//    resource function onString(WebSocketClient caller, string text) {
+//    resource function onText(WebSocketClient caller, string text) {
 //        attDettExpectedData = <@untainted>text;
 //    }
 //    resource function onError(WebSocketClient caller, error err) {
@@ -86,7 +86,7 @@
 //@test:Config {}
 //public function attachClientService() {
 //    WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-//    checkpanic wsClientEp->writeString("client_attach");
+//    checkpanic wsClientEp->pushText("client_attach");
 //    runtime:sleep(500);
 //    test:assertEquals(attDettServerOutput, "GenericError: Client service cannot be attached to the Listener");
 //}
@@ -95,7 +95,7 @@
 //@test:Config {}
 //public function detachFirst() {
 //    WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-//    checkpanic wsClientEp->writeString("detach");
+//    checkpanic wsClientEp->pushText("detach");
 //    runtime:sleep(500);
 //    test:assertEquals(attDettServerOutput, "GenericError: Cannot detach service. Service has not been registered");
 //    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -108,19 +108,19 @@
 //@test:Config {}
 //public function attachSuccess() {
 //    WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-//    checkpanic wsClientEp->writeString("attach");
+//    checkpanic wsClientEp->pushText("attach");
 //    runtime:sleep(500);
 //
 //    // send to the no path service
 //    WebSocketClient attachClient = new ("ws://localhost:21032", {callbackService: attachService});
-//    checkpanic attachClient->writeString(msg);
+//    checkpanic attachClient->pushText(msg);
 //    runtime:sleep(500);
 //    test:assertEquals(attDettExpectedData, msg);
 //
 //    // send to service with path
 //    msg = "path message";
 //    WebSocketClient pathClient = new ("ws://localhost:21032/hello", {callbackService: attachService});
-//    checkpanic attachClient->writeString(msg);
+//    checkpanic attachClient->pushText(msg);
 //    runtime:sleep(500);
 //    test:assertEquals(attDettExpectedData, msg);
 //    error? result1 = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 180);
@@ -141,7 +141,7 @@
 //@test:Config {}
 //public function detachSuccess() {
 //    WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-//    checkpanic wsClientEp->writeString("detach");
+//    checkpanic wsClientEp->pushText("detach");
 //    runtime:sleep(500);
 //    test:assertEquals(attDettServerOutput, "GenericError: Cannot detach service. Service has not been registered");
 //    WebSocketClient attachClient = new ("ws://localhost:21032", {callbackService: attachService});
@@ -157,9 +157,9 @@
 //@test:Config {}
 //public function attachTwice() {
 //    WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-//    checkpanic wsClientEp->writeString("attach");
+//    checkpanic wsClientEp->pushText("attach");
 //    runtime:sleep(500);
-//    checkpanic wsClientEp->writeString("attach");
+//    checkpanic wsClientEp->pushText("attach");
 //    runtime:sleep(500);
 //    test:assertEquals(attDettServerOutput, "GenericError: Two services have the same addressable URI");
 //    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -172,9 +172,9 @@
 //@test:Config {}
 //public function detachTwice() {
 //    WebSocketClient wsClientEp = new ("ws://localhost:21032/attach/detach");
-//    checkpanic wsClientEp->writeString("detach");
+//    checkpanic wsClientEp->pushText("detach");
 //    runtime:sleep(500);
-//    checkpanic wsClientEp->writeString("detach");
+//    checkpanic wsClientEp->pushText("detach");
 //    runtime:sleep(500);
 //    test:assertEquals(attDettServerOutput, "GenericError: Cannot detach service. Service has not been registered");
 //    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

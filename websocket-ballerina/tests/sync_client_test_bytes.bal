@@ -63,7 +63,7 @@ public function testSyncClientByteArray() {
 
       byte[] resp5 = <byte[]> checkpanic wsClient->readString(outputByteArr);
       aggregatedByteOutput = aggregatedByteOutput + resp5.toString();
-      io:println("4th response received at sync byte[] client :" + resp5.toString());
+      io:println("final response received at sync byte[] client :" + resp5.toString());
    }
    @strand {
       thread:"any"

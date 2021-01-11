@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * Utilities related to websocket connector actions.
@@ -141,7 +141,7 @@ public class WebSocketConnector {
     public static Object externReadString(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        BlockingQueue<WebSocketTextMessage> messages = connectionInfo.getTxtMsgQueue();
+        SynchronousQueue<WebSocketTextMessage> messages = connectionInfo.getTxtMsgQueue();
         try {
             String msg = messages.take().getText();
             return StringUtils.fromString(msg);
@@ -156,12 +156,12 @@ public class WebSocketConnector {
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {
             WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
+            WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
+                    .createIfNullAndGetStringAggregator();
+            SynchronousQueue<WebSocketTextMessage> message = connectionInfo.getTxtMsgQueue();
             while (true) {
-                BlockingQueue<WebSocketTextMessage> message = connectionInfo.getTxtMsgQueue();
                 WebSocketTextMessage msg = message.take();
                 boolean finalFragment = msg.isFinalFragment();
-                WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
-                        .createIfNullAndGetStringAggregator();
                 stringAggregator.appendAggregateString(msg.getText());
                 if (finalFragment) {
                     BXml bxml = XmlUtils.parse(stringAggregator.getAggregateString());
@@ -172,7 +172,6 @@ public class WebSocketConnector {
                     stringAggregator.resetAggregateString();
                     return bxml;
                 }
-
             }
         } catch (InterruptedException | IllegalAccessException e) {
             return WebSocketUtil
@@ -187,8 +186,8 @@ public class WebSocketConnector {
             WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
+            SynchronousQueue<WebSocketTextMessage> message = connectionInfo.getTxtMsgQueue();
             while (true) {
-                BlockingQueue<WebSocketTextMessage> message = connectionInfo.getTxtMsgQueue();
                 WebSocketTextMessage msg = message.take();
                 boolean finalFragment = msg.isFinalFragment();
                 stringAggregator.appendAggregateString(msg.getText());
@@ -211,8 +210,8 @@ public class WebSocketConnector {
             WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
+            SynchronousQueue<WebSocketTextMessage> message = connectionInfo.getTxtMsgQueue();
             while (true) {
-                BlockingQueue<WebSocketTextMessage> message = connectionInfo.getTxtMsgQueue();
                 WebSocketTextMessage msg = message.take();
                 boolean finalFragment = msg.isFinalFragment();
                 stringAggregator.appendAggregateString(msg.getText());
@@ -232,7 +231,7 @@ public class WebSocketConnector {
     public static Object externReadBytes(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        BlockingQueue<WebSocketBinaryMessage> messages = connectionInfo.getBinMsgQueue();
+        SynchronousQueue<WebSocketBinaryMessage> messages = connectionInfo.getBinMsgQueue();
         try {
             byte[] binaryMessage = messages.take().getByteArray();
             return ValueCreator.createArrayValue(binaryMessage);

@@ -83,6 +83,8 @@ class WebSocketConnector {
 
     # Reads text data from the websocket connection.
     #
+    # + targetType -the message type (`string`, `xml`, `json`, `byte[]`,`record {| anydata...; |}`),
+    #               which is expected to be returned after data binding
     # + return  - The text message or an `error` if an error occurs when sending
     public isolated function readString(TargetType targetType) returns string|xml|json|record{}|WebSocketError {
         if (targetType is typedesc<string>) {

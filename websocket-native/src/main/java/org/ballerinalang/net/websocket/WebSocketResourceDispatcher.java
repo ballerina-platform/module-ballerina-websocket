@@ -194,7 +194,7 @@ public class WebSocketResourceDispatcher {
         Object dispatchingService = wsService.getWsService(webSocketConnection.getChannelId());
         MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService)
                 .getType())).getMethods();
-        BObject balService1 = (BObject) dispatchingService;
+        BObject balService = (BObject) dispatchingService;
         for (MethodType remoteFunc : remoteFunctions) {
             if (remoteFunc.getName().equals(RESOURCE_NAME_ON_OPEN)) {
                 onOpenResource = remoteFunc;
@@ -202,7 +202,7 @@ public class WebSocketResourceDispatcher {
             }
         }
         if (onOpenResource != null) {
-            executeOnOpenResource(wsService, balService1, onOpenResource, webSocketCaller, webSocketConnection);
+            executeOnOpenResource(wsService, balService, onOpenResource, webSocketCaller, webSocketConnection);
         } else {
             webSocketConnection.readNextFrame();
         }

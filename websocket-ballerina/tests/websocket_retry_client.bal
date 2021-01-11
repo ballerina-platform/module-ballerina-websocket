@@ -39,13 +39,13 @@
 //        io:println("onOpen: " + caller.getConnectionId());
 //    }
 //
-//    resource function onString(http:WebSocketCaller caller, string text, boolean finalFrame) {
-//        checkpanic caller->writeString(text);
+//    resource function onText(http:WebSocketCaller caller, string text, boolean finalFrame) {
+//        checkpanic caller->pushText(text);
 //    }
 //};
 //
 //service retryClientCallbackService = @http:WebSocketServiceConfig {} service {
-//    resource function onString(http:WebSocketClient wsEp, string text) {
+//    resource function onText(http:WebSocketClient wsEp, string text) {
 //        expectedOutput34 = <@untainted>text;
 //    }
 //};
@@ -60,7 +60,7 @@
 //                    retryClientCallbackService,
 //                retryConfig: {}
 //            });
-//        var returnVal = wsClientEp->writeString("Hi madam");
+//        var returnVal = wsClientEp->pushText("Hi madam");
 //        if (returnVal is http:WebSocketError) {
 //            panic <error>returnVal;
 //        }

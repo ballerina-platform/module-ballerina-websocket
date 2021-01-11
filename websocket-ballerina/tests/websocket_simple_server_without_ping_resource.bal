@@ -17,12 +17,11 @@
 import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 byte[] expectedAutoPongData = [];
 
 service / on new Listener(21020) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new TestService();
    }
 }

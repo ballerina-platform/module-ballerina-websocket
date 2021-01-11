@@ -16,12 +16,11 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 string errorMsg2 = "";
 
 service /pushTextFailureService on new Listener(21008) {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new PushTextFailureService();
    }
 }

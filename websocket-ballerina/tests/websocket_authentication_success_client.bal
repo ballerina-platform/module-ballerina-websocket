@@ -43,13 +43,13 @@
 //                }
 //            }
 //            );
-//        checkpanic wsClient->writeString("Hello World!");
+//        checkpanic wsClient->pushText("Hello World!");
 //    }
 //}
 //
 //service authenticationService = @websocket:ServiceConfig {} service {
 //
-//    resource function onString(websocket:WebSocketClient conn, string text, boolean finalFrame) {
+//    resource function onText(websocket:WebSocketClient conn, string text, boolean finalFrame) {
 //        expectedOutput39 = <@untainted>text;
 //    }
 //

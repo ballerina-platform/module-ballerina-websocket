@@ -16,13 +16,12 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 
 string arrivedData = "";
 boolean isClientConnectionOpen = false;
 
 service /'client/'service on new Listener(21021) {
-   resource isolated function onUpgrade bbe(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function onUpgrade bbe() returns Service|UpgradeError {
        return new clientFailure200();
    }
 }
@@ -51,9 +50,6 @@ public function testClientSuccessWithoutService() {
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests the client initialization with a WebSocketClientService but without any resources.
@@ -65,9 +61,6 @@ public function testClientSuccessWithWebSocketClientService() {
    runtime:sleep(500);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   io:println("Error occurred when closing connection", result);
-   //}
 }
 
 // Tests the client initialization failure when used with a WebSocketService.

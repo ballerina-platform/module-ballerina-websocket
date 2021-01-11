@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/test;
-import ballerina/http;
 import ballerina/io;
 import ballerina/runtime;
 
@@ -25,7 +24,7 @@ public type WsPerson record {|
    int age;
 |};
 service /onTextRecord on new Listener(21052) {
-   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource function onUpgrade .() returns Service|UpgradeError {
        return new WsServiceSyncRecord();
    }
 }

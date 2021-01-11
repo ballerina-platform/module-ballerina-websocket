@@ -15,13 +15,12 @@
 // under the License.
 
 import ballerina/test;
-import ballerina/http;
 import ballerina/runtime;
 
 int expectedStatusCode = 0;
 
 service /clientClose on new Listener(21004) {
-    resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new clientCloseService();
     }
 }

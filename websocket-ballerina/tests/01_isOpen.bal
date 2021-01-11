@@ -28,7 +28,7 @@ int x = 0;
 final map<string> customHeaders = {"X-some-header": "some-header-value"};
 
 service /isOpen/abc on socketListener {
-    resource function onUpgrade barz/[string xyz]/abc/[string value](http:Caller caller, http:Request req)
+    resource function onUpgrade barz/[string xyz]/abc/[string value](http:Request req)
                returns Service|UpgradeError  {
        pathParam = <@untainted> xyz;
        var qParam = req.getQueryParamValue("para1");

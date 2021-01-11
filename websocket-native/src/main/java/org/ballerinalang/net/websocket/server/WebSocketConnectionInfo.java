@@ -25,7 +25,6 @@ import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -39,8 +38,8 @@ public class WebSocketConnectionInfo {
     private final WebSocketConnection webSocketConnection;
     private StringAggregator stringAggregator = null;
     private final boolean sync;
-    private BlockingQueue<WebSocketTextMessage> txtMsgQueue = new SynchronousQueue<WebSocketTextMessage>();
-    private BlockingQueue<WebSocketBinaryMessage> binMsgQueue = new SynchronousQueue<>();
+    private SynchronousQueue<WebSocketTextMessage> txtMsgQueue = new SynchronousQueue<>();
+    private SynchronousQueue<WebSocketBinaryMessage> binMsgQueue = new SynchronousQueue<>();
 
     /**
      * @param webSocketService    can be the WebSocketServerService or WebSocketService
@@ -75,7 +74,7 @@ public class WebSocketConnectionInfo {
         }
     }
 
-    public BlockingQueue<WebSocketTextMessage> getTxtMsgQueue() {
+    public SynchronousQueue<WebSocketTextMessage> getTxtMsgQueue() {
         return txtMsgQueue;
     }
 
@@ -87,7 +86,7 @@ public class WebSocketConnectionInfo {
         }
     }
 
-    public BlockingQueue<WebSocketBinaryMessage> getBinMsgQueue() {
+    public SynchronousQueue<WebSocketBinaryMessage> getBinMsgQueue() {
         return binMsgQueue;
     }
 

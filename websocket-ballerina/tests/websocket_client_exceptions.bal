@@ -16,7 +16,6 @@
 
 import ballerina/runtime;
 import ballerina/test;
-import ballerina/http;
 import ballerina/io;
 
 string errMessage = "";
@@ -31,7 +30,7 @@ service class errorResourceService {
 
 @ServiceConfig {}
 service /websocket on new Listener(21030) {
-    resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError  {
+    resource isolated function onUpgrade .() returns Service|UpgradeError  {
        return new ErrorServer();
     }
 }
@@ -106,9 +105,6 @@ public function testLongFrameError() {
        test:assertFail("Mismatched output");
    }
    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
 }
 
 // Close the connection and push text
@@ -116,9 +112,6 @@ public function testLongFrameError() {
 public function testConnectionClosedError() {
    AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService());
    error? result = wsClientEp->close(timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
    runtime:sleep(2000);
    var err = wsClientEp->writeString("some");
    if (err is error) {

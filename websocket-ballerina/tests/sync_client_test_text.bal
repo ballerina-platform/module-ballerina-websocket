@@ -15,13 +15,12 @@
 // under the License.
 
 import ballerina/test;
-import ballerina/http;
 import ballerina/io;
 import ballerina/runtime;
 
 string aggregatedTextOutput = "";
 service /onTextString on new Listener(21000) {
-   resource function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource function onUpgrade .() returns Service|UpgradeError {
        return new WsServiceSync();
    }
 }
@@ -40,9 +39,9 @@ service class WsServiceSync {
 @test:Config {}
 public function testSyncClient() {
    SyncClient wsClient = new("ws://localhost:21000/onTextString");
-    @strand {
-           thread:"any"
-       }
+   @strand {
+      thread:"any"
+   }
    worker w1 {
       io:println("Reading message starting: sync text client");
 
