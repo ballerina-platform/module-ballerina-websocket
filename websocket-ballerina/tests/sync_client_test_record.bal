@@ -23,7 +23,8 @@ public type WsPerson record {|
    string name;
    int age;
 |};
-service /onTextRecord on new Listener(21052) {
+listener Listener l10 = checkpanic new(21052);
+service /onTextRecord on l10 {
    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsServiceSyncRecord();
    }

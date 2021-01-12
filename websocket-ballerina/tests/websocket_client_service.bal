@@ -19,8 +19,8 @@ import ballerina/test;
 
 string arrivedData = "";
 boolean isClientConnectionOpen = false;
-
-service /'client/'service on new Listener(21021) {
+listener Listener l15 = checkpanic new(21021);
+service /'client/'service on l15 {
    resource isolated function onUpgrade bbe() returns Service|UpgradeError {
        return new clientFailure200();
    }
@@ -28,7 +28,7 @@ service /'client/'service on new Listener(21021) {
 
 service class clientFailure200 {
   *Service;
-  remote function onOpen(Caller wsEp) {
+  remote function onConnect(Caller wsEp) {
        isClientConnectionOpen = true;
    }
 }

@@ -28,8 +28,9 @@ service class errorResourceService {
    }
 }
 
+listener Listener l14 = checkpanic new(21030);
 @ServiceConfig {}
-service /websocket on new Listener(21030) {
+service /websocket on l14 {
     resource isolated function onUpgrade .() returns Service|UpgradeError  {
        return new ErrorServer();
     }
@@ -37,7 +38,7 @@ service /websocket on new Listener(21030) {
 
 service class ErrorServer {
   *Service;
-   remote isolated function onOpen(Caller caller) {
+   remote isolated function onConnect(Caller caller) {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 

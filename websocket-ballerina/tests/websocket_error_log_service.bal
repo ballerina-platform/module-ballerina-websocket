@@ -16,7 +16,8 @@
 
 import ballerina/io;
 
-service UpgradeService /'error/ws on new Listener(21013) {
+listener Listener l16 = checkpanic new(21013);
+service UpgradeService /'error/ws on l16 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ErrorService();
    }
@@ -24,7 +25,7 @@ service UpgradeService /'error/ws on new Listener(21013) {
 
 service class ErrorService {
    *Service;
-   remote function onOpen(Caller ep) {
+   remote function onConnect(Caller ep) {
    }
 
    remote function onString(Caller ep, string text) {

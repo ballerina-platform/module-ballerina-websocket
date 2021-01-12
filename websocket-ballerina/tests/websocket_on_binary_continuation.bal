@@ -19,8 +19,8 @@ import ballerina/test;
 
 byte[] content = [];
 byte[] binaryContent = [];
-
-service /onBinaryContinuation on new Listener(21007) {
+listener Listener l18 = checkpanic new(21007);
+service /onBinaryContinuation on l18 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new OnBinaryContinuation();
    }

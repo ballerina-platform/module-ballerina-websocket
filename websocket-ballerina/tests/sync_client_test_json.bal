@@ -20,7 +20,8 @@ import ballerina/io;
 import ballerina/runtime;
 
 string aggregatedjsonOutput = "";
-service /onTextJson on new Listener(21051) {
+listener Listener l9 = checkpanic new(21051);
+service /onTextJson on l9 {
    resource function onUpgrade .(http:Caller caller) returns Service|UpgradeError {
        return new WsServiceSyncJson();
    }

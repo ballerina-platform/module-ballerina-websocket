@@ -115,7 +115,7 @@ public client class AsyncClient {
     }
 
     # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `upgrade` or `onOpen` resources.
+    # WebSocketListener, it can be called only in the `onUpgrade` or `onConnect` resources.
     #
     # + return - an `error` if an error occurs while checking the connection state
     remote isolated function ready() returns WebSocketError? {

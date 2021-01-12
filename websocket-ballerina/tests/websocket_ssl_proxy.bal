@@ -14,28 +14,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//import ballerina/log;
+import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
 
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
-
-service /sslEcho on new Listener(21027, {
-       secureSocket: {
-           keyStore: {
-               path: KEYSTORE_PATH,
-               password: "ballerina"
-           }
-       }
-   }) {
+listener Listener l24 = checkpanic new(21027, {
+                      secureSocket: {
+                          keyStore: {
+                              path: KEYSTORE_PATH,
+                              password: "ballerina"
+                          }
+                      }
+                  });
+service /sslEcho on l24 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new SslProxy();
    }
 }
 service class SslProxy {
    *Service;
-   remote function onOpen(Caller wsEp) {
+   remote function onConnect(Caller wsEp) {
        AsyncClient wsClientEp = new ("wss://localhost:21028/websocket", new sslClientService(), {
                secureSocket: {
                    trustStore: {
@@ -96,14 +96,15 @@ service class sslClientService {
    }
 }
 
-service /websocket on new Listener(21028, {
-       secureSocket: {
-           keyStore: {
-               path: KEYSTORE_PATH,
-               password: "ballerina"
-           }
-       }
-   }) {
+listener Listener l27 = checkpanic new(21028, {
+                              secureSocket: {
+                                  keyStore: {
+                                      path: KEYSTORE_PATH,
+                                      password: "ballerina"
+                                  }
+                              }
+                          });
+service /websocket on l27 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new SslProxyServer();
    }
@@ -111,14 +112,14 @@ service /websocket on new Listener(21028, {
 
 service class SslProxyServer {
    *Service;
-   remote function onOpen(Caller caller) {
-       //log:print("The Connection ID: " + caller.getConnectionId());
+   remote function onConnect(Caller caller) {
+       io:println("The Connection ID: " + caller.getConnectionId());
    }
 
    remote function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
-           //log:printError("Error occurred when sending text message", err = err);
+           io:println("Error occurred when sending text message: ", err);
        }
    }
 

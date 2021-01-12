@@ -19,8 +19,8 @@ import ballerina/runtime;
 import ballerina/test;
 
 byte[] expectedAutoPongData = [];
-
-service / on new Listener(21020) {
+listener Listener l23 = checkpanic new(21020);
+service / on l23 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new TestService();
    }
@@ -28,7 +28,7 @@ service / on new Listener(21020) {
 
 service class TestService {
    *Service;
-   remote function onOpen(Caller wsEp) {
+   remote function onConnect(Caller wsEp) {
        io:println("New Client Connected");
    }
 }

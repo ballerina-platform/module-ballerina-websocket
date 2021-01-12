@@ -24,7 +24,7 @@ service class WsService {
 ```
 The `upgradeService` is a server callback service.
 
-**onOpen resource**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` resource is dispatched. This resource is only available in the service of the server.
+**onConnect resource**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` resource is dispatched. This resource is only available in the service of the server.
 
 **onString resource**: The received text messages are dispatched to this resource. This resource is not applicable for `SyncClient`
 

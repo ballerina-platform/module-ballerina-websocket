@@ -19,7 +19,8 @@ import ballerina/io;
 import ballerina/runtime;
 
 string aggregatedOutput = "";
-service /onTextXML on new Listener(21050) {
+listener Listener l12 = checkpanic new(21050);
+service /onTextXML on l12 {
    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsServiceSyncXml();
    }

@@ -18,8 +18,8 @@ import ballerina/test;
 import ballerina/runtime;
 
 int expectedStatusCode = 0;
-
-service /clientClose on new Listener(21004) {
+listener Listener l13 = checkpanic new(21004);
+service /clientClose on l13 {
     resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new clientCloseService();
     }

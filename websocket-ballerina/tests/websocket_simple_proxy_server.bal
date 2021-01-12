@@ -14,13 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//import ballerina/log;
+import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
 
 string proxyData = "";
-
-service / on new Listener(21018) {
+listener Listener l22 = checkpanic new(21018);
+service / on l22 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ProxyService();
    }
@@ -28,7 +28,7 @@ service / on new Listener(21018) {
 
 service class ProxyService {
   *Service;
-  remote function onOpen(Caller wsEp) {
+  remote function onConnect(Caller wsEp) {
        AsyncClient wsClientEp = new ("ws://localhost:21019/websocket", new clientCallbackService9(), {
                readyOnConnect: false
            });
@@ -61,7 +61,8 @@ service class ProxyService {
 
 }
 
-service /websocket on new Listener(21019) {
+listener Listener l26 = checkpanic new(21019);
+service /websocket on l26 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ProxyService2();
    }
@@ -69,14 +70,14 @@ service /websocket on new Listener(21019) {
 
 service class ProxyService2 {
    *Service;
-   remote function onOpen(Caller caller) {
-       //log:print("The Connection ID: " + caller.getConnectionId());
+   remote function onConnect(Caller caller) {
+       io:println("The Connection ID: " + caller.getConnectionId());
    }
 
    remote function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
        if (err is WebSocketError) {
-           //log:printError("Error occurred when sending text message", err = err);
+           io:println("Error occurred when sending text message: ", err);
        }
    }
 

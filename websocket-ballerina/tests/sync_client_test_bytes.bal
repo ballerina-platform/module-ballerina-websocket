@@ -20,7 +20,9 @@ import ballerina/runtime;
 
 string aggregatedByteOutput = "";
 type outputByteArr byte[];
-service /onTextBytes on new Listener(21053) {
+
+listener Listener l8 = checkpanic new(21053);
+service /onTextBytes on l8 {
    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsServiceSyncBytes();
    }

@@ -26,7 +26,9 @@ public type WebSocketPerson record {|
    int age;
 |};
 
-service /onTextString on new Listener(21003) {
+listener Listener l2 = checkpanic new(21003);
+
+service /onTextString on l2 {
    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService1();
    }
@@ -39,7 +41,9 @@ service class WsService1 {
   }
 }
 
-service /onTextJSON on new Listener(21023) {
+listener Listener l3 = checkpanic new(21023);
+
+service /onTextJSON on l3 {
    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService2();
    }
@@ -52,7 +56,9 @@ service class WsService2 {
   }
 }
 
-service /onTextXML on new Listener(21024) {
+listener Listener l4 = checkpanic new(21024);
+
+service /onTextXML on l4 {
    resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService3();
    }
@@ -65,7 +71,9 @@ service class WsService3 {
   }
 }
 
-service /onTextRecord on new Listener(21025) {
+listener Listener l5 = checkpanic new(21025);
+
+service /onTextRecord on l5 {
     resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService4();
    }
@@ -86,7 +94,9 @@ service class WsService4 {
    }
 }
 
-service /onTextByteArray on new Listener(21026) {
+listener Listener l6 = checkpanic new(21026);
+
+service /onTextByteArray on l6 {
     resource function onUpgrade .() returns Service|UpgradeError {
        return new WsService5();
     }

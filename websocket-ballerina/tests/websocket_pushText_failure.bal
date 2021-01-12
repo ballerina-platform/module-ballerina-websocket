@@ -18,8 +18,8 @@ import ballerina/runtime;
 import ballerina/test;
 
 string errorMsg2 = "";
-
-service /pushTextFailureService on new Listener(21008) {
+listener Listener l20 = checkpanic new(21008);
+service /pushTextFailureService on l20 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new PushTextFailureService();
    }
@@ -27,7 +27,7 @@ service /pushTextFailureService on new Listener(21008) {
 
 service class PushTextFailureService {
    *Service;
-   remote function onOpen(Caller caller) {
+   remote function onConnect(Caller caller) {
        WebSocketError? err1 = caller->close(timeoutInSeconds = 0);
        var err = caller->writeString("hey");
        if (err is WebSocketError) {

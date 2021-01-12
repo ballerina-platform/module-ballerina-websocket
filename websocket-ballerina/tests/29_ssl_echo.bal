@@ -22,14 +22,16 @@ string expectedString = "";
 byte[] expectedBinaryData = [];
 string expectedRawpath = "";
 
-service /sslEcho on new Listener(21029, {
-       secureSocket: {
-           keyStore: {
-               path: "tests/certsAndKeys/ballerinaKeystore.p12",
-               password: "ballerina"
-           }
-       }
-   }) {
+listener Listener l7 = checkpanic new(21029, {
+                         secureSocket: {
+                             keyStore: {
+                                 path: "tests/certsAndKeys/ballerinaKeystore.p12",
+                                 password: "ballerina"
+                             }
+                         }
+                     });
+
+service /sslEcho on l7 {
    resource function upgrade .(http:Request req) returns Service {
        expectedRawpath = req.rawPath;
        return new WsService6();

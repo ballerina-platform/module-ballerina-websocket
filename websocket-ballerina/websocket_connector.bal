@@ -74,7 +74,7 @@ class WebSocketConnector {
     }
 
     # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. The
-    # WebSocketListener can be called only in the `upgrade` or `onOpen` resources.
+    # WebSocketListener can be called only in the `upgrade` or `onConnect` resources.
     #
     # + return - An `error` if an error occurs when sending
     public isolated function ready() returns WebSocketError? {

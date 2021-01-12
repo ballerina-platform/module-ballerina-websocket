@@ -19,8 +19,8 @@ import ballerina/test;
 
 byte[] expectedPongData = [];
 byte[] expectedPongData1 = [];
-
-service /pingpong/ws on new Listener(21014) {
+listener Listener l19 = checkpanic new(21014);
+service /pingpong/ws on l19 {
     resource isolated function onUpgrade .() returns Service|UpgradeError  {
        return new PingPongService();
     }
@@ -28,7 +28,7 @@ service /pingpong/ws on new Listener(21014) {
 
 service class PingPongService {
   *Service;
-   remote isolated function onOpen(Caller caller) {
+   remote isolated function onConnect(Caller caller) {
    }
 
    remote isolated function onPing(Caller caller, byte[] localData) {

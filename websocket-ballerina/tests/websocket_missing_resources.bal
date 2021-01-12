@@ -21,11 +21,11 @@ import ballerina/http;
 string expectedData = "";
 byte[] expectedBinData = [];
 byte[] expectedPingBinaryData = [];
-
+listener Listener l17 = checkpanic new(21005);
 @ServiceConfig {
    idleTimeoutInSeconds: 10
 }
-service /onlyOnBinary on new Listener(21005) {
+service /onlyOnBinary on l17 {
    resource isolated function onUpgrade .(http:Request req) returns Service|UpgradeError {
        return new OnlyOnBinary();
    }
@@ -37,7 +37,8 @@ service class OnlyOnBinary {
    }
 }
 
-service /onlyOnText on new Listener(21006) {
+listener Listener l25 = checkpanic new(21006);
+service /onlyOnText on l25 {
    resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
        return new OnlyOnText();
    }

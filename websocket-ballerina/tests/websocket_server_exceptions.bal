@@ -19,8 +19,8 @@ import ballerina/runtime;
 import ballerina/test;
 
 string serverOutput = "";
-
-service /server/errors on new Listener(21031) {
+listener Listener l21 = checkpanic new(21031);
+service /server/errors on l21 {
    resource isolated function onUpgrade .() returns Service|UpgradeError {
        return new ServerError();
    }
