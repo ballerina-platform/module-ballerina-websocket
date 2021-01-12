@@ -46,25 +46,25 @@ public function testSyncClient() {
    worker w1 {
       io:println("Reading message starting: sync text client");
 
-      string resp1 = <string> checkpanic wsClient->readString(string);
+      string resp1 = <string> checkpanic wsClient->readString();
       aggregatedTextOutput = aggregatedTextOutput + resp1;
       io:println("1st response received at sync text client :" + resp1);
 
-      var resp2 = <string> checkpanic wsClient->readString(string);
+      var resp2 = <string> checkpanic wsClient->readString();
       aggregatedTextOutput = aggregatedTextOutput + resp2;
       io:println("2nd response received at sync text client :" + resp2);
 
-      var resp3 = <string> checkpanic wsClient->readString(string);
+      var resp3 = <string> checkpanic wsClient->readString();
       aggregatedTextOutput = aggregatedTextOutput + resp3;
       io:println("3rd response received at sync text client :" + resp3);
 
       runtime:sleep(3000);
 
-      var resp4 = <string> checkpanic wsClient->readString(string);
+      var resp4 = <string> checkpanic wsClient->readString();
       aggregatedTextOutput = aggregatedTextOutput + resp4;
       io:println("4th response received at sync text client :" + resp4);
 
-      var resp5 = <string> checkpanic wsClient->readString(string);
+      var resp5 = <string> checkpanic wsClient->readString();
       aggregatedTextOutput = aggregatedTextOutput + resp5;
       io:println("Final response received at sync text client :" + resp5);
    }

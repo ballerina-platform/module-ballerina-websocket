@@ -31,7 +31,7 @@ service /onTextBytes on l8 {
 service class WsServiceSyncBytes {
   *Service;
   remote isolated function onString(Caller caller, byte[] data) {
-      checkpanic caller->writeString(data);
+      checkpanic caller->writeBytes(data);
   }
 
   remote isolated function onClose(Caller caller, string data, boolean finalFrame) {
@@ -47,23 +47,23 @@ public function testSyncClientByteArray() {
    }
    worker w1 {
       io:println("Reading message starting: sync byte[] client");
-      byte[] resp1 = <byte[]> checkpanic wsClient->readString(outputByteArr);
+      byte[] resp1 = <byte[]> checkpanic wsClient->readBytes();
       aggregatedByteOutput = aggregatedByteOutput + resp1.toString();
       io:println("1st response received at sync byte[] client :" + resp1.toString());
 
-      byte[] resp2 = <byte[]> checkpanic wsClient->readString(outputByteArr);
+      byte[] resp2 = <byte[]> checkpanic wsClient->readBytes();
       aggregatedByteOutput = aggregatedByteOutput + resp2.toString();
       io:println("2nd response received at sync byte[] client :" + resp2.toString());
 
-      byte[] resp3 = <byte[]> checkpanic wsClient->readString(outputByteArr);
+      byte[] resp3 = <byte[]> checkpanic wsClient->readBytes();
       aggregatedByteOutput = aggregatedByteOutput + resp3.toString();
       io:println("3rd response received at sync byte[] client :" + resp3.toString());
 
-      byte[] resp4 = <byte[]> checkpanic wsClient->readString(outputByteArr);
+      byte[] resp4 = <byte[]> checkpanic wsClient->readBytes();
       aggregatedByteOutput = aggregatedByteOutput + resp4.toString();
       io:println("4th response received at sync byte[] client :" + resp4.toString());
 
-      byte[] resp5 = <byte[]> checkpanic wsClient->readString(outputByteArr);
+      byte[] resp5 = <byte[]> checkpanic wsClient->readBytes();
       aggregatedByteOutput = aggregatedByteOutput + resp5.toString();
       io:println("final response received at sync byte[] client :" + resp5.toString());
    }

@@ -18,17 +18,12 @@ package org.ballerinalang.net.websocket.actions.websocketconnector;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.XmlNodeType;
-import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.api.values.BXml;
 import io.netty.channel.ChannelFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
@@ -39,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -146,83 +140,6 @@ public class WebSocketConnector {
             String msg = msgQueue.take().getText();
             return StringUtils.fromString(msg);
         } catch (InterruptedException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
-        }
-    }
-
-    public static Object externReadXml(Environment env, BObject wsConnection) {
-        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
-                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        try {
-            WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
-            WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
-                    .createIfNullAndGetStringAggregator();
-            SynchronousQueue<WebSocketTextMessage> msgQueue = connectionInfo.getTxtMsgQueue();
-            while (true) {
-                WebSocketTextMessage msg = msgQueue.take();
-                boolean finalFragment = msg.isFinalFragment();
-                stringAggregator.appendAggregateString(msg.getText());
-                if (finalFragment) {
-                    BXml bxml = XmlUtils.parse(stringAggregator.getAggregateString());
-                    if (bxml.getNodeType() != XmlNodeType.SEQUENCE) {
-                        throw WebSocketUtil.getWebSocketError("Invalid XML data", null,
-                                WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
-                    }
-                    stringAggregator.resetAggregateString();
-                    return bxml;
-                }
-            }
-        } catch (InterruptedException | IllegalAccessException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
-        }
-    }
-
-    public static Object externReadJson(Environment env, BObject wsConnection) {
-        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
-                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        try {
-            WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
-            WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
-                    .createIfNullAndGetStringAggregator();
-            SynchronousQueue<WebSocketTextMessage> msgQueue = connectionInfo.getTxtMsgQueue();
-            while (true) {
-                WebSocketTextMessage msg = msgQueue.take();
-                boolean finalFragment = msg.isFinalFragment();
-                stringAggregator.appendAggregateString(msg.getText());
-                if (finalFragment) {
-                    Object jsonMsg = JsonUtils.parse(stringAggregator.getAggregateString());
-                    stringAggregator.resetAggregateString();
-                    return jsonMsg;
-                }
-            }
-        } catch (InterruptedException | IllegalAccessException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
-        }
-    }
-
-    public static Object externReadTextAsBytes(Environment env, BObject wsConnection) {
-        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
-                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        try {
-            WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
-            WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
-                    .createIfNullAndGetStringAggregator();
-            SynchronousQueue<WebSocketTextMessage> msgQueue = connectionInfo.getTxtMsgQueue();
-            while (true) {
-                WebSocketTextMessage msg = msgQueue.take();
-                boolean finalFragment = msg.isFinalFragment();
-                stringAggregator.appendAggregateString(msg.getText());
-                if (finalFragment) {
-                    Object byteMsg = ValueCreator.createArrayValue(
-                            stringAggregator.getAggregateString().getBytes(StandardCharsets.UTF_8));
-                    stringAggregator.resetAggregateString();
-                    return byteMsg;
-                }
-            }
-        } catch (InterruptedException | IllegalAccessException e) {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
         }
