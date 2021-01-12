@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'string as strings;
 import ballerina/java;
 
 # Represents a WebSocket connection in Ballerina. This includes all connection-oriented operations.
@@ -24,36 +23,19 @@ class WebSocketConnector {
     # Pushes text to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
+    # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeString(string|json|xml|boolean|int|float|byte|byte[] data, boolean finalFrame)
-    returns Error? {
-        string text = "";
-        if (data is byte[]) {
-            string|error result = strings:fromBytes(data);
-
-            if (result is error) {
-                return error WsGenericError("Error occurred during the text message creation", result);
-            } else {
-                text = result;
-            }
-        } else if (data is json) {
-            text = data.toJsonString();
-        } else {
-            text = data.toString();
-        }
-        return externWriteString(self, text, finalFrame);
+    public isolated function writeString(string data) returns Error? {
+        return externWriteString(self, data);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeBytes(byte[] data, boolean finalFrame) returns Error? {
-        return externWriteBytes(self, data, finalFrame);
+    public isolated function writeBytes(byte[] data) returns Error? {
+        return externWriteBytes(self, data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the connection, that frame will be lost.
@@ -119,12 +101,12 @@ class WebSocketConnector {
     }
 }
 
-isolated function externWriteString(WebSocketConnector wsConnector, string text, boolean finalFrame) returns Error? =
+isolated function externWriteString(WebSocketConnector wsConnector, string text) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data, boolean finalFrame) returns Error? =
+isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
     name: "writeBytes"

@@ -74,8 +74,8 @@ service class ProxyService2 {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 
-   remote function onString(Caller caller, string text, boolean finalFrame) {
-       var err = caller->writeString(text, finalFrame);
+   remote function onString(Caller caller, string text) {
+       var err = caller->writeString(text);
        if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
        }

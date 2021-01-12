@@ -58,12 +58,11 @@ public client class SyncClient {
     # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
+    # + data - Data to be sent.
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeString(string|json|xml|boolean|int|float|byte|byte[] data,
-    boolean finalFrame = true) returns Error? {
-        return self.conn.writeString(data, finalFrame);
+    remote isolated function writeString(string data) returns Error? {
+        return self.conn.writeString(data);
     }
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -72,8 +71,8 @@ public client class SyncClient {
     # + data - Binary data to be sent
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data, boolean finalFrame = true) returns Error? {
-        return self.conn.writeBytes(data, finalFrame);
+    remote isolated function writeBytes(byte[] data) returns Error? {
+        return self.conn.writeBytes(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.

@@ -42,14 +42,14 @@ import java.util.concurrent.SynchronousQueue;
 public class WebSocketConnector {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 
-    public static Object externWriteString(Environment env, BObject wsConnection, BString text, boolean finalFrame) {
+    public static Object externWriteString(Environment env, BObject wsConnection, BString text) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.WRITE_STRING);
         try {
-            ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(text.getValue(), finalFrame);
+            ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(text.getValue(), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
                     connectionInfo);
@@ -64,8 +64,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    public static Object writeBytes(Environment env, BObject wsConnection, BArray binaryData,
-            boolean finalFrame) {
+    public static Object writeBytes(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
@@ -73,7 +72,7 @@ public class WebSocketConnector {
                 WebSocketConstants.WRITE_BYTES);
         try {
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
-                    ByteBuffer.wrap(binaryData.getBytes()), finalFrame);
+                    ByteBuffer.wrap(binaryData.getBytes()), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, webSocketChannelFuture, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY,
                     connectionInfo);

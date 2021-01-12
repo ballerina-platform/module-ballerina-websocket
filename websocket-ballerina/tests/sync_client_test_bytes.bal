@@ -34,7 +34,7 @@ service class WsServiceSyncBytes {
       checkpanic caller->writeBytes(data);
   }
 
-  remote isolated function onClose(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onClose(Caller caller, string data) {
         checkpanic caller->writeString(data);
   }
 }

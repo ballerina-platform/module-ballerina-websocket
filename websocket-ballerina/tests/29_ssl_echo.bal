@@ -40,15 +40,15 @@ service /sslEcho on l7 {
 
 service class WsService6 {
   *Service;
-  remote isolated function onString(Caller caller, string data, boolean finalFrame) {
-       var returnVal = caller->writeString(data, finalFrame);
+  remote isolated function onString(Caller caller, string data) {
+       var returnVal = caller->writeString(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onBytes(Caller caller, byte[] data, boolean finalFrame) {
-       var returnVal = caller->writeBytes(data, finalFrame);
+   remote isolated function onBytes(Caller caller, byte[] data) {
+       var returnVal = caller->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }

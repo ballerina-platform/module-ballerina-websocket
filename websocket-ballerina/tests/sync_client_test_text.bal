@@ -28,11 +28,11 @@ service /onTextString on l11 {
 
 service class WsServiceSync {
   *Service;
-  remote isolated function onString(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onString(Caller caller, string data) {
       checkpanic caller->writeString(data);
   }
 
-  remote isolated function onClose(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onClose(Caller caller, string data) {
         checkpanic caller->writeString(data);
   }
 }

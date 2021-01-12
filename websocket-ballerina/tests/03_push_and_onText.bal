@@ -30,7 +30,7 @@ service /onTextString on l2 {
 
 service class WsService1 {
   *Service;
-  remote isolated function onString(Caller caller, string data, boolean finalFrame) {
+  remote isolated function onString(Caller caller, string data) {
       checkpanic caller->writeString(data);
   }
 }

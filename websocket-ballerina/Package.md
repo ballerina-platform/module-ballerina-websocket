@@ -17,12 +17,11 @@ service /basePath on new websocket:Listener(21003) {
         
 service class WsService {
   *websocket:Service;
-  remote isolated function onText(websocket:Caller caller, string data) {
-      checkpanic caller->pushText(data);
+  remote isolated function onString(websocket:Caller caller, string data) {
+      checkpanic caller->writeString(data);
   }
 }              
 ```
-The `upgradeService` is a server callback service.
 
 **onConnect resource**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` resource is dispatched. This resource is only available in the service of the server.
 
