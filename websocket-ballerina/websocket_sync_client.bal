@@ -62,7 +62,7 @@ public client class SyncClient {
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
     remote isolated function writeString(string|json|xml|boolean|int|float|byte|byte[] data,
-    boolean finalFrame = true) returns WebSocketError? {
+    boolean finalFrame = true) returns Error? {
         return self.conn.writeString(data, finalFrame);
     }
 
@@ -72,7 +72,7 @@ public client class SyncClient {
     # + data - Binary data to be sent
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data, boolean finalFrame = true) returns WebSocketError? {
+    remote isolated function writeBytes(byte[] data, boolean finalFrame = true) returns Error? {
         return self.conn.writeBytes(data, finalFrame);
     }
 
@@ -80,7 +80,7 @@ public client class SyncClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function ping(byte[] data) returns WebSocketError? {
+    remote isolated function ping(byte[] data) returns Error? {
         return self.conn.ping(data);
     }
 
@@ -89,7 +89,7 @@ public client class SyncClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function pong(byte[] data) returns WebSocketError? {
+    remote isolated function pong(byte[] data) returns Error? {
         return self.conn.pong(data);
     }
 
@@ -104,7 +104,7 @@ public client class SyncClient {
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeoutInSeconds = 60) returns WebSocketError? {
+        int timeoutInSeconds = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 
@@ -170,7 +170,7 @@ public client class SyncClient {
     # Reads the texts in a synchronous manner
     #
     # + return  - The text data sent by the server or an `error` if an error occurs when sending
-    remote isolated function readString(TargetType targetType) returns string|xml|json|record{}|WebSocketError {
+    remote isolated function readString(TargetType targetType) returns string|xml|json|record{}|Error {
         return self.conn.readString(targetType);
     }
 }

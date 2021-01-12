@@ -42,14 +42,14 @@ service class WsService6 {
   *Service;
   remote isolated function onString(Caller caller, string data, boolean finalFrame) {
        var returnVal = caller->writeString(data, finalFrame);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote isolated function onBytes(Caller caller, byte[] data, boolean finalFrame) {
        var returnVal = caller->writeBytes(data, finalFrame);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
@@ -66,7 +66,7 @@ service class sslEchoCallbackService {
 
    remote isolated function onClose(AsyncClient wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

@@ -31,7 +31,7 @@ service class OnBinaryContinuation {
        if (finalFrame) {
            appendToArray(<@untainted> data, content);
            var returnVal = caller->writeBytes(content);
-           if (returnVal is WebSocketError) {
+           if (returnVal is Error) {
                panic <error> returnVal;
            }
        } else {

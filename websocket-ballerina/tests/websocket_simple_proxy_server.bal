@@ -33,28 +33,28 @@ service class ProxyService {
                readyOnConnect: false
            });
        var returnVal = wsClientEp->ready();
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote function onString(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote function onBytes(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
@@ -76,14 +76,14 @@ service class ProxyService2 {
 
    remote function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
-       if (err is WebSocketError) {
+       if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
        }
    }
 
    remote function onBytes(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
@@ -92,21 +92,21 @@ service class ProxyService2 {
 service class clientCallbackService9 {
    remote function onString(AsyncClient wsEp, string text) {
        var returnVal = wsEp->writeString(text);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote function onBytes(AsyncClient wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote function onClose(AsyncClient wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
@@ -123,7 +123,7 @@ service class proxyCallbackService {
 
    remote function onClose(AsyncClient wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

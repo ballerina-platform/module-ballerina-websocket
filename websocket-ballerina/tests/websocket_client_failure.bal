@@ -31,7 +31,7 @@ public function testClientEndpointFailureInResource() {
            readyOnConnect: false
        });
    var err = wsClientEp->ready();
-   if (err is WebSocketError) {
+   if (err is Error) {
        test:assertEquals(err.message(), "ConnectionError: The WebSocket connection has not been made");
    } else {
        test:assertFail("Couldn't find the expected output");

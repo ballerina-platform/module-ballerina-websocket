@@ -87,7 +87,7 @@ service class WsService4 {
            panic personData;
        } else {
            var returnVal = caller->writeString(personData);
-           if (returnVal is WebSocketError) {
+           if (returnVal is Error) {
                panic <error>returnVal;
            }
        }
@@ -106,7 +106,7 @@ service class WsService5 {
   *Service;
   remote isolated function onString(Caller caller, byte[] data) {
        var returnVal = caller->writeString(data);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

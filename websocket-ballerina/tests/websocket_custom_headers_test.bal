@@ -51,7 +51,7 @@ service class MyWSService {
      self.customHeaders = customHeaders;
   }
   remote function onString(Caller caller, string text) {
-      WebSocketError? err = caller->close(timeoutInSeconds = 0);
+      Error? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In service 1 onString isOpen " + caller.isOpen().toString());
   }
 }
@@ -59,7 +59,7 @@ service class MyWSService {
 service class MyWSService2 {
   *Service;
   remote function onString(Caller caller, string text) {
-      WebSocketError? err = caller->close(timeoutInSeconds = 0);
+      Error? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In service 2 onString isOpen " + caller.isOpen().toString());
   }
 }

@@ -33,14 +33,14 @@ service class PingPongService {
 
    remote isolated function onPing(Caller caller, byte[] localData) {
        var returnVal = caller->pong(localData);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote isolated function onPong(Caller caller, byte[] localData) {
        var returnVal = caller->ping(localData);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

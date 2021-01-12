@@ -28,7 +28,7 @@ class WebSocketConnector {
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
     public isolated function writeString(string|json|xml|boolean|int|float|byte|byte[] data, boolean finalFrame)
-    returns WebSocketError? {
+    returns Error? {
         string text = "";
         if (data is byte[]) {
             string|error result = strings:fromBytes(data);
@@ -52,7 +52,7 @@ class WebSocketConnector {
     # + data - Binary data to be sent
     # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeBytes(byte[] data, boolean finalFrame) returns WebSocketError? {
+    public isolated function writeBytes(byte[] data, boolean finalFrame) returns Error? {
         return externWriteBytes(self, data, finalFrame);
     }
 
@@ -60,7 +60,7 @@ class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function ping(byte[] data) returns WebSocketError? {
+    public isolated function ping(byte[] data) returns Error? {
         return externPing(self, data);
     }
 
@@ -69,7 +69,7 @@ class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function pong(byte[] data) returns WebSocketError? {
+    public isolated function pong(byte[] data) returns Error? {
         return externPong(self, data);
     }
 
@@ -77,7 +77,7 @@ class WebSocketConnector {
     # WebSocketListener can be called only in the `upgrade` or `onConnect` resources.
     #
     # + return - An `error` if an error occurs when sending
-    public isolated function ready() returns WebSocketError? {
+    public isolated function ready() returns Error? {
         return externReady(self);
     }
 
@@ -86,7 +86,7 @@ class WebSocketConnector {
     # + targetType -the message type (`string`, `xml`, `json`, `byte[]`,`record {| anydata...; |}`),
     #               which is expected to be returned after data binding
     # + return  - The text message or an `error` if an error occurs when sending
-    public isolated function readString(TargetType targetType) returns string|xml|json|record{}|WebSocketError {
+    public isolated function readString(TargetType targetType) returns string|xml|json|record{}|Error {
         if (targetType is typedesc<string>) {
             return externReadString(self);
         } else if (targetType is typedesc<xml>) {
@@ -113,7 +113,7 @@ class WebSocketConnector {
     # Reads text data from the websocket connection.
     #
     # + return  - The binary message or an `error` if an error occurs when sending
-    public isolated function readBytes() returns byte[]|WebSocketError {
+    public isolated function readBytes() returns byte[]|Error {
         return externReadBytes(self);
     }
 
@@ -127,7 +127,7 @@ class WebSocketConnector {
     #                   until a close frame is received. If WebSocket frame is received from the remote endpoint
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
-    public isolated function close(int? statusCode = 1000, string? reason = (), int timeoutInSecs = 60) returns WebSocketError? {
+    public isolated function close(int? statusCode = 1000, string? reason = (), int timeoutInSecs = 60) returns Error? {
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {
@@ -141,61 +141,61 @@ class WebSocketConnector {
     }
 }
 
-isolated function externWriteString(WebSocketConnector wsConnector, string text, boolean finalFrame) returns WebSocketError? =
+isolated function externWriteString(WebSocketConnector wsConnector, string text, boolean finalFrame) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data, boolean finalFrame) returns WebSocketError? =
+isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data, boolean finalFrame) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
     name: "writeBytes"
 } external;
 
-isolated function externPing(WebSocketConnector wsConnector, byte[] data) returns WebSocketError? =
+isolated function externPing(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
     name: "ping"
 } external;
 
-isolated function externPong(WebSocketConnector wsConnector, byte[] data) returns WebSocketError? =
+isolated function externPong(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
     name: "pong"
 } external;
 
 isolated function externClose(WebSocketConnector wsConnector, int statusCode, string reason, int timeoutInSecs)
-                     returns WebSocketError? =
+                     returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
 } external;
 
-isolated function externReady(WebSocketConnector wsConnector) returns WebSocketError? = @java:Method {
+isolated function externReady(WebSocketConnector wsConnector) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Ready",
     name: "ready"
 } external;
 
-isolated function externReadString(WebSocketConnector wsConnector) returns string|WebSocketError =
+isolated function externReadString(WebSocketConnector wsConnector) returns string|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externReadXml(WebSocketConnector wsConnector) returns xml|WebSocketError =
+isolated function externReadXml(WebSocketConnector wsConnector) returns xml|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externReadJson(WebSocketConnector wsConnector) returns json|WebSocketError =
+isolated function externReadJson(WebSocketConnector wsConnector) returns json|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externReadTextAsBytes(WebSocketConnector wsConnector) returns byte[]|WebSocketError =
+isolated function externReadTextAsBytes(WebSocketConnector wsConnector) returns byte[]|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externReadBytes(WebSocketConnector wsConnector) returns byte[]|WebSocketError =
+isolated function externReadBytes(WebSocketConnector wsConnector) returns byte[]|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

@@ -77,7 +77,7 @@ public class Listener {
     #
     # + port - Listening port of the websocket service listener
     # + config - Configurations for the websocket service listener
-    public isolated function init(int|http:Listener listenerPort, ListenerConfiguration? config = ()) returns error? {
+    public isolated function init(int|http:Listener listenerPort, ListenerConfiguration? config = ()) returns Error? {
         self.instanceId = uuid();
         self.config = config ?: {};
         if (listenerPort is http:Listener) {
@@ -88,7 +88,7 @@ public class Listener {
         return self.initEndpoint();
     }
 
-    public isolated function initEndpoint() returns error? {
+    public isolated function initEndpoint() returns Error? {
         return externInitEndpoint(self);
     }
 
@@ -124,7 +124,7 @@ public class Listener {
     }
 }
 
-isolated function externInitEndpoint(Listener listenerObj) returns error? = @java:Method {
+isolated function externInitEndpoint(Listener listenerObj) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.serviceendpoint.InitEndpoint",
     name: "initEndpoint"
 } external;

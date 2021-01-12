@@ -28,9 +28,9 @@ service /pushTextFailureService on l20 {
 service class PushTextFailureService {
    *Service;
    remote function onConnect(Caller caller) {
-       WebSocketError? err1 = caller->close(timeoutInSeconds = 0);
+       Error? err1 = caller->close(timeoutInSeconds = 0);
        var err = caller->writeString("hey");
-       if (err is WebSocketError) {
+       if (err is Error) {
            errorMsg2 = <@untainted>err.message();
        }
    }

@@ -44,28 +44,28 @@ service class ErrorServer {
 
    remote isolated function onPing(Caller caller, byte[] localData) {
        var returnVal = caller->pong(localData);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote isolated function onPong(Caller caller, byte[] localData) {
        var returnVal = caller->ping(localData);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote isolated function onString(Caller caller, string text, boolean finalFrame) {
        var err = caller->writeString(text, finalFrame);
-       if (err is WebSocketError) {
+       if (err is Error) {
            io:println("Error occurred when sending text message" + err.message());
        }
    }
 
    remote isolated function onBytes(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

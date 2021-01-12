@@ -30,7 +30,7 @@ service class ErrorService {
 
    remote function onString(Caller ep, string text) {
        var returnVal = ep->writeString(text);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

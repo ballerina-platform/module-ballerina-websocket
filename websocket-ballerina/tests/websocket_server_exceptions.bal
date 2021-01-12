@@ -41,7 +41,7 @@ service class ServerError {
 
    remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
        var returnVal = caller->writeBytes(data, finalFrame);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }

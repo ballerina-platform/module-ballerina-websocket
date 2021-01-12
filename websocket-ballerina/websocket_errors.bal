@@ -45,6 +45,6 @@ public type ReadingInboundTextError distinct error;
 public type ReadingInboundBinaryError distinct error;
 
 # The union of all the WebSocket related errors
-public type WebSocketError WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
+public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
 WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|ReadingInboundTextError|
 ReadingInboundBinaryError;
