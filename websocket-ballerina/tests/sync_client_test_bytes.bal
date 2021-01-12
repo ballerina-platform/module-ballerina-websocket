@@ -30,7 +30,7 @@ service /onTextBytes on l8 {
 
 service class WsServiceSyncBytes {
   *Service;
-  remote isolated function onString(Caller caller, byte[] data) {
+  remote isolated function onBytes(Caller caller, byte[] data) {
       checkpanic caller->writeBytes(data);
   }
 
@@ -73,13 +73,13 @@ public function testSyncClientByteArray() {
    worker w2 {
       io:println("Waiting till client starts reading byte[].");
       runtime:sleep(2000);
-      var resp1 = wsClient->writeString("Hello");
+      var resp1 = wsClient->writeBytes("Hello".toBytes());
       runtime:sleep(2000);
-      var resp2 = wsClient->writeString("Hello2");
+      var resp2 = wsClient->writeBytes("Hello2".toBytes());
       runtime:sleep(2000);
-      var resp3 = wsClient->writeString("Hello3");
-      var resp4 = wsClient->writeString("Hello4");
-      var resp5 = wsClient->writeString("Hello5");
+      var resp3 = wsClient->writeBytes("Hello3".toBytes());
+      var resp4 = wsClient->writeBytes("Hello4".toBytes());
+      var resp5 = wsClient->writeBytes("Hello5".toBytes());
    }
    _ = wait {w1, w2};
    string msg = "[72,101,108,108,111][72,101,108,108,111,50][72,101,108,108,111,51][72,101,108,108,111,52][72,101,108,108,111,53]";

@@ -23,22 +23,16 @@ import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
-import io.ballerina.runtime.api.types.StructureType;
 import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.types.XmlNodeType;
-import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BValue;
-import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.netty.channel.ChannelFuture;
@@ -66,7 +60,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -283,27 +276,6 @@ public class WebSocketResourceDispatcher {
                 executeResource(wsService, balservice,
                         new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_STRING), bValues, connectionInfo,
                         RESOURCE_NAME_ON_STRING, ON_TEXT_METADATA);
-            } else if (isDataBindingSupported(dataTypeTag)) {
-                // During data binding the string is aggregated before it is dispatched to the resource
-                WebSocketConnectionInfo.StringAggregator stringAggregator =
-                        connectionInfo.createIfNullAndGetStringAggregator();
-                if (finalFragment) {
-                    stringAggregator.appendAggregateString(textMessage.getText());
-                    Object aggregate = getAggregatedObject(webSocketConnection, dataType,
-                            stringAggregator.getAggregateString(), connectionInfo);
-                    if (aggregate != null) {
-                        bValues[2] = aggregate;
-                        bValues[3] = true;
-                        executeResource(wsService, balservice,
-                                new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_STRING), bValues,
-                                connectionInfo, RESOURCE_NAME_ON_STRING, ON_TEXT_METADATA);
-                    }
-                    stringAggregator.resetAggregateString();
-                } else {
-                    stringAggregator.appendAggregateString(textMessage.getText());
-                    webSocketConnection.readNextFrame();
-                }
-
             }
         } catch (Exception e) {
             WebSocketObservabilityUtil.observeError(connectionInfo,
@@ -311,62 +283,6 @@ public class WebSocketResourceDispatcher {
                     WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
                     e.getMessage());
         }
-    }
-
-    private static boolean isDataBindingSupported(int dataTypeTag) {
-        return dataTypeTag == TypeTags.JSON_TAG || dataTypeTag == TypeTags.RECORD_TYPE_TAG ||
-                dataTypeTag == TypeTags.XML_TAG || dataTypeTag == TypeTags.ARRAY_TAG;
-    }
-
-    private static Object getAggregatedObject(WebSocketConnection webSocketConnection, Type dataType,
-            String aggregateString, WebSocketConnectionInfo connectionInfo) {
-        try {
-            switch (dataType.getTag()) {
-            case TypeTags.JSON_TAG:
-                return JsonUtils.parse(aggregateString);
-            case TypeTags.XML_TAG:
-                BXml bxml = (BXml) XmlUtils.parse(aggregateString);
-                if (bxml.getNodeType() != XmlNodeType.SEQUENCE) {
-                    throw WebSocketUtil.getWebSocketError(
-                            "Invalid XML data", null,
-                            WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
-                }
-                return bxml;
-            case TypeTags.RECORD_TYPE_TAG:
-                return JsonUtils.convertJSONToRecord(JsonUtils.parse(aggregateString),
-                        (StructureType) dataType);
-            case TypeTags.ARRAY_TAG:
-                if (((ArrayType) dataType).getElementType().getTag() == TypeTags.BYTE_TAG) {
-                    return ValueCreator.createArrayValue(
-                            aggregateString.getBytes(StandardCharsets.UTF_8));
-                }
-                break;
-            default:
-                //Throw an exception because a different type is invalid.
-                //Cannot reach here because of compiler plugin validation.
-                throw WebSocketUtil.getWebSocketError(
-                        "Invalid resource signature.", null,
-                        WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
-            }
-        } catch (WebSocketException ex) {
-            webSocketConnection.terminateConnection(1003, ex.detailMessage());
-            WebSocketObservabilityUtil.observeError(connectionInfo,
-                    WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
-                    WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
-                    ex.getMessage());
-        } catch (Exception ex) {
-            String errorMessage = WebSocketUtil.getErrorMessage(ex);
-            if (errorMessage.length() > 123) {
-                errorMessage = errorMessage.substring(0, 120) + "...";
-            }
-            webSocketConnection.terminateConnection(1003, errorMessage);
-            log.error("Data binding failed. Hence connection terminated. ", ex);
-            WebSocketObservabilityUtil.observeError(connectionInfo,
-                    WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
-                    WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
-                    ex.getMessage());
-        }
-        return null;
     }
 
     public static void dispatchOnBinary(WebSocketConnectionInfo connectionInfo, WebSocketBinaryMessage binaryMessage,

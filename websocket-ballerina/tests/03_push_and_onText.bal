@@ -19,12 +19,6 @@ import ballerina/test;
 import ballerina/io;
 
 string data = "";
-string expectedMsg = "{\"name\":\"Riyafa\", \"age\":23}";
-
-public type WebSocketPerson record {|
-   string name;
-   int age;
-|};
 
 listener Listener l2 = checkpanic new(21003);
 
@@ -39,77 +33,6 @@ service class WsService1 {
   remote isolated function onString(Caller caller, string data, boolean finalFrame) {
       checkpanic caller->writeString(data);
   }
-}
-
-listener Listener l3 = checkpanic new(21023);
-
-service /onTextJSON on l3 {
-   resource function onUpgrade .() returns Service|UpgradeError {
-       return new WsService2();
-   }
-}
-
-service class WsService2 {
-  *Service;
-  remote isolated function onString(Caller caller, json data) {
-      checkpanic caller->writeString(data);
-  }
-}
-
-listener Listener l4 = checkpanic new(21024);
-
-service /onTextXML on l4 {
-   resource function onUpgrade .() returns Service|UpgradeError {
-       return new WsService3();
-   }
-}
-
-service class WsService3 {
-  *Service;
-  remote isolated function onString(Caller caller, xml data) {
-      checkpanic caller->writeString(data);
-  }
-}
-
-listener Listener l5 = checkpanic new(21025);
-
-service /onTextRecord on l5 {
-    resource function onUpgrade .() returns Service|UpgradeError {
-       return new WsService4();
-   }
-}
-
-service class WsService4 {
-  *Service;
-  remote isolated function onString(Caller caller, WebSocketPerson data) {
-       var personData = data.cloneWithType(json);
-       if (personData is error) {
-           panic personData;
-       } else {
-           var returnVal = caller->writeString(personData);
-           if (returnVal is Error) {
-               panic <error>returnVal;
-           }
-       }
-   }
-}
-
-listener Listener l6 = checkpanic new(21026);
-
-service /onTextByteArray on l6 {
-    resource function onUpgrade .() returns Service|UpgradeError {
-       return new WsService5();
-    }
-}
-
-service class WsService5 {
-  *Service;
-  remote isolated function onString(Caller caller, byte[] data) {
-       var returnVal = caller->writeString(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
 }
 
 service class clientPushCallbackService {
@@ -129,47 +52,5 @@ public function testString() {
    checkpanic wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(data, "Hi", msg = "Failed writeString");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-}
-
-// Tests JSON support for writeString and onString
-@test:Config {}
-public function testJson() {
-   AsyncClient wsClient = new("ws://localhost:21023/onTextJSON", new clientPushCallbackService());
-   checkpanic wsClient->writeString("{\"name\":\"Riyafa\", \"age\":23}");
-   runtime:sleep(500);
-   test:assertEquals(data, expectedMsg, msg = "Failed writeString");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-}
-
-// Tests XML support for writeString and onString
-@test:Config {}
-public function testXml() {
-   AsyncClient wsClient = new ("ws://localhost:21024/onTextXML", new clientPushCallbackService());
-   string msg = "<note><to>Tove</to></note>";
-   var output = wsClient->writeString(msg);
-   runtime:sleep(500);
-   test:assertEquals(data, msg, msg = "");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-}
-
-// Tests Record support for writeString and onString
-@test:Config {}
-public function testRecord() {
-   AsyncClient wsClient = new ("ws://localhost:21025/onTextRecord", new clientPushCallbackService());
-   var output = wsClient->writeString("{\"name\":\"Riyafa\", \"age\":23}");
-   runtime:sleep(500);
-   test:assertEquals(data, expectedMsg, msg = "");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-}
-
-// Tests byte array support for writeString and onString
-@test:Config {}
-public function testByteArray() {
-   AsyncClient wsClient = new ("ws://localhost:21026/onTextByteArray", new clientPushCallbackService());
-   string msg = "Hello";
-   var output = wsClient->writeString(msg);
-   runtime:sleep(500);
-   test:assertEquals(data, msg, msg = "");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
