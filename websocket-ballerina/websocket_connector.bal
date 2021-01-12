@@ -110,7 +110,7 @@ class WebSocketConnector {
         }
     }
 
-    # Reads text data from the websocket connection.
+    # Reads binary data from the websocket connection.
     #
     # + return  - The binary message or an `error` if an error occurs when sending
     public isolated function readBytes() returns byte[]|Error {
