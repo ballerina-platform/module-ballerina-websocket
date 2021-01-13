@@ -33,7 +33,7 @@ public client class AsyncClient {
     private WebSocketConnector conn = new;
     private string url = "";
     private WebSocketClientConfiguration config = {};
-    private (service object {})? callbackService = ();
+    private Service? callbackService = ();
 
     # Initializes the client when called.
     #
@@ -41,7 +41,7 @@ public client class AsyncClient {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, (service object {})? callbackService = (), WebSocketClientConfiguration? config = ()) {
+    public isolated function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ()) {
         self.url = url;
         //if (config is WebSocketClientConfiguration) {
         //    addCookies(config);

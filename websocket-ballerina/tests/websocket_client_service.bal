@@ -21,7 +21,7 @@ string arrivedData = "";
 boolean isClientConnectionOpen = false;
 listener Listener l15 = checkpanic new(21021);
 service /'client/'service on l15 {
-   resource isolated function onUpgrade bbe() returns Service|UpgradeError {
+   resource isolated function get bbe() returns Service|UpgradeError {
        return new clientFailure200();
    }
 }
@@ -34,12 +34,14 @@ service class clientFailure200 {
 }
 
 service class callback200 {
-   remote function onString(Caller caller, string text) {
+   *Service;
+   remote function onString(string caller, string text) {
    }
 }
 
 service class ClientService200 {
-   remote function onString(AsyncClient caller, string text) {
+   *Service;
+   remote function onString(Caller caller, string text) {
    }
 }
 

@@ -22,7 +22,7 @@ string expectedString = "";
 byte[] expectedBinaryData = [];
 string expectedRawpath = "";
 
-listener Listener l7 = checkpanic new(21029, {
+listener Listener l7 = check new(21029, {
                          secureSocket: {
                              keyStore: {
                                  path: "tests/certsAndKeys/ballerinaKeystore.p12",
@@ -32,7 +32,7 @@ listener Listener l7 = checkpanic new(21029, {
                      });
 
 service /sslEcho on l7 {
-   resource function upgrade .(http:Request req) returns Service {
+   resource function get .(http:Request req) returns Service {
        expectedRawpath = req.rawPath;
        return new WsService6();
    }
@@ -56,15 +56,16 @@ service class WsService6 {
 }
 
 service class sslEchoCallbackService {
-   remote function onString(AsyncClient wsEp, string text) {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
        expectedString = <@untainted>text;
    }
 
-   remote function onBytes(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
-   remote isolated function onClose(AsyncClient wsEp, int statusCode, string reason) {
+   remote isolated function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -74,7 +75,7 @@ service class sslEchoCallbackService {
 
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
-public function sslBinaryEcho() {
+public function sslBinaryEcho() returns Error? {
    AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
            secureSocket: {
                trustStore: {
@@ -84,7 +85,7 @@ public function sslBinaryEcho() {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   checkpanic wsClient->writeBytes(binaryData);
+   check wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
@@ -93,7 +94,7 @@ public function sslBinaryEcho() {
 
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
-public function sslTextEcho() {
+public function sslTextEcho() returns Error? {
    AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
            secureSocket: {
                trustStore: {
@@ -102,7 +103,7 @@ public function sslTextEcho() {
                }
            }
        });
-   checkpanic wsClient->writeString("Hi madam");
+   check wsClient->writeString("Hi madam");
    runtime:sleep(500);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");

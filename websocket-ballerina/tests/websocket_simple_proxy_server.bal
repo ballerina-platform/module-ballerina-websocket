@@ -21,7 +21,7 @@ import ballerina/test;
 string proxyData = "";
 listener Listener l22 = checkpanic new(21018);
 service / on l22 {
-   resource isolated function onUpgrade .() returns Service|UpgradeError {
+   resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService();
    }
 }
@@ -63,7 +63,7 @@ service class ProxyService {
 
 listener Listener l26 = checkpanic new(21019);
 service /websocket on l26 {
-   resource isolated function onUpgrade .() returns Service|UpgradeError {
+   resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService2();
    }
 }
@@ -90,21 +90,22 @@ service class ProxyService2 {
 }
 
 service class clientCallbackService9 {
-   remote function onString(AsyncClient wsEp, string text) {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBytes(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onClose(AsyncClient wsEp, int statusCode, string reason) {
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -113,15 +114,16 @@ service class clientCallbackService9 {
 }
 
 service class proxyCallbackService {
-   remote function onString(AsyncClient wsEp, string text) {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
        proxyData = <@untainted>text;
    }
 
-   remote function onBytes(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
-   remote function onClose(AsyncClient wsEp, int statusCode, string reason) {
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
        if (returnVal is Error) {
            panic <error>returnVal;

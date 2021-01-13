@@ -152,10 +152,6 @@ public class WebSocketResourceDispatcher {
         for (Type param : parameterTypes) {
             String typeName = param.getName();
             switch (typeName) {
-                case HttpConstants.CALLER:
-                    bValues[index++] = httpCaller;
-                    bValues[index++] = true;
-                    break;
                 case HttpConstants.REQUEST:
                     bValues[index++] = inRequest;
                     bValues[index++] = true;

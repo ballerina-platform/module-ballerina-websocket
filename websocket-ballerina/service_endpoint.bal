@@ -77,13 +77,13 @@ public class Listener {
     #
     # + port - Listening port of the websocket service listener
     # + config - Configurations for the websocket service listener
-    public isolated function init(int|http:Listener listenerPort, ListenerConfiguration? config = ()) returns Error? {
+    public isolated function init(int|http:Listener 'listener, ListenerConfiguration? config = ()) returns Error? {
         self.instanceId = uuid();
         self.config = config ?: {};
-        if (listenerPort is http:Listener) {
-           self.port = listenerPort.getPort();
+        if ('listener is http:Listener) {
+           self.port = 'listener.getPort();
         } else {
-           self.port = listenerPort;
+           self.port = 'listener;
         }
         return self.initEndpoint();
     }

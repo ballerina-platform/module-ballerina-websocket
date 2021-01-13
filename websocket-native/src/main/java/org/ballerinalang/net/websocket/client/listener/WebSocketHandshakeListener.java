@@ -18,8 +18,12 @@
 
 package org.ballerinalang.net.websocket.client.listener;
 
+import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
@@ -35,6 +39,8 @@ import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_CONFIG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.ON_OPEN_METADATA;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CONNECT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
 
 /**
@@ -80,8 +86,35 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
         }
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketConnector, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
+        dispatchClientOnOpen(webSocketConnection, connectionInfo, wsService);
         countDownLatch.countDown();
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
+    }
+
+    private static void dispatchClientOnOpen(WebSocketConnection webSocketConnection,
+            WebSocketConnectionInfo connectionInfo, WebSocketService wsService) {
+        BObject dispatchingService = wsService.getBalService();
+        MethodType onOpenResource = wsService.getResourceByName(RESOURCE_NAME_ON_CONNECT);
+        if (onOpenResource != null) {
+            Type[] parameterTypes = onOpenResource.getParameterTypes();
+            Object[] bValues = new Object[parameterTypes.length * 2];
+            bValues[0] = connectionInfo.getWebSocketEndpoint();
+            bValues[1] = true;
+            Callback onOpenCallback = new Callback() {
+                @Override
+                public void notifySuccess(Object result) {
+                }
+
+                @Override
+                public void notifyFailure(BError error) {
+                    error.getPrintableStackTrace();
+                    WebSocketUtil.closeDuringUnexpectedCondition(webSocketConnection);
+                }
+            };
+            wsService.getRuntime()
+                    .invokeMethodAsync(dispatchingService, RESOURCE_NAME_ON_CONNECT, null, ON_OPEN_METADATA,
+                            onOpenCallback, bValues);
+        }
     }
 
     @Override

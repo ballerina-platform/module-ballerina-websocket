@@ -21,7 +21,7 @@ import ballerina/test;
 byte[] expectedAutoPongData = [];
 listener Listener l23 = checkpanic new(21020);
 service / on l23 {
-   resource isolated function onUpgrade .() returns Service|UpgradeError {
+   resource isolated function get .() returns Service|UpgradeError {
        return new TestService();
    }
 }
@@ -34,7 +34,8 @@ service class TestService {
 }
 
 service class PongService {
-   remote function onPong(AsyncClient wsEp, byte[] data) {
+   *Service;
+   remote function onPong(Caller wsEp, byte[] data) {
        expectedAutoPongData = <@untainted>data;
    }
 }

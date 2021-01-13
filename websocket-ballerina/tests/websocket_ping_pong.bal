@@ -21,7 +21,7 @@ byte[] expectedPongData = [];
 byte[] expectedPongData1 = [];
 listener Listener l19 = checkpanic new(21014);
 service /pingpong/ws on l19 {
-    resource isolated function onUpgrade .() returns Service|UpgradeError  {
+    resource isolated function get .() returns Service|UpgradeError  {
        return new PingPongService();
     }
 }
@@ -47,11 +47,12 @@ service class PingPongService {
 }
 
 service class pingPongCallbackService {
-   remote function onPing(AsyncClient wsEp, byte[] localData) {
+   *Service;
+   remote function onPing(Caller wsEp, byte[] localData) {
        expectedPongData1 = <@untainted>localData;
    }
 
-   remote function onPong(AsyncClient wsEp, byte[] localData) {
+   remote function onPong(Caller wsEp, byte[] localData) {
        expectedPongData = <@untainted>localData;
    }
 }

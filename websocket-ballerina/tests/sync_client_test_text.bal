@@ -21,7 +21,7 @@ import ballerina/runtime;
 string aggregatedTextOutput = "";
 listener Listener l11 = checkpanic new(21000);
 service /onTextString on l11 {
-   resource function onUpgrade .() returns Service|UpgradeError {
+   resource function get .() returns Service|UpgradeError {
        return new WsServiceSync();
    }
 }

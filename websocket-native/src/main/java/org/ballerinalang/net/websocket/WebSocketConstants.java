@@ -45,9 +45,10 @@ public class WebSocketConstants {
     public static final String WSS_SCHEME = "wss";
     public static final String WS_SCHEME = "ws";
     public static final String BACK_SLASH = "/";
+    public static final String GET = "get";
     public static final String WEBSOCKET_CALLER_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CALLER;
-    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CLIENT;
+    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
     public static final String FULL_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CLIENT;
 

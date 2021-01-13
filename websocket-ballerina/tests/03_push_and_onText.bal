@@ -20,36 +20,41 @@ import ballerina/io;
 
 string data = "";
 
-listener Listener l2 = checkpanic new(21003);
+listener Listener l2 = check new(21003);
 
 service /onTextString on l2 {
-   resource function onUpgrade .() returns Service|UpgradeError {
+   resource function get .() returns Service|UpgradeError {
        return new WsService1();
    }
 }
 
 service class WsService1 {
   *Service;
-  remote isolated function onString(Caller caller, string data) {
-      checkpanic caller->writeString(data);
+  remote isolated function onString(Caller caller, string data) returns Error? {
+      check caller->writeString(data);
   }
 }
 
 service class clientPushCallbackService {
-    remote function onString(AsyncClient wsEp, string text) {
+    *Service;
+    remote function onString(Caller wsEp, string text) {
         data = <@untainted>text;
     }
 
-    remote isolated function onError(AsyncClient wsEp, error err) {
+    remote isolated function onError(Caller wsEp, error err) {
         io:println(err);
+    }
+
+    remote isolated function onConnect(Caller wsEp) {
+        io:println("On open resource");
     }
 }
 
 // Tests string support for writeString and onString
 @test:Config {}
-public function testString() {
+public function testString() returns Error? {
    AsyncClient wsClient = new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
-   checkpanic wsClient->writeString("Hi");
+   check wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(data, "Hi", msg = "Failed writeString");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

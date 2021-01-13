@@ -18,7 +18,7 @@ import ballerina/io;
 
 listener Listener l16 = checkpanic new(21013);
 service UpgradeService /'error/ws on l16 {
-   resource isolated function onUpgrade .() returns Service|UpgradeError {
+   resource isolated function get .() returns Service|UpgradeError {
        return new ErrorService();
    }
 }

@@ -19,7 +19,7 @@ import ballerina/test;
 import ballerina/http;
 
 http:Listener hl = new(21001);
-listener Listener socketListener = checkpanic new(hl);
+listener Listener socketListener = check new(hl);
 string output = "";
 string errorMsg = "";
 string pathParam = "";
@@ -28,7 +28,7 @@ int x = 0;
 final map<string> customHeaders = {"X-some-header": "some-header-value"};
 
 service /isOpen/abc on socketListener {
-    resource function onUpgrade barz/[string xyz]/abc/[string value](http:Request req)
+    resource function get barz/[string xyz]/abc/[string value](http:Request req)
                returns Service|UpgradeError  {
        pathParam = <@untainted> xyz;
        var qParam = req.getQueryParamValue("para1");
@@ -66,9 +66,9 @@ service class MyWSService2 {
 
 // Test isOpen when close is called
 @test:Config {}
-public function testIsOpenCloseCalled() {
+public function testIsOpenCloseCalled() returns error? {
     AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
-    checkpanic wsClient->writeString("Hi");
+    check wsClient->writeString("Hi");
     runtime:sleep(500);
 
     test:assertEquals(output, "In service 1 onString isOpen false");
@@ -83,7 +83,7 @@ public function testIsOpenCloseCalled() {
     }
 
     AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
-    checkpanic wsClient2->writeString("Hi");
+    check wsClient2->writeString("Hi");
     runtime:sleep(500);
     test:assertEquals(output, "In service 2 onString isOpen false");
     test:assertEquals(pathParam, "tuv");
@@ -92,9 +92,9 @@ public function testIsOpenCloseCalled() {
 // Test isOpen when a close frame is received
 // Disable due to https://github.com/ballerina-platform/module-ballerina-http/issues/71#issuecomment-707017984
 @test:Config {enable : false}
-public function testIsOpenCloseFrameReceived() {
+public function testIsOpenCloseFrameReceived() returns error? {
     AsyncClient wsClient = new ("ws://localhost:21001");
-    checkpanic wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
+    check wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
     runtime:sleep(500);
     test:assertEquals(output, "In onClose isOpen true");
 }

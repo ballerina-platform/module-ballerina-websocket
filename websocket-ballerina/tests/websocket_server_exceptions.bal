@@ -21,7 +21,7 @@
 // string serverOutput = "";
 // listener Listener l21 = checkpanic new(21031);
 // service /server/errors on l21 {
-//    resource isolated function onUpgrade .() returns Service|UpgradeError {
+//    resource isolated function get .() returns Service|UpgradeError {
 //        return new ServerError();
 //    }
 // }

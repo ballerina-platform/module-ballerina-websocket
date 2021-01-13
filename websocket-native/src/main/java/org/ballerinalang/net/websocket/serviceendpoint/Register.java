@@ -21,6 +21,7 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -34,6 +35,7 @@ import org.ballerinalang.net.websocket.server.WebSocketServerService;
 import org.ballerinalang.net.websocket.server.WebSocketServicesRegistry;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.BACK_SLASH;
+import static org.ballerinalang.net.websocket.WebSocketConstants.GET;
 
 /**
  * Register a service to the listener.
@@ -48,12 +50,15 @@ public class Register extends AbstractWebsocketNativeFunction {
         String basePath = getBasePath(serviceName);
 
         MethodType[] resourceList = ((ServiceType) service.getType()).getResourceMethods();
+        ResourceMethodType resource = (ResourceMethodType) resourceList[0];
+        resource.getAccessor();
+
         try {
-            if (resourceList.length == 1) {
+            if (resourceList.length == 1 && ((ResourceMethodType) resourceList[0]).getAccessor().equals(GET)) {
                 webSocketServicesRegistry.registerService(new WebSocketServerService(service, runtime, basePath));
             } else if (resourceList.length > 1) {
                 return WebSocketUtil
-                        .createWebsocketError("Invalid websocket Service. There should be only one onUpgrade resource",
+                        .createWebsocketError("Invalid websocket Service. There should be only one get resource",
                                 WebSocketConstants.ErrorCode.WsGenericListenerError);
             } else {
                 return WebSocketUtil.createWebsocketError("Invalid websocket Service.",

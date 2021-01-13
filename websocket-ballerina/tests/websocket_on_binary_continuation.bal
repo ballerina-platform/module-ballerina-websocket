@@ -21,7 +21,7 @@
 // byte[] binaryContent = [];
 // listener Listener l18 = checkpanic new(21007);
 // service /onBinaryContinuation on l18 {
-//    resource isolated function onUpgrade .() returns Service|UpgradeError {
+//    resource isolated function get .() returns Service|UpgradeError {
 //        return new OnBinaryContinuation();
 //    }
 // }
@@ -50,7 +50,7 @@
 // }
 
 // service class continuationService {
-//    remote function onBytes(AsyncClient caller, byte[] data, boolean finalFrame) {
+//    remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
 //        binaryContent = <@untainted>data;
 //    }
 // }

@@ -21,57 +21,58 @@ import ballerina/http;
 string expectedData = "";
 byte[] expectedBinData = [];
 byte[] expectedPingBinaryData = [];
-listener Listener l17 = checkpanic new(21005);
+listener Listener l17 = check new(21005);
 @ServiceConfig {
    idleTimeoutInSeconds: 10
 }
 service /onlyOnBinary on l17 {
-   resource isolated function onUpgrade .(http:Request req) returns Service|UpgradeError {
+   resource isolated function get .(http:Request req) returns Service|UpgradeError {
        return new OnlyOnBinary();
    }
 }
 service class OnlyOnBinary {
   *Service;
-   remote function onBytes(Caller caller, byte[] data) {
-       checkpanic caller->writeBytes(data);
+   remote function onBytes(Caller caller, byte[] data) returns Error? {
+       check caller->writeBytes(data);
    }
 }
 
-listener Listener l25 = checkpanic new(21006);
+listener Listener l25 = check new(21006);
 service /onlyOnText on l25 {
-   resource isolated function onUpgrade .(http:Caller caller, http:Request req) returns Service|UpgradeError {
+   resource isolated function get .(http:Request req) returns Service|UpgradeError {
        return new OnlyOnText();
    }
 }
 
 service class OnlyOnText {
    *Service;
-   remote function onString(Caller caller, string data) {
-       checkpanic caller->writeString(data);
+   remote function onString(Caller caller, string data) returns Error? {
+       check caller->writeString(data);
    }
 }
 
 service class callbackService {
-   remote function onString(AsyncClient wsEp, string text) {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
        expectedData = <@untainted>text;
    }
 
-   remote function onBytes(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        expectedBinData = <@untainted>data;
    }
 
-   remote function onPing(AsyncClient wsEp, byte[] data) {
+   remote function onPing(Caller wsEp, byte[] data) {
        expectedPingBinaryData = <@untainted>data;
    }
 }
 
 // Tests behavior when onString resource is missing and a text message is received
 @test:Config {}
-public function testMissingOnText() {
+public function testMissingOnText() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    expectedData = "";
    byte[] binaryData = [5, 24, 56, 243];
-   checkpanic wsClient->writeString("Hi");
+   check wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
    checkpanic wsClient->writeBytes(binaryData);
@@ -82,14 +83,14 @@ public function testMissingOnText() {
 
 // Tests behavior when onPong resource is missing and a pong is received
 @test:Config {}
-public function testMissingOnPong() {
+public function testMissingOnPong() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
    expectedBinData = [];
-   checkpanic wsClient->pong(binaryData);
+   check wsClient->pong(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedPingBinaryData, expectedBinData, msg = "Data mismatched");
-   checkpanic wsClient->writeBytes(binaryData);
+   check wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -97,16 +98,16 @@ public function testMissingOnPong() {
 
 // Tests behavior when onBytes resource is missing and binary message is received
 @test:Config {}
-public function testMissingOnBinary() {
+public function testMissingOnBinary() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
    expectedBinData = [];
    byte[] expectedBinData = [];
    expectedData = "";
-   checkpanic wsClient->writeBytes(binaryData);
+   check wsClient->writeBytes(binaryData);
    runtime:sleep(500);
    test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
-   checkpanic wsClient->writeString("Hi");
+   check wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -114,11 +115,11 @@ public function testMissingOnBinary() {
 
 // Tests behavior when onBytes resource is missing and binary message is received
 @test:Config {}
-public function testMissingOnIdleTimeout() {
+public function testMissingOnIdleTimeout() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
    expectedData = "";
    runtime:sleep(500);
-   checkpanic wsClient->writeString("Hi");
+   check wsClient->writeString("Hi");
    runtime:sleep(500);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

@@ -29,7 +29,7 @@ listener Listener l24 = checkpanic new(21027, {
                       }
                   });
 service /sslEcho on l24 {
-   resource isolated function onUpgrade .() returns Service|UpgradeError {
+   resource isolated function get .() returns Service|UpgradeError {
        return new SslProxy();
    }
 }
@@ -74,21 +74,22 @@ service class SslProxy {
 }
 
 service class sslClientService {
-   remote function onString(AsyncClient wsEp, string text) {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBytes(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onClose(AsyncClient wsEp, int statusCode, string reason) {
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode, reason);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -105,7 +106,7 @@ listener Listener l27 = checkpanic new(21028, {
                               }
                           });
 service /websocket on l27 {
-   resource isolated function onUpgrade .() returns Service|UpgradeError {
+   resource isolated function get .() returns Service|UpgradeError {
        return new SslProxyServer();
    }
 }
@@ -132,15 +133,16 @@ service class SslProxyServer {
 }
 
 service class sslProxyCallbackService {
-   remote function onString(AsyncClient wsEp, string text) {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
        proxyData = <@untainted>text;
    }
 
-   remote function onBytes(AsyncClient wsEp, byte[] data) {
+   remote function onBytes(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
-   remote function onClose(AsyncClient wsEp, int statusCode, string reason) {
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason);
        if (returnVal is Error) {
            panic <error>returnVal;
