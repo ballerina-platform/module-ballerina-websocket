@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
@@ -73,10 +73,10 @@ public function testMissingOnText() returns Error? {
    expectedData = "";
    byte[] binaryData = [5, 24, 56, 243];
    check wsClient->writeString("Hi");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
    checkpanic wsClient->writeBytes(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
@@ -88,10 +88,10 @@ public function testMissingOnPong() returns Error? {
    byte[] binaryData = [5, 24, 56, 243];
    expectedBinData = [];
    check wsClient->pong(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedPingBinaryData, expectedBinData, msg = "Data mismatched");
    check wsClient->writeBytes(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
@@ -105,10 +105,10 @@ public function testMissingOnBinary() returns Error? {
    byte[] expectedBinData = [];
    expectedData = "";
    check wsClient->writeBytes(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
    check wsClient->writeString("Hi");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
@@ -118,9 +118,9 @@ public function testMissingOnBinary() returns Error? {
 public function testMissingOnIdleTimeout() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
    expectedData = "";
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    check wsClient->writeString("Hi");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

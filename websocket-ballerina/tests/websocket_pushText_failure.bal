@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string errorMsg2 = "";
@@ -40,7 +40,7 @@ service class PushTextFailureService {
 @test:Config {}
 public function pushTextFailure() {
    AsyncClient wsClient = new("ws://localhost:21008/pushTextFailureService");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(errorMsg2, "ConnectionClosureError: Close frame already sent. Cannot push text data!",
        msg = "Data mismatched");
 }

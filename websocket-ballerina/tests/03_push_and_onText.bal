@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/io;
 
@@ -36,7 +36,7 @@ service class WsService1 {
 }
 
 service class clientPushCallbackService {
-    *Service;
+    //*Service;
     remote function onString(Caller wsEp, string text) {
         data = <@untainted>text;
     }
@@ -55,7 +55,7 @@ service class clientPushCallbackService {
 public function testString() returns Error? {
    AsyncClient wsClient = new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
    check wsClient->writeString("Hi");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(data, "Hi", msg = "Failed writeString");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
@@ -162,7 +162,7 @@ public function testSslProxySendText() {
            }
        });
    checkpanic wsClient->writeString("Hi");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
@@ -180,7 +180,7 @@ public function testSslProxySendBinary() {
        });
    byte[] binaryData = [5, 24, 56];
    checkpanic wsClient->writeBytes(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

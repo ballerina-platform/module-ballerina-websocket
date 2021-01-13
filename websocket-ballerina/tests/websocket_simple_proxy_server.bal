@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string proxyData = "";
@@ -136,7 +136,7 @@ service class proxyCallbackService {
 public function testSendText() {
    AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
    checkpanic wsClient->writeString("Hi kalai");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
@@ -147,7 +147,7 @@ public function testSendBinary() {
    AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
    byte[] binaryData = [5, 24, 56, 243];
    checkpanic wsClient->writeBytes(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

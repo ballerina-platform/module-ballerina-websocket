@@ -16,7 +16,7 @@
 
 import ballerina/test;
 import ballerina/io;
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 
 string aggregatedByteOutput = "";
 type outputByteArr byte[];
@@ -72,11 +72,11 @@ public function testSyncClientByteArray() {
    }
    worker w2 {
       io:println("Waiting till client starts reading byte[].");
-      runtime:sleep(2000);
+      runtime:sleep(2);
       var resp1 = wsClient->writeBytes("Hello".toBytes());
-      runtime:sleep(2000);
+      runtime:sleep(2);
       var resp2 = wsClient->writeBytes("Hello2".toBytes());
-      runtime:sleep(2000);
+      runtime:sleep(2);
       var resp3 = wsClient->writeBytes("Hello3".toBytes());
       var resp4 = wsClient->writeBytes("Hello4".toBytes());
       var resp5 = wsClient->writeBytes("Hello5".toBytes());
@@ -84,5 +84,5 @@ public function testSyncClientByteArray() {
    _ = wait {w1, w2};
    string msg = "[72,101,108,108,111][72,101,108,108,111,50][72,101,108,108,111,51][72,101,108,108,111,52][72,101,108,108,111,53]";
    test:assertEquals(aggregatedByteOutput, msg, msg = "");
-   runtime:sleep(2000);
+   runtime:sleep(2);
 }

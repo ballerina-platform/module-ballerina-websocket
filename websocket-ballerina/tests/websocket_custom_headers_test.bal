@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
@@ -69,7 +69,7 @@ service class MyWSService2 {
 public function testIsOpenCloseCalled() returns error? {
     AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
     check wsClient->writeString("Hi");
-    runtime:sleep(500);
+    runtime:sleep(0.5);
 
     test:assertEquals(output, "In service 1 onString isOpen false");
     test:assertEquals(pathParam, "xyz");
@@ -84,7 +84,7 @@ public function testIsOpenCloseCalled() returns error? {
 
     AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
     check wsClient2->writeString("Hi");
-    runtime:sleep(500);
+    runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onString isOpen false");
     test:assertEquals(pathParam, "tuv");
 }
@@ -95,6 +95,6 @@ public function testIsOpenCloseCalled() returns error? {
 public function testIsOpenCloseFrameReceived() returns error? {
     AsyncClient wsClient = new ("ws://localhost:21001");
     check wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
-    runtime:sleep(500);
+    runtime:sleep(0.5);
     test:assertEquals(output, "In onClose isOpen true");
 }

@@ -16,7 +16,7 @@
 
 import ballerina/test;
 import ballerina/io;
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 
 string aggregatedTextOutput = "";
 listener Listener l11 = checkpanic new(21000);
@@ -58,7 +58,7 @@ public function testSyncClient() {
       aggregatedTextOutput = aggregatedTextOutput + resp3;
       io:println("3rd response received at sync text client :" + resp3);
 
-      runtime:sleep(3000);
+      runtime:sleep(3);
 
       var resp4 = <string> checkpanic wsClient->readString();
       aggregatedTextOutput = aggregatedTextOutput + resp4;
@@ -73,11 +73,11 @@ public function testSyncClient() {
    }
    worker w2 {
       io:println("Waiting till client starts reading text.");
-      runtime:sleep(2000);
+      runtime:sleep(2);
       var resp1 = wsClient->writeString("Hi world1");
-      runtime:sleep(2000);
+      runtime:sleep(2);
       var resp2 = wsClient->writeString("Hi world2");
-      runtime:sleep(2000);
+      runtime:sleep(2);
       var resp3 = wsClient->writeString("Hi world3");
       var resp4 = wsClient->writeString("Hi world4");
       var resp5 = wsClient->writeString("Hi world5");
@@ -85,5 +85,5 @@ public function testSyncClient() {
    _ = wait {w1, w2};
    string msg = "Hi world1Hi world2Hi world3Hi world4Hi world5";
    test:assertEquals(aggregatedTextOutput, msg, msg = "");
-   runtime:sleep(3000);
+   runtime:sleep(3);
 }

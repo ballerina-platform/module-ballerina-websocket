@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/io;
 
@@ -78,7 +78,7 @@ service class ErrorServer {
 @test:Config {}
 public function testConnectionError() {
    AsyncClient wsClient = new ("ws://lmnop.ls", new errorResourceService(), config);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(errMessage, "ConnectionError: IO Error");
 }
 
@@ -86,7 +86,7 @@ public function testConnectionError() {
 @test:Config {}
 public function testSslError() {
    AsyncClient|error wsClient = new ("wss://localhost:21030/websocket", new errorResourceService(), config);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
 }
 
@@ -97,7 +97,7 @@ public function testLongFrameError() {
        + "pingpingpingpingpingpingpingpingpingpingpingpingpingping";
    byte[] pingData = ping.toBytes();
    AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService());
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    var err = wsClientEp->ping(pingData);
    if (err is error) {
        test:assertEquals(err.message(), "ProtocolError: io.netty.handler.codec.TooLongFrameException: " +
@@ -113,7 +113,7 @@ public function testLongFrameError() {
 public function testConnectionClosedError() {
    AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService());
    error? result = wsClientEp->close(timeoutInSeconds = 0);
-   runtime:sleep(2000);
+   runtime:sleep(2);
    var err = wsClientEp->writeString("some");
    if (err is error) {
        test:assertEquals(err.message(), "ConnectionClosureError: Close frame already sent. Cannot push text data!");
@@ -126,7 +126,7 @@ public function testConnectionClosedError() {
 @test:Config {}
 public function testHandshakeError() {
    AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService(), config);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
 }
 

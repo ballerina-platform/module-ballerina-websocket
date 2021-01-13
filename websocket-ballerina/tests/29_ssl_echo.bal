@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
@@ -86,7 +86,7 @@ public function sslBinaryEcho() returns Error? {
        });
    byte[] binaryData = [5, 24, 56];
    check wsClient->writeBytes(binaryData);
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -104,7 +104,7 @@ public function sslTextEcho() returns Error? {
            }
        });
    check wsClient->writeString("Hi madam");
-   runtime:sleep(500);
+   runtime:sleep(0.5);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
