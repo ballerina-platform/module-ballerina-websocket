@@ -25,6 +25,8 @@ import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -37,6 +39,7 @@ public class WebSocketConnectionInfo {
     private final BObject webSocketEndpoint;
     private final WebSocketConnection webSocketConnection;
     private StringAggregator stringAggregator = null;
+    private ByteArrAggregator byteArrAggregator = null;
     private final boolean sync;
     private SynchronousQueue<WebSocketTextMessage> txtMsgQueue = new SynchronousQueue<>();
     private SynchronousQueue<WebSocketBinaryMessage> binMsgQueue = new SynchronousQueue<>();
@@ -105,6 +108,13 @@ public class WebSocketConnectionInfo {
         return stringAggregator;
     }
 
+    public ByteArrAggregator createIfNullAndGetByteArrAggregator() {
+        if (byteArrAggregator == null) {
+            byteArrAggregator = new ByteArrAggregator();
+        }
+        return byteArrAggregator;
+    }
+
     /**
      * A string aggregator to handle string aggregation for data binding during onString resource dispatching. The
      * aggregation is done in the ConnectionInfo class because the strings specific to a particular connection needs to
@@ -127,6 +137,31 @@ public class WebSocketConnectionInfo {
 
         public void resetAggregateString() {
             this.aggregateString = "";
+        }
+    }
+
+    /**
+     * A byte array aggregator to handle byte array aggregation until the final frame is received. The aggregation
+     * is done in the ConnectionInfo class because the byte arrays specific to a particular connection needs to
+     * be aggregated.
+     */
+    public static class ByteArrAggregator {
+        private ByteArrAggregator() {
+
+        }
+
+        private ByteArrayOutputStream aggregateArr = new ByteArrayOutputStream();
+
+        public byte[] getAggregateByteArr() {
+            return aggregateArr.toByteArray();
+        }
+
+        public void appendAggregateArr(byte[] aggregateByteArr) throws IOException {
+            this.aggregateArr.write(aggregateByteArr);
+        }
+
+        public void resetAggregateByteArr() {
+            this.aggregateArr = new ByteArrayOutputStream();
         }
     }
 }

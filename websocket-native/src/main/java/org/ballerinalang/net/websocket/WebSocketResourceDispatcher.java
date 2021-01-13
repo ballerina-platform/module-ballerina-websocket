@@ -279,10 +279,6 @@ public class WebSocketResourceDispatcher {
                 stringAggregator.appendAggregateString(textMessage.getText());
                 bValues[2] = StringUtils.fromString(stringAggregator.getAggregateString());
                 bValues[3] = true;
-//                if (parameterTypes.length == 3) {
-//                    bValues[4] = finalFragment;
-//                    bValues[5] = true;
-//                }
                 executeResource(wsService, balservice,
                         new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_STRING), bValues, connectionInfo,
                         RESOURCE_NAME_ON_STRING, ON_TEXT_METADATA);
@@ -291,14 +287,6 @@ public class WebSocketResourceDispatcher {
                 stringAggregator.appendAggregateString(textMessage.getText());
                 webSocketConnection.readNextFrame();
             }
-            //            if (dataTypeTag == TypeTags.STRING_TAG) {
-//                bValues[2] = StringUtils.fromString(textMessage.getText());
-//                bValues[3] = true;
-//                if (parameterTypes.length == 3) {
-//                    bValues[4] = finalFragment;
-//                    bValues[5] = true;
-//                }
-//            }
         } catch (Exception e) {
             WebSocketObservabilityUtil.observeError(connectionInfo,
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
@@ -392,19 +380,25 @@ public class WebSocketResourceDispatcher {
                 webSocketConnection.readNextFrame();
                 return;
             }
+            boolean finalFragment = binaryMessage.isFinalFragment();
             Type[] paramDetails = onBinaryMessageResource.getParameterTypes();
             Object[] bValues = new Object[paramDetails.length * 2];
-            bValues[0] = connectionInfo.getWebSocketEndpoint();
-            bValues[1] = true;
-            bValues[2] = ValueCreator.createArrayValue(binaryMessage.getByteArray());
-            bValues[3] = true;
-            if (paramDetails.length == 3) {
-                bValues[4] = binaryMessage.isFinalFragment();
-                bValues[5] = true;
+            WebSocketConnectionInfo.ByteArrAggregator byteAggregator = connectionInfo
+                    .createIfNullAndGetByteArrAggregator();
+            if (finalFragment) {
+                byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
+                bValues[0] = connectionInfo.getWebSocketEndpoint();
+                bValues[1] = true;
+                bValues[2] = ValueCreator.createArrayValue(byteAggregator.getAggregateByteArr());
+                bValues[3] = true;
+                executeResource(wsService, balservice, new WebSocketResourceCallback(
+                                connectionInfo, RESOURCE_NAME_ON_BINARY), bValues, connectionInfo,
+                        RESOURCE_NAME_ON_BINARY, ON_BINARY_METADATA);
+                byteAggregator.resetAggregateByteArr();
+            } else {
+                byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
+                webSocketConnection.readNextFrame();
             }
-            executeResource(wsService, balservice, new WebSocketResourceCallback(
-                            connectionInfo, RESOURCE_NAME_ON_BINARY), bValues, connectionInfo,
-                    RESOURCE_NAME_ON_BINARY, ON_BINARY_METADATA);
         } catch (Exception e) {
             WebSocketObservabilityUtil.observeError(connectionInfo,
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,

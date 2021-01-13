@@ -45,7 +45,6 @@ public client class WebSocketFailoverClient {
     # will be lost.
     #
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
     remote isolated function writeString(string data) returns Error? {
         return self.conn.writeString(data);
@@ -55,7 +54,6 @@ public client class WebSocketFailoverClient {
     # that message will be lost.
     #
     # + data - Binary data to be sent
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
     remote isolated function writeBytes(byte[] data) returns Error? {
         return self.conn.writeBytes(data);
