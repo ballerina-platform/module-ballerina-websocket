@@ -39,10 +39,6 @@ service class WsService {
 
 For more information, see the following.
 * [WebSocket Basic Example](https://ballerina.io/swan-lake/learn/by-example/websocket-basic-sample.html)
-* [HTTP to WebSocket Upgrade Example](https://ballerina.io/swan-lake/learn/by-example/http-to-websocket-upgrade.html)
 * [WebSocket Chat Application](https://ballerina.io/swan-lake/learn/by-example/websocket-chat-application.html)
 * [WebSocket Proxy Server](https://ballerina.io/swan-lake/learn/by-example/websocket-proxy-server.html)
-* [Client Endpoint](https://ballerina.io/swan-lake/learn/by-example/websocket-client.html)   
-* [Retry](https://ballerina.io/swan-lake/learn/by-example/websocket-retry.html)
-* [Failover](https://ballerina.io/swan-lake/learn/by-example/websocket-failover.html)
-* [Cookie](https://ballerina.io/swan-lake/learn/by-example/websocket-cookie.html)
+* [Client Endpoint](https://ballerina.io/swan-lake/learn/by-example/websocket-client.html)  

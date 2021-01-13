@@ -26,6 +26,7 @@ import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
 import org.ballerinalang.net.websocket.WebSocketUtil;
+import org.ballerinalang.net.websocket.observability.WebSocketObservabilityConstants;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 
@@ -49,11 +50,13 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
         if (connectionInfo.isSync()) {
-            connectionInfo.addTxtMessageToQueue(webSocketTextMessage);
             try {
+                connectionInfo.addTxtMessageToQueue(webSocketTextMessage);
                 connectionInfo.getWebSocketConnection().readNextFrame();
-            } catch (IllegalAccessException e) {
-                //ignore as at this point the websocket connection has been made.
+            } catch (Exception e) {
+                WebSocketObservabilityUtil
+                        .observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
+                                WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, e.getMessage());
             }
         } else {
             WebSocketResourceDispatcher.dispatchOnText(connectionInfo, webSocketTextMessage, false);
@@ -63,11 +66,13 @@ public class ClientConnectorListener implements ExtendedConnectorListener {
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
         if (connectionInfo.isSync()) {
-            connectionInfo.addBinMessageToQueue(webSocketBinaryMessage);
             try {
+                connectionInfo.addBinMessageToQueue(webSocketBinaryMessage);
                 connectionInfo.getWebSocketConnection().readNextFrame();
-            } catch (IllegalAccessException e) {
-                //ignore as at this point the websocket connection has been made.
+            } catch (Exception e) {
+                WebSocketObservabilityUtil
+                        .observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
+                                WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, e.getMessage());
             }
         } else {
             WebSocketResourceDispatcher.dispatchOnBinary(connectionInfo, webSocketBinaryMessage, false);

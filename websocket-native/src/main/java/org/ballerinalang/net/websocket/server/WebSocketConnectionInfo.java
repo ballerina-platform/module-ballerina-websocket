@@ -81,24 +81,16 @@ public class WebSocketConnectionInfo {
         return txtMsgQueue;
     }
 
-    public void addTxtMessageToQueue(WebSocketTextMessage msg) {
-        try {
-            txtMsgQueue.put(msg);
-        } catch (InterruptedException e) {
-            // ignore this.
-        }
+    public void addTxtMessageToQueue(WebSocketTextMessage msg) throws InterruptedException {
+        txtMsgQueue.put(msg);
     }
 
     public SynchronousQueue<WebSocketBinaryMessage> getBinMsgQueue() {
         return binMsgQueue;
     }
 
-    public void addBinMessageToQueue(WebSocketBinaryMessage msg) {
-        try {
-            binMsgQueue.put(msg);
-        } catch (InterruptedException e) {
-            // ignore this.
-        }
+    public void addBinMessageToQueue(WebSocketBinaryMessage msg) throws InterruptedException {
+        binMsgQueue.put(msg);
     }
 
     public StringAggregator createIfNullAndGetStringAggregator() {
@@ -125,18 +117,18 @@ public class WebSocketConnectionInfo {
 
         }
 
-        private String aggregateString = "";
+        private StringBuilder aggregateStrBuilder = new StringBuilder();
 
         public String getAggregateString() {
-            return aggregateString;
+            return aggregateStrBuilder.toString();
         }
 
         public void appendAggregateString(String aggregateString) {
-            this.aggregateString += aggregateString;
+            aggregateStrBuilder.append(aggregateString);
         }
 
         public void resetAggregateString() {
-            this.aggregateString = "";
+            aggregateStrBuilder = new StringBuilder();
         }
     }
 
