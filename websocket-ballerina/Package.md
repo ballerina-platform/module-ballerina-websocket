@@ -12,7 +12,7 @@ The returning `websocket:Service` has a fixed set of remote methods.
 ```ballerina
 service /ws on new websocket:Listener(21003) {
     resource function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
-        returns new WsService();
+        return new WsService();
 }
         
 service class WsService {
@@ -23,7 +23,7 @@ service class WsService {
 }              
 ```
 
-**onConnect remote method**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched. This remote method is only available in the service of the server.
+**onConnect remote method**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched.
 
 **onString remote method**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 

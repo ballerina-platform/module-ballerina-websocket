@@ -37,7 +37,6 @@ ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibConfigVersion = project.stdlibConfigVersion
 ext.stdlibReflectVersion = project.stdlibReflectVersion
-ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 ext.stdlibOsVersion = project.stdlibOsVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibEncodingVersion = project.stdlibEncodingVersion
@@ -239,7 +238,6 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "org.ballerinalang:config-ballerina:${stdlibConfigVersion}"
         ballerinaStdLibs "org.ballerinalang:reflect-ballerina:${stdlibReflectVersion}"
-        ballerinaStdLibs "org.ballerinalang:runtime-ballerina:${stdlibRuntimeVersion}"
 
         // Transitive dependencies
         ballerinaStdLibs "org.ballerinalang:os-ballerina:${stdlibOsVersion}"
