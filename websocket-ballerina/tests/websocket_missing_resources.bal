@@ -75,7 +75,7 @@ public function testMissingOnText() returns Error? {
    check wsClient->writeString("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
-   checkpanic wsClient->writeBytes(binaryData);
+   check wsClient->writeBytes(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);

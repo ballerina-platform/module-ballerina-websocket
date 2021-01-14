@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string errorMsg2 = "";
-listener Listener l20 = checkpanic new(21008);
+listener Listener l20 = check new(21008);
 service /pushTextFailureService on l20 {
    resource isolated function get .() returns Service|UpgradeError {
        return new PushTextFailureService();

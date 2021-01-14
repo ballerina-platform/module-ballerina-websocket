@@ -18,7 +18,7 @@ import ballerina/test;
 import ballerina/lang.runtime as runtime;
 
 int expectedStatusCode = 0;
-listener Listener l13 = checkpanic new(21004);
+listener Listener l13 = check new(21004);
 service /clientClose on l13 {
     resource isolated function get .() returns Service|UpgradeError {
        return new clientCloseService();

@@ -28,7 +28,7 @@ service class errorResourceService {
    }
 }
 
-listener Listener l14 = checkpanic new(21030);
+listener Listener l14 = check new(21030);
 @ServiceConfig {}
 service /websocket on l14 {
     resource isolated function get .() returns Service|UpgradeError  {

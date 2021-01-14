@@ -20,7 +20,7 @@ import ballerina/test;
 
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
-listener Listener l24 = checkpanic new(21027, {
+listener Listener l24 = check new(21027, {
                       secureSocket: {
                           keyStore: {
                               path: KEYSTORE_PATH,
@@ -97,7 +97,7 @@ service class sslClientService {
    }
 }
 
-listener Listener l27 = checkpanic new(21028, {
+listener Listener l27 = check new(21028, {
                               secureSocket: {
                                   keyStore: {
                                       path: KEYSTORE_PATH,
@@ -152,7 +152,7 @@ service class sslProxyCallbackService {
 
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
-public function testSslProxySendText() {
+public function testSslProxySendText() returns Error? {
    AsyncClient wsClient = new ("wss://localhost:21027/sslEcho", new sslProxyCallbackService(), {
            secureSocket: {
                trustStore: {
@@ -161,7 +161,7 @@ public function testSslProxySendText() {
                }
            }
        });
-   checkpanic wsClient->writeString("Hi");
+   check wsClient->writeString("Hi");
    runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -169,7 +169,7 @@ public function testSslProxySendText() {
 
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
-public function testSslProxySendBinary() {
+public function testSslProxySendBinary() returns Error? {
    AsyncClient wsClient = new ("wss://localhost:21027/sslEcho", new sslProxyCallbackService(), {
            secureSocket: {
                trustStore: {
@@ -179,7 +179,7 @@ public function testSslProxySendBinary() {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   checkpanic wsClient->writeBytes(binaryData);
+   check wsClient->writeBytes(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

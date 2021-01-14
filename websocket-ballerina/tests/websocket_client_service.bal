@@ -19,7 +19,7 @@ import ballerina/test;
 
 string arrivedData = "";
 boolean isClientConnectionOpen = false;
-listener Listener l15 = checkpanic new(21021);
+listener Listener l15 = check new(21021);
 service /'client/'service on l15 {
    resource isolated function get bbe() returns Service|UpgradeError {
        return new clientFailure200();
@@ -56,10 +56,10 @@ public function testClientSuccessWithoutService() {
 
 // Tests the client initialization with a WebSocketClientService but without any resources.
 @test:Config {}
-public function testClientSuccessWithWebSocketClientService() {
+public function testClientSuccessWithWebSocketClientService() returns Error? {
    isClientConnectionOpen = false;
    AsyncClient wsClient = new ("ws://localhost:21021/client/service/bbe", new ClientService200());
-   checkpanic wsClient->writeString("Client worked");
+   check wsClient->writeString("Client worked");
    runtime:sleep(0.5);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

@@ -19,7 +19,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string proxyData = "";
-listener Listener l22 = checkpanic new(21018);
+listener Listener l22 = check new(21018);
 service / on l22 {
    resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService();
@@ -61,7 +61,7 @@ service class ProxyService {
 
 }
 
-listener Listener l26 = checkpanic new(21019);
+listener Listener l26 = check new(21019);
 service /websocket on l26 {
    resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService2();
@@ -133,9 +133,9 @@ service class proxyCallbackService {
 
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
-public function testSendText() {
+public function testSendText() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
-   checkpanic wsClient->writeString("Hi kalai");
+   check wsClient->writeString("Hi kalai");
    runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -143,10 +143,10 @@ public function testSendText() {
 
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
-public function testSendBinary() {
+public function testSendBinary() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
    byte[] binaryData = [5, 24, 56, 243];
-   checkpanic wsClient->writeBytes(binaryData);
+   check wsClient->writeBytes(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

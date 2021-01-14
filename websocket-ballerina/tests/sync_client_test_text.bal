@@ -19,7 +19,7 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 
 string aggregatedTextOutput = "";
-listener Listener l11 = checkpanic new(21000);
+listener Listener l11 = check new(21000);
 service /onTextString on l11 {
    resource function get .() returns Service|UpgradeError {
        return new WsServiceSync();
@@ -28,12 +28,12 @@ service /onTextString on l11 {
 
 service class WsServiceSync {
   *Service;
-  remote isolated function onString(Caller caller, string data) {
-      checkpanic caller->writeString(data);
+  remote isolated function onString(Caller caller, string data) returns Error? {
+      check caller->writeString(data);
   }
 
-  remote isolated function onClose(Caller caller, string data) {
-        checkpanic caller->writeString(data);
+  remote isolated function onClose(Caller caller, string data) returns Error? {
+        check caller->writeString(data);
   }
 }
 

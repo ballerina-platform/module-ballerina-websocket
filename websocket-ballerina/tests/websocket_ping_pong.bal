@@ -19,7 +19,7 @@ import ballerina/test;
 
 byte[] expectedPongData = [];
 byte[] expectedPongData1 = [];
-listener Listener l19 = checkpanic new(21014);
+listener Listener l19 = check new(21014);
 service /pingpong/ws on l19 {
     resource isolated function get .() returns Service|UpgradeError  {
        return new PingPongService();
@@ -59,10 +59,10 @@ service class pingPongCallbackService {
 
 // Tests ping to Ballerina WebSocket server
 @test:Config {}
-public function testPingToBallerinaServer() {
+public function testPingToBallerinaServer() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
    byte[] pongData = [5, 24, 56, 243];
-   checkpanic wsClient->ping(pongData);
+   check wsClient->ping(pongData);
    runtime:sleep(0.5);
    test:assertEquals(expectedPongData, pongData);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -70,10 +70,10 @@ public function testPingToBallerinaServer() {
 
 // Tests pong to Ballerina WebSocket server
 @test:Config {}
-public function testPingFromRemoteServerToBallerinaClient() {
+public function testPingFromRemoteServerToBallerinaClient() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
    byte[] pongData = [5, 24, 34];
-   checkpanic wsClient->pong(pongData);
+   check wsClient->pong(pongData);
    runtime:sleep(0.5);
    test:assertEquals(expectedPongData1, pongData);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

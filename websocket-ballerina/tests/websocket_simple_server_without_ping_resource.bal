@@ -19,7 +19,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 byte[] expectedAutoPongData = [];
-listener Listener l23 = checkpanic new(21020);
+listener Listener l23 = check new(21020);
 service / on l23 {
    resource isolated function get .() returns Service|UpgradeError {
        return new TestService();
@@ -42,10 +42,10 @@ service class PongService {
 
 // Tests the auto ping pong support in Ballerina if there is no onPing resource
 @test:Config {}
-public function testAutoPingPongSupport() {
+public function testAutoPingPongSupport() returns Error? {
    AsyncClient wsClient = new ("ws://localhost:21020", new PongService());
    byte[] pingData = [5, 24, 56, 243];
-   checkpanic wsClient->ping(pingData);
+   check wsClient->ping(pingData);
    runtime:sleep(0.5);
    test:assertEquals(expectedAutoPongData, pingData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

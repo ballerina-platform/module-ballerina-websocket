@@ -21,7 +21,7 @@ import ballerina/lang.runtime as runtime;
 string aggregatedByteOutput = "";
 type outputByteArr byte[];
 
-listener Listener l8 = checkpanic new(21053);
+listener Listener l8 = check new(21053);
 service /onTextBytes on l8 {
    resource function get .() returns Service|UpgradeError {
        return new WsServiceSyncBytes();
@@ -30,12 +30,12 @@ service /onTextBytes on l8 {
 
 service class WsServiceSyncBytes {
   *Service;
-  remote isolated function onBytes(Caller caller, byte[] data) {
-      checkpanic caller->writeBytes(data);
+  remote isolated function onBytes(Caller caller, byte[] data) returns Error? {
+      check caller->writeBytes(data);
   }
 
-  remote isolated function onClose(Caller caller, string data) {
-        checkpanic caller->writeString(data);
+  remote isolated function onClose(Caller caller, string data) returns Error? {
+        check caller->writeString(data);
   }
 }
 
