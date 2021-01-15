@@ -81,7 +81,7 @@ public class WebSocketUtil {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketUtil.class);
     private static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
     private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeoutInSeconds");
-    private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_HTTP +
+    private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_WEBSOCKET +
             WebSocketConstants.SEPARATOR + WebSocketConstants.FAILOVER_WEBSOCKET_CLIENT;
     public static final String ERROR_MESSAGE = "Error occurred: ";
     public static final String LOG_MESSAGE = "{} {}";
@@ -97,7 +97,7 @@ public class WebSocketUtil {
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
         WebSocketConnectionInfo connectionInfo =
-                new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller);
+                new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller, false);
         connectionManager.addConnection(webSocketConnection.getChannelId(), connectionInfo);
         webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO,
                 connectionInfo);
@@ -478,7 +478,7 @@ public class WebSocketUtil {
         clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
         BMap<BString, Object> headerValues = (BMap<BString, Object>) clientEndpointConfig.getMapValue(
-                WebSocketConstants.CLIENT_CUSTOM_HEADERS_CONFIG);
+                WebSocketConstants.CUSTOM_HEADERS);
         if (headerValues != null) {
             clientConnectorConfig.addHeaders(getCustomHeaders(headerValues));
         }
@@ -544,21 +544,19 @@ public class WebSocketUtil {
     /**
      * Validate and create the webSocket service.
      *
-     * @param clientEndpointConfig - a client endpoint config
+     * @param callbackService - a client endpoint config
      * @param runtime - ballerina runtime
      * @return webSocketService
      */
-    public static WebSocketService validateAndCreateWebSocketService(Runtime runtime,
-            BMap<BString, Object> clientEndpointConfig) {
-        Object clientService = clientEndpointConfig.get(WebSocketConstants.CLIENT_SERVICE_CONFIG);
-        if (clientService != null) {
-            Type param = ((BObject) clientService).getType().getMethods()[0].getParameterTypes()[0];
+    public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
+        if (callbackService != null) {
+            Type param = (callbackService).getType().getMethods()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a WebSocket Client Service",
                         null, WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
             }
-            return new WebSocketService((BObject) clientService, runtime);
+            return new WebSocketService(callbackService, runtime);
         } else {
             return new WebSocketService(runtime);
         }
@@ -595,8 +593,8 @@ public class WebSocketUtil {
                 WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), null));
     }
 
-    public static BError createWebsocketError(String message, HttpErrorType errorType) {
-        return ErrorCreator.createDistinctError(errorType.getErrorName(), PROTOCOL_WEBSOCKET_PKG_ID,
+    public static BError createWebsocketError(String message, WebSocketConstants.ErrorCode errorType) {
+        return ErrorCreator.createDistinctError(errorType.errorCode(), PROTOCOL_WEBSOCKET_PKG_ID,
                 StringUtils.fromString(message));
     }
 

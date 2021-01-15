@@ -14,22 +14,49 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents a WebSocket caller.
-public client class Caller {
+import ballerina/java;
+import ballerina/http;
+
+# Represents a WebSocket synchronous client endpoint.
+public client class SyncClient {
 
     private string id = "";
     private string? negotiatedSubProtocol = ();
     private boolean secure = false;
     private boolean open = false;
+    private http:Response? response = ();
     private map<any> attributes = {};
 
     private WebSocketConnector conn = new;
+    private string url = "";
+    private WebSocketClientConfiguration config = {};
+    private (service object {})? callbackService = ();
 
-    isolated function init() {
-        // package private function to prevent object creation
+    # Initializes the synchronous client when called.
+    #
+    # + url - URL of the target service
+    # + callbackService - The callback service of the client. Resources in this service gets called on the
+    #                     receipt of ping, pong, close from the server
+    # + config - The configurations to be used when initializing the client
+    public isolated function init(string url, (service object {})? callbackService = (), WebSocketClientConfiguration? config = ())
+                              returns Error? {
+        self.url = url;
+        self.config = config ?: {};
+        self.callbackService = callbackService ?: ();
+        self.initEndpoint();
     }
 
-    # Pushes text to the connection. If an error occurs while sending the text message to the connection, that message
+    # Initializes the endpoint.
+    public isolated function initEndpoint() {
+        var retryConfig = self.config?.retryConfig;
+        if (retryConfig is WebSocketRetryConfig) {
+            return externSyncRetryInitEndpoint(self);
+        } else {
+            return externSyncWSInitEndpoint(self);
+        }
+    }
+
+    # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
     # + data - Data to be sent.
@@ -38,7 +65,7 @@ public client class Caller {
         return self.conn.writeString(data);
     }
 
-    # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
+    # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent
@@ -70,16 +97,16 @@ public client class Caller {
     # + reason - Reason for closing the connection
     # + timeoutInSeconds - Time to wait for the close frame to be received from the remote endpoint before closing the
     #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
-    #                   is not received from the remote endpoint. If the value < 0 (e.g., -1), then the connection waits
-    #                   until a close frame is received. If WebSocket frame is received from the remote endpoint
-    #                   within the waiting period, the connection is terminated immediately.
-    # + return - An `error` if an error occurs when sending
+    #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
+    #                   waits until a close frame is received. If the WebSocket frame is received from the remote
+    #                   endpoint within the waiting period, the connection is terminated immediately.
+    # + return - An `error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (),
         int timeoutInSeconds = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 
-    # Sets a connection related attribute.
+    # Sets a connection-related attribute.
     #
     # + key - The key, which identifies the attribute
     # + value - The value of the attribute
@@ -87,7 +114,7 @@ public client class Caller {
         self.attributes[key] = value;
     }
 
-    # Gets connection related attribute if any.
+    # Gets connection-related attributes if any.
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
@@ -130,4 +157,35 @@ public client class Caller {
     public isolated function isOpen() returns boolean {
         return self.open;
     }
+
+    # Gives the HTTP response if any received for the client handshake request.
+    #
+    # + return - The HTTP response received from the client handshake request
+    public isolated function getHttpResponse() returns http:Response? {
+        return self.response;
+    }
+
+    # Reads the texts in a synchronous manner
+    #
+    # + return  - The text data sent by the server or an `error` if an error occurs when sending
+    remote isolated function readString() returns string|Error {
+        return self.conn.readString();
+    }
+
+    # Reads the binary data in a synchronous manner
+    #
+    # + return  - The binary data sent by the server or an `error` if an error occurs when sending
+    remote isolated function readBytes() returns byte[]|Error {
+        return self.conn.readBytes();
+    }
 }
+
+isolated function externSyncWSInitEndpoint(SyncClient wsClient) = @java:Method {
+    'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
+    name: "initEndpoint"
+} external;
+
+isolated function externSyncRetryInitEndpoint(SyncClient wsClient) = @java:Method {
+    'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
+    name: "initEndpoint"
+} external;

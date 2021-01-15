@@ -21,10 +21,10 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpConnectorPortBindingListener;
 import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpErrorType;
-import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.ServerConnector;
 import org.ballerinalang.net.transport.contract.ServerConnectorFuture;
+import org.ballerinalang.net.websocket.WebSocketConstants;
+import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketServerListener;
 
 import static org.ballerinalang.net.http.HttpConstants.SERVICE_ENDPOINT_CONFIG;
@@ -58,9 +58,9 @@ public class Start extends AbstractWebsocketNativeFunction {
         try {
             serverConnectorFuture.sync();
         } catch (Exception ex) {
-            throw HttpUtil.createHttpError("failed to start server connector '"
-                    + serverConnector.getConnectorID()
-                    + "': " + ex.getMessage(), HttpErrorType.LISTENER_STARTUP_FAILURE);
+            throw WebSocketUtil.createWebsocketError(
+                    "failed to start server connector '" + serverConnector.getConnectorID() + "': " + ex.getMessage(),
+                    WebSocketConstants.ErrorCode.WsGenericListenerError);
         }
 
         serviceEndpoint.addNativeData(HttpConstants.CONNECTOR_STARTED, true);

@@ -22,9 +22,9 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpConnectionManager;
-import org.ballerinalang.net.http.HttpErrorType;
 import org.ballerinalang.net.transport.contract.ServerConnector;
 import org.ballerinalang.net.transport.contract.config.ListenerConfiguration;
+import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import static org.ballerinalang.net.http.HttpUtil.getListenerConfig;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ENDPOINT_CONFIG_PORT;
@@ -53,7 +53,7 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         } catch (BError errorValue) {
             return errorValue;
         } catch (Exception e) {
-            return createWebsocketError(e.getMessage(), HttpErrorType.GENERIC_LISTENER_ERROR);
+            return createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsGenericListenerError);
         }
     }
 }

@@ -14,58 +14,58 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
-import ballerina/http;
 import ballerina/io;
 
 string errMessage = "";
 
-WebSocketClientConfiguration config = {callbackService: errorResourceService, subProtocols: ["xml"]};
+WebSocketClientConfiguration config = {subProtocols: ["xml"]};
 
-service object {} errorResourceService = @ServiceConfig {} service object {
-   remote function onError(Client clientCaller, error err) {
+service class errorResourceService {
+   remote function onError(Caller clientCaller, error err) {
        errMessage = <@untainted>err.message();
    }
-};
+}
 
+listener Listener l14 = check new(21030);
 @ServiceConfig {}
-service /websocket on new Listener(21030) {
-    remote isolated function onUpgrade(http:Caller caller, http:Request req) returns Service|WebSocketError  {
+service /websocket on l14 {
+    resource isolated function get .() returns Service|UpgradeError  {
        return new ErrorServer();
     }
 }
 
 service class ErrorServer {
   *Service;
-   remote isolated function onOpen(Caller caller) {
+   remote isolated function onConnect(Caller caller) {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 
    remote isolated function onPing(Caller caller, byte[] localData) {
        var returnVal = caller->pong(localData);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
    remote isolated function onPong(Caller caller, byte[] localData) {
        var returnVal = caller->ping(localData);
-       if (returnVal is WebSocketError) {
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onText(Caller caller, string text, boolean finalFrame) {
-       var err = caller->pushText(text, finalFrame);
-       if (err is WebSocketError) {
+   remote isolated function onString(Caller caller, string text) {
+       var err = caller->writeString(text);
+       if (err is Error) {
            io:println("Error occurred when sending text message" + err.message());
        }
    }
 
-   remote isolated function onBinary(Caller caller, byte[] data) {
-       var returnVal = caller->pushBinary(data);
-       if (returnVal is WebSocketError) {
+   remote isolated function onBytes(Caller caller, byte[] data) {
+       var returnVal = caller->writeBytes(data);
+       if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
@@ -76,28 +76,28 @@ service class ErrorServer {
 
 // Connection refused IO error.
 @test:Config {}
-public function testConnectionError() {
-   Client wsClient = new ("ws://lmnop.ls", config);
-   runtime:sleep(500);
+public function testConnectionError() returns Error? {
+   AsyncClient wsClient = check new ("ws://lmnop.ls", new errorResourceService(), config);
+   runtime:sleep(0.5);
    test:assertEquals(errMessage, "ConnectionError: IO Error");
 }
 
 // SSL/TLS error
 @test:Config {}
 public function testSslError() {
-   Client|error wsClient = new ("wss://localhost:21030/websocket", config);
-   runtime:sleep(500);
+   AsyncClient|error wsClient = new ("wss://localhost:21030/websocket", new errorResourceService(), config);
+   runtime:sleep(0.5);
    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
 }
 
 // The frame exceeds the max frame length
 @test:Config {}
-public function testLongFrameError() {
+public function testLongFrameError() returns Error? {
    string ping = "pingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingping"
        + "pingpingpingpingpingpingpingpingpingpingpingpingpingping";
    byte[] pingData = ping.toBytes();
-   Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
-   runtime:sleep(500);
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
+   runtime:sleep(0.5);
    var err = wsClientEp->ping(pingData);
    if (err is error) {
        test:assertEquals(err.message(), "ProtocolError: io.netty.handler.codec.TooLongFrameException: " +
@@ -106,21 +106,15 @@ public function testLongFrameError() {
        test:assertFail("Mismatched output");
    }
    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
 }
 
 // Close the connection and push text
 @test:Config {}
-public function testConnectionClosedError() {
-   Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
+public function testConnectionClosedError() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    error? result = wsClientEp->close(timeoutInSeconds = 0);
-   //if (result is WebSocketError) {
-   //   log:printError("Error occurred when closing connection", err = result);
-   //}
-   runtime:sleep(2000);
-   var err = wsClientEp->pushText("some");
+   runtime:sleep(2);
+   var err = wsClientEp->writeString("some");
    if (err is error) {
        test:assertEquals(err.message(), "ConnectionClosureError: Close frame already sent. Cannot push text data!");
    } else {
@@ -130,17 +124,17 @@ public function testConnectionClosedError() {
 
 // Handshake failing because of missing subprotocol
 @test:Config {}
-public function testHandshakeError() {
-   Client wsClientEp = new ("ws://localhost:21030/websocket", config);
-   runtime:sleep(500);
+public function testHandshakeError() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService(), config);
+   runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
 }
 
 // Tests the ready function using the WebSocket client. When `readyOnConnect` is true,
 // calls the `ready()` function.
 @test:Config {}
-public function testReadyOnConnect() {
-   Client wsClientEp = new ("ws://localhost:21030/websocket", {callbackService: errorResourceService});
+public function testReadyOnConnect() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    var err = wsClientEp->ready();
    if (err is error) {
        test:assertEquals(err.message(), "GenericError: Already started reading frames");

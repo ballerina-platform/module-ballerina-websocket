@@ -39,14 +39,16 @@ public class WebSocketConstants {
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
     public static final String WEBSOCKET_CALLER = "Caller";
-    public static final String WEBSOCKET_CLIENT = "Client";
+    public static final String WEBSOCKET_CLIENT = "AsyncClient";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
     public static final String WSS_SCHEME = "wss";
     public static final String WS_SCHEME = "ws";
+    public static final String BACK_SLASH = "/";
+    public static final String GET = "get";
     public static final String WEBSOCKET_CALLER_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CALLER;
-    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CLIENT;
+    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
     public static final String FULL_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CLIENT;
 
@@ -56,9 +58,9 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeoutInSeconds");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
-    public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
-    public static final String RESOURCE_NAME_ON_TEXT = "onText";
-    public static final String RESOURCE_NAME_ON_BINARY = "onBinary";
+    public static final String RESOURCE_NAME_ON_CONNECT = "onConnect";
+    public static final String RESOURCE_NAME_ON_STRING = "onString";
+    public static final String RESOURCE_NAME_ON_BINARY = "onBytes";
     public static final String RESOURCE_NAME_ON_PING = "onPing";
     public static final String RESOURCE_NAME_ON_PONG = "onPong";
     public static final String RESOURCE_NAME_ON_CLOSE = "onClose";
@@ -67,8 +69,8 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_CLOSE = "close";
     public static final String RESOURCE_NAME_PING = "ping";
     public static final String RESOURCE_NAME_PONG = "pong";
-    public static final String RESOURCE_NAME_PUSH_BINARY = "pushBinary";
-    public static final String RESOURCE_NAME_PUSH_TEXT = "pushText";
+    public static final String WRITE_BYTES = "writeBytes";
+    public static final String WRITE_STRING = "writeString";
     public static final String RESOURCE_NAME_READY = "ready";
     public static final String RESOURCE_NAME_UPGRADE = "onUpgrade";
 
@@ -79,9 +81,10 @@ public class WebSocketConstants {
 
     public static final BString CLIENT_URL_CONFIG = StringUtils.fromString("url");
     public static final BString CLIENT_SERVICE_CONFIG = StringUtils.fromString("callbackService");
-    public static final BString CLIENT_CUSTOM_HEADERS_CONFIG = StringUtils.fromString("customHeaders");
+    public static final BString CUSTOM_HEADERS = StringUtils.fromString("customHeaders");
     public static final BString CLIENT_READY_ON_CONNECT = StringUtils.fromString("readyOnConnect");
     public static final BString WEBSOCKET_UPGRADE_SERVICE_CONFIG = StringUtils.fromString("upgradeService");
+    public static final String SYNC_CLIENT = "SyncClient";
 
     public static final BString RETRY_CONTEXT = StringUtils.fromString("retryConfig");
     public static final String COUNT_DOWN_LATCH = "countDownLatch";
@@ -94,7 +97,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final String FULL_FAILOVER_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
-            PACKAGE_HTTP + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
+            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
 
     public static final String COLON = ":";
     public static final String PACKAGE = "ballerina";
@@ -139,11 +142,13 @@ public class WebSocketConstants {
     public static final String HTTP_SERVER_CONNECTOR = "HTTP_SERVER_CONNECTOR";
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
 
+    public static final String PARAM_TYPE_STRING = "string";
+
     // Strand meta data
     public static final StrandMetadata ON_OPEN_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_OPEN);
+            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_CONNECT);
     public static final StrandMetadata ON_TEXT_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_TEXT);
+            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_STRING);
     public static final StrandMetadata ON_BINARY_METADATA =
             new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_BINARY);
     public static final StrandMetadata ON_PING_METADATA =
@@ -173,7 +178,11 @@ public class WebSocketConstants {
         WsProtocolError("WsProtocolError"),
         WsConnectionError("WsConnectionError"),
         WsInvalidContinuationFrameError("WsInvalidContinuationFrameError"),
-        WsGenericError("WsGenericError");
+        WsGenericError("WsGenericError"),
+        WsGenericListenerError("GenericListenerError"),
+        WsGenericClientError("GenericClientError"),
+        ReadingInboundTextError("ReadingInboundTextError"),
+        ReadingInboundBinaryError("ReadingInboundBinaryError");
 
         private String errorCode;
 

@@ -34,6 +34,8 @@ import org.ballerinalang.net.websocket.client.listener.ClientConnectorListener;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 
+import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_SERVICE_CONFIG;
+
 /**
  * Initialize the WebSocket Client.
  *
@@ -46,8 +48,9 @@ public class InitEndpoint {
         BMap<BString, Object> clientEndpointConfig =  webSocketClient.getMapValue(
                 WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
         String remoteUrl = webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
-        WebSocketService wsService = WebSocketUtil.validateAndCreateWebSocketService(env.getRuntime(),
-                clientEndpointConfig);
+        BObject callbackService = webSocketClient.getObjectValue(CLIENT_SERVICE_CONFIG);
+        WebSocketService wsService = WebSocketUtil
+                .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
         HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
         WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
         String scheme = URI.create(remoteUrl).getScheme();

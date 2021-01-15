@@ -31,15 +31,18 @@ import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.transport.message.HttpCarbonMessage;
+import org.ballerinalang.net.uri.URIUtil;
 import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityConstants;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
-//import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
-//import org.ballerinalang.net.websocket.WebSocketException;
+import static org.ballerinalang.net.http.HttpDispatcher.getValidatedURI;
+import static org.ballerinalang.net.websocket.WebSocketConstants.BACK_SLASH;
 
 /**
  * Ballerina Connector listener for WebSocket.
@@ -62,7 +65,13 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
     public void onHandshake(WebSocketHandshaker webSocketHandshaker) {
         HttpResourceArguments pathParams = new HttpResourceArguments();
         URI requestUri = createRequestUri(webSocketHandshaker);
-        WebSocketServerService wsService = servicesRegistry.findMatching(requestUri.getPath(), pathParams,
+        Map<String, Map<String, String>> matrixParams = new HashMap<>();
+        String uriWithoutMatrixParams = URIUtil.extractMatrixParams(requestUri.getRawPath(), matrixParams);
+        URI validatedUri = getValidatedURI(uriWithoutMatrixParams);
+        String matchingBasePath = servicesRegistry
+                .findTheMostSpecificBasePath(validatedUri.getRawPath(), servicesRegistry.getServicesByBasePath(),
+                        servicesRegistry.getSortedServiceURIs());
+        WebSocketServerService wsService = servicesRegistry.findMatching(matchingBasePath, pathParams,
                 webSocketHandshaker);
         if (wsService == null) {
             String errMsg = "No service found to handle the service request";
@@ -72,21 +81,10 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
                     WebSocketObservabilityConstants.CONTEXT_SERVER);
             return;
         }
-        setCarbonMessageProperties(pathParams, requestUri, webSocketHandshaker.getHttpCarbonRequest());
-
-//        HttpResource onUpgradeResource = wsService.getUpgradeResource();
-        boolean onUpgradeResource = wsService.getUpgradeRemoteFunction(wsService);
-        if (onUpgradeResource) {
+        setCarbonMessageProperties(pathParams, requestUri, validatedUri, webSocketHandshaker.getHttpCarbonRequest(),
+                matchingBasePath);
             WebSocketResourceDispatcher.dispatchUpgrade(webSocketHandshaker, wsService, httpEndpointConfig,
                     connectionManager);
-        } else {
-            String errMsg = "No remote function found to handle the upgrade request";
-            webSocketHandshaker.cancelHandshake(404, errMsg);
-//            ServerHandshakeFuture future = webSocketHandshaker.handshake(
-//                    wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
-//                    wsService.getMaxFrameSize());
-//            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager));
-        }
     }
 
     private URI createRequestUri(WebSocketHandshaker webSocketHandshaker) {
@@ -95,10 +93,17 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
         return URI.create(serviceUri);
     }
 
-    private void setCarbonMessageProperties(HttpResourceArguments pathParams, URI requestUri, HttpCarbonMessage msg) {
+    private void setCarbonMessageProperties(HttpResourceArguments pathParams, URI requestUri, URI validateUri,
+            HttpCarbonMessage msg, String matchingBasePath) {
+        String subPath = URIUtil.getSubPath(validateUri.getRawPath(), matchingBasePath);
         msg.setProperty(HttpConstants.QUERY_STR, requestUri.getRawQuery());
         msg.setProperty(HttpConstants.RAW_QUERY_STR, requestUri.getRawQuery());
         msg.setProperty(HttpConstants.RESOURCE_ARGS, pathParams);
+        if (subPath.startsWith(BACK_SLASH)) {
+            msg.setProperty(HttpConstants.SUB_PATH, subPath.substring(1));
+        } else {
+            msg.setProperty(HttpConstants.SUB_PATH, subPath);
+        }
     }
 
     @Override

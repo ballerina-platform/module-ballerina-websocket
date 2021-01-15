@@ -21,7 +21,7 @@ import ballerina/http;
 import ballerina/mime;
 
 # Represents a WebSocket client endpoint.
-public client class Client {
+public client class AsyncClient {
 
     private string id = "";
     private string? negotiatedSubProtocol = ();
@@ -33,17 +33,22 @@ public client class Client {
     private WebSocketConnector conn = new;
     private string url = "";
     private WebSocketClientConfiguration config = {};
+    private Service? callbackService = ();
 
     # Initializes the client when called.
     #
     # + url - URL of the target service
+    # + callbackService - The callback service of the client. Resources in this service gets called on the
+    #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, WebSocketClientConfiguration? config = ()) {
+    public isolated function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ())
+                returns Error? {
         self.url = url;
         //if (config is WebSocketClientConfiguration) {
         //    addCookies(config);
         //}
         self.config = config ?: {};
+        self.callbackService = callbackService ?: ();
         self.initEndpoint();
     }
 
@@ -57,32 +62,29 @@ public client class Client {
         }
     }
 
-    # Pushes text to the connection. If an error occurs while sending the text message to the connection, that message
+    # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
+    # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    remote isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data,
-    boolean finalFrame = true) returns WebSocketError? {
-        return self.conn.pushText(data, finalFrame);
+    remote isolated function writeString(string data) returns Error? {
+        return self.conn.writeString(data);
     }
 
-    # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
+    # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    remote isolated function pushBinary(byte[] data, boolean finalFrame = true) returns WebSocketError? {
-        return self.conn.pushBinary(data, finalFrame);
+    remote isolated function writeBytes(byte[] data) returns Error? {
+        return self.conn.writeBytes(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function ping(byte[] data) returns WebSocketError? {
+    remote isolated function ping(byte[] data) returns Error? {
         return self.conn.ping(data);
     }
 
@@ -91,7 +93,7 @@ public client class Client {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function pong(byte[] data) returns WebSocketError? {
+    remote isolated function pong(byte[] data) returns Error? {
         return self.conn.pong(data);
     }
 
@@ -106,15 +108,15 @@ public client class Client {
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeoutInSeconds = 60) returns WebSocketError? {
+        int timeoutInSeconds = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 
     # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `upgrade` or `onOpen` resources.
+    # WebSocketListener, it can be called only in the `onUpgrade` or `onConnect` resources.
     #
     # + return - an `error` if an error occurs while checking the connection state
-    remote isolated function ready() returns WebSocketError? {
+    remote isolated function ready() returns Error? {
         return self.conn.ready();
     }
 
@@ -202,8 +204,6 @@ public type WebSocketClientConfiguration record {|
 
 # Common client configurations for WebSocket clients.
 #
-# + callbackService - The callback service of the client. Resources in this service gets called on the
-#                     receipt of messages from the server
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
 # + idleTimeoutInSeconds - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
@@ -220,7 +220,6 @@ public type WebSocketClientConfiguration record {|
 #                               an error.If the value < 0, then the value sets to the default value(300).
 //# + cookies - An Array of `http:Cookie`
 public type CommonWebSocketClientConfiguration record {|
-    CallbackService? callbackService = ();
     string[] subProtocols = [];
     map<string> customHeaders = {};
     int idleTimeoutInSeconds = -1;
@@ -283,12 +282,12 @@ const SPACE = " ";
 const SEMICOLON = ";";
 string dummy = mime:MULTIPART_MIXED;
 
-isolated function externWSInitEndpoint(Client wsClient) = @java:Method {
+isolated function externWSInitEndpoint(AsyncClient wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
     name: "initEndpoint"
 } external;
 
-isolated function externRetryInitEndpoint(Client wsClient) = @java:Method {
+isolated function externRetryInitEndpoint(AsyncClient wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
     name: "initEndpoint"
 } external;

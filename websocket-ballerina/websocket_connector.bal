@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'string as strings;
 import ballerina/java;
 
 # Represents a WebSocket connection in Ballerina. This includes all connection-oriented operations.
@@ -24,43 +23,26 @@ class WebSocketConnector {
     # Pushes text to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
+    # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    public isolated function pushText(string|json|xml|boolean|int|float|byte|byte[] data, boolean finalFrame)
-    returns WebSocketError? {
-        string text = "";
-        if (data is byte[]) {
-            string|error result = strings:fromBytes(data);
-
-            if (result is error) {
-                return error WsGenericError("Error occurred during the text message creation", result);
-            } else {
-                text = result;
-            }
-        } else if (data is json) {
-            text = data.toJsonString();
-        } else {
-            text = data.toString();
-        }
-        return externPushText(self, text, finalFrame);
+    public isolated function writeString(string data) returns Error? {
+        return externWriteString(self, data);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent
-    # + finalFrame - Set to `true` if this is a final frame of a (long) message
     # + return  - An `error` if an error occurs when sending
-    public isolated function pushBinary(byte[] data, boolean finalFrame) returns WebSocketError? {
-        return externPushBinary(self, data, finalFrame);
+    public isolated function writeBytes(byte[] data) returns Error? {
+        return externWriteBytes(self, data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the connection, that frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function ping(byte[] data) returns WebSocketError? {
+    public isolated function ping(byte[] data) returns Error? {
         return externPing(self, data);
     }
 
@@ -69,16 +51,30 @@ class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function pong(byte[] data) returns WebSocketError? {
+    public isolated function pong(byte[] data) returns Error? {
         return externPong(self, data);
     }
 
     # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. The
-    # WebSocketListener can be called only in the `upgrade` or `onOpen` resources.
+    # WebSocketListener can be called only in the `upgrade` or `onConnect` resources.
     #
     # + return - An `error` if an error occurs when sending
-    public isolated function ready() returns WebSocketError? {
+    public isolated function ready() returns Error? {
         return externReady(self);
+    }
+
+    # Reads text data from the websocket connection.
+    #
+    # + return  - The text message or an `error` if an error occurs when sending
+    public isolated function readString() returns string|Error {
+        return externReadString(self);
+    }
+
+    # Reads binary data from the websocket connection.
+    #
+    # + return  - The binary message or an `error` if an error occurs when sending
+    public isolated function readBytes() returns byte[]|Error {
+        return externReadBytes(self);
     }
 
     # Closes the connection.
@@ -91,7 +87,7 @@ class WebSocketConnector {
     #                   until a close frame is received. If WebSocket frame is received from the remote endpoint
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
-    public isolated function close(int? statusCode = 1000, string? reason = (), int timeoutInSecs = 60) returns WebSocketError? {
+    public isolated function close(int? statusCode = 1000, string? reason = (), int timeoutInSecs = 60) returns Error? {
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {
@@ -105,36 +101,46 @@ class WebSocketConnector {
     }
 }
 
-isolated function externPushText(WebSocketConnector wsConnector, string text, boolean finalFrame) returns WebSocketError? =
+isolated function externWriteString(WebSocketConnector wsConnector, string text) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externPushBinary(WebSocketConnector wsConnector, byte[] data, boolean finalFrame) returns WebSocketError? =
+isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
-    name: "pushBinary"
+    name: "writeBytes"
 } external;
 
-isolated function externPing(WebSocketConnector wsConnector, byte[] data) returns WebSocketError? =
+isolated function externPing(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
     name: "ping"
 } external;
 
-isolated function externPong(WebSocketConnector wsConnector, byte[] data) returns WebSocketError? =
+isolated function externPong(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
     name: "pong"
 } external;
 
 isolated function externClose(WebSocketConnector wsConnector, int statusCode, string reason, int timeoutInSecs)
-                     returns WebSocketError? =
+                     returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
 } external;
 
-isolated function externReady(WebSocketConnector wsConnector) returns WebSocketError? = @java:Method {
+isolated function externReady(WebSocketConnector wsConnector) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Ready",
     name: "ready"
+} external;
+
+isolated function externReadString(WebSocketConnector wsConnector) returns string|Error =
+@java:Method {
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+} external;
+
+isolated function externReadBytes(WebSocketConnector wsConnector) returns byte[]|Error =
+@java:Method {
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

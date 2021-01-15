@@ -1,189 +1,186 @@
-//// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-////
-//// WSO2 Inc. licenses this file to you under the Apache License,
-//// Version 2.0 (the "License"); you may not use this file except
-//// in compliance with the License.
-//// You may obtain a copy of the License at
-////
-//// http://www.apache.org/licenses/LICENSE-2.0
-////
-//// Unless required by applicable law or agreed to in writing,
-//// software distributed under the License is distributed on an
-//// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-//// KIND, either express or implied.  See the License for the
-//// specific language governing permissions and limitations
-//// under the License.
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
-//import ballerina/log;
-//import ballerina/runtime;
-//import ballerina/test;
-////import ballerina/websocket;
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
 //
-//final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
-//final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-//@WebSocketServiceConfig {
-//    path: "/sslEcho"
-//}
-//service on new Listener(21027,
-//    {
-//        secureSocket: {
-//            keyStore: {
-//                path: KEYSTORE_PATH,
-//                password: "ballerina"
-//            }
-//        }
-//    }) {
-//    resource function onOpen(WebSocketCaller wsEp) {
-//        WebSocketClient wsClientEp = new ("wss://localhost:21028/websocket", {
-//                callbackService:
-//                    sslClientService,
-//                secureSocket: {
-//                    trustStore: {
-//                        path: TRUSTSTORE_PATH,
-//                        password: "ballerina"
-//                    }
-//                },
-//                readyOnConnect: false
-//            });
-//        var returnVal = wsClientEp->ready();
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onText(WebSocketCaller wsEp, string text) {
-//        var returnVal = wsEp->pushText(text);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onBinary(WebSocketCaller wsEp, byte[] data) {
-//        var returnVal = wsEp->pushBinary(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onClose(WebSocketCaller wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode = statusCode, reason = reason);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//}
-//
-//service sslClientService = @WebSocketServiceConfig {} service {
-//    resource function onText(WebSocketClient wsEp, string text) {
-//        var returnVal = wsEp->pushText(text);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onBinary(WebSocketClient wsEp, byte[] data) {
-//        var returnVal = wsEp->pushBinary(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onClose(WebSocketClient wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode, reason);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//};
-//
-//@WebSocketServiceConfig {
-//    path: "/websocket"
-//}
-//service sslProxyServer on new Listener(21028, {
-//        secureSocket: {
-//            keyStore: {
-//                path: KEYSTORE_PATH,
-//                password: "ballerina"
-//            }
-//        }
-//    }) {
-//
-//    resource function onOpen(WebSocketCaller caller) {
-//        log:print("The Connection ID: " + caller.getConnectionId());
-//    }
-//
-//    resource function onText(WebSocketCaller caller, string text, boolean finalFrame) {
-//        var err = caller->pushText(text, finalFrame);
-//        if (err is WebSocketError) {
-//            log:printError("Error occurred when sending text message", err = err);
-//        }
-//    }
-//
-//    resource function onBinary(WebSocketCaller caller, byte[] data) {
-//        var returnVal = caller->pushBinary(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//}
-//
-//service sslProxyCallbackService = @WebSocketServiceConfig {} service {
-//    resource function onText(WebSocketClient wsEp, string text) {
-//        proxyData = <@untainted>text;
-//    }
-//
-//    resource function onBinary(WebSocketClient wsEp, byte[] data) {
-//        expectedBinaryData = <@untainted>data;
-//    }
-//
-//    resource function onClose(WebSocketClient wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode = statusCode, reason = reason);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//};
-//
-//// Tests sending and receiving of text frames in WebSockets.
-//@test:Config {}
-//public function testSslProxySendText() {
-//    WebSocketClient wsClient = new ("wss://localhost:21027/sslEcho", {
-//            callbackService: sslProxyCallbackService,
-//            secureSocket: {
-//                trustStore: {
-//                    path: TRUSTSTORE_PATH,
-//                    password: "ballerina"
-//                }
-//            }
-//        });
-//    checkpanic wsClient->pushText("Hi");
-//    runtime:sleep(500);
-//    test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-//    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", err = result);
-//    //}
-//}
-//
-//// Tests sending and receiving of binary frames in WebSocket.
-//@test:Config {}
-//public function testSslProxySendBinary() {
-//    WebSocketClient wsClient = new ("wss://localhost:21027/sslEcho", {
-//            callbackService: sslProxyCallbackService,
-//            secureSocket: {
-//                trustStore: {
-//                    path: TRUSTSTORE_PATH,
-//                    password: "ballerina"
-//                }
-//            }
-//        });
-//    byte[] binaryData = [5, 24, 56];
-//    checkpanic wsClient->pushBinary(binaryData);
-//    runtime:sleep(500);
-//    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-//    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", err = result);
-//    //}
-//}
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import ballerina/io;
+import ballerina/lang.runtime as runtime;
+import ballerina/test;
+
+final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
+final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
+listener Listener l24 = check new(21027, {
+                      secureSocket: {
+                          keyStore: {
+                              path: KEYSTORE_PATH,
+                              password: "ballerina"
+                          }
+                      }
+                  });
+service /sslEcho on l24 {
+   resource isolated function get .() returns Service|UpgradeError {
+       return new SslProxy();
+   }
+}
+service class SslProxy {
+   *Service;
+   remote function onConnect(Caller wsEp) returns Error? {
+       AsyncClient wsClientEp = check new ("wss://localhost:21028/websocket", new sslClientService(), {
+               secureSocket: {
+                   trustStore: {
+                       path: TRUSTSTORE_PATH,
+                       password: "ballerina"
+                   }
+               },
+               readyOnConnect: false
+           });
+       var returnVal = wsClientEp->ready();
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onString(Caller wsEp, string text) {
+       var returnVal = wsEp->writeString(text);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onBytes(Caller wsEp, byte[] data) {
+       var returnVal = wsEp->writeBytes(data);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
+       var returnVal = wsEp->close(statusCode = statusCode, reason = reason);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+}
+
+service class sslClientService {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
+       var returnVal = wsEp->writeString(text);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onBytes(Caller wsEp, byte[] data) {
+       var returnVal = wsEp->writeBytes(data);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
+       var returnVal = wsEp->close(statusCode, reason);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+}
+
+listener Listener l27 = check new(21028, {
+                              secureSocket: {
+                                  keyStore: {
+                                      path: KEYSTORE_PATH,
+                                      password: "ballerina"
+                                  }
+                              }
+                          });
+service /websocket on l27 {
+   resource isolated function get .() returns Service|UpgradeError {
+       return new SslProxyServer();
+   }
+}
+
+service class SslProxyServer {
+   *Service;
+   remote function onConnect(Caller caller) {
+       io:println("The Connection ID: " + caller.getConnectionId());
+   }
+
+   remote function onString(Caller caller, string text) {
+       var err = caller->writeString(text);
+       if (err is Error) {
+           io:println("Error occurred when sending text message: ", err);
+       }
+   }
+
+   remote function onBytes(Caller caller, byte[] data) {
+       var returnVal = caller->writeBytes(data);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+}
+
+service class sslProxyCallbackService {
+   *Service;
+   remote function onString(Caller wsEp, string text) {
+       proxyData = <@untainted>text;
+   }
+
+   remote function onBytes(Caller wsEp, byte[] data) {
+       expectedBinaryData = <@untainted>data;
+   }
+
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
+       var returnVal = wsEp->close(statusCode = statusCode, reason = reason);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+}
+
+// Tests sending and receiving of text frames in WebSockets.
+@test:Config {}
+public function testSslProxySendText() returns Error? {
+   AsyncClient wsClient = check new ("wss://localhost:21027/sslEcho", new sslProxyCallbackService(), {
+           secureSocket: {
+               trustStore: {
+                   path: TRUSTSTORE_PATH,
+                   password: "ballerina"
+               }
+           }
+       });
+   check wsClient->writeString("Hi");
+   runtime:sleep(0.5);
+   test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+}
+
+// Tests sending and receiving of binary frames in WebSocket.
+@test:Config {}
+public function testSslProxySendBinary() returns Error? {
+   AsyncClient wsClient = check new ("wss://localhost:21027/sslEcho", new sslProxyCallbackService(), {
+           secureSocket: {
+               trustStore: {
+                   path: TRUSTSTORE_PATH,
+                   password: "ballerina"
+               }
+           }
+       });
+   byte[] binaryData = [5, 24, 56];
+   check wsClient->writeBytes(binaryData);
+   runtime:sleep(0.5);
+   test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+}
