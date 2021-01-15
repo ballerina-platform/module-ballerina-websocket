@@ -1,4 +1,4 @@
-// Copyright (c) 2020 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -67,7 +67,7 @@ service class clientCbackService {
 // Tests string support for writeString and onString
 @test:Config {}
 public function testCorruptedFrame() returns Error? {
-   AsyncClient wsClient = new("ws://localhost:21103/onCorrupt/", new clientCbackService());
+   AsyncClient wsClient = check new("ws://localhost:21103/onCorrupt/", new clientCbackService());
    check wsClient->writeString("Hi");
    runtime:sleep(0.5);
    test:assertEquals(data2, "PayloadTooBigError: Max frame length of 1 has been exceeded.", msg = "Failed testCorruptedFrame");

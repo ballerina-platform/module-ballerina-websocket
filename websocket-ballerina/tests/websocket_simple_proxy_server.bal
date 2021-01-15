@@ -28,8 +28,8 @@ service / on l22 {
 
 service class ProxyService {
   *Service;
-  remote function onConnect(Caller wsEp) {
-       AsyncClient wsClientEp = new ("ws://localhost:21019/websocket", new clientCallbackService9(), {
+  remote function onConnect(Caller wsEp) returns Error? {
+       AsyncClient wsClientEp = check new ("ws://localhost:21019/websocket", new clientCallbackService9(), {
                readyOnConnect: false
            });
        var returnVal = wsClientEp->ready();
@@ -134,7 +134,7 @@ service class proxyCallbackService {
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
 public function testSendText() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21018", new proxyCallbackService());
    check wsClient->writeString("Hi kalai");
    runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
@@ -144,7 +144,7 @@ public function testSendText() returns Error? {
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
 public function testSendBinary() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21018", new proxyCallbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21018", new proxyCallbackService());
    byte[] binaryData = [5, 24, 56, 243];
    check wsClient->writeBytes(binaryData);
    runtime:sleep(0.5);

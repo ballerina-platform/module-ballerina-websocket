@@ -76,8 +76,8 @@ service class ErrorServer {
 
 // Connection refused IO error.
 @test:Config {}
-public function testConnectionError() {
-   AsyncClient wsClient = new ("ws://lmnop.ls", new errorResourceService(), config);
+public function testConnectionError() returns Error? {
+   AsyncClient wsClient = check new ("ws://lmnop.ls", new errorResourceService(), config);
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "ConnectionError: IO Error");
 }
@@ -92,11 +92,11 @@ public function testSslError() {
 
 // The frame exceeds the max frame length
 @test:Config {}
-public function testLongFrameError() {
+public function testLongFrameError() returns Error? {
    string ping = "pingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingping"
        + "pingpingpingpingpingpingpingpingpingpingpingpingpingping";
    byte[] pingData = ping.toBytes();
-   AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService());
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    runtime:sleep(0.5);
    var err = wsClientEp->ping(pingData);
    if (err is error) {
@@ -110,8 +110,8 @@ public function testLongFrameError() {
 
 // Close the connection and push text
 @test:Config {}
-public function testConnectionClosedError() {
-   AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService());
+public function testConnectionClosedError() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    error? result = wsClientEp->close(timeoutInSeconds = 0);
    runtime:sleep(2);
    var err = wsClientEp->writeString("some");
@@ -124,8 +124,8 @@ public function testConnectionClosedError() {
 
 // Handshake failing because of missing subprotocol
 @test:Config {}
-public function testHandshakeError() {
-   AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService(), config);
+public function testHandshakeError() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService(), config);
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
 }
@@ -133,8 +133,8 @@ public function testHandshakeError() {
 // Tests the ready function using the WebSocket client. When `readyOnConnect` is true,
 // calls the `ready()` function.
 @test:Config {}
-public function testReadyOnConnect() {
-   AsyncClient wsClientEp = new ("ws://localhost:21030/websocket", new errorResourceService());
+public function testReadyOnConnect() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    var err = wsClientEp->ready();
    if (err is error) {
        test:assertEquals(err.message(), "GenericError: Already started reading frames");

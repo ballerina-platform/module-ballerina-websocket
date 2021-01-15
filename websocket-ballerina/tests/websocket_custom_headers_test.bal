@@ -67,7 +67,7 @@ service class MyWSService2 {
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() returns error? {
-    AsyncClient wsClient = new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
+    AsyncClient wsClient = check new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
     check wsClient->writeString("Hi");
     runtime:sleep(0.5);
 
@@ -82,7 +82,7 @@ public function testIsOpenCloseCalled() returns error? {
        test:assertFail("Couldn't find the expected values");
     }
 
-    AsyncClient wsClient2 = new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
+    AsyncClient wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
     check wsClient2->writeString("Hi");
     runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onString isOpen false");
@@ -93,7 +93,7 @@ public function testIsOpenCloseCalled() returns error? {
 // Disable due to https://github.com/ballerina-platform/module-ballerina-http/issues/71#issuecomment-707017984
 @test:Config {enable : false}
 public function testIsOpenCloseFrameReceived() returns error? {
-    AsyncClient wsClient = new ("ws://localhost:21001");
+    AsyncClient wsClient = check new ("ws://localhost:21001");
     check wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
     runtime:sleep(0.5);
     test:assertEquals(output, "In onClose isOpen true");

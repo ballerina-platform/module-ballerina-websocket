@@ -41,7 +41,8 @@ public client class AsyncClient {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ()) {
+    public isolated function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ())
+                returns Error? {
         self.url = url;
         //if (config is WebSocketClientConfiguration) {
         //    addCookies(config);

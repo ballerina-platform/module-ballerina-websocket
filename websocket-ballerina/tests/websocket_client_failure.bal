@@ -27,8 +27,8 @@ service class errorHandlingService {
 
 // Tests the client initialization failing in a resource.
 @test:Config {}
-public function testClientEndpointFailureInResource() {
-   AsyncClient wsClientEp = new ("ws://localhost:21010/websocketxyz", new errorHandlingService(), {
+public function testClientEndpointFailureInResource() returns Error? {
+   AsyncClient wsClientEp = check new ("ws://localhost:21010/websocketxyz", new errorHandlingService(), {
            readyOnConnect: false
        });
    var err = wsClientEp->ready();

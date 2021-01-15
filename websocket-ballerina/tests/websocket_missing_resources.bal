@@ -69,7 +69,7 @@ service class callbackService {
 // Tests behavior when onString resource is missing and a text message is received
 @test:Config {}
 public function testMissingOnText() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21005/onlyOnBinary", new callbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    expectedData = "";
    byte[] binaryData = [5, 24, 56, 243];
    check wsClient->writeString("Hi");
@@ -84,7 +84,7 @@ public function testMissingOnText() returns Error? {
 // Tests behavior when onPong resource is missing and a pong is received
 @test:Config {}
 public function testMissingOnPong() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21005/onlyOnBinary", new callbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
    expectedBinData = [];
    check wsClient->pong(binaryData);
@@ -99,7 +99,7 @@ public function testMissingOnPong() returns Error? {
 // Tests behavior when onBytes resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnBinary() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
    expectedBinData = [];
    byte[] expectedBinData = [];
@@ -116,7 +116,7 @@ public function testMissingOnBinary() returns Error? {
 // Tests behavior when onBytes resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnIdleTimeout() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21006/onlyOnText", new callbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
    expectedData = "";
    runtime:sleep(0.5);
    check wsClient->writeString("Hi");

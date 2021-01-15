@@ -47,8 +47,8 @@ service class ClientService200 {
 
 // Tests the client initialization without a callback service.
 @test:Config {}
-public function testClientSuccessWithoutService() {
-   AsyncClient wsClient = new ("ws://localhost:21021/client/service/bbe");
+public function testClientSuccessWithoutService() returns Error? {
+   AsyncClient wsClient = check new ("ws://localhost:21021/client/service/bbe");
    runtime:sleep(0.5);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -58,7 +58,7 @@ public function testClientSuccessWithoutService() {
 @test:Config {}
 public function testClientSuccessWithWebSocketClientService() returns Error? {
    isClientConnectionOpen = false;
-   AsyncClient wsClient = new ("ws://localhost:21021/client/service/bbe", new ClientService200());
+   AsyncClient wsClient = check new("ws://localhost:21021/client/service/bbe", new ClientService200());
    check wsClient->writeString("Client worked");
    runtime:sleep(0.5);
    test:assertTrue(isClientConnectionOpen);

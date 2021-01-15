@@ -53,7 +53,7 @@ service class clientPushCallbackService {
 // Tests string support for writeString and onString
 @test:Config {}
 public function testString() returns Error? {
-   AsyncClient wsClient = new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
+   AsyncClient wsClient = check new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
    check wsClient->writeString("Hi");
    runtime:sleep(0.5);
    test:assertEquals(data, "Hi", msg = "Failed writeString");

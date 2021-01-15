@@ -60,7 +60,7 @@ service class pingPongCallbackService {
 // Tests ping to Ballerina WebSocket server
 @test:Config {}
 public function testPingToBallerinaServer() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
    byte[] pongData = [5, 24, 56, 243];
    check wsClient->ping(pongData);
    runtime:sleep(0.5);
@@ -71,7 +71,7 @@ public function testPingToBallerinaServer() returns Error? {
 // Tests pong to Ballerina WebSocket server
 @test:Config {}
 public function testPingFromRemoteServerToBallerinaClient() returns Error? {
-   AsyncClient wsClient = new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
+   AsyncClient wsClient = check new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
    byte[] pongData = [5, 24, 34];
    check wsClient->pong(pongData);
    runtime:sleep(0.5);

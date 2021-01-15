@@ -38,8 +38,8 @@ service class PushTextFailureService {
 
 // Checks for the log that is printed when writeString fails.
 @test:Config {}
-public function pushTextFailure() {
-   AsyncClient wsClient = new("ws://localhost:21008/pushTextFailureService");
+public function pushTextFailure() returns Error? {
+   AsyncClient wsClient = check new("ws://localhost:21008/pushTextFailureService");
    runtime:sleep(0.5);
    test:assertEquals(errorMsg2, "ConnectionClosureError: Close frame already sent. Cannot push text data!",
        msg = "Data mismatched");

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -40,8 +40,8 @@ service class WsServiceSyncBytes {
 }
 
 @test:Config {}
-public function testSyncClientByteArray() {
-   SyncClient wsClient = new("ws://localhost:21053/onTextBytes");
+public function testSyncClientByteArray() returns Error? {
+   SyncClient wsClient = check new("ws://localhost:21053/onTextBytes");
    @strand {
       thread:"any"
    }

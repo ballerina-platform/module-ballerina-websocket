@@ -76,7 +76,7 @@ service class sslEchoCallbackService {
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
 public function sslBinaryEcho() returns Error? {
-   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
+   AsyncClient wsClient = check new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
            secureSocket: {
                trustStore: {
                    path: "tests/certsAndKeys/ballerinaTruststore.p12",
@@ -95,7 +95,7 @@ public function sslBinaryEcho() returns Error? {
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
 public function sslTextEcho() returns Error? {
-   AsyncClient wsClient = new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
+   AsyncClient wsClient = check new ("wss://localhost:21029/sslEcho", new sslEchoCallbackService(), {
            secureSocket: {
                trustStore: {
                    path: "tests/certsAndKeys/ballerinaTruststore.p12",
