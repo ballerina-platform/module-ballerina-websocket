@@ -18,44 +18,58 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/io;
 
-string data = "";
+string data2 = "";
 
-listener Listener l2 = check new(21003);
+listener Listener l30 = check new(21103);
 
-service /onTextString on l2 {
+@ServiceConfig {
+   maxFrameSize: 1
+}
+service /onCorrupt on l30 {
    resource function get .() returns Service|UpgradeError {
-       return new WsService1();
+       return new corruptedService();
    }
 }
 
-service class WsService1 {
+service class corruptedService {
   *Service;
   remote isolated function onString(Caller caller, string data) returns Error? {
-      check caller->writeString(data);
+      check caller->writeString("xyz");
+  }
+  remote function onError(Caller wsEp, error err) {
+      io:println("on server error");
+      data2 = err.message();
+  }
+  remote isolated function onClose(Caller wsEp, error err) {
+      io:println(err);
   }
 }
 
-service class clientPushCallbackService {
+service class clientCbackService {
     *Service;
     remote function onString(Caller wsEp, string text) {
-        data = <@untainted>text;
+        data2 = <@untainted>text;
     }
 
     remote isolated function onError(Caller wsEp, error err) {
-        io:println(err);
+        io:println(<@untainted>err.message());
     }
 
     remote isolated function onConnect(Caller wsEp) {
         io:println("On connect resource");
     }
+
+    remote isolated function onClose(Caller wsEp, error err) {
+        io:println(err.message());
+    }
 }
 
 // Tests string support for writeString and onString
 @test:Config {}
-public function testString() returns Error? {
-   AsyncClient wsClient = new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
+public function testCorruptedFrame() returns Error? {
+   AsyncClient wsClient = new("ws://localhost:21103/onCorrupt/", new clientCbackService());
    check wsClient->writeString("Hi");
    runtime:sleep(0.5);
-   test:assertEquals(data, "Hi", msg = "Failed writeString");
+   test:assertEquals(data2, "PayloadTooBigError: Max frame length of 1 has been exceeded.", msg = "Failed testCorruptedFrame");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

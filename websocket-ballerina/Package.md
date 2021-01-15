@@ -23,13 +23,13 @@ service class WsService {
 }              
 ```
 
-**onConnect remote method**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched.
+**onConnect**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched.
 
-**onString remote method**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onString**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 
-**onBytes remote method**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onBytes**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 
-**onPing and onPong remote method**: The received ping and pong messages are dispatched to these remote methods respectively.
+**onPing and onPong**: The received ping and pong messages are dispatched to these remote methods respectively.
 
 **onIdleTimeout**: This remote method is dispatched when the idle timeout is reached. The `idleTimeout` has to be configured either in the WebSocket service or the client configuration.
 

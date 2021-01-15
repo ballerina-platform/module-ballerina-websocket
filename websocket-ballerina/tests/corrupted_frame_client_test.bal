@@ -18,44 +18,58 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/io;
 
-string data = "";
+string data3 = "";
 
-listener Listener l2 = check new(21003);
+listener Listener l31 = check new(21104);
 
-service /onTextString on l2 {
+@ServiceConfig {
+   maxFrameSize: 10
+}
+service /onCorruptClient on l31 {
    resource function get .() returns Service|UpgradeError {
-       return new WsService1();
+       return new corruptedClService();
    }
 }
 
-service class WsService1 {
+service class corruptedClService {
   *Service;
   remote isolated function onString(Caller caller, string data) returns Error? {
-      check caller->writeString(data);
+      check caller->writeString("xyz");
+  }
+  remote function onError(Caller wsEp, error err) {
+      io:println("on server error");
+  }
+  remote isolated function onClose(Caller wsEp, error err) {
+      io:println(err);
   }
 }
 
-service class clientPushCallbackService {
+service class clientCBService {
     *Service;
     remote function onString(Caller wsEp, string text) {
-        data = <@untainted>text;
+        data2 = <@untainted>text;
     }
 
-    remote isolated function onError(Caller wsEp, error err) {
-        io:println(err);
+    remote function onError(Caller wsEp, error err) {
+        data3 = err.message();
+        io:println(<@untainted>err.message());
     }
 
     remote isolated function onConnect(Caller wsEp) {
         io:println("On connect resource");
     }
+
+    remote isolated function onClose(Caller wsEp, error err) {
+        io:println(err.message());
+    }
 }
 
 // Tests string support for writeString and onString
 @test:Config {}
-public function testString() returns Error? {
-   AsyncClient wsClient = new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
+public function testCorruptedFrameClient() returns Error? {
+   AsyncClient wsClient = new("ws://localhost:21104/onCorruptClient/", new clientCBService(), config = {maxFrameSize: 1});
    check wsClient->writeString("Hi");
    runtime:sleep(0.5);
-   test:assertEquals(data, "Hi", msg = "Failed writeString");
+   test:assertEquals(data3, "PayloadTooBigError: Max frame length of 1 has been exceeded.", msg = "Failed testCorruptedFrameClient");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

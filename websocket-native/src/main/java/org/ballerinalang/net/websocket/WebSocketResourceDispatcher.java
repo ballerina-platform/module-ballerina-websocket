@@ -610,7 +610,7 @@ public class WebSocketResourceDispatcher {
                 connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
             }
             balservice = (BObject) dispatchingService;
-            MethodType[] remoteFunctions = ((ServiceType) (((BValue) webSocketService)
+            MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService)
                     .getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
                 if (remoteFunc.getName().equals(RESOURCE_NAME_ON_ERROR)) {
