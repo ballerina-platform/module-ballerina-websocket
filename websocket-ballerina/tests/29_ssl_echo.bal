@@ -22,7 +22,7 @@ string expectedString = "";
 byte[] expectedBinaryData = [];
 string expectedRawpath = "";
 
-listener Listener l7 = check new(21029, {
+listener Listener l7 = new(21029, {
                          secureSocket: {
                              keyStore: {
                                  path: "tests/certsAndKeys/ballerinaKeystore.p12",

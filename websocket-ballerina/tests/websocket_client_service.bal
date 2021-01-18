@@ -19,7 +19,7 @@ import ballerina/test;
 
 string arrivedData = "";
 boolean isClientConnectionOpen = false;
-listener Listener l15 = check new(21021);
+listener Listener l15 = new(21021);
 service /'client/'service on l15 {
    resource isolated function get bbe() returns Service|UpgradeError {
        return new clientFailure200();

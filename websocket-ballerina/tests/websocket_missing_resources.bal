@@ -21,7 +21,7 @@ import ballerina/http;
 string expectedData = "";
 byte[] expectedBinData = [];
 byte[] expectedPingBinaryData = [];
-listener Listener l17 = check new(21005);
+listener Listener l17 = new(21005);
 @ServiceConfig {
    idleTimeoutInSeconds: 10
 }
@@ -37,7 +37,7 @@ service class OnlyOnBinary {
    }
 }
 
-listener Listener l25 = check new(21006);
+listener Listener l25 = new(21006);
 service /onlyOnText on l25 {
    resource isolated function get .(http:Request req) returns Service|UpgradeError {
        return new OnlyOnText();

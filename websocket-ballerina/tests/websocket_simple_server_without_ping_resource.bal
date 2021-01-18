@@ -19,7 +19,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 byte[] expectedAutoPongData = [];
-listener Listener l23 = check new(21020);
+listener Listener l23 = new(21020);
 service / on l23 {
    resource isolated function get .() returns Service|UpgradeError {
        return new TestService();

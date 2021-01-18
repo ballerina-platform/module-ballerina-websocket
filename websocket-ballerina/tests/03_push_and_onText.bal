@@ -20,7 +20,7 @@ import ballerina/io;
 
 string data = "";
 
-listener Listener l2 = check new(21003);
+listener Listener l2 = new(21003);
 
 service /onTextString on l2 {
    resource function get .() returns Service|UpgradeError {
