@@ -19,7 +19,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string proxyData = "";
-listener Listener l22 = check new(21018);
+listener Listener l22 = new(21018);
 service / on l22 {
    resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService();
@@ -61,7 +61,7 @@ service class ProxyService {
 
 }
 
-listener Listener l26 = check new(21019);
+listener Listener l26 = new(21019);
 service /websocket on l26 {
    resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService2();

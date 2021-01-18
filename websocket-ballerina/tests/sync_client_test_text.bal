@@ -19,7 +19,7 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 
 string aggregatedTextOutput = "";
-listener Listener l11 = check new(21000);
+listener Listener l11 = new(21000);
 service /onTextString on l11 {
    resource function get .() returns Service|UpgradeError {
        return new WsServiceSync();

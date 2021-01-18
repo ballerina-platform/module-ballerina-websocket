@@ -20,7 +20,7 @@ import ballerina/test;
 
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
-listener Listener l24 = check new(21027, {
+listener Listener l24 = new(21027, {
                       secureSocket: {
                           keyStore: {
                               path: KEYSTORE_PATH,
@@ -97,7 +97,7 @@ service class sslClientService {
    }
 }
 
-listener Listener l27 = check new(21028, {
+listener Listener l27 = new(21028, {
                               secureSocket: {
                                   keyStore: {
                                       path: KEYSTORE_PATH,

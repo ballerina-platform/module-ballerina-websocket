@@ -19,7 +19,7 @@ import ballerina/test;
 
 byte[] expectedPongData = [];
 byte[] expectedPongData1 = [];
-listener Listener l19 = check new(21014);
+listener Listener l19 = new(21014);
 service /pingpong/ws on l19 {
     resource isolated function get .() returns Service|UpgradeError  {
        return new PingPongService();

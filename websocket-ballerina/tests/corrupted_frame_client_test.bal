@@ -20,7 +20,7 @@ import ballerina/io;
 
 string data3 = "";
 
-listener Listener l31 = check new(21104);
+listener Listener l31 = new(21104);
 
 @ServiceConfig {
    maxFrameSize: 10

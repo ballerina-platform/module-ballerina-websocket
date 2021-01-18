@@ -234,7 +234,7 @@ test {
 
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
-    mustRunAfter(test)
+    finalizedBy(test)
     finalizedBy(revertTomlFile)
 
     doLast {
