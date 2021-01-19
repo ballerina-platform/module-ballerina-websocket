@@ -175,8 +175,8 @@ public client class SyncClient {
     # Reads the binary data in a synchronous manner
     #
     # + return  - The binary data sent by the server or an `error` if an error occurs when sending
-    remote isolated function readBytes() returns byte[]|Error {
-        return self.conn.readBytes();
+    remote isolated function readBinaryMessage() returns byte[]|Error {
+        return self.conn.readBinaryMessage();
     }
 }
 

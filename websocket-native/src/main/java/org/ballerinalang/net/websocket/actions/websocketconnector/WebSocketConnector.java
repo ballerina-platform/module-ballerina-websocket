@@ -157,7 +157,7 @@ public class WebSocketConnector {
         }
     }
 
-    public static Object externReadBytes(Environment env, BObject wsConnection) {
+    public static Object externReadBinaryMessage(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {

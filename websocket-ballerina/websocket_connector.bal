@@ -73,8 +73,8 @@ class WebSocketConnector {
     # Reads binary data from the websocket connection.
     #
     # + return  - The binary message or an `error` if an error occurs when sending
-    public isolated function readBytes() returns byte[]|Error {
-        return externReadBytes(self);
+    public isolated function readBinaryMessage() returns byte[]|Error {
+        return externReadBinaryMessage(self);
     }
 
     # Closes the connection.
@@ -140,7 +140,7 @@ isolated function externReadTextMessage(WebSocketConnector wsConnector) returns 
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externReadBytes(WebSocketConnector wsConnector) returns byte[]|Error =
+isolated function externReadBinaryMessage(WebSocketConnector wsConnector) returns byte[]|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
