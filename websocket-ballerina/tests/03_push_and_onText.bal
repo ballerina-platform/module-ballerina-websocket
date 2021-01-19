@@ -31,7 +31,7 @@ service /onTextString on l2 {
 service class WsService1 {
   *Service;
   remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->writeString(data);
+      check caller->writeTextMessage(data);
   }
 }
 
@@ -50,12 +50,12 @@ service class clientPushCallbackService {
     }
 }
 
-// Tests string support for writeString and onTextMessage
+// Tests string support for writeTextMessage and onTextMessage
 @test:Config {}
 public function testString() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
-   check wsClient->writeString("Hi");
+   check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
-   test:assertEquals(data, "Hi", msg = "Failed writeString");
+   test:assertEquals(data, "Hi", msg = "Failed writeTextMessage");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

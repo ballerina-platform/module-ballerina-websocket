@@ -68,7 +68,7 @@ service class MyWSService2 {
 @test:Config {}
 public function testIsOpenCloseCalled() returns error? {
     AsyncClient wsClient = check new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
-    check wsClient->writeString("Hi");
+    check wsClient->writeTextMessage("Hi");
     runtime:sleep(0.5);
 
     test:assertEquals(output, "In service 1 onTextMessage isOpen false");
@@ -83,7 +83,7 @@ public function testIsOpenCloseCalled() returns error? {
     }
 
     AsyncClient wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
-    check wsClient2->writeString("Hi");
+    check wsClient2->writeTextMessage("Hi");
     runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onTextMessage isOpen false");
     test:assertEquals(pathParam, "tuv");

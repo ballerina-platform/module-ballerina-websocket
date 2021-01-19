@@ -41,7 +41,7 @@ service /sslEcho on l7 {
 service class WsService6 {
   *Service;
   remote isolated function onTextMessage(Caller caller, string data) {
-       var returnVal = caller->writeString(data);
+       var returnVal = caller->writeTextMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -103,7 +103,7 @@ public function sslTextEcho() returns Error? {
                }
            }
        });
-   check wsClient->writeString("Hi madam");
+   check wsClient->writeTextMessage("Hi madam");
    runtime:sleep(0.5);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");

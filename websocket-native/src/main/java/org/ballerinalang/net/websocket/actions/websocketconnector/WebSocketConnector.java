@@ -44,7 +44,7 @@ import java.util.concurrent.SynchronousQueue;
 public class WebSocketConnector {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 
-    public static Object externWriteString(Environment env, BObject wsConnection, BString text) {
+    public static Object externWriteTextMessage(Environment env, BObject wsConnection, BString text) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);

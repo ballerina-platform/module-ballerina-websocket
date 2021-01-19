@@ -39,7 +39,7 @@ service class ProxyService {
    }
 
    remote function onTextMessage(Caller wsEp, string text) {
-       var returnVal = wsEp->writeString(text);
+       var returnVal = wsEp->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -75,7 +75,7 @@ service class ProxyService2 {
    }
 
    remote function onTextMessage(Caller caller, string text) {
-       var err = caller->writeString(text);
+       var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
        }
@@ -92,7 +92,7 @@ service class ProxyService2 {
 service class clientCallbackService9 {
    *Service;
    remote function onTextMessage(Caller wsEp, string text) {
-       var returnVal = wsEp->writeString(text);
+       var returnVal = wsEp->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -135,7 +135,7 @@ service class proxyCallbackService {
 @test:Config {}
 public function testSendText() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21018", new proxyCallbackService());
-   check wsClient->writeString("Hi kalai");
+   check wsClient->writeTextMessage("Hi kalai");
    runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

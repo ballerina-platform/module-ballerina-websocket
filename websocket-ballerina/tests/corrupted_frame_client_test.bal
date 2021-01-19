@@ -34,7 +34,7 @@ service /onCorruptClient on l31 {
 service class corruptedClService {
   *Service;
   remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->writeString("xyz");
+      check caller->writeTextMessage("xyz");
   }
   remote function onError(Caller wsEp, error err) {
       io:println("on server error");
@@ -64,11 +64,11 @@ service class clientCBService {
     }
 }
 
-// Tests string support for writeString and onTextMessage
+// Tests string support for writeTextMessage and onTextMessage
 @test:Config {}
 public function testCorruptedFrameClient() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21104/onCorruptClient/", new clientCBService(), config = {maxFrameSize: 1});
-   check wsClient->writeString("Hi");
+   check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(data3, "PayloadTooBigError: Max frame length of 1 has been exceeded.", msg = "Failed testCorruptedFrameClient");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

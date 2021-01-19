@@ -25,8 +25,8 @@ class WebSocketConnector {
     #
     # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeString(string data) returns Error? {
-        return externWriteString(self, data);
+    public isolated function writeTextMessage(string data) returns Error? {
+        return externWriteTextMessage(self, data);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -101,7 +101,7 @@ class WebSocketConnector {
     }
 }
 
-isolated function externWriteString(WebSocketConnector wsConnector, string text) returns Error? =
+isolated function externWriteTextMessage(WebSocketConnector wsConnector, string text) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

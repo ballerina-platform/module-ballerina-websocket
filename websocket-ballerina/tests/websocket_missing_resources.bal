@@ -47,7 +47,7 @@ service /onlyOnText on l25 {
 service class OnlyOnText {
    *Service;
    remote function onTextMessage(Caller caller, string data) returns Error? {
-       check caller->writeString(data);
+       check caller->writeTextMessage(data);
    }
 }
 
@@ -72,7 +72,7 @@ public function testMissingOnText() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    expectedData = "";
    byte[] binaryData = [5, 24, 56, 243];
-   check wsClient->writeString("Hi");
+   check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
    check wsClient->writeBytes(binaryData);
@@ -107,7 +107,7 @@ public function testMissingOnBinary() returns Error? {
    check wsClient->writeBytes(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
-   check wsClient->writeString("Hi");
+   check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -119,7 +119,7 @@ public function testMissingOnIdleTimeout() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
    expectedData = "";
    runtime:sleep(0.5);
-   check wsClient->writeString("Hi");
+   check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

@@ -57,7 +57,7 @@ service class ErrorServer {
    }
 
    remote isolated function onTextMessage(Caller caller, string text) {
-       var err = caller->writeString(text);
+       var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message" + err.message());
        }
@@ -114,7 +114,7 @@ public function testConnectionClosedError() returns Error? {
    AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    error? result = wsClientEp->close(timeoutInSeconds = 0);
    runtime:sleep(2);
-   var err = wsClientEp->writeString("some");
+   var err = wsClientEp->writeTextMessage("some");
    if (err is error) {
        test:assertEquals(err.message(), "ConnectionClosureError: Close frame already sent. Cannot push text data!");
    } else {

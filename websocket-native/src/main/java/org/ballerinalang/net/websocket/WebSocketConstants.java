@@ -70,7 +70,7 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_PING = "ping";
     public static final String RESOURCE_NAME_PONG = "pong";
     public static final String WRITE_BYTES = "writeBytes";
-    public static final String WRITE_STRING = "writeString";
+    public static final String WRITE_STRING = "writeTextMessage";
     public static final String RESOURCE_NAME_READY = "ready";
     public static final String RESOURCE_NAME_UPGRADE = "onUpgrade";
 

@@ -29,7 +29,7 @@ service class ErrorService {
    }
 
    remote function onTextMessage(Caller ep, string text) {
-       var returnVal = ep->writeString(text);
+       var returnVal = ep->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }

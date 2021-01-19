@@ -18,7 +18,7 @@ service /ws on new websocket:Listener(21003) {
 service class WsService {
   *websocket:Service;
   remote isolated function onString(websocket:Caller caller, string data) returns Error? {
-      check caller->writeString(data);
+      check caller->writeTextMessage(data);
   }
 }              
 ```

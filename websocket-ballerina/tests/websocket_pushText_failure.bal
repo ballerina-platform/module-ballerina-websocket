@@ -29,14 +29,14 @@ service class PushTextFailureService {
    *Service;
    remote function onConnect(Caller caller) {
        Error? err1 = caller->close(timeoutInSeconds = 0);
-       var err = caller->writeString("hey");
+       var err = caller->writeTextMessage("hey");
        if (err is Error) {
            errorMsg2 = <@untainted>err.message();
        }
    }
 }
 
-// Checks for the log that is printed when writeString fails.
+// Checks for the log that is printed when writeTextMessage fails.
 @test:Config {}
 public function pushTextFailure() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21008/pushTextFailureService");

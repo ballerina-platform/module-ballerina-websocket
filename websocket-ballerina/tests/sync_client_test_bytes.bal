@@ -35,7 +35,7 @@ service class WsServiceSyncBytes {
   }
 
   remote isolated function onClose(Caller caller, string data) returns Error? {
-        check caller->writeString(data);
+        check caller->writeTextMessage(data);
   }
 }
 
