@@ -112,14 +112,6 @@ public client class AsyncClient {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `onUpgrade` or `onOpen` resources.
-    #
-    # + return - an `error` if an error occurs while checking the connection state
-    remote isolated function ready() returns Error? {
-        return self.conn.ready();
-    }
-
     # Sets a connection-related attribute.
     #
     # + key - The key, which identifies the attribute
@@ -190,7 +182,6 @@ public client class AsyncClient {
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
 # | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
-# | readyOnConnect - Copied from CommonWebSocketClientConfiguration              |
 # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
 # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
@@ -208,9 +199,6 @@ public type WebSocketClientConfiguration record {|
 # + customHeaders - Custom headers, which should be sent to the server
 # + idleTimeoutInSeconds - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
 #                          of the client service will be triggered
-# + readyOnConnect - Set to `true` if the client is ready to receive messages as soon as the connection is established.
-#                    This is set to `true` by default. If changed to `false`, the ready() function of the
-#                    `WebSocketClient` needs to be called once to start receiving messages
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
@@ -223,7 +211,6 @@ public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     int idleTimeoutInSeconds = -1;
-    boolean readyOnConnect = true;
     http:ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 0;
     boolean webSocketCompressionEnabled = true;

@@ -91,14 +91,6 @@ public client class WebSocketFailoverClient {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
     }
 
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `upgrade` or `onOpen` resources.
-    #
-    # + return - An `error` if an error occurs while checking the connection state
-    remote isolated function ready() returns Error? {
-        return self.conn.ready();
-    }
-
     # Sets a connection-related attribute.
     #
     # + key - The key to identify the attribute
@@ -167,7 +159,6 @@ public client class WebSocketFailoverClient {
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
 # | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
-# | readyOnConnect - Copied from CommonWebSocketClientConfiguration              |
 # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
 # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |

@@ -126,19 +126,8 @@ public function testConnectionClosedError() returns Error? {
 @test:Config {}
 public function testHandshakeError() returns Error? {
    AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService(), config);
+   var resp = wsClientEp->writeTextMessage("text");
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
 }
 
-// Tests the ready function using the WebSocket client. When `readyOnConnect` is true,
-// calls the `ready()` function.
-@test:Config {}
-public function testReadyOnConnect() returns Error? {
-   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
-   var err = wsClientEp->ready();
-   if (err is error) {
-       test:assertEquals(err.message(), "GenericError: Already started reading frames");
-   } else {
-       test:assertFail("Mismatched output");
-   }
-}

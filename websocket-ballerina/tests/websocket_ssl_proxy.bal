@@ -42,13 +42,8 @@ service class SslProxy {
                        path: TRUSTSTORE_PATH,
                        password: "ballerina"
                    }
-               },
-               readyOnConnect: false
+               }
            });
-       var returnVal = wsClientEp->ready();
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
    }
 
    remote function onTextMessage(Caller wsEp, string text) {

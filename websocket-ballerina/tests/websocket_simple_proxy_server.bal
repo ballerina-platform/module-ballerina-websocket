@@ -29,13 +29,7 @@ service / on l22 {
 service class ProxyService {
   *Service;
   remote function onOpen(Caller wsEp) returns Error? {
-       AsyncClient wsClientEp = check new ("ws://localhost:21019/websocket", new clientCallbackService9(), {
-               readyOnConnect: false
-           });
-       var returnVal = wsClientEp->ready();
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+       AsyncClient wsClientEp = check new ("ws://localhost:21019/websocket", new clientCallbackService9());
    }
 
    remote function onTextMessage(Caller wsEp, string text) {

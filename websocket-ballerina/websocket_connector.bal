@@ -55,14 +55,6 @@ class WebSocketConnector {
         return externPong(self, data);
     }
 
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. The
-    # WebSocketListener can be called only in the `upgrade` or `onOpen` resources.
-    #
-    # + return - An `error` if an error occurs when sending
-    public isolated function ready() returns Error? {
-        return externReady(self);
-    }
-
     # Reads text data from the websocket connection.
     #
     # + return  - The text message or an `error` if an error occurs when sending
