@@ -49,7 +49,7 @@ public class WebSocketConnector {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
-                WebSocketConstants.WRITE_STRING);
+                WebSocketConstants.WRITE_TEXT_MESSAGE);
         try {
             ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(text.getValue(), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
@@ -71,7 +71,7 @@ public class WebSocketConnector {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
-                WebSocketConstants.WRITE_BYTES);
+                WebSocketConstants.WRITE_BINARY_MESSAGE);
         try {
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
                     ByteBuffer.wrap(binaryData.getBytes()), true);
