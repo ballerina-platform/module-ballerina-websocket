@@ -168,8 +168,8 @@ public client class SyncClient {
     # Reads the texts in a synchronous manner
     #
     # + return  - The text data sent by the server or an `error` if an error occurs when sending
-    remote isolated function readString() returns string|Error {
-        return self.conn.readString();
+    remote isolated function readTextMessage() returns string|Error {
+        return self.conn.readTextMessage();
     }
 
     # Reads the binary data in a synchronous manner

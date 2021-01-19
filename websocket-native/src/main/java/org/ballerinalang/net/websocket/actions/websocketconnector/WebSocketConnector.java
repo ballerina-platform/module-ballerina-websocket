@@ -133,7 +133,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    public static Object externReadString(Environment env, BObject wsConnection) {
+    public static Object externReadTextMessage(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {

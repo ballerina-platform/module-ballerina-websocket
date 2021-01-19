@@ -66,8 +66,8 @@ class WebSocketConnector {
     # Reads text data from the websocket connection.
     #
     # + return  - The text message or an `error` if an error occurs when sending
-    public isolated function readString() returns string|Error {
-        return externReadString(self);
+    public isolated function readTextMessage() returns string|Error {
+        return externReadTextMessage(self);
     }
 
     # Reads binary data from the websocket connection.
@@ -135,7 +135,7 @@ isolated function externReady(WebSocketConnector wsConnector) returns Error? = @
     name: "ready"
 } external;
 
-isolated function externReadString(WebSocketConnector wsConnector) returns string|Error =
+isolated function externReadTextMessage(WebSocketConnector wsConnector) returns string|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
