@@ -40,7 +40,7 @@ service /sslEcho on l7 {
 
 service class WsService6 {
   *Service;
-  remote isolated function onString(Caller caller, string data) {
+  remote isolated function onTextMessage(Caller caller, string data) {
        var returnVal = caller->writeString(data);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -57,7 +57,7 @@ service class WsService6 {
 
 service class sslEchoCallbackService {
    *Service;
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        expectedString = <@untainted>text;
    }
 

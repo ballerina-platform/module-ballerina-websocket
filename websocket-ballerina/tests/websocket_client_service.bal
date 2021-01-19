@@ -35,13 +35,13 @@ service class clientFailure200 {
 
 service class callback200 {
    *Service;
-   remote function onString(string caller, string text) {
+   remote function onTextMessage(string caller, string text) {
    }
 }
 
 service class ClientService200 {
    *Service;
-   remote function onString(Caller caller, string text) {
+   remote function onTextMessage(Caller caller, string text) {
    }
 }
 

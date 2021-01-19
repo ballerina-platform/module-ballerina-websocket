@@ -56,7 +56,7 @@ service class ErrorServer {
        }
    }
 
-   remote isolated function onString(Caller caller, string text) {
+   remote isolated function onTextMessage(Caller caller, string text) {
        var err = caller->writeString(text);
        if (err is Error) {
            io:println("Error occurred when sending text message" + err.message());

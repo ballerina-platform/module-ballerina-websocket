@@ -28,7 +28,7 @@ service class ErrorService {
    remote function onConnect(Caller ep) {
    }
 
-   remote function onString(Caller ep, string text) {
+   remote function onTextMessage(Caller ep, string text) {
        var returnVal = ep->writeString(text);
        if (returnVal is Error) {
            panic <error>returnVal;

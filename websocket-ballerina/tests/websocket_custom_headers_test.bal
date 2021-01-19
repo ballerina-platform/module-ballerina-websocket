@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-http:Listener hl = check new(21001);
+http:Listener hl = new(21001);
 listener Listener socketListener = new(<@untainted> hl);
 string output = "";
 string errorMsg = "";
@@ -50,17 +50,17 @@ service class MyWSService {
   public function init(map<string> customHeaders) {
      self.customHeaders = customHeaders;
   }
-  remote function onString(Caller caller, string text) {
+  remote function onTextMessage(Caller caller, string text) {
       Error? err = caller->close(timeoutInSeconds = 0);
-      output = <@untainted>("In service 1 onString isOpen " + caller.isOpen().toString());
+      output = <@untainted>("In service 1 onTextMessage isOpen " + caller.isOpen().toString());
   }
 }
 
 service class MyWSService2 {
   *Service;
-  remote function onString(Caller caller, string text) {
+  remote function onTextMessage(Caller caller, string text) {
       Error? err = caller->close(timeoutInSeconds = 0);
-      output = <@untainted>("In service 2 onString isOpen " + caller.isOpen().toString());
+      output = <@untainted>("In service 2 onTextMessage isOpen " + caller.isOpen().toString());
   }
 }
 
@@ -71,7 +71,7 @@ public function testIsOpenCloseCalled() returns error? {
     check wsClient->writeString("Hi");
     runtime:sleep(0.5);
 
-    test:assertEquals(output, "In service 1 onString isOpen false");
+    test:assertEquals(output, "In service 1 onTextMessage isOpen false");
     test:assertEquals(pathParam, "xyz");
     test:assertEquals(queryParam, "value1");
 
@@ -85,7 +85,7 @@ public function testIsOpenCloseCalled() returns error? {
     AsyncClient wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
     check wsClient2->writeString("Hi");
     runtime:sleep(0.5);
-    test:assertEquals(output, "In service 2 onString isOpen false");
+    test:assertEquals(output, "In service 2 onTextMessage isOpen false");
     test:assertEquals(pathParam, "tuv");
 }
 

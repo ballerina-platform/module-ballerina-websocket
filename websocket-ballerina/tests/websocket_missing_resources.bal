@@ -46,14 +46,14 @@ service /onlyOnText on l25 {
 
 service class OnlyOnText {
    *Service;
-   remote function onString(Caller caller, string data) returns Error? {
+   remote function onTextMessage(Caller caller, string data) returns Error? {
        check caller->writeString(data);
    }
 }
 
 service class callbackService {
    *Service;
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        expectedData = <@untainted>text;
    }
 
@@ -66,7 +66,7 @@ service class callbackService {
    }
 }
 
-// Tests behavior when onString resource is missing and a text message is received
+// Tests behavior when onTextMessage resource is missing and a text message is received
 @test:Config {}
 public function testMissingOnText() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21005/onlyOnBinary", new callbackService());

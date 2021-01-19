@@ -38,7 +38,7 @@ service class ProxyService {
        }
    }
 
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -74,7 +74,7 @@ service class ProxyService2 {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 
-   remote function onString(Caller caller, string text) {
+   remote function onTextMessage(Caller caller, string text) {
        var err = caller->writeString(text);
        if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
@@ -91,7 +91,7 @@ service class ProxyService2 {
 
 service class clientCallbackService9 {
    *Service;
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        var returnVal = wsEp->writeString(text);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -115,7 +115,7 @@ service class clientCallbackService9 {
 
 service class proxyCallbackService {
    *Service;
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        proxyData = <@untainted>text;
    }
 

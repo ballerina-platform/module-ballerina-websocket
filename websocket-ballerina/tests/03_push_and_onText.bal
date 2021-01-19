@@ -30,14 +30,14 @@ service /onTextString on l2 {
 
 service class WsService1 {
   *Service;
-  remote isolated function onString(Caller caller, string data) returns Error? {
+  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
       check caller->writeString(data);
   }
 }
 
 service class clientPushCallbackService {
     *Service;
-    remote function onString(Caller wsEp, string text) {
+    remote function onTextMessage(Caller wsEp, string text) {
         data = <@untainted>text;
     }
 
@@ -50,7 +50,7 @@ service class clientPushCallbackService {
     }
 }
 
-// Tests string support for writeString and onString
+// Tests string support for writeString and onTextMessage
 @test:Config {}
 public function testString() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21003/onTextString/", new clientPushCallbackService());

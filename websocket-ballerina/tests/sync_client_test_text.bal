@@ -28,7 +28,7 @@ service /onTextString on l11 {
 
 service class WsServiceSync {
   *Service;
-  remote isolated function onString(Caller caller, string data) returns Error? {
+  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
       check caller->writeString(data);
   }
 

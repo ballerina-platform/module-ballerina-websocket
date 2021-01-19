@@ -27,7 +27,7 @@
 // }
 // service class ServerError {
 //    *Service;
-//    remote function onString(Caller caller, string text) {
+//    remote function onTextMessage(Caller caller, string text) {
 //        checkpanic caller->writeString("Hello World!", false);
 //        string hello = "hello";
 //        byte[] data = hello.toBytes();

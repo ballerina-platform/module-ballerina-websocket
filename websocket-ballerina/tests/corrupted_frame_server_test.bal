@@ -33,7 +33,7 @@ service /onCorrupt on l30 {
 
 service class corruptedService {
   *Service;
-  remote isolated function onString(Caller caller, string data) returns Error? {
+  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
       check caller->writeString("xyz");
   }
   remote function onError(Caller wsEp, error err) {
@@ -47,7 +47,7 @@ service class corruptedService {
 
 service class clientCbackService {
     *Service;
-    remote function onString(Caller wsEp, string text) {
+    remote function onTextMessage(Caller wsEp, string text) {
         data2 = <@untainted>text;
     }
 
@@ -64,7 +64,7 @@ service class clientCbackService {
     }
 }
 
-// Tests string support for writeString and onString
+// Tests the error when a corrupted frame is sent
 @test:Config {}
 public function testCorruptedFrame() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21103/onCorrupt/", new clientCbackService());

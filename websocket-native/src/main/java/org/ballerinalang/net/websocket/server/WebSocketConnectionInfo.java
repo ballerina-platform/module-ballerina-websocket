@@ -108,7 +108,7 @@ public class WebSocketConnectionInfo {
     }
 
     /**
-     * A string aggregator to handle string aggregation for data binding during onString resource dispatching. The
+     * A string aggregator to handle string aggregation for data binding during onTextMessage resource dispatching. The
      * aggregation is done in the ConnectionInfo class because the strings specific to a particular connection needs to
      * be aggregated.
      */
