@@ -17,17 +17,17 @@ service /ws on new websocket:Listener(21003) {
         
 service class WsService {
   *websocket:Service;
-  remote isolated function onString(websocket:Caller caller, string data) returns Error? {
-      check caller->writeString(data);
+  remote isolated function onTextMessage(websocket:Caller caller, string data) returns websocket:Error? {
+      check caller->writeTextMessage(data);
   }
 }              
 ```
 
-**onConnect**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched.
+**onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
-**onString**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onTextMessage**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 
-**onBytes**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onBinaryMessage**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 
 **onPing and onPong**: The received ping and pong messages are dispatched to these remote methods respectively.
 

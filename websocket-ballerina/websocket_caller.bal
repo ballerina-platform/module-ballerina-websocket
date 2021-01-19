@@ -34,8 +34,8 @@ public client class Caller {
     #
     # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeString(string data) returns Error? {
-        return self.conn.writeString(data);
+    remote isolated function writeTextMessage(string data) returns Error? {
+        return self.conn.writeTextMessage(data);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -43,8 +43,8 @@ public client class Caller {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data) returns Error? {
-        return self.conn.writeBytes(data);
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return self.conn.writeBinaryMessage(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.

@@ -44,12 +44,12 @@ import java.util.concurrent.SynchronousQueue;
 public class WebSocketConnector {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 
-    public static Object externWriteString(Environment env, BObject wsConnection, BString text) {
+    public static Object externWriteTextMessage(Environment env, BObject wsConnection, BString text) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
-                WebSocketConstants.WRITE_STRING);
+                WebSocketConstants.WRITE_TEXT_MESSAGE);
         try {
             ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(text.getValue(), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
@@ -66,12 +66,12 @@ public class WebSocketConnector {
         return null;
     }
 
-    public static Object writeBytes(Environment env, BObject wsConnection, BArray binaryData) {
+    public static Object writeBinaryMessage(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
-                WebSocketConstants.WRITE_BYTES);
+                WebSocketConstants.WRITE_BINARY_MESSAGE);
         try {
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
                     ByteBuffer.wrap(binaryData.getBytes()), true);
@@ -133,7 +133,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    public static Object externReadString(Environment env, BObject wsConnection) {
+    public static Object externReadTextMessage(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {
@@ -157,7 +157,7 @@ public class WebSocketConnector {
         }
     }
 
-    public static Object externReadBytes(Environment env, BObject wsConnection) {
+    public static Object externReadBinaryMessage(Environment env, BObject wsConnection) {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {

@@ -25,8 +25,8 @@ class WebSocketConnector {
     #
     # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeString(string data) returns Error? {
-        return externWriteString(self, data);
+    public isolated function writeTextMessage(string data) returns Error? {
+        return externWriteTextMessage(self, data);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -34,8 +34,8 @@ class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeBytes(byte[] data) returns Error? {
-        return externWriteBytes(self, data);
+    public isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return externWriteBinaryMessage(self, data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the connection, that frame will be lost.
@@ -55,26 +55,18 @@ class WebSocketConnector {
         return externPong(self, data);
     }
 
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. The
-    # WebSocketListener can be called only in the `upgrade` or `onConnect` resources.
-    #
-    # + return - An `error` if an error occurs when sending
-    public isolated function ready() returns Error? {
-        return externReady(self);
-    }
-
     # Reads text data from the websocket connection.
     #
     # + return  - The text message or an `error` if an error occurs when sending
-    public isolated function readString() returns string|Error {
-        return externReadString(self);
+    public isolated function readTextMessage() returns string|Error {
+        return externReadTextMessage(self);
     }
 
     # Reads binary data from the websocket connection.
     #
     # + return  - The binary message or an `error` if an error occurs when sending
-    public isolated function readBytes() returns byte[]|Error {
-        return externReadBytes(self);
+    public isolated function readBinaryMessage() returns byte[]|Error {
+        return externReadBinaryMessage(self);
     }
 
     # Closes the connection.
@@ -101,15 +93,15 @@ class WebSocketConnector {
     }
 }
 
-isolated function externWriteString(WebSocketConnector wsConnector, string text) returns Error? =
+isolated function externWriteTextMessage(WebSocketConnector wsConnector, string text) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data) returns Error? =
+isolated function externWriteBinaryMessage(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
-    name: "writeBytes"
+    name: "writeBinaryMessage"
 } external;
 
 isolated function externPing(WebSocketConnector wsConnector, byte[] data) returns Error? =
@@ -135,12 +127,12 @@ isolated function externReady(WebSocketConnector wsConnector) returns Error? = @
     name: "ready"
 } external;
 
-isolated function externReadString(WebSocketConnector wsConnector) returns string|Error =
+isolated function externReadTextMessage(WebSocketConnector wsConnector) returns string|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externReadBytes(WebSocketConnector wsConnector) returns byte[]|Error =
+isolated function externReadBinaryMessage(WebSocketConnector wsConnector) returns byte[]|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;

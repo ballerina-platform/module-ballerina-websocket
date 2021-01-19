@@ -28,7 +28,7 @@ service /pingpong/ws on l19 {
 
 service class PingPongService {
   *Service;
-   remote isolated function onConnect(Caller caller) {
+   remote isolated function onOpen(Caller caller) {
    }
 
    remote isolated function onPing(Caller caller, byte[] localData) {

@@ -61,8 +61,8 @@ public client class SyncClient {
     #
     # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeString(string data) returns Error? {
-        return self.conn.writeString(data);
+    remote isolated function writeTextMessage(string data) returns Error? {
+        return self.conn.writeTextMessage(data);
     }
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -70,8 +70,8 @@ public client class SyncClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data) returns Error? {
-        return self.conn.writeBytes(data);
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return self.conn.writeBinaryMessage(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
@@ -168,15 +168,15 @@ public client class SyncClient {
     # Reads the texts in a synchronous manner
     #
     # + return  - The text data sent by the server or an `error` if an error occurs when sending
-    remote isolated function readString() returns string|Error {
-        return self.conn.readString();
+    remote isolated function readTextMessage() returns string|Error {
+        return self.conn.readTextMessage();
     }
 
     # Reads the binary data in a synchronous manner
     #
     # + return  - The binary data sent by the server or an `error` if an error occurs when sending
-    remote isolated function readBytes() returns byte[]|Error {
-        return self.conn.readBytes();
+    remote isolated function readBinaryMessage() returns byte[]|Error {
+        return self.conn.readBinaryMessage();
     }
 }
 

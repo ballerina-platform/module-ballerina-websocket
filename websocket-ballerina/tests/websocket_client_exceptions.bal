@@ -38,7 +38,7 @@ service /websocket on l14 {
 
 service class ErrorServer {
   *Service;
-   remote isolated function onConnect(Caller caller) {
+   remote isolated function onOpen(Caller caller) {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 
@@ -56,15 +56,15 @@ service class ErrorServer {
        }
    }
 
-   remote isolated function onString(Caller caller, string text) {
-       var err = caller->writeString(text);
+   remote isolated function onTextMessage(Caller caller, string text) {
+       var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message" + err.message());
        }
    }
 
-   remote isolated function onBytes(Caller caller, byte[] data) {
-       var returnVal = caller->writeBytes(data);
+   remote isolated function onBinaryMessage(Caller caller, byte[] data) {
+       var returnVal = caller->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -114,7 +114,7 @@ public function testConnectionClosedError() returns Error? {
    AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
    error? result = wsClientEp->close(timeoutInSeconds = 0);
    runtime:sleep(2);
-   var err = wsClientEp->writeString("some");
+   var err = wsClientEp->writeTextMessage("some");
    if (err is error) {
        test:assertEquals(err.message(), "ConnectionClosureError: Close frame already sent. Cannot push text data!");
    } else {
@@ -126,19 +126,8 @@ public function testConnectionClosedError() returns Error? {
 @test:Config {}
 public function testHandshakeError() returns Error? {
    AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService(), config);
+   var resp = wsClientEp->writeTextMessage("text");
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
 }
 
-// Tests the ready function using the WebSocket client. When `readyOnConnect` is true,
-// calls the `ready()` function.
-@test:Config {}
-public function testReadyOnConnect() returns Error? {
-   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
-   var err = wsClientEp->ready();
-   if (err is error) {
-       test:assertEquals(err.message(), "GenericError: Already started reading frames");
-   } else {
-       test:assertFail("Mismatched output");
-   }
-}

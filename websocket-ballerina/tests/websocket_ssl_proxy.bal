@@ -35,31 +35,26 @@ service /sslEcho on l24 {
 }
 service class SslProxy {
    *Service;
-   remote function onConnect(Caller wsEp) returns Error? {
+   remote function onOpen(Caller wsEp) returns Error? {
        AsyncClient wsClientEp = check new ("wss://localhost:21028/websocket", new sslClientService(), {
                secureSocket: {
                    trustStore: {
                        path: TRUSTSTORE_PATH,
                        password: "ballerina"
                    }
-               },
-               readyOnConnect: false
+               }
            });
-       var returnVal = wsClientEp->ready();
+   }
+
+   remote function onTextMessage(Caller wsEp, string text) {
+       var returnVal = wsEp->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onString(Caller wsEp, string text) {
-       var returnVal = wsEp->writeString(text);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
-
-   remote function onBytes(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->writeBytes(data);
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
+       var returnVal = wsEp->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -75,15 +70,15 @@ service class SslProxy {
 
 service class sslClientService {
    *Service;
-   remote function onString(Caller wsEp, string text) {
-       var returnVal = wsEp->writeString(text);
+   remote function onTextMessage(Caller wsEp, string text) {
+       var returnVal = wsEp->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->writeBytes(data);
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
+       var returnVal = wsEp->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -113,19 +108,19 @@ service /websocket on l27 {
 
 service class SslProxyServer {
    *Service;
-   remote function onConnect(Caller caller) {
+   remote function onOpen(Caller caller) {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 
-   remote function onString(Caller caller, string text) {
-       var err = caller->writeString(text);
+   remote function onTextMessage(Caller caller, string text) {
+       var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
        }
    }
 
-   remote function onBytes(Caller caller, byte[] data) {
-       var returnVal = caller->writeBytes(data);
+   remote function onBinaryMessage(Caller caller, byte[] data) {
+       var returnVal = caller->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -134,11 +129,11 @@ service class SslProxyServer {
 
 service class sslProxyCallbackService {
    *Service;
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        proxyData = <@untainted>text;
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
@@ -161,7 +156,7 @@ public function testSslProxySendText() returns Error? {
                }
            }
        });
-   check wsClient->writeString("Hi");
+   check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(proxyData, "Hi", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
@@ -179,7 +174,7 @@ public function testSslProxySendBinary() returns Error? {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   check wsClient->writeBytes(binaryData);
+   check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);

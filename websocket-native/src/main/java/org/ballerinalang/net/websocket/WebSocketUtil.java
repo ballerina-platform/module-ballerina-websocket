@@ -340,8 +340,7 @@ public class WebSocketUtil {
      */
     public static void establishWebSocketConnection(WebSocketClientConnector clientConnector,
             BObject webSocketClient, WebSocketService wsService) {
-        boolean readyOnConnect = webSocketClient.getMapValue(CLIENT_ENDPOINT_CONFIG).getBooleanValue(
-                WebSocketConstants.CLIENT_READY_ON_CONNECT);
+        boolean readyOnConnect = true;
         ClientHandshakeFuture handshakeFuture = clientConnector.connect();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch, readyOnConnect);

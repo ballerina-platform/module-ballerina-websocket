@@ -40,15 +40,15 @@ service /sslEcho on l7 {
 
 service class WsService6 {
   *Service;
-  remote isolated function onString(Caller caller, string data) {
-       var returnVal = caller->writeString(data);
+  remote isolated function onTextMessage(Caller caller, string data) {
+       var returnVal = caller->writeTextMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onBytes(Caller caller, byte[] data) {
-       var returnVal = caller->writeBytes(data);
+   remote isolated function onBinaryMessage(Caller caller, byte[] data) {
+       var returnVal = caller->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -57,11 +57,11 @@ service class WsService6 {
 
 service class sslEchoCallbackService {
    *Service;
-   remote function onString(Caller wsEp, string text) {
+   remote function onTextMessage(Caller wsEp, string text) {
        expectedString = <@untainted>text;
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 
@@ -85,7 +85,7 @@ public function sslBinaryEcho() returns Error? {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   check wsClient->writeBytes(binaryData);
+   check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
@@ -103,7 +103,7 @@ public function sslTextEcho() returns Error? {
                }
            }
        });
-   check wsClient->writeString("Hi madam");
+   check wsClient->writeTextMessage("Hi madam");
    runtime:sleep(0.5);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");

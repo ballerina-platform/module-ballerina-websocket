@@ -82,14 +82,14 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.ON_TEXT_METADAT
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_TIMEOUT_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_UPGRADE_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.PARAM_TYPE_STRING;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_BINARY;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CLOSE;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CONNECT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_ERROR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PING;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PONG;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_STRING;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE;
 
 /**
  * {@code WebSocketDispatcher} This is the web socket request dispatcher implementation which finds best matching
@@ -192,7 +192,7 @@ public class WebSocketResourceDispatcher {
                 .getType())).getMethods();
         BObject balService = (BObject) dispatchingService;
         for (MethodType remoteFunc : remoteFunctions) {
-            if (remoteFunc.getName().equals(RESOURCE_NAME_ON_CONNECT)) {
+            if (remoteFunc.getName().equals(RESOURCE_NAME_ON_OPEN)) {
                 onOpenResource = remoteFunc;
                 break;
             }
@@ -225,10 +225,10 @@ public class WebSocketResourceDispatcher {
                 WebSocketUtil.closeDuringUnexpectedCondition(webSocketConnection);
                 WebSocketObservabilityUtil
                         .observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION,
-                                RESOURCE_NAME_ON_CONNECT, error.getMessage());
+                                RESOURCE_NAME_ON_OPEN, error.getMessage());
             }
         };
-        executeResource(wsService, balService, onOpenCallback, bValues, connectionInfo, RESOURCE_NAME_ON_CONNECT,
+        executeResource(wsService, balService, onOpenCallback, bValues, connectionInfo, RESOURCE_NAME_ON_OPEN,
                 ON_OPEN_METADATA);
     }
 
@@ -247,14 +247,14 @@ public class WebSocketResourceDispatcher {
                 MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType()))
                         .getMethods();
                 for (MethodType remoteFunc : remoteFunctions) {
-                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_STRING)) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_TEXT_MESSAGE)) {
                         onTextMessageResource = remoteFunc;
                         break;
                     }
                 }
             } else {
                 balservice = wsService.getBalService();
-                onTextMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_STRING);
+                onTextMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_TEXT_MESSAGE);
             }
             if (onTextMessageResource == null) {
                 webSocketConnection.readNextFrame();
@@ -276,8 +276,8 @@ public class WebSocketResourceDispatcher {
                 bValues[2] = StringUtils.fromString(stringAggregator.getAggregateString());
                 bValues[3] = true;
                 executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_STRING), bValues, connectionInfo,
-                        RESOURCE_NAME_ON_STRING, ON_TEXT_METADATA);
+                        new WebSocketResourceCallback(connectionInfo, RESOURCE_NAME_ON_TEXT_MESSAGE), bValues,
+                        connectionInfo, RESOURCE_NAME_ON_TEXT_MESSAGE, ON_TEXT_METADATA);
                 stringAggregator.resetAggregateString();
             } else {
                 stringAggregator.appendAggregateString(textMessage.getText());
@@ -363,14 +363,14 @@ public class WebSocketResourceDispatcher {
                 MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType()))
                         .getMethods();
                 for (MethodType remoteFunc : remoteFunctions) {
-                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_BINARY)) {
+                    if (remoteFunc.getName().equals(RESOURCE_NAME_ON_BINARY_MESSAGE)) {
                         onBinaryMessageResource = remoteFunc;
                         break;
                     }
                 }
             } else {
                 balservice = wsService.getBalService();
-                onBinaryMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_BINARY);
+                onBinaryMessageResource = wsService.getResourceByName(RESOURCE_NAME_ON_BINARY_MESSAGE);
             }
             if (onBinaryMessageResource == null) {
                 webSocketConnection.readNextFrame();
@@ -388,8 +388,8 @@ public class WebSocketResourceDispatcher {
                 bValues[2] = ValueCreator.createArrayValue(byteAggregator.getAggregateByteArr());
                 bValues[3] = true;
                 executeResource(wsService, balservice, new WebSocketResourceCallback(
-                                connectionInfo, RESOURCE_NAME_ON_BINARY), bValues, connectionInfo,
-                        RESOURCE_NAME_ON_BINARY, ON_BINARY_METADATA);
+                                connectionInfo, RESOURCE_NAME_ON_BINARY_MESSAGE), bValues, connectionInfo,
+                        RESOURCE_NAME_ON_BINARY_MESSAGE, ON_BINARY_METADATA);
                 byteAggregator.resetAggregateByteArr();
             } else {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());

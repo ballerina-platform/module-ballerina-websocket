@@ -28,20 +28,20 @@ service /'client/'service on l15 {
 
 service class clientFailure200 {
   *Service;
-  remote function onConnect(Caller wsEp) {
+  remote function onOpen(Caller wsEp) {
        isClientConnectionOpen = true;
    }
 }
 
 service class callback200 {
    *Service;
-   remote function onString(string caller, string text) {
+   remote function onTextMessage(string caller, string text) {
    }
 }
 
 service class ClientService200 {
    *Service;
-   remote function onString(Caller caller, string text) {
+   remote function onTextMessage(Caller caller, string text) {
    }
 }
 
@@ -59,7 +59,7 @@ public function testClientSuccessWithoutService() returns Error? {
 public function testClientSuccessWithWebSocketClientService() returns Error? {
    isClientConnectionOpen = false;
    AsyncClient wsClient = check new("ws://localhost:21021/client/service/bbe", new ClientService200());
-   check wsClient->writeString("Client worked");
+   check wsClient->writeTextMessage("Client worked");
    runtime:sleep(0.5);
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
