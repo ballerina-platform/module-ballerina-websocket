@@ -48,7 +48,7 @@ service class WsService6 {
    }
 
    remote isolated function onBinaryMessage(Caller caller, byte[] data) {
-       var returnVal = caller->writeBytes(data);
+       var returnVal = caller->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -85,7 +85,7 @@ public function sslBinaryEcho() returns Error? {
            }
        });
    byte[] binaryData = [5, 24, 56];
-   check wsClient->writeBytes(binaryData);
+   check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");

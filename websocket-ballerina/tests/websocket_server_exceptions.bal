@@ -31,7 +31,7 @@
 //        checkpanic caller->writeTextMessage("Hello World!", false);
 //        string hello = "hello";
 //        byte[] data = hello.toBytes();
-//        var err = caller->writeBytes(data, false);
+//        var err = caller->writeBinaryMessage(data, false);
 //        if (err is error) {
 //            serverOutput = <@untainted>err.message();
 //        } else {
@@ -40,7 +40,7 @@
 //    }
 
 //    remote function onBinaryMessage(Caller caller, byte[] data, boolean finalFrame) {
-//        var returnVal = caller->writeBytes(data, finalFrame);
+//        var returnVal = caller->writeBinaryMessage(data, finalFrame);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }

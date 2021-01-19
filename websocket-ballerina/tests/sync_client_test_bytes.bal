@@ -31,7 +31,7 @@ service /onTextBytes on l8 {
 service class WsServiceSyncBytes {
   *Service;
   remote isolated function onBinaryMessage(Caller caller, byte[] data) returns Error? {
-      check caller->writeBytes(data);
+      check caller->writeBinaryMessage(data);
   }
 
   remote isolated function onClose(Caller caller, string data) returns Error? {
@@ -73,13 +73,13 @@ public function testSyncClientByteArray() returns Error? {
    worker w2 {
       io:println("Waiting till client starts reading byte[].");
       runtime:sleep(2);
-      var resp1 = wsClient->writeBytes("Hello".toBytes());
+      var resp1 = wsClient->writeBinaryMessage("Hello".toBytes());
       runtime:sleep(2);
-      var resp2 = wsClient->writeBytes("Hello2".toBytes());
+      var resp2 = wsClient->writeBinaryMessage("Hello2".toBytes());
       runtime:sleep(2);
-      var resp3 = wsClient->writeBytes("Hello3".toBytes());
-      var resp4 = wsClient->writeBytes("Hello4".toBytes());
-      var resp5 = wsClient->writeBytes("Hello5".toBytes());
+      var resp3 = wsClient->writeBinaryMessage("Hello3".toBytes());
+      var resp4 = wsClient->writeBinaryMessage("Hello4".toBytes());
+      var resp5 = wsClient->writeBinaryMessage("Hello5".toBytes());
    }
    _ = wait {w1, w2};
    string msg = "[72,101,108,108,111][72,101,108,108,111,50][72,101,108,108,111,51][72,101,108,108,111,52][72,101,108,108,111,53]";

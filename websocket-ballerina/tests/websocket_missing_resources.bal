@@ -33,7 +33,7 @@ service /onlyOnBinary on l17 {
 service class OnlyOnBinary {
   *Service;
    remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
-       check caller->writeBytes(data);
+       check caller->writeBinaryMessage(data);
    }
 }
 
@@ -75,7 +75,7 @@ public function testMissingOnText() returns Error? {
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "", msg = "Data mismatched");
-   check wsClient->writeBytes(binaryData);
+   check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -90,7 +90,7 @@ public function testMissingOnPong() returns Error? {
    check wsClient->pong(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedPingBinaryData, expectedBinData, msg = "Data mismatched");
-   check wsClient->writeBytes(binaryData);
+   check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
@@ -104,7 +104,7 @@ public function testMissingOnBinary() returns Error? {
    expectedBinData = [];
    byte[] expectedBinData = [];
    expectedData = "";
-   check wsClient->writeBytes(binaryData);
+   check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
    check wsClient->writeTextMessage("Hi");

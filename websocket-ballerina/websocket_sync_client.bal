@@ -70,8 +70,8 @@ public client class SyncClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data) returns Error? {
-        return self.conn.writeBytes(data);
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return self.conn.writeBinaryMessage(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.

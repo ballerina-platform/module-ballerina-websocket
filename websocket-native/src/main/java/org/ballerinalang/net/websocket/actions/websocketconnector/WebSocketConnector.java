@@ -66,7 +66,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    public static Object writeBytes(Environment env, BObject wsConnection, BArray binaryData) {
+    public static Object writeBinaryMessage(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);

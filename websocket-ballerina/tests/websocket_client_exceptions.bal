@@ -64,7 +64,7 @@ service class ErrorServer {
    }
 
    remote isolated function onBinaryMessage(Caller caller, byte[] data) {
-       var returnVal = caller->writeBytes(data);
+       var returnVal = caller->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }

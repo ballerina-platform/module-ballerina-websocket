@@ -30,7 +30,7 @@
 //    remote function onBinaryMessage(Caller caller, byte[] data, boolean finalFrame) {
 //        if (finalFrame) {
 //            appendToArray(<@untainted> data, content);
-//            var returnVal = caller->writeBytes(content);
+//            var returnVal = caller->writeBinaryMessage(content);
 //            if (returnVal is Error) {
 //                panic <error> returnVal;
 //            }
@@ -62,9 +62,9 @@
 //    string[] values = ["<note>", "<to>", "Tove", "</to>"];
 //    AsyncClient wsClient = new ("ws://localhost:21007/onBinaryContinuation", new continuationService());
 //    foreach string value in values {
-//        checkpanic wsClient->writeBytes(value.toBytes(), false);
+//        checkpanic wsClient->writeBinaryMessage(value.toBytes(), false);
 //    }
-//    checkpanic wsClient->writeBytes("</note>".toBytes(), true);
+//    checkpanic wsClient->writeBinaryMessage("</note>".toBytes(), true);
 //    runtime:sleep(500);
 //    string|error value = 'string:fromBytes(binaryContent);
 //    string s = value is error ? value.toString() : value.toString();

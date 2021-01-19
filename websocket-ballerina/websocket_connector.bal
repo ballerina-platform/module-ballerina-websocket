@@ -34,8 +34,8 @@ class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeBytes(byte[] data) returns Error? {
-        return externWriteBytes(self, data);
+    public isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return externWriteBinaryMessage(self, data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the connection, that frame will be lost.
@@ -106,10 +106,10 @@ isolated function externWriteTextMessage(WebSocketConnector wsConnector, string 
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
 } external;
 
-isolated function externWriteBytes(WebSocketConnector wsConnector, byte[] data) returns Error? =
+isolated function externWriteBinaryMessage(WebSocketConnector wsConnector, byte[] data) returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector",
-    name: "writeBytes"
+    name: "writeBinaryMessage"
 } external;
 
 isolated function externPing(WebSocketConnector wsConnector, byte[] data) returns Error? =
