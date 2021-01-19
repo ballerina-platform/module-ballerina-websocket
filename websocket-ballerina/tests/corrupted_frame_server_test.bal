@@ -55,7 +55,7 @@ service class clientCbackService {
         io:println(<@untainted>err.message());
     }
 
-    remote isolated function onConnect(Caller wsEp) {
+    remote isolated function onOpen(Caller wsEp) {
         io:println("On connect resource");
     }
 

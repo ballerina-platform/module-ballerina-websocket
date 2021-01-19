@@ -25,7 +25,7 @@ service UpgradeService /'error/ws on l16 {
 
 service class ErrorService {
    *Service;
-   remote function onConnect(Caller ep) {
+   remote function onOpen(Caller ep) {
    }
 
    remote function onTextMessage(Caller ep, string text) {

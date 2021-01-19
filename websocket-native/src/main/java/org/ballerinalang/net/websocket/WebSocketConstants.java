@@ -58,7 +58,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeoutInSeconds");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
-    public static final String RESOURCE_NAME_ON_CONNECT = "onConnect";
+    public static final String RESOURCE_NAME_ON_CONNECT = "onOpen";
     public static final String RESOURCE_NAME_ON_STRING = "onTextMessage";
     public static final String RESOURCE_NAME_ON_BINARY = "onBinaryMessage";
     public static final String RESOURCE_NAME_ON_PING = "onPing";

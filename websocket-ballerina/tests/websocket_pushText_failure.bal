@@ -27,7 +27,7 @@ service /pushTextFailureService on l20 {
 
 service class PushTextFailureService {
    *Service;
-   remote function onConnect(Caller caller) {
+   remote function onOpen(Caller caller) {
        Error? err1 = caller->close(timeoutInSeconds = 0);
        var err = caller->writeTextMessage("hey");
        if (err is Error) {

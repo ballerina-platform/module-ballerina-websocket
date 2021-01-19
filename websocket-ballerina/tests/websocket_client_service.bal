@@ -28,7 +28,7 @@ service /'client/'service on l15 {
 
 service class clientFailure200 {
   *Service;
-  remote function onConnect(Caller wsEp) {
+  remote function onOpen(Caller wsEp) {
        isClientConnectionOpen = true;
    }
 }

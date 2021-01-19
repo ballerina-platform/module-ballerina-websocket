@@ -23,7 +23,7 @@ service class WsService {
 }              
 ```
 
-**onConnect**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched.
+**onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onConnect` remote method is dispatched.
 
 **onString**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 

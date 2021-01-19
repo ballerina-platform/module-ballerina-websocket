@@ -35,7 +35,7 @@ service /sslEcho on l24 {
 }
 service class SslProxy {
    *Service;
-   remote function onConnect(Caller wsEp) returns Error? {
+   remote function onOpen(Caller wsEp) returns Error? {
        AsyncClient wsClientEp = check new ("wss://localhost:21028/websocket", new sslClientService(), {
                secureSocket: {
                    trustStore: {
@@ -113,7 +113,7 @@ service /websocket on l27 {
 
 service class SslProxyServer {
    *Service;
-   remote function onConnect(Caller caller) {
+   remote function onOpen(Caller caller) {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 

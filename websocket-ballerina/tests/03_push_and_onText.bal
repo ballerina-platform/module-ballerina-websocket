@@ -45,7 +45,7 @@ service class clientPushCallbackService {
         io:println(err);
     }
 
-    remote isolated function onConnect(Caller wsEp) {
+    remote isolated function onOpen(Caller wsEp) {
         io:println("On connect resource");
     }
 }

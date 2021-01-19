@@ -28,7 +28,7 @@ service / on l22 {
 
 service class ProxyService {
   *Service;
-  remote function onConnect(Caller wsEp) returns Error? {
+  remote function onOpen(Caller wsEp) returns Error? {
        AsyncClient wsClientEp = check new ("ws://localhost:21019/websocket", new clientCallbackService9(), {
                readyOnConnect: false
            });
@@ -70,7 +70,7 @@ service /websocket on l26 {
 
 service class ProxyService2 {
    *Service;
-   remote function onConnect(Caller caller) {
+   remote function onOpen(Caller caller) {
        io:println("The Connection ID: " + caller.getConnectionId());
    }
 
