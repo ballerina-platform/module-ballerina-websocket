@@ -27,7 +27,7 @@ service class WsService {
 
 **onString**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 
-**onBytes**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onBinaryMessage**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
 
 **onPing and onPong**: The received ping and pong messages are dispatched to these remote methods respectively.
 

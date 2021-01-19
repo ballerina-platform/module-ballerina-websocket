@@ -27,7 +27,7 @@
 // }
 // service class OnBinaryContinuation {
 //    *Service;
-//    remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
+//    remote function onBinaryMessage(Caller caller, byte[] data, boolean finalFrame) {
 //        if (finalFrame) {
 //            appendToArray(<@untainted> data, content);
 //            var returnVal = caller->writeBytes(content);
@@ -50,7 +50,7 @@
 // }
 
 // service class continuationService {
-//    remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
+//    remote function onBinaryMessage(Caller caller, byte[] data, boolean finalFrame) {
 //        binaryContent = <@untainted>data;
 //    }
 // }

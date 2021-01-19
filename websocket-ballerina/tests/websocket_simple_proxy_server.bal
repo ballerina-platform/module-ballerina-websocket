@@ -45,7 +45,7 @@ service class ProxyService {
        }
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -81,7 +81,7 @@ service class ProxyService2 {
        }
    }
 
-   remote function onBytes(Caller caller, byte[] data) {
+   remote function onBinaryMessage(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -98,7 +98,7 @@ service class clientCallbackService9 {
        }
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        var returnVal = wsEp->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -119,7 +119,7 @@ service class proxyCallbackService {
        proxyData = <@untainted>text;
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 

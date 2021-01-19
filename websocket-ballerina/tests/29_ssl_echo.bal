@@ -47,7 +47,7 @@ service class WsService6 {
        }
    }
 
-   remote isolated function onBytes(Caller caller, byte[] data) {
+   remote isolated function onBinaryMessage(Caller caller, byte[] data) {
        var returnVal = caller->writeBytes(data);
        if (returnVal is Error) {
            panic <error>returnVal;
@@ -61,7 +61,7 @@ service class sslEchoCallbackService {
        expectedString = <@untainted>text;
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        expectedBinaryData = <@untainted>data;
    }
 

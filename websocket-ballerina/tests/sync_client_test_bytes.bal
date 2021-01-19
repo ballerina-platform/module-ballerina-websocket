@@ -30,7 +30,7 @@ service /onTextBytes on l8 {
 
 service class WsServiceSyncBytes {
   *Service;
-  remote isolated function onBytes(Caller caller, byte[] data) returns Error? {
+  remote isolated function onBinaryMessage(Caller caller, byte[] data) returns Error? {
       check caller->writeBytes(data);
   }
 

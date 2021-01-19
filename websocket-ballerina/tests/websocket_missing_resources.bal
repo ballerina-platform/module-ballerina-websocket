@@ -32,7 +32,7 @@ service /onlyOnBinary on l17 {
 }
 service class OnlyOnBinary {
   *Service;
-   remote function onBytes(Caller caller, byte[] data) returns Error? {
+   remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
        check caller->writeBytes(data);
    }
 }
@@ -57,7 +57,7 @@ service class callbackService {
        expectedData = <@untainted>text;
    }
 
-   remote function onBytes(Caller wsEp, byte[] data) {
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
        expectedBinData = <@untainted>data;
    }
 
@@ -96,7 +96,7 @@ public function testMissingOnPong() returns Error? {
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
 
-// Tests behavior when onBytes resource is missing and binary message is received
+// Tests behavior when onBinaryMessage resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnBinary() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
@@ -113,7 +113,7 @@ public function testMissingOnBinary() returns Error? {
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
 
-// Tests behavior when onBytes resource is missing and binary message is received
+// Tests behavior when onBinaryMessage resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnIdleTimeout() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
