@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-http:Listener hl = new(21001);
+http:Listener hl = check new(21001);
 listener Listener socketListener = new(<@untainted> hl);
 string output = "";
 string errorMsg = "";
