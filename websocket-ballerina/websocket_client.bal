@@ -43,7 +43,7 @@ public client class AsyncClient {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
-    public function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ())
+    public isolated function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ())
                 returns Error? {
         self.url = url;
         //if (config is WebSocketClientConfiguration) {
@@ -110,7 +110,7 @@ public client class AsyncClient {
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
-    remote function close(int? statusCode = 1000, string? reason = (),
+    remote isolated function close(int? statusCode = 1000, string? reason = (),
         int timeoutInSeconds = 60) returns Error? {
         Error? err = self.conn.close(statusCode, reason, timeoutInSeconds);
         runtime:deregisterListener(self.dynamicListener);
