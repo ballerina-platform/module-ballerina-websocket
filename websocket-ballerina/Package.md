@@ -1,8 +1,8 @@
 ## Module Overview
 
-This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates three types of network entry points as ‘AsyncClient’, ‘SyncClient’ and ‘Listener’.
+This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates two types of network entry points as ‘AsyncClient’, and ‘Listener’.
 
-The `AsyncClient` has a callback service that can be registered at the initialization of the client. It has a fixed set of remote methods in this service and they get called on the receipt of messages from the server. The ‘SyncClient’ also can have a callback service registered to receive control frames like ping, pong and close.
+The `AsyncClient` has a callback service that can be registered at the initialization of the client. It has a fixed set of remote methods in this service and they get called on the receipt of messages from the server. 
 
 In the server side, initial websocket service is there to handle upgrade requests. It has a single `get` resource which takes in `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages gets dispatched after a successful websocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the websocket upgrade by returning an error.
 The returning `websocket:Service` has a fixed set of remote methods.
@@ -25,9 +25,9 @@ service class WsService {
 
 **onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
-**onTextMessage**: The received text messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onTextMessage**: The received text messages are dispatched to this remote method.
 
-**onBinaryMessage**: The received binary messages are dispatched to this remote method. This remote method is not applicable for `SyncClient`
+**onBinaryMessage**: The received binary messages are dispatched to this remote method.
 
 **onPing and onPong**: The received ping and pong messages are dispatched to these remote methods respectively.
 

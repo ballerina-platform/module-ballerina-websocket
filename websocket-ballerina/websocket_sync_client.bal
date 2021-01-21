@@ -18,7 +18,7 @@ import ballerina/java;
 import ballerina/http;
 
 # Represents a WebSocket synchronous client endpoint.
-public client class SyncClient {
+public client class Client {
 
     private string id = "";
     private string? negotiatedSubProtocol = ();
@@ -180,12 +180,12 @@ public client class SyncClient {
     }
 }
 
-isolated function externSyncWSInitEndpoint(SyncClient wsClient) = @java:Method {
+isolated function externSyncWSInitEndpoint(Client wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
     name: "initEndpoint"
 } external;
 
-isolated function externSyncRetryInitEndpoint(SyncClient wsClient) = @java:Method {
+isolated function externSyncRetryInitEndpoint(Client wsClient) = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
     name: "initEndpoint"
 } external;
