@@ -80,14 +80,16 @@ public function testConnectionError() returns Error? {
    AsyncClient wsClient = check new ("ws://lmnop.ls", new errorResourceService(), config);
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "ConnectionError: IO Error");
+   error? err = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
 }
 
 // SSL/TLS error
 @test:Config {}
-public function testSslError() {
-   AsyncClient|error wsClient = new ("wss://localhost:21030/websocket", new errorResourceService(), config);
+public function testSslError() returns Error? {
+   AsyncClient wsClient = check new ("wss://localhost:21030/websocket", new errorResourceService(), config);
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
+   error? err = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
 }
 
 // The frame exceeds the max frame length
@@ -129,5 +131,5 @@ public function testHandshakeError() returns Error? {
    var resp = wsClientEp->writeTextMessage("text");
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
+   error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
 }
-

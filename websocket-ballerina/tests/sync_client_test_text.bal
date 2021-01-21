@@ -39,7 +39,7 @@ service class WsServiceSync {
 
 @test:Config {}
 public function testSyncClient() returns Error? {
-   SyncClient wsClient = check new("ws://localhost:21000/onTextString");
+   Client wsClient = check new("ws://localhost:21000/onTextString");
    @strand {
       thread:"any"
    }

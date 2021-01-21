@@ -87,6 +87,8 @@ public function testIsOpenCloseCalled() returns error? {
     runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onTextMessage isOpen false");
     test:assertEquals(pathParam, "tuv");
+    error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
 
 // Test isOpen when a close frame is received
@@ -97,4 +99,5 @@ public function testIsOpenCloseFrameReceived() returns error? {
     check wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
     runtime:sleep(0.5);
     test:assertEquals(output, "In onClose isOpen true");
+    error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
 }

@@ -43,4 +43,5 @@ public function pushTextFailure() returns Error? {
    runtime:sleep(0.5);
    test:assertEquals(errorMsg2, "ConnectionClosureError: Close frame already sent. Cannot push text data!",
        msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
 }
