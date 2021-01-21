@@ -41,7 +41,7 @@ service class WsServiceSyncBytes {
 
 @test:Config {}
 public function testSyncClientByteArray() returns Error? {
-   SyncClient wsClient = check new("ws://localhost:21053/onTextBytes");
+   Client wsClient = check new("ws://localhost:21053/onTextBytes");
    @strand {
       thread:"any"
    }

@@ -76,5 +76,5 @@ public function testPingFromRemoteServerToBallerinaClient() returns Error? {
    check wsClient->pong(pongData);
    runtime:sleep(0.5);
    test:assertEquals(expectedPongData1, pongData);
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
 }

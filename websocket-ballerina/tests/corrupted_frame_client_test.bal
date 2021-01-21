@@ -47,7 +47,7 @@ service class corruptedClService {
 service class clientCBService {
     *Service;
     remote function onTextMessage(Caller wsEp, string text) {
-        data2 = <@untainted>text;
+        data3 = <@untainted>text;
     }
 
     remote function onError(Caller wsEp, error err) {

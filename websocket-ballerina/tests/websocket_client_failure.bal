@@ -37,4 +37,5 @@ public function testClientEndpointFailureInResource() returns Error? {
    }
    runtime:sleep(0.5);
    test:assertEquals(expectedErr, "error(\"ConnectionError: IO Error\")");
+   error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
 }

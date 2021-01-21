@@ -19,6 +19,7 @@ import ballerina/java;
 //import ballerina/time;
 import ballerina/http;
 import ballerina/mime;
+import ballerina/lang.runtime;
 
 # Represents a WebSocket client endpoint.
 public client class AsyncClient {
@@ -34,6 +35,7 @@ public client class AsyncClient {
     private string url = "";
     private WebSocketClientConfiguration config = {};
     private Service? callbackService = ();
+    private DynamicListener dynamicListener = new;
 
     # Initializes the client when called.
     #
@@ -49,6 +51,8 @@ public client class AsyncClient {
         //}
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
+        self.dynamicListener = new DynamicListener();
+        runtime:registerListener(self.dynamicListener);
         return self.initEndpoint();
     }
 
@@ -108,7 +112,9 @@ public client class AsyncClient {
     # + return - An `error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (),
         int timeoutInSeconds = 60) returns Error? {
-        return self.conn.close(statusCode, reason, timeoutInSeconds);
+        Error? err = self.conn.close(statusCode, reason, timeoutInSeconds);
+        runtime:deregisterListener(self.dynamicListener);
+        return err;
     }
 
     # Sets a connection-related attribute.
@@ -169,6 +175,20 @@ public client class AsyncClient {
     public isolated function getHttpResponse() returns http:Response? {
         return self.response;
     }
+}
+
+
+public class DynamicListener {
+
+   *runtime:DynamicListener;
+
+   public isolated function init(){}
+
+   public isolated function 'start() returns error? {}
+
+   public isolated function gracefulStop() returns error? {}
+
+   public isolated function immediateStop() returns error? {}
 }
 
 # Configurations for the WebSocket client.
