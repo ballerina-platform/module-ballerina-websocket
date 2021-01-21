@@ -28,10 +28,8 @@ service class errorHandlingService {
 // Tests the client initialization failing in a resource.
 @test:Config {}
 public function testClientEndpointFailureInResource() returns Error? {
-   AsyncClient wsClientEp = check new ("ws://localhost:21010/websocketxyz", new errorHandlingService(), {
-           readyOnConnect: false
-       });
-   var err = wsClientEp->ready();
+   AsyncClient wsClientEp = check new ("ws://localhost:21010/websocketxyz", new errorHandlingService());
+   var err = wsClientEp->writeTextMessage("text");
    if (err is Error) {
        test:assertEquals(err.message(), "ConnectionError: The WebSocket connection has not been made");
    } else {

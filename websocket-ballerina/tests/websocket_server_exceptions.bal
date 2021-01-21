@@ -27,11 +27,11 @@
 // }
 // service class ServerError {
 //    *Service;
-//    remote function onString(Caller caller, string text) {
-//        checkpanic caller->writeString("Hello World!", false);
+//    remote function onTextMessage(Caller caller, string text) {
+//        checkpanic caller->writeTextMessage("Hello World!", false);
 //        string hello = "hello";
 //        byte[] data = hello.toBytes();
-//        var err = caller->writeBytes(data, false);
+//        var err = caller->writeBinaryMessage(data, false);
 //        if (err is error) {
 //            serverOutput = <@untainted>err.message();
 //        } else {
@@ -39,8 +39,8 @@
 //        }
 //    }
 
-//    remote function onBytes(Caller caller, byte[] data, boolean finalFrame) {
-//        var returnVal = caller->writeBytes(data, finalFrame);
+//    remote function onBinaryMessage(Caller caller, byte[] data, boolean finalFrame) {
+//        var returnVal = caller->writeBinaryMessage(data, finalFrame);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
@@ -55,7 +55,7 @@
 // @test:Config {}
 // public function testContinuationFrameError() {
 //    AsyncClient wsClientEp = new ("ws://localhost:21031/server/errors");
-//    var err = trap wsClientEp->writeString("Hi kalai");
+//    var err = trap wsClientEp->writeTextMessage("Hi kalai");
 //    runtime:sleep(500);
 //    test:assertEquals(serverOutput, "InvalidContinuationFrameError: Cannot interrupt WebSocket" +
 //        " text frame continuation");

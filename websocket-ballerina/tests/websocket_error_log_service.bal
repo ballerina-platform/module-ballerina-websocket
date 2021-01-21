@@ -25,11 +25,11 @@ service UpgradeService /'error/ws on l16 {
 
 service class ErrorService {
    *Service;
-   remote function onConnect(Caller ep) {
+   remote function onOpen(Caller ep) {
    }
 
-   remote function onString(Caller ep, string text) {
-       var returnVal = ep->writeString(text);
+   remote function onTextMessage(Caller ep, string text) {
+       var returnVal = ep->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }

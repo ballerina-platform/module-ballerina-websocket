@@ -40,7 +40,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_CONFIG;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_OPEN_METADATA;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CONNECT;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
 
 /**
@@ -94,7 +94,7 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
     private static void dispatchClientOnOpen(WebSocketConnection webSocketConnection,
             WebSocketConnectionInfo connectionInfo, WebSocketService wsService) {
         BObject dispatchingService = wsService.getBalService();
-        MethodType onOpenResource = wsService.getResourceByName(RESOURCE_NAME_ON_CONNECT);
+        MethodType onOpenResource = wsService.getResourceByName(RESOURCE_NAME_ON_OPEN);
         if (onOpenResource != null) {
             Type[] parameterTypes = onOpenResource.getParameterTypes();
             Object[] bValues = new Object[parameterTypes.length * 2];
@@ -112,7 +112,7 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
                 }
             };
             wsService.getRuntime()
-                    .invokeMethodAsync(dispatchingService, RESOURCE_NAME_ON_CONNECT, null, ON_OPEN_METADATA,
+                    .invokeMethodAsync(dispatchingService, RESOURCE_NAME_ON_OPEN, null, ON_OPEN_METADATA,
                             onOpenCallback, bValues);
         }
     }

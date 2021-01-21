@@ -28,7 +28,7 @@ service / on l23 {
 
 service class TestService {
    *Service;
-   remote function onConnect(Caller wsEp) {
+   remote function onOpen(Caller wsEp) {
        io:println("New Client Connected");
    }
 }

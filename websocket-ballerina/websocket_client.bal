@@ -67,8 +67,8 @@ public client class AsyncClient {
     #
     # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeString(string data) returns Error? {
-        return self.conn.writeString(data);
+    remote isolated function writeTextMessage(string data) returns Error? {
+        return self.conn.writeTextMessage(data);
     }
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -76,8 +76,8 @@ public client class AsyncClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data) returns Error? {
-        return self.conn.writeBytes(data);
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return self.conn.writeBinaryMessage(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
@@ -110,14 +110,6 @@ public client class AsyncClient {
     remote isolated function close(int? statusCode = 1000, string? reason = (),
         int timeoutInSeconds = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
-    }
-
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `onUpgrade` or `onConnect` resources.
-    #
-    # + return - an `error` if an error occurs while checking the connection state
-    remote isolated function ready() returns Error? {
-        return self.conn.ready();
     }
 
     # Sets a connection-related attribute.
@@ -190,7 +182,6 @@ public client class AsyncClient {
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
 # | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
-# | readyOnConnect - Copied from CommonWebSocketClientConfiguration              |
 # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
 # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
@@ -208,9 +199,6 @@ public type WebSocketClientConfiguration record {|
 # + customHeaders - Custom headers, which should be sent to the server
 # + idleTimeoutInSeconds - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
 #                          of the client service will be triggered
-# + readyOnConnect - Set to `true` if the client is ready to receive messages as soon as the connection is established.
-#                    This is set to `true` by default. If changed to `false`, the ready() function of the
-#                    `WebSocketClient` needs to be called once to start receiving messages
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
@@ -223,7 +211,6 @@ public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     int idleTimeoutInSeconds = -1;
-    boolean readyOnConnect = true;
     http:ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 0;
     boolean webSocketCompressionEnabled = true;

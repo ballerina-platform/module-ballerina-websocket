@@ -46,8 +46,8 @@ public client class WebSocketFailoverClient {
     #
     # + data - Data to be sent. If it is a byte[], it is converted to a UTF-8 string for sending
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeString(string data) returns Error? {
-        return self.conn.writeString(data);
+    remote isolated function writeTextMessage(string data) returns Error? {
+        return self.conn.writeTextMessage(data);
     }
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -55,8 +55,8 @@ public client class WebSocketFailoverClient {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBytes(byte[] data) returns Error? {
-        return self.conn.writeBytes(data);
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
+        return self.conn.writeBinaryMessage(data);
     }
 
     # Pings the connection. If an error occurs while sending the ping frame to the connection, that frame will be lost.
@@ -89,14 +89,6 @@ public client class WebSocketFailoverClient {
     remote isolated function close(int? statusCode = 1000, string? reason = (),
     int timeoutInSeconds = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeoutInSeconds);
-    }
-
-    # Calls when the endpoint is ready to receive messages. It can be called only once per endpoint. For the
-    # WebSocketListener, it can be called only in the `upgrade` or `onConnect` resources.
-    #
-    # + return - An `error` if an error occurs while checking the connection state
-    remote isolated function ready() returns Error? {
-        return self.conn.ready();
     }
 
     # Sets a connection-related attribute.
@@ -167,7 +159,6 @@ public client class WebSocketFailoverClient {
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
 # | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
-# | readyOnConnect - Copied from CommonWebSocketClientConfiguration              |
 # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
 # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
