@@ -43,11 +43,10 @@ public client class Client {
         self.url = url;
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
-        self.initEndpoint();
+        return self.initEndpoint();
     }
 
-    # Initializes the endpoint.
-    public isolated function initEndpoint() {
+    public isolated function initEndpoint() returns Error? {
         var retryConfig = self.config?.retryConfig;
         if (retryConfig is WebSocketRetryConfig) {
             return externSyncRetryInitEndpoint(self);
@@ -180,12 +179,12 @@ public client class Client {
     }
 }
 
-isolated function externSyncWSInitEndpoint(Client wsClient) = @java:Method {
+isolated function externSyncWSInitEndpoint(Client wsClient) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
     name: "initEndpoint"
 } external;
 
-isolated function externSyncRetryInitEndpoint(Client wsClient) = @java:Method {
+isolated function externSyncRetryInitEndpoint(Client wsClient) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
     name: "initEndpoint"
 } external;

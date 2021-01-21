@@ -71,7 +71,7 @@ public function testClientSuccessWithWebSocketClientService() returns Error? {
 // @test:Config {}
 // public function testClientFailureWithWebSocketService() {
 //    isClientConnectionOpen = false;
-//    AsyncClient|error wsClientEp = trap new ("ws://localhost:21021/client/service/bbe", new callback200());
+//    AsyncClient|error wsClientEp = new ("ws://localhost:21021/client/service/bbe", new callback200());
 //    runtime:sleep(0.5);
 //    if (wsClientEp is error) {
 //        test:assertEquals(wsClientEp.message(),
