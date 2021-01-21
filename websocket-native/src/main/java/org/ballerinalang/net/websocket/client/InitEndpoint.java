@@ -19,6 +19,7 @@
 package org.ballerinalang.net.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -70,6 +71,9 @@ public class InitEndpoint {
             // Sets the count down latch for the initial connection.
             WebSocketUtil.waitForHandshake(countDownLatch);
         } catch (Exception e) {
+            if (e instanceof BError) {
+                return e;
+            }
             return WebSocketUtil.getWebSocketError(e.getMessage(),
                     null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
         }

@@ -46,7 +46,6 @@ public client class SyncClient {
         return self.initEndpoint();
     }
 
-    # Initializes the endpoint.
     public isolated function initEndpoint() returns Error? {
         var retryConfig = self.config?.retryConfig;
         if (retryConfig is WebSocketRetryConfig) {

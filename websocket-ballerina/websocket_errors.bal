@@ -44,7 +44,10 @@ public type ReadingInboundTextError distinct error;
 # Raised when the reading the binary messages have failed
 public type ReadingInboundBinaryError distinct error;
 
+# Raised when the client creation fails
+public type WsGenericClientError distinct error;
+
 # The union of all the WebSocket related errors
 public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
 WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|ReadingInboundTextError|
-ReadingInboundBinaryError;
+ReadingInboundBinaryError|WsGenericClientError;
