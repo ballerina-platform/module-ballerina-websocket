@@ -131,6 +131,69 @@ allprojects {
                 password System.getenv("packagePAT")
             }
         }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-log'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-regex'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-os'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-file'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-time'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-auth'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-crypto'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-cache'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+        maven {
+            url 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-task'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
     }
 }
 
@@ -144,7 +207,6 @@ subprojects {
         /* Standard libraries */
         ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
-        ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
 
         // Transitive dependencies
@@ -161,6 +223,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "org.ballerinalang:reflect-ballerina:${stdlibReflectVersion}"
+        ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
     }
 }
 

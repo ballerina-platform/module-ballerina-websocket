@@ -13,10 +13,11 @@ org = "ballerina"
 name = "mime"
 version = "@stdlib.mime.version@"
 
-[[dependency]]
-org = "ballerina"
-name = "time"
-version = "@stdlib.time.version@"
+#
+#[[dependency]]
+#org = "ballerina"
+#name = "time"
+#version = "@stdlib.time.version@"
 
 [[dependency]]
 org = "ballerina"
