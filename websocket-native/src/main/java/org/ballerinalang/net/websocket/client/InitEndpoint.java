@@ -19,6 +19,7 @@
 package org.ballerinalang.net.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -43,32 +44,40 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_SERVICE_
  */
 public class InitEndpoint {
 
-    public static void initEndpoint(Environment env, BObject webSocketClient) {
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        BMap<BString, Object> clientEndpointConfig =  webSocketClient.getMapValue(
-                WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
-        String remoteUrl = webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
-        BObject callbackService = webSocketClient.getObjectValue(CLIENT_SERVICE_CONFIG);
-        WebSocketService wsService = WebSocketUtil
-                .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
-        HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
-        WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
-        String scheme = URI.create(remoteUrl).getScheme();
-        WebSocketUtil.populateClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
-        // Creates the client connector.
-        WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
-        webSocketClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
-        // Add the client connector as a native data
-        // because there is no need to create the client connector again when using one URL.
-        webSocketClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
-        if (webSocketClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
-            webSocketClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, new ClientConnectorListener());
+    public static Object initEndpoint(Environment env, BObject webSocketClient) {
+        try {
+            @SuppressWarnings(WebSocketConstants.UNCHECKED) BMap<BString, Object> clientEndpointConfig = webSocketClient
+                    .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
+            String remoteUrl = webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
+            BObject callbackService = webSocketClient.getObjectValue(CLIENT_SERVICE_CONFIG);
+            WebSocketService wsService = WebSocketUtil
+                    .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
+            HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
+            WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
+            String scheme = URI.create(remoteUrl).getScheme();
+            WebSocketUtil.populateClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
+            // Creates the client connector.
+            WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
+            webSocketClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
+            // Add the client connector as a native data
+            // because there is no need to create the client connector again when using one URL.
+            webSocketClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
+            if (webSocketClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
+                webSocketClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, new ClientConnectorListener());
+            }
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            webSocketClient.addNativeData(WebSocketConstants.COUNT_DOWN_LATCH, countDownLatch);
+            WebSocketUtil.establishWebSocketConnection(clientConnector, webSocketClient, wsService);
+            // Sets the count down latch for the initial connection.
+            WebSocketUtil.waitForHandshake(countDownLatch);
+        } catch (Exception e) {
+            if (e instanceof BError) {
+                return e;
+            }
+            return WebSocketUtil.getWebSocketError(e.getMessage(),
+                    null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
         }
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        webSocketClient.addNativeData(WebSocketConstants.COUNT_DOWN_LATCH, countDownLatch);
-        WebSocketUtil.establishWebSocketConnection(clientConnector, webSocketClient, wsService);
-        // Sets the count down latch for the initial connection.
-        WebSocketUtil.waitForHandshake(countDownLatch);
+        return null;
     }
 
     private InitEndpoint() {

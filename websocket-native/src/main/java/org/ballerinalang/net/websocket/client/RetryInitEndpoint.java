@@ -44,19 +44,25 @@ public class RetryInitEndpoint {
     private static final BString MAX_COUNT = StringUtils.fromString("maxCount");
     private static final BString BACK_OF_FACTOR = StringUtils.fromString("backOffFactor");
 
-    public static void initEndpoint(Environment env, BObject retryClient) {
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        BMap<BString, Object> clientEndpointConfig = (BMap<BString, Object>) retryClient.getMapValue(
-                HttpConstants.CLIENT_ENDPOINT_CONFIG);
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        BMap<BString, Object> retryConfig = (BMap<BString, Object>) clientEndpointConfig.getMapValue(
-                WebSocketConstants.RETRY_CONTEXT);
-        RetryContext retryConnectorConfig = new RetryContext();
-        populateRetryConnectorConfig(retryConfig, retryConnectorConfig);
-        retryClient.addNativeData(WebSocketConstants.RETRY_CONTEXT.getValue(), retryConnectorConfig);
-        retryClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, new RetryConnectorListener(
-                new ClientConnectorListener()));
-        InitEndpoint.initEndpoint(env, retryClient);
+    public static Object initEndpoint(Environment env, BObject retryClient) {
+        try {
+            @SuppressWarnings(WebSocketConstants.UNCHECKED)
+            BMap<BString, Object> clientEndpointConfig = (BMap<BString, Object>) retryClient.getMapValue(
+                    HttpConstants.CLIENT_ENDPOINT_CONFIG);
+            @SuppressWarnings(WebSocketConstants.UNCHECKED)
+            BMap<BString, Object> retryConfig = (BMap<BString, Object>) clientEndpointConfig.getMapValue(
+                    WebSocketConstants.RETRY_CONTEXT);
+            RetryContext retryConnectorConfig = new RetryContext();
+            populateRetryConnectorConfig(retryConfig, retryConnectorConfig);
+            retryClient.addNativeData(WebSocketConstants.RETRY_CONTEXT.getValue(), retryConnectorConfig);
+            retryClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, new RetryConnectorListener(
+                    new ClientConnectorListener()));
+            InitEndpoint.initEndpoint(env, retryClient);
+        } catch (Exception e) {
+            return WebSocketUtil.getWebSocketError(e.getMessage(),
+                    null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
+        }
+        return null;
     }
 
     /**

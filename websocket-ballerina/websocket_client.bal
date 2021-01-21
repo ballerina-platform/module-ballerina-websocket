@@ -49,11 +49,10 @@ public client class AsyncClient {
         //}
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
-        self.initEndpoint();
+        return self.initEndpoint();
     }
 
-    # Initializes the endpoint.
-    public isolated function initEndpoint() {
+    public isolated function initEndpoint() returns Error? {
         var retryConfig = self.config?.retryConfig;
         if (retryConfig is WebSocketRetryConfig) {
             return externRetryInitEndpoint(self);
@@ -269,12 +268,12 @@ const SPACE = " ";
 const SEMICOLON = ";";
 string dummy = mime:MULTIPART_MIXED;
 
-isolated function externWSInitEndpoint(AsyncClient wsClient) = @java:Method {
+isolated function externWSInitEndpoint(AsyncClient wsClient) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
     name: "initEndpoint"
 } external;
 
-isolated function externRetryInitEndpoint(AsyncClient wsClient) = @java:Method {
+isolated function externRetryInitEndpoint(AsyncClient wsClient) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
     name: "initEndpoint"
 } external;
