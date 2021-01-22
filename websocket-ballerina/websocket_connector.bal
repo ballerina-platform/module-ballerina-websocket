@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/java;
+import ballerina/jballerina.java;
 
 # Represents a WebSocket connection in Ballerina. This includes all connection-oriented operations.
 class WebSocketConnector {
