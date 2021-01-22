@@ -1,0 +1,19 @@
+[[dependency]]
+org = "ballerina"
+name = "io"
+version = "@stdlib.io.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "mime"
+version = "@stdlib.mime.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "time"
+version = "@stdlib.time.version@"
+
+[[dependency]]
+org = "ballerina"
+name = "http"
+version = "@stdlib.http.version@"

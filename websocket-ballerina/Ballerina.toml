@@ -3,27 +3,6 @@ org = "ballerina"
 name = "websocket"
 version = "@toml.version@"
 
-[[dependency]]
-org = "ballerina"
-name = "io"
-version = "@stdlib.io.version@"
-
-[[dependency]]
-org = "ballerina"
-name = "mime"
-version = "@stdlib.mime.version@"
-
-#
-#[[dependency]]
-#org = "ballerina"
-#name = "time"
-#version = "@stdlib.time.version@"
-
-[[dependency]]
-org = "ballerina"
-name = "http"
-version = "@stdlib.http.version@"
-
 [[platform.java11.dependency]]
 path = "../websocket-native/build/libs/websocket-native-@project.version@.jar"
 groupId = "ballerina"
