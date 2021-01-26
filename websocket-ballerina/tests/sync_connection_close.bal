@@ -37,6 +37,7 @@ service class WsServiceSyncClose {
   }
 }
 
+// Tests the connection close in readTextMessage in synchronous client
 @test:Config {}
 public function testSyncClientClose() returns Error? {
    Client wsClient = check new("ws://localhost:21002/onCloseText", config = {idleTimeoutInSeconds: 60});
@@ -63,7 +64,7 @@ public function testSyncClientClose() returns Error? {
       runtime:sleep(2);
    }
    _ = wait {w1, w2};
-   string msg = "Close the connection";
+   string msg = "Close the connection: Status code: 1000";
    test:assertEquals(closeError, msg, msg = "");
    runtime:sleep(3);
 }

@@ -56,10 +56,6 @@ service class WsServiceSyncPingPong {
 }
 
 service class clientPingPongCallbackService {
-    *Service;
-    remote function onTextMessage(Caller wsEp, string text) {
-    }
-
     remote isolated function onPing(Caller caller, byte[] localData) {
         io:println("On sync client ping");
         var returnVal = caller->pong(localData);
@@ -75,12 +71,10 @@ service class clientPingPongCallbackService {
            panic <error>returnVal;
         }
     }
-
-    remote isolated function onOpen(Caller wsEp) {
-        io:println("On connect resource");
-    }
 }
 
+// Tests the receiving of ping messages asynchronously in WebSocket synchronous client.
+// Ping messages are dispatched to the registered callback service.
 @test:Config {}
 public function testSyncClientPingPong() returns Error? {
    Client wsClient = check new("ws://localhost:21057/pingpong", new clientPingPongCallbackService());

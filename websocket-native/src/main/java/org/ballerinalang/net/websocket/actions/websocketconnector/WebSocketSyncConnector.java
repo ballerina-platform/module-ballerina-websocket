@@ -43,7 +43,7 @@ public class WebSocketSyncConnector {
             connectionInfo.getWebSocketConnection().readNextFrame();
         } catch (IllegalAccessException e) {
             return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingTextMessageError);
         }
         return null;
     }
@@ -60,7 +60,7 @@ public class WebSocketSyncConnector {
             connectionInfo.getWebSocketConnection().readNextFrame();
         } catch (IllegalAccessException e) {
             return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundBinaryError);
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingBinaryMessageError);
         }
         return null;
     }

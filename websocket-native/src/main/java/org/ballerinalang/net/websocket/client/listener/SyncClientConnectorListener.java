@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -50,9 +50,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
     }
 
     @Override
-    public void onHandshake(WebSocketHandshaker webSocketHandshaker) {
-        // Cannot reach this point as onHandshake and onOpen is not supported for WebSocket client service
-    }
+    public void onHandshake(WebSocketHandshaker webSocketHandshaker) {}
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
@@ -65,7 +63,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
             connectionInfo.getWebSocketConnection().removeIdleStateHandler();
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError));
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingTextMessageError));
         }
     }
 
@@ -94,9 +92,9 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
             byte[] binMsg = getAggregatedBinMessage(webSocketBinaryMessage, byteArrAggregator);
             callback.complete(ValueCreator.createArrayValue(binMsg));
             connectionInfo.getWebSocketConnection().removeIdleStateHandler();
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IOException e) {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundBinaryError));
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingBinaryMessageError));
         }
     }
 
@@ -124,15 +122,17 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
-        String closeReason = webSocketCloseMessage.getCloseReason();
-        int closeCode = webSocketCloseMessage.getCloseCode();
-        callback.complete(WebSocketUtil
-                .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.WsConnectionClosureError));
         try {
+            int closeCode = webSocketCloseMessage.getCloseCode();
+            String closeReason = webSocketCloseMessage.getCloseReason().equals("") ?
+                    "Connection closed: Status code: " + closeCode :
+                    webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
+            callback.complete(WebSocketUtil
+                    .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.WsConnectionClosureError));
+
             WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
             wsConnection.removeIdleStateHandler();
-            WebSocketResourceDispatcher
-                    .finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
+            WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
                     WebSocketConstants.ErrorCode.WsConnectionClosureError));
@@ -141,9 +141,9 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
-        callback.complete(WebSocketUtil
-                .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.WsGenericError));
         try {
+            callback.complete(WebSocketUtil
+                    .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.WsGenericError));
             connectionInfo.getWebSocketConnection().removeIdleStateHandler();
         } catch (IllegalAccessException e) {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);

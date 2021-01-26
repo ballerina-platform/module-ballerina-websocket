@@ -183,8 +183,8 @@ public class WebSocketConstants {
         WsGenericError("WsGenericError"),
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
-        ReadingInboundTextError("ReadingInboundTextError"),
-        ReadingInboundBinaryError("ReadingInboundBinaryError"),
+        ReadingTextMessageError("ReadingTextMessageError"),
+        ReadingBinaryMessageError("ReadingBinaryMessageError"),
         ReadTimedOutError("ReadTimedOutError");
 
         private String errorCode;

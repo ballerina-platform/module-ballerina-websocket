@@ -19,10 +19,11 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 
 string idleTimeOutError = "";
+string secondReadResp = "";
 listener Listener l34 = new(21056);
 service /onIdleTimeoutService on l34 {
    resource function get .() returns Service|UpgradeError {
-       return new WsServiceSyncError();
+       return new onIdleTimeoutService();
    }
 }
 
@@ -37,6 +38,7 @@ service class onIdleTimeoutService {
   }
 }
 
+// Tests the idle timeout error returned from readTextMessage
 @test:Config {}
 public function testSyncIdleTimeOutError() returns Error? {
    Client wsClient = check new("ws://localhost:21056/onIdleTimeoutService", config = {idleTimeoutInSeconds: 2});
@@ -50,7 +52,13 @@ public function testSyncIdleTimeOutError() returns Error? {
       if (resp1 is Error) {
          idleTimeOutError = resp1.message();
       } else {
-         io:println("1st response received at sync close client :" + resp1);
+         io:println("1st response received at sync idle timeout client :" + resp1);
+      }
+      string|Error resp2 = wsClient->readTextMessage();
+      if (resp2 is Error) {
+         idleTimeOutError = resp2.message();
+      } else {
+         secondReadResp = resp2;
       }
    }
    @strand {
@@ -64,6 +72,7 @@ public function testSyncIdleTimeOutError() returns Error? {
    }
    _ = wait {w1, w2};
    string msg = "Read timed out";
-   test:assertEquals(idleTimeOutError, msg, msg = "");
+   test:assertEquals(idleTimeOutError, msg);
+   test:assertEquals(secondReadResp, "Hi world1");
    runtime:sleep(3);
 }

@@ -18,7 +18,7 @@ import ballerina/test;
 import ballerina/io;
 import ballerina/lang.runtime as runtime;
 
-string corruptedError = "";
+string corruptedFrameError = "";
 listener Listener l33 = new(21055);
 service /onErrorText on l33 {
    resource function get .() returns Service|UpgradeError {
@@ -37,6 +37,7 @@ service class WsServiceSyncError {
   }
 }
 
+// Tests the corrupted frame error returned from readTextMessage
 @test:Config {}
 public function testSyncClientError() returns Error? {
    Client wsClient = check new("ws://localhost:21055/onErrorText", config = {maxFrameSize: 1});
@@ -44,11 +45,11 @@ public function testSyncClientError() returns Error? {
       thread:"any"
    }
    worker w1 {
-      io:println("Reading message starting: sync close client");
+      io:println("Reading message starting: sync error client");
 
       string|Error resp1 = wsClient->readTextMessage();
       if (resp1 is Error) {
-         corruptedError = resp1.message();
+         corruptedFrameError = resp1.message();
       } else {
          io:println("1st response received at sync close client :" + resp1);
       }
@@ -64,6 +65,6 @@ public function testSyncClientError() returns Error? {
    }
    _ = wait {w1, w2};
    string msg = "Max frame length of 1 has been exceeded.";
-   test:assertEquals(corruptedError, msg, msg = "");
+   test:assertEquals(corruptedFrameError, msg);
    runtime:sleep(3);
 }
