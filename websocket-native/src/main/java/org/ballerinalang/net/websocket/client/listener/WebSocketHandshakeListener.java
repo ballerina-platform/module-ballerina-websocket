@@ -41,7 +41,6 @@ import java.util.concurrent.CountDownLatch;
 import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_CONFIG;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ON_OPEN_METADATA;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
-import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
 
 /**
  * The `WebSocketHandshakeListener` implements the `{@link ExtendedHandshakeListener}` interface directly.
@@ -143,9 +142,10 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
     private void setWebSocketOpenConnectionInfo(WebSocketConnection webSocketConnection,
             BObject webSocketConnector,
             BObject webSocketClient, WebSocketService wsService) {
-        this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient,
-                webSocketClient.getType().getName().equals(SYNC_CLIENT));
+        this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient);
         webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
+        webSocketConnector.addNativeData(WebSocketConstants.CLIENT_LISTENER,
+                webSocketClient.getNativeData(WebSocketConstants.CLIENT_LISTENER));
         webSocketClient.set(WebSocketConstants.CLIENT_CONNECTOR_FIELD, webSocketConnector);
     }
 

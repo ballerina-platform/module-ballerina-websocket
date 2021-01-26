@@ -39,7 +39,7 @@ public class WebSocketConstants {
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
     public static final String WEBSOCKET_CALLER = "Caller";
-    public static final String WEBSOCKET_CLIENT = "AsyncClient";
+    public static final String WEBSOCKET_ASYNC_CLIENT = "AsyncClient";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
     public static final String WSS_SCHEME = "wss";
@@ -50,7 +50,7 @@ public class WebSocketConstants {
             PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CALLER;
     public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
     public static final String FULL_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
-            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CLIENT;
+            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_ASYNC_CLIENT;
 
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
@@ -184,7 +184,8 @@ public class WebSocketConstants {
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
         ReadingInboundTextError("ReadingInboundTextError"),
-        ReadingInboundBinaryError("ReadingInboundBinaryError");
+        ReadingInboundBinaryError("ReadingInboundBinaryError"),
+        ReadTimedOutError("ReadTimedOutError");
 
         private String errorCode;
 

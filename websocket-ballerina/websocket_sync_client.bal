@@ -180,7 +180,7 @@ public client class Client {
 }
 
 isolated function externSyncWSInitEndpoint(Client wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
+    'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
     name: "initEndpoint"
 } external;
 

@@ -72,6 +72,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.PROTOCOL_WEBSOCKET_PKG_ID;
+import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_ASYNC_CLIENT;
 
 /**
  * Utility class for WebSocket.
@@ -97,7 +98,7 @@ public class WebSocketUtil {
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
         WebSocketConnectionInfo connectionInfo =
-                new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller, false);
+                new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller);
         connectionManager.addConnection(webSocketConnection.getChannelId(), connectionInfo);
         webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO,
                 connectionInfo);
@@ -144,9 +145,9 @@ public class WebSocketUtil {
     }
 
     private static boolean hasSupportForResiliency(WebSocketConnectionInfo connectionInfo) {
-        return ((connectionInfo.getWebSocketEndpoint().getType().getName().equalsIgnoreCase(WebSocketConstants.
-                WEBSOCKET_CLIENT) && WebSocketUtil.hasRetryContext(connectionInfo.getWebSocketEndpoint())) ||
-                connectionInfo.getWebSocketEndpoint().getType().getName().equalsIgnoreCase(WebSocketConstants.
+        return ((connectionInfo.getWebSocketEndpoint().getType().getName().equalsIgnoreCase(WEBSOCKET_ASYNC_CLIENT)
+                && WebSocketUtil.hasRetryContext(connectionInfo.getWebSocketEndpoint())) || connectionInfo
+                .getWebSocketEndpoint().getType().getName().equalsIgnoreCase(WebSocketConstants.
                         FAILOVER_WEBSOCKET_CLIENT));
     }
 
@@ -340,7 +341,9 @@ public class WebSocketUtil {
      */
     public static void establishWebSocketConnection(WebSocketClientConnector clientConnector,
             BObject webSocketClient, WebSocketService wsService) {
-        boolean readyOnConnect = true;
+        // Async client has to start reading the frames once connected. Hence if the client is Async
+        // we set the readyOnConnect to true.
+        boolean readyOnConnect = webSocketClient.getType().getName().equals(WEBSOCKET_ASYNC_CLIENT);
         ClientHandshakeFuture handshakeFuture = clientConnector.connect();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch, readyOnConnect);

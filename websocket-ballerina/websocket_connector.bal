@@ -129,10 +129,10 @@ isolated function externReady(WebSocketConnector wsConnector) returns Error? = @
 
 isolated function externReadTextMessage(WebSocketConnector wsConnector) returns string|Error =
 @java:Method {
-    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
 } external;
 
 isolated function externReadBinaryMessage(WebSocketConnector wsConnector) returns byte[]|Error =
 @java:Method {
-    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
 } external;
