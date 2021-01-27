@@ -58,7 +58,7 @@ public function testSyncClientClose() returns Error? {
       thread:"any"
    }
    worker w2 {
-      io:println("Waiting till client starts reading text.");
+      io:println("Waiting till close client starts reading text.");
       runtime:sleep(2);
       var resp1 = wsClient->writeTextMessage("Hi world1");
       runtime:sleep(2);

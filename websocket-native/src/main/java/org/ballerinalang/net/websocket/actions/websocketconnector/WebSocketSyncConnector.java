@@ -25,6 +25,8 @@ import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.ballerinalang.net.websocket.WebSocketUtil.findTimeoutInSeconds;
+
 /**
  * Utilities related to websocket synchronous client connector read actions.
  */
@@ -38,7 +40,11 @@ public class WebSocketSyncConnector {
                     .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
             SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
                     .getNativeData(WebSocketConstants.CLIENT_LISTENER);
-            connectionInfo.getWebSocketConnection().addIdleStateHandler(connectorListener.getTimeOut());
+            @SuppressWarnings(WebSocketConstants.UNCHECKED)
+            long idleTimeoutInSeconds = findTimeoutInSeconds(
+                    connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
+                    WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
+            connectionInfo.getWebSocketConnection().addIdleStateHandler(idleTimeoutInSeconds);
             connectorListener.setCallback(callback);
             connectionInfo.getWebSocketConnection().readNextFrame();
         } catch (IllegalAccessException e) {
@@ -55,7 +61,11 @@ public class WebSocketSyncConnector {
                     .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
             SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
                     .getNativeData(WebSocketConstants.CLIENT_LISTENER);
-            connectionInfo.getWebSocketConnection().addIdleStateHandler(connectorListener.getTimeOut());
+            @SuppressWarnings(WebSocketConstants.UNCHECKED)
+            long idleTimeoutInSeconds = findTimeoutInSeconds(
+                    connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
+                    WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
+            connectionInfo.getWebSocketConnection().addIdleStateHandler(idleTimeoutInSeconds);
             connectorListener.setCallback(callback);
             connectionInfo.getWebSocketConnection().readNextFrame();
         } catch (IllegalAccessException e) {

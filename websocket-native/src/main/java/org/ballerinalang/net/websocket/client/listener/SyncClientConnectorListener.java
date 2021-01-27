@@ -43,7 +43,6 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;
-    private long timeOut;
 
     public void setConnectionInfo(WebSocketConnectionInfo connectionInfo) {
         this.connectionInfo = connectionInfo;
@@ -173,13 +172,5 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
 
     public void setCallback(Future callback) {
         this.callback = callback;
-    }
-
-    public long getTimeOut() {
-        return timeOut;
-    }
-
-    public void setTimeOut(long timeOut) {
-        this.timeOut = timeOut;
     }
 }

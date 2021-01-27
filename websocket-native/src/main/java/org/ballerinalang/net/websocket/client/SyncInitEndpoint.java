@@ -35,7 +35,9 @@ import org.ballerinalang.net.websocket.client.listener.SyncClientConnectorListen
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 
+import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_SERVICE_CONFIG;
+import static org.ballerinalang.net.websocket.WebSocketUtil.createErrorByType;
 
 /**
  * Initialize the WebSocket Synchronous Client.
@@ -59,7 +61,6 @@ public class SyncInitEndpoint {
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
             if (wsSyncClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
                 SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
-                syncClientConnectorListener.setTimeOut(clientConnectorConfig.getIdleTimeoutInMillis());
                 wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
             }
             CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -67,6 +68,9 @@ public class SyncInitEndpoint {
             WebSocketUtil.establishWebSocketConnection(clientConnector, wsSyncClient, wsService);
             // Sets the count down latch for the initial connection.
             WebSocketUtil.waitForHandshake(countDownLatch);
+            if (wsSyncClient.getNativeData(CLIENT_CONNECTION_ERROR) != null) {
+                return createErrorByType((Throwable) wsSyncClient.getNativeData(CLIENT_CONNECTION_ERROR));
+            }
         } catch (Exception e) {
             if (e instanceof BError) {
                 return e;

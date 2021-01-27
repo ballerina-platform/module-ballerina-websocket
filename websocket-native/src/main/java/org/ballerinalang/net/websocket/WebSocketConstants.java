@@ -80,6 +80,7 @@ public class WebSocketConstants {
     public static final String COUNT_DOWN_LATCH = "countDownLatch";
     public static final String CLIENT_LISTENER = "clientListener";
     public static final String CLIENT_CONNECTOR = "clientConnector";
+    public static final String CLIENT_CONNECTION_ERROR = "clientConnectorError";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
     public static final BString TARGET_URLS = StringUtils.fromString("targetUrls");

@@ -39,7 +39,7 @@ service /websocket on l14 {
 service class ErrorServer {
   *Service;
    remote isolated function onOpen(Caller caller) {
-       io:println("The Connection ID: " + caller.getConnectionId());
+       io:println("The Connection ID websocket client exceptions test: " + caller.getConnectionId());
    }
 
    remote isolated function onPing(Caller caller, byte[] localData) {

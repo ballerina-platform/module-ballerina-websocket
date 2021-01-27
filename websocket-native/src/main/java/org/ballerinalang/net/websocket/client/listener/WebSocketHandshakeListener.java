@@ -40,6 +40,7 @@ import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.net.http.HttpConstants.CLIENT_ENDPOINT_CONFIG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
 
 /**
@@ -121,6 +122,7 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
         if (response != null) {
             webSocketClient.set(WebSocketConstants.CLIENT_RESPONSE_FIELD, HttpUtil.createResponseStruct(response));
         }
+        webSocketClient.addNativeData(CLIENT_CONNECTION_ERROR, t);
         BObject webSocketConnector = ValueCreator.createObjectValue(ModuleUtils.getWebsocketModule(),
                 WebSocketConstants.WEBSOCKET_CONNECTOR);
         setWebSocketOpenConnectionInfo(null, webSocketConnector, webSocketClient, wsService);
