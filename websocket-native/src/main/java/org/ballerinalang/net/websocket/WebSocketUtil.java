@@ -71,9 +71,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
-import static org.ballerinalang.net.websocket.WebSocketConstants.PROTOCOL_WEBSOCKET_PKG_ID;
-import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_ASYNC_CLIENT;
-
 /**
  * Utility class for WebSocket.
  */
@@ -91,9 +88,9 @@ public class WebSocketUtil {
             WebSocketServerService wsService,
             WebSocketConnectionManager connectionManager) {
         BObject webSocketCaller = ValueCreator
-                .createObjectValue(PROTOCOL_WEBSOCKET_PKG_ID, WebSocketConstants.WEBSOCKET_CALLER);
+                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CALLER);
         BObject webSocketConnector = ValueCreator
-                .createObjectValue(PROTOCOL_WEBSOCKET_PKG_ID, WebSocketConstants.WEBSOCKET_CONNECTOR);
+                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CONNECTOR);
 
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
@@ -232,7 +229,7 @@ public class WebSocketUtil {
             }
         } else if (throwable instanceof SSLException) {
             cause = createErrorCause(throwable.getMessage(), HttpErrorType.SSL_ERROR.getReason(),
-                    PROTOCOL_WEBSOCKET_PKG_ID);
+                    ModuleUtils.getWebsocketModule());
             message = "SSL/TLS Error";
         } else if (throwable instanceof IllegalStateException) {
             if (throwable.getMessage().contains("frame continuation")) {
@@ -596,7 +593,7 @@ public class WebSocketUtil {
     }
 
     public static BError createWebsocketError(String message, WebSocketConstants.ErrorCode errorType) {
-        return ErrorCreator.createDistinctError(errorType.errorCode(), PROTOCOL_WEBSOCKET_PKG_ID,
+        return ErrorCreator.createDistinctError(errorType.errorCode(), ModuleUtils.getWebsocketModule(),
                 StringUtils.fromString(message));
     }
 

@@ -18,13 +18,8 @@
 
 package org.ballerinalang.net.websocket;
 
-import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.async.StrandMetadata;
-import io.ballerina.runtime.api.constants.RuntimeConstants;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
-
-import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
 
 /**
  * Constants of WebSocket.
@@ -34,7 +29,6 @@ public class WebSocketConstants {
     public static final String BALLERINA_ORG = "ballerina";
     public static final String PACKAGE_HTTP = "http";
     public static final String PACKAGE_WEBSOCKET = "websocket";
-    public static final String WEBSOCKET_MODULE_VERSION = "1.1.2";
     public static final String SEPARATOR = ":";
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
@@ -46,11 +40,7 @@ public class WebSocketConstants {
     public static final String WS_SCHEME = "ws";
     public static final String BACK_SLASH = "/";
     public static final String GET = "get";
-    public static final String WEBSOCKET_CALLER_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
-            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_CALLER;
     public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
-    public static final String FULL_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
-            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + WEBSOCKET_ASYNC_CLIENT;
 
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
@@ -96,14 +86,12 @@ public class WebSocketConstants {
     public static final String FAILOVER_CONTEXT = "failoverContext";
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
-    public static final String FULL_FAILOVER_WEBSOCKET_CLIENT_NAME = RuntimeConstants.BALLERINA_PACKAGE_PREFIX +
-            PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_MODULE_VERSION + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
+    public static final String FULL_FAILOVER_WEBSOCKET_CLIENT_NAME =
+            ModuleUtils.getPackageIdentifier() + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
 
     public static final String COLON = ":";
     public static final String PACKAGE = "ballerina";
     public static final String PROTOCOL_WEBSOCKET = "websocket";
-    public static final String PROTOCOL_PACKAGE_WEBSOCKET =
-            PACKAGE + ORG_NAME_SEPARATOR + PROTOCOL_WEBSOCKET + COLON + WEBSOCKET_MODULE_VERSION;
 
     public static final BString COMPRESSION_ENABLED_CONFIG = StringUtils.fromString("webSocketCompressionEnabled");
 
@@ -128,8 +116,6 @@ public class WebSocketConstants {
     public static final int STATUS_CODE_FOR_NO_STATUS_CODE_PRESENT = 1005;
 
     public static final int DEFAULT_MAX_FRAME_SIZE = 65536;
-    public static final Module PROTOCOL_WEBSOCKET_PKG_ID = new Module(RuntimeConstants.BALLERINA_BUILTIN_PKG_PREFIX,
-            "websocket", WEBSOCKET_MODULE_VERSION);
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";
@@ -143,28 +129,6 @@ public class WebSocketConstants {
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
 
     public static final String PARAM_TYPE_STRING = "string";
-
-    // Strand meta data
-    public static final StrandMetadata ON_OPEN_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_OPEN);
-    public static final StrandMetadata ON_TEXT_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION,
-                    RESOURCE_NAME_ON_TEXT_MESSAGE);
-    public static final StrandMetadata ON_BINARY_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION,
-                    RESOURCE_NAME_ON_BINARY_MESSAGE);
-    public static final StrandMetadata ON_PING_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_PING);
-    public static final StrandMetadata ON_PONG_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_PONG);
-    public static final StrandMetadata ON_CLOSE_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_CLOSE);
-    public static final StrandMetadata ON_ERROR_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_ERROR);
-    public static final StrandMetadata ON_TIMEOUT_METADATA = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
-            WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_ON_IDLE_TIMEOUT);
-    public static final StrandMetadata ON_UPGRADE_METADATA =
-            new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET, WEBSOCKET_MODULE_VERSION, RESOURCE_NAME_UPGRADE);
 
     public WebSocketConstants() {
     }
