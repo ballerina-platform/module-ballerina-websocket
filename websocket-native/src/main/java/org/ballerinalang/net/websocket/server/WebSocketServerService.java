@@ -26,11 +26,11 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
+import org.ballerinalang.net.websocket.ModuleUtils;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 
-import static org.ballerinalang.net.websocket.WebSocketConstants.PROTOCOL_PACKAGE_WEBSOCKET;
 
 /**
  * WebSocket service for service dispatching.
@@ -60,8 +60,8 @@ public class WebSocketServerService extends WebSocketService {
     }
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
-        return (BMap<BString, Object>) (service.getType()).getAnnotation(StringUtils
-                .fromString(PROTOCOL_PACKAGE_WEBSOCKET + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
+        return (BMap<BString, Object>) (service.getType()).getAnnotation(StringUtils.fromString(
+                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
     }
 
     public String getName() {

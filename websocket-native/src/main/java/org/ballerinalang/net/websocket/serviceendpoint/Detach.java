@@ -22,15 +22,22 @@ package org.ballerinalang.net.websocket.serviceendpoint;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BObject;
+import org.ballerinalang.net.websocket.ModuleUtils;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketServicesRegistry;
+
+import static org.ballerinalang.net.websocket.WebSocketConstants.SEPARATOR;
+import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_CALLER;
 
 /**
  * Disengage a service from the listener.
  *
  */
 public class Detach extends AbstractWebsocketNativeFunction {
+    public static final String WEBSOCKET_CALLER_NAME =
+            ModuleUtils.getPackageIdentifier() + SEPARATOR + WEBSOCKET_CALLER;
+
     public static Object detach(BObject serviceEndpoint, BObject serviceObj) {
         WebSocketServicesRegistry webSocketServicesRegistry = getWebSocketServicesRegistry(serviceEndpoint);
         Type param;
@@ -38,7 +45,7 @@ public class Detach extends AbstractWebsocketNativeFunction {
         try {
             if (resourceList.length > 0 && (param = resourceList[0].getParameterTypes()[0]) != null) {
                 String callerType = param.getQualifiedName();
-                if (WebSocketConstants.WEBSOCKET_CALLER_NAME.equals(callerType)) {
+                if (WEBSOCKET_CALLER_NAME.equals(callerType)) {
                     return webSocketServicesRegistry.unRegisterService(serviceObj);
                 }
             }
