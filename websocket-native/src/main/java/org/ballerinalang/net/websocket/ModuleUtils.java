@@ -19,8 +19,20 @@ package org.ballerinalang.net.websocket;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
+import io.ballerina.runtime.api.async.StrandMetadata;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
+import static org.ballerinalang.net.websocket.WebSocketConstants.BALLERINA_ORG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.PACKAGE_WEBSOCKET;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CLOSE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_ERROR;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PING;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_PONG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_UPGRADE;
 
 /**
  * This class will hold module related utility functions.
@@ -29,13 +41,40 @@ public class ModuleUtils {
 
     private static Module websocketModule;
     private static String packageIdentifier;
+    private static StrandMetadata onOpenMetaData;
+    private static StrandMetadata onTextMetaData;
+    private static StrandMetadata onBinaryMetaData;
+    private static StrandMetadata onPingMetaData;
+    private static StrandMetadata onPongMetaData;
+    private static StrandMetadata onCloseMetaData;
+    private static StrandMetadata onErrorMetaData;
+    private static StrandMetadata onTimeoutMetaData;
+    private static StrandMetadata onUpgradeMetaData;
 
     private ModuleUtils() {}
 
     public static void setModule(Environment env) {
         websocketModule = env.getCurrentModule();
-        packageIdentifier = WebSocketConstants.PACKAGE + ORG_NAME_SEPARATOR + WebSocketConstants.PROTOCOL_WEBSOCKET +
-               WebSocketConstants.SEPARATOR + websocketModule.getVersion();
+        packageIdentifier = WebSocketConstants.PACKAGE + ORG_NAME_SEPARATOR + WebSocketConstants.PROTOCOL_WEBSOCKET
+                + WebSocketConstants.SEPARATOR + websocketModule.getVersion();
+        onOpenMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_OPEN);
+        onTextMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_TEXT_MESSAGE);
+        onBinaryMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_BINARY_MESSAGE);
+        onPingMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_PING);
+        onPongMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_PONG);
+        onCloseMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_CLOSE);
+        onErrorMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_ERROR);
+        onTimeoutMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_ON_IDLE_TIMEOUT);
+        onUpgradeMetaData = new StrandMetadata(BALLERINA_ORG, PACKAGE_WEBSOCKET,
+                ModuleUtils.getWebsocketModule().getVersion(), RESOURCE_NAME_UPGRADE);
     }
 
     public static Module getWebsocketModule() {
@@ -44,5 +83,41 @@ public class ModuleUtils {
 
     public static String getPackageIdentifier() {
         return packageIdentifier;
+    }
+
+    public static StrandMetadata getOnOpenMetaData() {
+        return onOpenMetaData;
+    }
+
+    public static StrandMetadata getOnTextMetaData() {
+        return onTextMetaData;
+    }
+
+    public static StrandMetadata getOnBinaryMetaData() {
+        return onBinaryMetaData;
+    }
+
+    public static StrandMetadata getOnPingMetaData() {
+        return onPingMetaData;
+    }
+
+    public static StrandMetadata getOnPongMetaData() {
+        return onPongMetaData;
+    }
+
+    public static StrandMetadata getOnCloseMetaData() {
+        return onCloseMetaData;
+    }
+
+    public static StrandMetadata getOnErrorMetaData() {
+        return onErrorMetaData;
+    }
+
+    public static StrandMetadata getOnTimeoutMetaData() {
+        return onTimeoutMetaData;
+    }
+
+    public static StrandMetadata getOnUpgradeMetaData() {
+        return onUpgradeMetaData;
     }
 }
