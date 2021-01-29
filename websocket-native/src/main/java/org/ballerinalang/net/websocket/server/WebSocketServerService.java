@@ -107,19 +107,4 @@ public class WebSocketServerService extends WebSocketService {
     public String getBasePath() {
         return basePath;
     }
-
-    private String findFullWebSocketUpgradePath(String[] basePathArr) {
-        String path = null;
-        if (basePathArr != null) {
-            String basePathVal = String.join("/", basePathArr);
-//            String basePathVal = config.getStringValue(WebSocketConstants.ANNOTATION_ATTR_PATH).getValue();
-            if (!basePathVal.trim().isEmpty()) {
-                path = HttpUtil.sanitizeBasePath(basePathVal);
-            }
-        }
-        if (path == null) {
-            path = "/".concat(getName());
-        }
-        return path;
-    }
 }
