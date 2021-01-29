@@ -58,6 +58,7 @@ import org.ballerinalang.net.websocket.server.WebSocketServerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -320,7 +321,7 @@ public class WebSocketResourceDispatcher {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
                 webSocketConnection.readNextFrame();
             }
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IOException e) {
             WebSocketObservabilityUtil.observeError(connectionInfo,
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY,
