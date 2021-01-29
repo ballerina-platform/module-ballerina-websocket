@@ -21,3 +21,7 @@ public type Service service object {
 # The Websocket upgrade service type
 public type UpgradeService service object {
 };
+
+# The Websocket Sync client service type
+public type ClientService service object {
+};

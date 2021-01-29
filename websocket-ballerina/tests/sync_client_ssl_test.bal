@@ -31,11 +31,11 @@ listener Listener l37 = new(21059, {
 
 service /sslTest on l37 {
    resource function get .(http:Request req) returns Service {
-       return new SyncSslTest();
+       return new SyncSslService();
    }
 }
 
-service class SyncSslTest {
+service class SyncSslService {
   *Service;
   remote isolated function onTextMessage(Caller caller, string data) {
        var returnVal = caller->writeTextMessage(data);
@@ -45,7 +45,7 @@ service class SyncSslTest {
    }
 }
 
-// Tests the Ssl error returned from readTextMessage
+// Tests the successful connection of sync client over SSL
 @test:Config {}
 public function testSyncClientSsl() returns Error? {
    Client wsClient = check new("wss://localhost:21059/sslTest", config = {

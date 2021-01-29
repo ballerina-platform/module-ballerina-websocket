@@ -30,7 +30,7 @@ public client class Client {
     private WebSocketConnector conn = new;
     private string url = "";
     private WebSocketClientConfiguration config = {};
-    private (service object {})? callbackService = ();
+    private ClientService? callbackService = ();
 
     # Initializes the synchronous client when called.
     #
@@ -38,7 +38,7 @@ public client class Client {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of ping, pong, close from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, (service object {})? callbackService = (), WebSocketClientConfiguration? config = ())
+    public isolated function init(string url, ClientService? callbackService = (), WebSocketClientConfiguration? config = ())
                               returns Error? {
         self.url = url;
         self.config = config ?: {};

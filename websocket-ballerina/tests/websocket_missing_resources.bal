@@ -102,11 +102,9 @@ public function testMissingOnBinary() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
    binData = [];
-   byte[] binData = [];
-   expectedData = "";
+   byte[] expBinData = [];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(binData, binData, msg = "Data mismatched");
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
@@ -117,7 +115,6 @@ public function testMissingOnBinary() returns Error? {
 @test:Config {}
 public function testMissingOnIdleTimeout() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
-   expectedData = "";
    runtime:sleep(0.5);
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);

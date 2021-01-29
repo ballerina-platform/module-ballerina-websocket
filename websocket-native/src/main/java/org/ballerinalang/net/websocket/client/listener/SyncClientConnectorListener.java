@@ -156,7 +156,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
         try {
             connectionInfo.getWebSocketConnection().removeIdleStateHandler();
         } catch (IllegalAccessException e) {
-            // Do nothing
+            // Ignore as it is not possible have an Illegal access
         }
     }
 

@@ -23,11 +23,11 @@ listener Listener l36 = new(21058);
 
 service /sslTest on l36 {
    resource function get .(http:Request req) returns Service {
-       return new SyncSslErrorTest();
+       return new SyncSslErrorService();
    }
 }
 
-service class SyncSslErrorTest {
+service class SyncSslErrorService {
   *Service;
   remote isolated function onTextMessage(Caller caller, string data) {
        var returnVal = caller->writeTextMessage(data);

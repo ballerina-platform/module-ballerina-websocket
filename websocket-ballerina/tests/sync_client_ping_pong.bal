@@ -56,6 +56,7 @@ service class WsServiceSyncPingPong {
 }
 
 service class clientPingPongCallbackService {
+    *ClientService;
     remote isolated function onPing(Caller caller, byte[] localData) {
         io:println("On sync client ping");
         var returnVal = caller->pong(localData);
