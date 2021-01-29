@@ -26,7 +26,6 @@ import io.ballerina.runtime.api.values.BString;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
 import org.ballerinalang.net.websocket.WebSocketUtil;
@@ -70,14 +69,12 @@ public class OnUpgradeResourceCallback implements Callback {
 
                 WebSocketConnectionInfo connectionInfo =
                         connectionManager.getConnectionInfo(webSocketHandshaker.getChannelId());
-                WebSocketConnection webSocketConnection = null;
                 try {
-                    webSocketConnection = connectionInfo.getWebSocketConnection();
+                    WebSocketResourceDispatcher.dispatchOnOpen(connectionInfo.getWebSocketConnection(),
+                            connectionInfo.getWebSocketEndpoint(), wsService);
                 } catch (IllegalAccessException e) {
                     // Ignore as it is not possible have an Illegal access
                 }
-                WebSocketResourceDispatcher.dispatchOnOpen(webSocketConnection, connectionInfo.getWebSocketEndpoint(),
-                        wsService);
             }
         }
     }

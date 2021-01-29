@@ -18,7 +18,7 @@
 plugins {
     id 'java'
     id 'checkstyle'
-//    id 'com.github.spotbugs'
+    id 'com.github.spotbugs'
 }
 
 description = 'Ballerina - Websocket Java Utils'
@@ -82,23 +82,23 @@ tasks.withType(Checkstyle) {
 
 checkstyleMain.dependsOn(":build-config:checkstyle:downloadMultipleFiles")
 
-//spotbugsMain {
-//    effort "max"
-//    reportLevel "low"
-//    reportsDir = file("$project.buildDir/reports/spotbugs")
-//    reports {
-//        html.enabled true
-//        text.enabled = true
-//    }
-//    def excludeFile = file('spotbugs-exclude.xml')
-//    if(excludeFile.exists()) {
-//        excludeFilter = excludeFile
-//    }
-//}
+spotbugsMain {
+    effort "max"
+    reportLevel "low"
+    reportsDir = file("$project.buildDir/reports/spotbugs")
+    reports {
+        html.enabled true
+        text.enabled = true
+    }
+    def excludeFile = file('spotbugs-exclude.xml')
+    if(excludeFile.exists()) {
+        excludeFilter = excludeFile
+    }
+}
 
-//spotbugsTest {
-//    enabled = false
-//}
+spotbugsTest {
+    enabled = false
+}
 
 
 compileJava {
