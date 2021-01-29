@@ -46,13 +46,13 @@ public class WebSocketException extends RuntimeException {
 
     public WebSocketException(String message, BError cause, String typeIdName) {
         this.message = message;
-        this.wsError = ErrorCreator.createDistinctError(typeIdName, WebSocketConstants.PROTOCOL_WEBSOCKET_PKG_ID,
+        this.wsError = ErrorCreator.createDistinctError(typeIdName, ModuleUtils.getWebsocketModule(),
                 StringUtils.fromString(message), cause);
     }
 
     public WebSocketException(String message, BMap<BString, Object> details, String typeIdName) {
         this.message = message;
-        this.wsError = ErrorCreator.createDistinctError(typeIdName, WebSocketConstants.PROTOCOL_WEBSOCKET_PKG_ID,
+        this.wsError = ErrorCreator.createDistinctError(typeIdName, ModuleUtils.getWebsocketModule(),
                 StringUtils.fromString(message), details);
     }
 
