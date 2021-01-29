@@ -30,25 +30,25 @@ listener Listener l37 = new(21059, {
             });
 
 service /sslTest on l37 {
-   resource function get .(http:Request req) returns Service {
-       return new SyncSslService();
-   }
+    resource function get .(http:Request req) returns Service {
+        return new SyncSslService();
+    }
 }
 
 service class SyncSslService {
-  *Service;
-  remote isolated function onTextMessage(Caller caller, string data) {
-       var returnVal = caller->writeTextMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
+    *Service;
+    remote isolated function onTextMessage(Caller caller, string data) {
+        var returnVal = caller->writeTextMessage(data);
+        if (returnVal is Error) {
+            panic <error>returnVal;
+        }
+    }
 }
 
 // Tests the successful connection of sync client over SSL
 @test:Config {}
 public function testSyncClientSsl() returns Error? {
-   Client wsClient = check new("wss://localhost:21059/sslTest", config = {
+    Client wsClient = check new("wss://localhost:21059/sslTest", config = {
                        secureSocket: {
                            trustStore: {
                                path: "tests/certsAndKeys/ballerinaTruststore.p12",
@@ -56,37 +56,37 @@ public function testSyncClientSsl() returns Error? {
                            }
                        }
                    });
-   @strand {
-      thread:"any"
-   }
-   worker w1 {
-      io:println("Reading message starting: sync ssl client");
+    @strand {
+        thread:"any"
+    }
+    worker w1 {
+        io:println("Reading message starting: sync ssl client");
 
-      string|Error resp1 = wsClient->readTextMessage();
-      if (resp1 is Error) {
-         io:println("Error creating client");
-         sslString = resp1.message();
-      } else {
-         sslString = resp1;
-         io:println("1st response received at sync Ssl client :" + resp1);
-      }
-   }
-   @strand {
-      thread:"any"
-   }
-   worker w2 {
-      io:println("Waiting till SSL client starts reading text.");
-      runtime:sleep(2);
-      var resp1 = wsClient->writeTextMessage("Hi world1");
-      if (resp1 is Error) {
-         io:println("Error occured when sending the text to ssl server");
-      } else {
-         io:println("Succesfully sent frame to ssl service");
-      }
-      runtime:sleep(2);
-   }
-   _ = wait {w1, w2};
-   string msg = "Hi world1";
-   test:assertEquals(sslString, msg);
-   runtime:sleep(3);
+        string|Error resp1 = wsClient->readTextMessage();
+        if (resp1 is Error) {
+            io:println("Error creating client");
+            sslString = resp1.message();
+        } else {
+            sslString = resp1;
+            io:println("1st response received at sync Ssl client :" + resp1);
+        }
+    }
+    @strand {
+        thread:"any"
+    }
+    worker w2 {
+        io:println("Waiting till SSL client starts reading text.");
+        runtime:sleep(2);
+        var resp1 = wsClient->writeTextMessage("Hi world1");
+        if (resp1 is Error) {
+            io:println("Error occured when sending the text to ssl server");
+        } else {
+            io:println("Succesfully sent frame to ssl service");
+        }
+        runtime:sleep(2);
+    }
+    _ = wait {w1, w2};
+    string msg = "Hi world1";
+    test:assertEquals(sslString, msg);
+    runtime:sleep(3);
 }

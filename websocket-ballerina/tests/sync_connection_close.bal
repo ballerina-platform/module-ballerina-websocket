@@ -27,44 +27,44 @@ service /onCloseText on l32 {
 }
 
 service class WsServiceSyncClose {
-  *Service;
-  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->close(statusCode = 1000, reason = "Close the connection");
-  }
+    *Service;
+    remote isolated function onTextMessage(Caller caller, string data) returns Error? {
+        check caller->close(statusCode = 1000, reason = "Close the connection");
+    }
 
-  remote isolated function onClose(Caller caller, string data) returns Error? {
+    remote isolated function onClose(Caller caller, string data) returns Error? {
         check caller->writeTextMessage(data);
-  }
+    }
 }
 
 // Tests the connection close in readTextMessage in synchronous client
 @test:Config {}
 public function testSyncClientClose() returns Error? {
-   Client wsClient = check new("ws://localhost:21002/onCloseText", config = {idleTimeoutInSeconds: 60});
-   @strand {
-      thread:"any"
-   }
-   worker w1 {
-      io:println("Reading message starting: sync close client");
+    Client wsClient = check new("ws://localhost:21002/onCloseText", config = {idleTimeoutInSeconds: 60});
+    @strand {
+        thread:"any"
+    }
+    worker w1 {
+        io:println("Reading message starting: sync close client");
 
-      string|Error resp1 = wsClient->readTextMessage();
-      if (resp1 is Error) {
-         closeError = resp1.message();
-      } else {
-         io:println("1st response received at sync close client :" + resp1);
-      }
-   }
-   @strand {
-      thread:"any"
-   }
-   worker w2 {
-      io:println("Waiting till close client starts reading text.");
-      runtime:sleep(2);
-      var resp1 = wsClient->writeTextMessage("Hi world1");
-      runtime:sleep(2);
-   }
-   _ = wait {w1, w2};
-   string msg = "Close the connection: Status code: 1000";
-   test:assertEquals(closeError, msg, msg = "");
-   runtime:sleep(3);
+        string|Error resp1 = wsClient->readTextMessage();
+        if (resp1 is Error) {
+            closeError = resp1.message();
+        } else {
+            io:println("1st response received at sync close client :" + resp1);
+        }
+    }
+    @strand {
+        thread:"any"
+    }
+    worker w2 {
+        io:println("Waiting till close client starts reading text.");
+        runtime:sleep(2);
+        var resp1 = wsClient->writeTextMessage("Hi world1");
+        runtime:sleep(2);
+    }
+    _ = wait {w1, w2};
+    string msg = "Close the connection: Status code: 1000";
+    test:assertEquals(closeError, msg, msg = "");
+    runtime:sleep(3);
 }

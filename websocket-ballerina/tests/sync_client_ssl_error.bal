@@ -22,25 +22,25 @@ string sslErrString = "";
 listener Listener l36 = new(21058);
 
 service /sslTest on l36 {
-   resource function get .(http:Request req) returns Service {
-       return new SyncSslErrorService();
-   }
+    resource function get .(http:Request req) returns Service {
+        return new SyncSslErrorService();
+    }
 }
 
 service class SyncSslErrorService {
-  *Service;
-  remote isolated function onTextMessage(Caller caller, string data) {
-       var returnVal = caller->writeTextMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
+    *Service;
+    remote isolated function onTextMessage(Caller caller, string data) {
+        var returnVal = caller->writeTextMessage(data);
+        if (returnVal is Error) {
+            panic <error>returnVal;
+        }
+    }
 }
 
 // Tests the Ssl error returned when creating the sync client
 @test:Config {}
 public function testSyncClientSslError() {
-   Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
+    Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
                        secureSocket: {
                            trustStore: {
                                path: "tests/certsAndKeys/ballerinaTruststore.p12",
@@ -48,9 +48,9 @@ public function testSyncClientSslError() {
                            }
                        }
                    });
-   if (wsClient is Error) {
-      sslErrString = wsClient.message();
-   }
-   test:assertEquals(sslErrString, "GenericError: SSL/TLS Error");
-   runtime:sleep(3);
+    if (wsClient is Error) {
+        sslErrString = wsClient.message();
+    }
+    test:assertEquals(sslErrString, "GenericError: SSL/TLS Error");
+    runtime:sleep(3);
 }

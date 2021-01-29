@@ -21,38 +21,38 @@ import ballerina/lang.runtime as runtime;
 string pingPongMsg = "";
 listener Listener l35 = new(21057);
 service /pingpong on l35 {
-   resource function get .() returns Service|UpgradeError {
-       return new WsServiceSyncPingPong();
-   }
+    resource function get .() returns Service|UpgradeError {
+        return new WsServiceSyncPingPong();
+    }
 }
 
 service class WsServiceSyncPingPong {
-  *Service;
-  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      io:println("On ping pong server text");
-      byte[] pingData = [5, 24, 56, 243];
-      check caller->ping(pingData);
-  }
+    *Service;
+    remote isolated function onTextMessage(Caller caller, string data) returns Error? {
+        io:println("On ping pong server text");
+        byte[] pingData = [5, 24, 56, 243];
+        check caller->ping(pingData);
+    }
 
-  remote isolated function onPing(Caller caller, byte[] localData) {
-      io:println("On server ping");
-      var returnVal = caller->pong(localData);
-      if (returnVal is Error) {
-          panic <error>returnVal;
-      }
-  }
+    remote isolated function onPing(Caller caller, byte[] localData) {
+        io:println("On server ping");
+        var returnVal = caller->pong(localData);
+        if (returnVal is Error) {
+            panic <error>returnVal;
+        }
+    }
 
-  remote isolated function onPong(Caller caller, byte[] localData) {
-      io:println("On server pong");
-      var returnVal = caller->writeTextMessage("pong received");
-      if (returnVal is Error) {
-         panic <error>returnVal;
-      }
-  }
+    remote isolated function onPong(Caller caller, byte[] localData) {
+        io:println("On server pong");
+        var returnVal = caller->writeTextMessage("pong received");
+        if (returnVal is Error) {
+            panic <error>returnVal;
+        }
+    }
 
-  remote isolated function onClose(Caller caller, string data) returns Error? {
+    remote isolated function onClose(Caller caller, string data) returns Error? {
         check caller->writeTextMessage(data);
-  }
+    }
 }
 
 service class clientPingPongCallbackService {
@@ -78,31 +78,31 @@ service class clientPingPongCallbackService {
 // Ping messages are dispatched to the registered callback service.
 @test:Config {}
 public function testSyncClientPingPong() returns Error? {
-   Client wsClient = check new("ws://localhost:21057/pingpong", new clientPingPongCallbackService());
-   @strand {
-      thread:"any"
-   }
-   worker w1 {
-      io:println("Reading message starting: sync ping pong client");
+    Client wsClient = check new("ws://localhost:21057/pingpong", new clientPingPongCallbackService());
+    @strand {
+        thread:"any"
+    }
+    worker w1 {
+        io:println("Reading message starting: sync ping pong client");
 
-      string|Error resp1 = wsClient->readTextMessage();
-      if (resp1 is Error) {
-         pingPongMsg = resp1.message();
-      } else {
-         pingPongMsg = resp1;
-      }
-   }
-   @strand {
-      thread:"any"
-   }
-   worker w2 {
-      io:println("Waiting till ping pong client starts reading text.");
-      runtime:sleep(2);
-      var resp1 = wsClient->writeTextMessage("Hi world1");
-      runtime:sleep(2);
-   }
-   _ = wait {w1, w2};
-   string msg = "pong received";
-   test:assertEquals(pingPongMsg, msg, msg = "");
-   runtime:sleep(3);
+        string|Error resp1 = wsClient->readTextMessage();
+        if (resp1 is Error) {
+            pingPongMsg = resp1.message();
+        } else {
+            pingPongMsg = resp1;
+        }
+    }
+    @strand {
+        thread:"any"
+    }
+    worker w2 {
+        io:println("Waiting till ping pong client starts reading text.");
+        runtime:sleep(2);
+        var resp1 = wsClient->writeTextMessage("Hi world1");
+        runtime:sleep(2);
+    }
+    _ = wait {w1, w2};
+    string msg = "pong received";
+    test:assertEquals(pingPongMsg, msg, msg = "");
+    runtime:sleep(3);
 }
