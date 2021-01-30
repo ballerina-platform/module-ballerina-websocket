@@ -130,6 +130,11 @@ public class WebSocketConstants {
 
     public static final String PARAM_TYPE_STRING = "string";
 
+    public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
+    public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";
+    public static final String WSS_ENDPOINT_STOPPED = "[ballerina/websocket] stopped WSS listener ";
+    public static final String WS_ENDPOINT_STOPPED = "[ballerina/websocket] stopped WS listener ";
+
     public WebSocketConstants() {
     }
 
