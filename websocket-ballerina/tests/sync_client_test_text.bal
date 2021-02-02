@@ -40,7 +40,7 @@ service class WsServiceSync {
 // Tests the readTextMessage in synchronous client
 @test:Config {}
 public function testSyncClient() returns Error? {
-   Client wsClient = check new("ws://localhost:21000/onTextString", config = {idleTimeoutInSeconds: 60});
+   Client wsClient = check new("ws://localhost:21000/onTextString");
    @strand {
       thread:"any"
    }

@@ -90,6 +90,7 @@ public class WebSocketConstants {
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final String FULL_FAILOVER_WEBSOCKET_CLIENT_NAME =
             ModuleUtils.getPackageIdentifier() + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
+    public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
 
     public static final String COLON = ":";
     public static final String PACKAGE = "ballerina";

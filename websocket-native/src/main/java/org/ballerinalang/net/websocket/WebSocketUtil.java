@@ -504,7 +504,7 @@ public class WebSocketUtil {
                 clientEndpointConfig.getBooleanValue(WebSocketConstants.COMPRESSION_ENABLED_CONFIG));
     }
 
-    private static Map<String, String> getCustomHeaders(BMap<BString, Object> headers) {
+    public static Map<String, String> getCustomHeaders(BMap<BString, Object> headers) {
         Map<String, String> customHeaders = new HashMap<>();
         headers.entrySet().forEach(
                 entry -> customHeaders.put(entry.getKey().getValue(), headers.get(entry.getKey()).toString())

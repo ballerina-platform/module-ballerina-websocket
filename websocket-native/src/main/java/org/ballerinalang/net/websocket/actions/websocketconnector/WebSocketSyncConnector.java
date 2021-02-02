@@ -50,14 +50,10 @@ public class WebSocketSyncConnector {
         SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
                 .getNativeData(WebSocketConstants.CLIENT_LISTENER);
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        long connIdleTimeoutInSeconds = findTimeoutInSeconds(
-                connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
-                WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
         long readTimeoutInSeconds = findTimeoutInSeconds(
                 connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
                 WebSocketConstants.ANNOTATION_ATTR_READ_IDLE_TIMEOUT, 0);
-        connectionInfo.getWebSocketConnection().addReadIdleStateHandler(readTimeoutInSeconds, connIdleTimeoutInSeconds);
+        connectionInfo.getWebSocketConnection().addReadIdleStateHandler(readTimeoutInSeconds);
         connectorListener.setCallback(callback);
         connectionInfo.getWebSocketConnection().readNextFrame();
     }

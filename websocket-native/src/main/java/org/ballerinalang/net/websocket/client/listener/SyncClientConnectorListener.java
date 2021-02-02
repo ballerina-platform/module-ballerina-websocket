@@ -166,7 +166,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
         try {
             WebSocketUtil.setListenerOpenField(connectionInfo);
         } catch (IllegalAccessException e) {
-            // Ignore as it is not possible have an Illegal access
+            // Ignore as at this point connection closure error is returned to the user
         }
     }
 

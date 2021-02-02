@@ -38,6 +38,7 @@ import java.util.concurrent.CountDownLatch;
 import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_SERVICE_CONFIG;
 import static org.ballerinalang.net.websocket.WebSocketUtil.createErrorByType;
+import static org.ballerinalang.net.websocket.WebSocketUtil.findMaxFrameSize;
 
 /**
  * Initialize the WebSocket Synchronous Client.
@@ -55,7 +56,7 @@ public class SyncInitEndpoint {
             HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
             WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
             String scheme = URI.create(remoteUrl).getScheme();
-            WebSocketUtil.populateClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
+            populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
             WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
             wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
@@ -79,6 +80,31 @@ public class SyncInitEndpoint {
                     null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
         }
         return null;
+    }
+
+    private static void populateSyncClientConnectorConfig(BMap<BString, Object> clientEndpointConfig,
+            WebSocketClientConnectorConfig clientConnectorConfig,
+            String scheme) {
+        clientConnectorConfig.setAutoRead(false); // Frames should be read only when client starts reading
+        clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
+        @SuppressWarnings(WebSocketConstants.UNCHECKED)
+        BMap<BString, Object> headerValues = (BMap<BString, Object>) clientEndpointConfig
+                .getMapValue(WebSocketConstants.CUSTOM_HEADERS);
+        if (headerValues != null) {
+            clientConnectorConfig.addHeaders(WebSocketUtil.getCustomHeaders(headerValues));
+        }
+
+        clientConnectorConfig.setMaxFrameSize(findMaxFrameSize(clientEndpointConfig));
+
+        BMap<BString, Object> secureSocket = (BMap<BString, Object>) clientEndpointConfig
+                .getMapValue(WebSocketConstants.ENDPOINT_CONFIG_SECURE_SOCKET);
+        if (secureSocket != null) {
+            HttpUtil.populateSSLConfiguration(clientConnectorConfig, secureSocket);
+        } else if (scheme.equals(WebSocketConstants.WSS_SCHEME)) {
+            clientConnectorConfig.useJavaDefaults();
+        }
+        clientConnectorConfig.setWebSocketCompressionEnabled(
+                clientEndpointConfig.getBooleanValue(WebSocketConstants.COMPRESSION_ENABLED_CONFIG));
     }
 
     private SyncInitEndpoint() {
