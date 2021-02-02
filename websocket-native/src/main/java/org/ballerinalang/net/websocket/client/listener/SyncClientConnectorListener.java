@@ -59,10 +59,10 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
             boolean finalFragment = webSocketTextMessage.isFinalFragment();
             BString txtMsg = getAggregatedTextMessage(webSocketTextMessage, stringAggregator, finalFragment);
             callback.complete(txtMsg);
-            connectionInfo.getWebSocketConnection().removeIdleStateHandler();
+            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingTextMessageError));
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError));
         }
     }
 
@@ -90,10 +90,10 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
                     .createIfNullAndGetByteArrAggregator();
             byte[] binMsg = getAggregatedBinMessage(webSocketBinaryMessage, byteArrAggregator);
             callback.complete(ValueCreator.createArrayValue(binMsg));
-            connectionInfo.getWebSocketConnection().removeIdleStateHandler();
+            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException | IOException e) {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingBinaryMessageError));
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError));
         }
     }
 
@@ -130,7 +130,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
                     .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.WsConnectionClosureError));
 
             WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
-            wsConnection.removeIdleStateHandler();
+            wsConnection.removeReadIdleStateHandler();
             WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
@@ -143,7 +143,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
         try {
             callback.complete(WebSocketUtil
                     .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.WsGenericError));
-            connectionInfo.getWebSocketConnection().removeIdleStateHandler();
+            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
         }
@@ -154,7 +154,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
         callback.complete(
                 WebSocketUtil.createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
         try {
-            connectionInfo.getWebSocketConnection().removeIdleStateHandler();
+            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             // Ignore as it is not possible have an Illegal access
         }

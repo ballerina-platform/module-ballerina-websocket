@@ -36,41 +36,39 @@ public class WebSocketSyncConnector {
     public static Object externReadTextMessage(Environment env, BObject wsConnection) {
         final Future callback = env.markAsync();
         try {
-            WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
-                    .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-            SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
-                    .getNativeData(WebSocketConstants.CLIENT_LISTENER);
-            @SuppressWarnings(WebSocketConstants.UNCHECKED)
-            long idleTimeoutInSeconds = findTimeoutInSeconds(
-                    connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
-                    WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
-            connectionInfo.getWebSocketConnection().addIdleStateHandler(idleTimeoutInSeconds);
-            connectorListener.setCallback(callback);
-            connectionInfo.getWebSocketConnection().readNextFrame();
+            readContentFromConnection(wsConnection, callback);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingTextMessageError);
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError);
         }
         return null;
+    }
+
+    private static void readContentFromConnection(BObject wsConnection, Future callback) throws IllegalAccessException {
+        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
+                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
+        SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
+                .getNativeData(WebSocketConstants.CLIENT_LISTENER);
+        @SuppressWarnings(WebSocketConstants.UNCHECKED)
+        long connIdleTimeoutInSeconds = findTimeoutInSeconds(
+                connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
+                WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
+        @SuppressWarnings(WebSocketConstants.UNCHECKED)
+        long readTimeoutInSeconds = findTimeoutInSeconds(
+                connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
+                WebSocketConstants.ANNOTATION_ATTR_READ_IDLE_TIMEOUT, 0);
+        connectionInfo.getWebSocketConnection().addReadIdleStateHandler(readTimeoutInSeconds, connIdleTimeoutInSeconds);
+        connectorListener.setCallback(callback);
+        connectionInfo.getWebSocketConnection().readNextFrame();
     }
 
     public static Object externReadBinaryMessage(Environment env, BObject wsConnection) {
         final Future callback = env.markAsync();
         try {
-            WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
-                    .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-            SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
-                    .getNativeData(WebSocketConstants.CLIENT_LISTENER);
-            @SuppressWarnings(WebSocketConstants.UNCHECKED)
-            long idleTimeoutInSeconds = findTimeoutInSeconds(
-                    connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
-                    WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
-            connectionInfo.getWebSocketConnection().addIdleStateHandler(idleTimeoutInSeconds);
-            connectorListener.setCallback(callback);
-            connectionInfo.getWebSocketConnection().readNextFrame();
+            readContentFromConnection(wsConnection, callback);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingBinaryMessageError);
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError);
         }
         return null;
     }

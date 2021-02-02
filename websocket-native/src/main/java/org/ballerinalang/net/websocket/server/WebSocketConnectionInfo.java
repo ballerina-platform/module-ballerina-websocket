@@ -62,7 +62,7 @@ public class WebSocketConnectionInfo {
         if (webSocketConnection != null) {
             return webSocketConnection;
         } else {
-            throw new IllegalAccessException(WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE);
+            throw new IllegalAccessException(WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE);
         }
     }
 

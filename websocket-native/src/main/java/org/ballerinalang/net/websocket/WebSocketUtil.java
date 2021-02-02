@@ -240,10 +240,10 @@ public class WebSocketUtil {
                 errorCode = WebSocketConstants.ErrorCode.WsConnectionClosureError.errorCode();
             }
         } else if (throwable instanceof IllegalAccessException &&
-                throwable.getMessage().equals(WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE)) {
+                throwable.getMessage().equals(WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE)) {
             errorCode = WebSocketConstants.ErrorCode.WsConnectionError.errorCode();
             if (throwable.getMessage() == null) {
-                message = WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE;
+                message = WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE;
             }
         } else if (throwable instanceof TooLongFrameException) {
             errorCode = WebSocketConstants.ErrorCode.WsPayloadTooBigError.errorCode();

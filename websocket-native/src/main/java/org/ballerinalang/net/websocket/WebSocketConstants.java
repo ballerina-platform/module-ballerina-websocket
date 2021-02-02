@@ -46,6 +46,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeoutInSeconds");
+    public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeoutInSeconds");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
@@ -120,8 +121,7 @@ public class WebSocketConstants {
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";
-    public static final String THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE =
-            "The WebSocket connection has not been made";
+    public static final String WEBSOCKET_CONNECTION_FAILURE = "WebSocket connection failure";
 
     public static final String WS_SERVICE_REGISTRY = "WS_SERVICE_REGISTRY";
     public static final BString SERVICE_ENDPOINT_CONFIG = StringUtils.fromString("config");
@@ -148,8 +148,6 @@ public class WebSocketConstants {
         WsGenericError("WsGenericError"),
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
-        ReadingTextMessageError("ReadingTextMessageError"),
-        ReadingBinaryMessageError("ReadingBinaryMessageError"),
         ReadTimedOutError("ReadTimedOutError");
 
         private String errorCode;
