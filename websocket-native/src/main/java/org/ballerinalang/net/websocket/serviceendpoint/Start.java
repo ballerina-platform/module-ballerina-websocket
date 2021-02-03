@@ -19,10 +19,10 @@
 package org.ballerinalang.net.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.values.BObject;
-import org.ballerinalang.net.http.HttpConnectorPortBindingListener;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.transport.contract.ServerConnector;
 import org.ballerinalang.net.transport.contract.ServerConnectorFuture;
+import org.ballerinalang.net.websocket.WebSocketConnectorPortBindingListener;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketServerListener;
@@ -44,14 +44,10 @@ public class Start extends AbstractWebsocketNativeFunction {
     private static Object startServerConnector(BObject serviceEndpoint) {
         ServerConnector serverConnector = getServerConnector(serviceEndpoint);
         ServerConnectorFuture serverConnectorFuture = serverConnector.start();
-        //        BallerinaHTTPConnectorListener httpListener =
-        //                new BallerinaHTTPConnectorListener(getHttpServicesRegistry(serviceEndpoint),
-        //                        serviceEndpoint.getMapValue(SERVICE_ENDPOINT_CONFIG));
         WebSocketServerListener wsListener =
                 new WebSocketServerListener(getWebSocketServicesRegistry(serviceEndpoint),
                         serviceEndpoint.getMapValue(SERVICE_ENDPOINT_CONFIG));
-        HttpConnectorPortBindingListener portBindingListener = new HttpConnectorPortBindingListener();
-        //        serverConnectorFuture.setHttpConnectorListener(httpListener);
+        WebSocketConnectorPortBindingListener portBindingListener = new WebSocketConnectorPortBindingListener();
         serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         serverConnectorFuture.setPortBindingEventListener(portBindingListener);
 
