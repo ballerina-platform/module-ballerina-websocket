@@ -24,7 +24,6 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.netty.channel.ChannelFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
@@ -137,7 +136,6 @@ public class WebSocketConnector {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {
-            WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
             SynchronousQueue<WebSocketTextMessage> msgQueue = connectionInfo.getTxtMsgQueue();
@@ -151,7 +149,7 @@ public class WebSocketConnector {
                     return txtMsg;
                 }
             }
-        } catch (InterruptedException | IllegalAccessException e) {
+        } catch (InterruptedException e) {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
         }
@@ -161,7 +159,6 @@ public class WebSocketConnector {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         try {
-            WebSocketConnection wsClientConnection = connectionInfo.getWebSocketConnection();
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
             SynchronousQueue<WebSocketBinaryMessage> binMsgQueue = connectionInfo.getBinMsgQueue();
@@ -175,7 +172,7 @@ public class WebSocketConnector {
                     return ValueCreator.createArrayValue(binMsg);
                 }
             }
-        } catch (InterruptedException | IllegalAccessException | IOException e) {
+        } catch (InterruptedException | IOException e) {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ReadingInboundTextError);
         }
