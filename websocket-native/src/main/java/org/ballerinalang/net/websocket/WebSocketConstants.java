@@ -152,6 +152,7 @@ public class WebSocketConstants {
         WsGenericError("WsGenericError"),
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
+        HandshakeTimedOut("HandshakeTimedOut"),
         ReadingInboundTextError("ReadingInboundTextError"),
         ReadingInboundBinaryError("ReadingInboundBinaryError");
 

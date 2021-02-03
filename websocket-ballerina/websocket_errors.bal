@@ -47,7 +47,10 @@ public type ReadingInboundBinaryError distinct error;
 # Raised when the client creation fails
 public type WsGenericClientError distinct error;
 
+# Raised when the initial WebSocket handshake timed out
+public type HandshakeTimedOut distinct error;
+
 # The union of all the WebSocket related errors
 public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
 WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|ReadingInboundTextError|
-ReadingInboundBinaryError|WsGenericClientError;
+ReadingInboundBinaryError|WsGenericClientError|HandshakeTimedOut;
