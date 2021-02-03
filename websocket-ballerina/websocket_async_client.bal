@@ -218,6 +218,7 @@ public type WebSocketClientConfiguration record {|
 # + customHeaders - Custom headers, which should be sent to the server
 # + idleTimeoutInSeconds - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
 #                          of the client service will be triggered
+# + readTimeoutInSeconds - Read timeout of the client. This is applicable only for the Sync client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
@@ -230,6 +231,7 @@ public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     int idleTimeoutInSeconds = -1;
+    int readTimeoutInSeconds = -1;
     http:ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 0;
     boolean webSocketCompressionEnabled = true;

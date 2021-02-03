@@ -31,7 +31,7 @@ public function testClientEndpointFailureInResource() returns Error? {
    AsyncClient wsClientEp = check new ("ws://localhost:21010/websocketxyz", new errorHandlingService());
    var err = wsClientEp->writeTextMessage("text");
    if (err is Error) {
-       test:assertEquals(err.message(), "ConnectionError: The WebSocket connection has not been made");
+       test:assertEquals(err.message(), "ConnectionError: WebSocket connection failure");
    } else {
        test:assertFail("Couldn't find the expected output");
    }

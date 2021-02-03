@@ -39,6 +39,7 @@ service class WsServiceSyncBytes {
   }
 }
 
+// Tests the readBinaryMessage in synchronous client
 @test:Config {}
 public function testSyncClientByteArray() returns Error? {
    Client wsClient = check new("ws://localhost:21053/onTextBytes");

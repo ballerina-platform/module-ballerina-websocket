@@ -38,16 +38,13 @@ public type WsGenericError distinct error;
 # Raised when the websocket upgrade is not accepted
 public type UpgradeError distinct error;
 
-# Raised when the reading the text messages have failed
-public type ReadingInboundTextError distinct error;
-
-# Raised when the reading the binary messages have failed
-public type ReadingInboundBinaryError distinct error;
-
 # Raised when the client creation fails
 public type WsGenericClientError distinct error;
 
+# Raised when the client creation fails
+public type ReadTimedOutError distinct error;
+
 # The union of all the WebSocket related errors
 public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
-WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|ReadingInboundTextError|
-ReadingInboundBinaryError|WsGenericClientError;
+WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|
+WsGenericClientError|ReadTimedOutError;
