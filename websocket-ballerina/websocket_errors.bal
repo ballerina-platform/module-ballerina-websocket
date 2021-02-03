@@ -49,5 +49,5 @@ public type ReadTimedOutError distinct error;
 
 # The union of all the WebSocket related errors
 public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
-WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|ReadingInboundTextError|
-ReadingInboundBinaryError|WsGenericClientError|ReadTimedOutError|HandshakeTimedOut;
+WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|
+WsGenericClientError|ReadTimedOutError|HandshakeTimedOut;
