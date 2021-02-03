@@ -154,6 +154,7 @@ public class WebSocketConstants {
         WsGenericError("WsGenericError"),
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
+        HandshakeTimedOut("HandshakeTimedOut"),
         ReadTimedOutError("ReadTimedOutError");
 
         private String errorCode;
