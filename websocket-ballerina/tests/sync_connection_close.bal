@@ -66,5 +66,4 @@ public function testSyncClientClose() returns Error? {
     _ = wait {w1, w2};
     string msg = "Close the connection: Status code: 1000";
     test:assertEquals(closeError, msg, msg = "");
-    runtime:sleep(3);
 }

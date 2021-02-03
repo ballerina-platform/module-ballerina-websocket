@@ -104,5 +104,4 @@ public function testSyncClientPingPong() returns Error? {
     _ = wait {w1, w2};
     string msg = "pong received";
     test:assertEquals(pingPongMsg, msg, msg = "");
-    runtime:sleep(3);
 }

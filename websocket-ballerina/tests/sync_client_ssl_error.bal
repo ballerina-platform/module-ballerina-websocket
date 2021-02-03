@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
@@ -52,5 +51,4 @@ public function testSyncClientSslError() {
         sslErrString = wsClient.message();
     }
     test:assertEquals(sslErrString, "GenericError: SSL/TLS Error");
-    runtime:sleep(3);
 }

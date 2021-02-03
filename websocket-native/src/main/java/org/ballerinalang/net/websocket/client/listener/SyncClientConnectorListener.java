@@ -151,9 +151,9 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
 
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
-        callback.complete(
-                WebSocketUtil.createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
         try {
+            callback.complete(WebSocketUtil
+                    .createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
             connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             // Ignore as it is not possible have an Illegal access

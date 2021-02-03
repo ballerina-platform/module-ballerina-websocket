@@ -75,5 +75,4 @@ public function testSyncIdleTimeOutError() returns Error? {
     string msg = "Read timed out";
     test:assertEquals(idleTimeOutError, msg);
     test:assertEquals(secondReadResp, "Hi world1");
-    runtime:sleep(3);
 }

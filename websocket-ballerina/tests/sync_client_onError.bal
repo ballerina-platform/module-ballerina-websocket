@@ -66,5 +66,4 @@ public function testSyncClientError() returns Error? {
     _ = wait {w1, w2};
     string msg = "Max frame length of 1 has been exceeded.";
     test:assertEquals(corruptedFrameError, msg);
-    runtime:sleep(3);
 }

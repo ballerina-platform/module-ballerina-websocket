@@ -88,5 +88,4 @@ public function testSyncClientSsl() returns Error? {
     _ = wait {w1, w2};
     string msg = "Hi world1";
     test:assertEquals(sslString, msg);
-    runtime:sleep(3);
 }
