@@ -19,7 +19,7 @@ import ballerina/test;
 import ballerina/http;
 
 string expectedData = "";
-byte[] expectedBinData = [];
+byte[] binData = [];
 byte[] expectedPingBinaryData = [];
 listener Listener l17 = new(21005);
 @ServiceConfig {
@@ -58,7 +58,7 @@ service class callbackService {
    }
 
    remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       expectedBinData = <@untainted>data;
+       binData = <@untainted>data;
    }
 
    remote function onPing(Caller wsEp, byte[] data) {
@@ -77,7 +77,7 @@ public function testMissingOnText() returns Error? {
    test:assertEquals(expectedData, "", msg = "Data mismatched");
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
+   test:assertEquals(binData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
 
@@ -86,13 +86,13 @@ public function testMissingOnText() returns Error? {
 public function testMissingOnPong() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21005/onlyOnBinary", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
-   expectedBinData = [];
+   binData = [];
    check wsClient->pong(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(expectedPingBinaryData, expectedBinData, msg = "Data mismatched");
+   test:assertEquals(expectedPingBinaryData, binData, msg = "Data mismatched");
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
+   test:assertEquals(binData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(timeoutInSeconds = 0);
 }
 
@@ -101,12 +101,10 @@ public function testMissingOnPong() returns Error? {
 public function testMissingOnBinary() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
    byte[] binaryData = [5, 24, 56, 243];
-   expectedBinData = [];
-   byte[] expectedBinData = [];
-   expectedData = "";
+   binData = [];
+   byte[] expBinData = [];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(expectedBinData, expectedBinData, msg = "Data mismatched");
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
@@ -117,7 +115,6 @@ public function testMissingOnBinary() returns Error? {
 @test:Config {}
 public function testMissingOnIdleTimeout() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
-   expectedData = "";
    runtime:sleep(0.5);
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);

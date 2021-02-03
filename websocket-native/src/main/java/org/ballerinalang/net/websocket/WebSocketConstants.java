@@ -33,7 +33,7 @@ public class WebSocketConstants {
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
     public static final String WEBSOCKET_CALLER = "Caller";
-    public static final String WEBSOCKET_CLIENT = "AsyncClient";
+    public static final String WEBSOCKET_ASYNC_CLIENT = "AsyncClient";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
     public static final String WSS_SCHEME = "wss";
@@ -46,6 +46,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeoutInSeconds");
+    public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeoutInSeconds");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
@@ -80,6 +81,7 @@ public class WebSocketConstants {
     public static final String COUNT_DOWN_LATCH = "countDownLatch";
     public static final String CLIENT_LISTENER = "clientListener";
     public static final String CLIENT_CONNECTOR = "clientConnector";
+    public static final String CLIENT_CONNECTION_ERROR = "clientConnectorError";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
     public static final BString TARGET_URLS = StringUtils.fromString("targetUrls");
@@ -88,6 +90,7 @@ public class WebSocketConstants {
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final String FULL_FAILOVER_WEBSOCKET_CLIENT_NAME =
             ModuleUtils.getPackageIdentifier() + SEPARATOR + FAILOVER_WEBSOCKET_CLIENT;
+    public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
 
     public static final String COLON = ":";
     public static final String PACKAGE = "ballerina";
@@ -119,8 +122,7 @@ public class WebSocketConstants {
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";
-    public static final String THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE =
-            "The WebSocket connection has not been made";
+    public static final String WEBSOCKET_CONNECTION_FAILURE = "WebSocket connection failure";
 
     public static final String WS_SERVICE_REGISTRY = "WS_SERVICE_REGISTRY";
     public static final BString SERVICE_ENDPOINT_CONFIG = StringUtils.fromString("config");
@@ -153,8 +155,7 @@ public class WebSocketConstants {
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
         HandshakeTimedOut("HandshakeTimedOut"),
-        ReadingInboundTextError("ReadingInboundTextError"),
-        ReadingInboundBinaryError("ReadingInboundBinaryError");
+        ReadTimedOutError("ReadTimedOutError");
 
         private String errorCode;
 

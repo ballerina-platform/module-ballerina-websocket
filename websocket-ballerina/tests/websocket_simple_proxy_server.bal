@@ -19,6 +19,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string proxyData = "";
+byte[] expectedBinData = [];
 listener Listener l22 = new(21018);
 service / on l22 {
    resource isolated function get .() returns Service|UpgradeError {
@@ -48,9 +49,6 @@ service class ProxyService {
 
    remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
    }
 
 }
@@ -65,7 +63,7 @@ service /websocket on l26 {
 service class ProxyService2 {
    *Service;
    remote function onOpen(Caller caller) {
-       io:println("The Connection ID: " + caller.getConnectionId());
+       io:println("The Connection ID simple proxy server test: " + caller.getConnectionId());
    }
 
    remote function onTextMessage(Caller caller, string text) {
@@ -101,9 +99,6 @@ service class clientCallbackService9 {
 
    remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
    }
 }
 
@@ -114,14 +109,11 @@ service class proxyCallbackService {
    }
 
    remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       expectedBinaryData = <@untainted>data;
+       expectedBinData = <@untainted>data;
    }
 
    remote function onClose(Caller wsEp, int statusCode, string reason) {
        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
    }
 }
 
@@ -142,6 +134,6 @@ public function testSendBinary() returns Error? {
    byte[] binaryData = [5, 24, 56, 243];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
+   test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

@@ -195,8 +195,8 @@ public class WebSocketResourceDispatcher {
         Object[] bValues = new Object[parameterTypes.length * 2];
         bValues[0] = webSocketEndpoint;
         bValues[1] = true;
-        WebSocketConnectionInfo connectionInfo = new WebSocketConnectionInfo(
-                wsService, webSocketConnection, webSocketEndpoint, false);
+        WebSocketConnectionInfo connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection,
+                webSocketEndpoint);
         Callback onOpenCallback = new Callback() {
             @Override
             public void notifySuccess(Object result) {
@@ -498,7 +498,7 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    private static void finishConnectionClosureIfOpen(WebSocketConnection webSocketConnection, int closeCode,
+    public static void finishConnectionClosureIfOpen(WebSocketConnection webSocketConnection, int closeCode,
             WebSocketConnectionInfo connectionInfo) {
         if (webSocketConnection.isOpen()) {
             ChannelFuture finishFuture;
