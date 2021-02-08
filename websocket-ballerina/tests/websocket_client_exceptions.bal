@@ -20,7 +20,7 @@ import ballerina/io;
 
 string errMessage = "";
 
-WebSocketClientConfiguration config = {subProtocols: ["xml"]};
+ClientConfiguration config = {subProtocols: ["xml"]};
 
 service class errorResourceService {
    remote function onError(Caller clientCaller, error err) {
