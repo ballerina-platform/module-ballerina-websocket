@@ -33,7 +33,7 @@ public client class AsyncClient {
 
     private WebSocketConnector conn = new;
     private string url = "";
-    private WebSocketClientConfiguration config = {};
+    private ClientConfiguration config = {};
     private Service? callbackService = ();
     private DynamicListener dynamicListener = new;
 
@@ -43,10 +43,10 @@ public client class AsyncClient {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of messages from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, Service? callbackService = (), WebSocketClientConfiguration? config = ())
+    public isolated function init(string url, Service? callbackService = (), ClientConfiguration? config = ())
                 returns Error? {
         self.url = url;
-        //if (config is WebSocketClientConfiguration) {
+        //if (config is ClientConfiguration) {
         //    addCookies(config);
         //}
         self.config = config ?: {};
@@ -206,7 +206,7 @@ public class DynamicListener {
 # | handShakeTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration   |
 # | cookies - Copied from CommonWebSocketClientConfiguration                     |
 # + retryConfig - Retry related configurations
-public type WebSocketClientConfiguration record {|
+public type ClientConfiguration record {|
     *CommonWebSocketClientConfiguration;
     WebSocketRetryConfig retryConfig?;
 |};
@@ -241,7 +241,7 @@ public type CommonWebSocketClientConfiguration record {|
 //# Adds cookies to the custom header.
 //#
 //# + config - Represents the cookies to be added
-//public isolated function addCookies(WebSocketClientConfiguration|WebSocketFailoverClientConfiguration config) {
+//public isolated function addCookies(ClientConfiguration|WebSocketFailoverClientConfiguration config) {
 //    string cookieHeader = "";
 //    var cookiesToAdd = config["cookies"];
 //    if (cookiesToAdd is http:Cookie[]) {
