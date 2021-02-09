@@ -18,46 +18,36 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/io;
 
-string data = "";
+byte[] BinData = [];
 
-listener Listener l2 = new(21003);
+listener Listener l40 = new(21310);
 
-service /onTextString on l2 {
+service /onBinaryData on l40 {
    resource function get .() returns Service|UpgradeError {
-       return new WsService1();
+       return new WsService40();
    }
 }
 
-service class WsService1 {
+service class WsService40 {
   *Service;
-  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      io:println("onTextMessage");
-      check caller->writeTextMessage(data);
+  remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
+      io:println("onBinaryMessage");
+      BinData = data;
+      io:println(BinData);
+      //check caller->writeBinaryMessage(data);
   }
-}
-
-service class clientPushCallbackService {
-    *Service;
-    remote function onTextMessage(Caller wsEp, string text) {
-        io:println("onTextMessage client");
-        data = <@untainted>text;
-    }
-
-    remote isolated function onError(Caller wsEp, error err) {
-        io:println(err);
-    }
-
-    remote isolated function onOpen(Caller wsEp) {
-        io:println("On connect resource");
-    }
 }
 
 // Tests string support for writeTextMessage and onTextMessage
 @test:Config {}
-public function testString() returns Error? {
-   AsyncClient wsClient = check new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
-   check wsClient->writeTextMessage("Hi");
-   runtime:sleep(0.5);
-   test:assertEquals(data, "Hi", msg = "Failed writeTextMessage");
+public function testBinaryData() returns Error? {
+   AsyncClient wsClient = check new("ws://localhost:21310/onBinaryData/", config = {maxFrameSize: 1});
+   byte[] binaryData = [5, 24, 56];
+   check wsClient->writeBinaryMessage(binaryData);
+   io:println("Sleeping 5 secs");
+   runtime:sleep(5);
+   io:println("Slept 5 secs");
+   test:assertEquals(BinData, binaryData, msg = "Failed testBinaryData");
+   io:println("Asserted");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

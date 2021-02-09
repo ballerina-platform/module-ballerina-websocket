@@ -31,7 +31,7 @@ public type WSServiceConfig record {|
     string path = "";
     string[] subProtocols = [];
     int idleTimeoutInSeconds = 0;
-    int maxFrameSize = 0;
+    int maxFrameSize = 65536;
 |};
 
 # The annotation which is used to configure a WebSocket service.

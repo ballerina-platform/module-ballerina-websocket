@@ -70,6 +70,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
+import static org.ballerinalang.net.websocket.WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_ASYNC_CLIENT;
 
 /**
@@ -92,6 +93,7 @@ public class WebSocketUtil {
                 .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CALLER);
         BObject webSocketConnector = ValueCreator
                 .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CONNECTOR);
+        webSocketCaller.addNativeData(NATIVE_DATA_MAX_FRAME_SIZE, wsService.getMaxFrameSize());
 
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);

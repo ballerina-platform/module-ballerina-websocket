@@ -62,6 +62,8 @@ public class InitEndpoint {
             // Add the client connector as a native data
             // because there is no need to create the client connector again when using one URL.
             webSocketClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
+            webSocketClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
+                    clientConnectorConfig.getMaxFrameSize());
             if (webSocketClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
                 webSocketClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, new ClientConnectorListener());
             }

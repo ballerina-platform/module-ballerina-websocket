@@ -197,7 +197,6 @@ public class DynamicListener {
 #
 # |                                                                              |
 # |:---------------------------------------------------------------------------- |
-# | callbackService - Copied from CommonWebSocketClientConfiguration             |
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
 # | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
@@ -233,7 +232,7 @@ public type CommonWebSocketClientConfiguration record {|
     int idleTimeoutInSeconds = -1;
     int readTimeoutInSeconds = -1;
     http:ClientSecureSocket? secureSocket = ();
-    int maxFrameSize = 0;
+    int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     int handShakeTimeoutInSeconds = 300;
     //http:Cookie[] cookies?;

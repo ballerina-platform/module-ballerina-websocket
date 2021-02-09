@@ -55,6 +55,7 @@ public class WebSocketServerService extends WebSocketService {
                     WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
         }
+        service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_MAX_FRAME_SIZE.toString(), maxFrameSize);
         // This will be overridden if there is an upgrade path
         setBasePathToServiceObj(basePath);
     }

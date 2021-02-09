@@ -20,7 +20,10 @@ import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
+import io.netty.util.CharsetUtil;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityConstants;
@@ -44,7 +47,24 @@ public class WebSocketConnector {
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.WRITE_TEXT_MESSAGE);
         try {
-            ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(text.getValue(), true);
+            ByteBuf byteBuf = fromText(text.getValue());
+            int noBytes = byteBuf.readableBytes();
+            int index = 0;
+            final int size = (int) connectionInfo.getWebSocketEndpoint()
+                    .getNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE);
+            while (index < noBytes - size) {
+                ByteBuf slice = byteBuf.retainedSlice(index, size);
+                String chunk = slice.toString(CharsetUtil.UTF_8);
+                slice.release();
+                ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(chunk, false);
+                future.sync();
+                index += size;
+            }
+
+            ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
+            String chunk = lastSlice.toString(CharsetUtil.UTF_8);
+            lastSlice.release();
+            ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(chunk, true);
             WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
                     connectionInfo);
@@ -59,6 +79,18 @@ public class WebSocketConnector {
         return null;
     }
 
+    private static ByteBuf fromText(String text) {
+        if (text == null || text.isEmpty()) {
+            return Unpooled.EMPTY_BUFFER;
+        } else {
+            return Unpooled.copiedBuffer(text, CharsetUtil.UTF_8);
+        }
+    }
+
+    private static ByteBuf getNettyByteBuf(ByteBuffer buffer) {
+        return Unpooled.wrappedBuffer(buffer);
+    }
+
     public static Object writeBinaryMessage(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
@@ -66,8 +98,23 @@ public class WebSocketConnector {
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.WRITE_BINARY_MESSAGE);
         try {
+            ByteBuf byteBuf = getNettyByteBuf(ByteBuffer.wrap(binaryData.getBytes()));
+            int noBytes = byteBuf.readableBytes();
+            int index = 0;
+            final int size = (int) connectionInfo.getWebSocketEndpoint()
+                    .getNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE);
+            while (index < noBytes - size) {
+                ByteBuf slice = byteBuf.retainedSlice(index, size);
+                byte[] part = getChunk(size, slice);
+                ChannelFuture future = connectionInfo.getWebSocketConnection().pushBinary(ByteBuffer.wrap(part), false);
+                future.sync();
+                index += size;
+            }
+            ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
+            byte[] finalChunk = getChunk(noBytes - index, lastSlice);
+            lastSlice.release();
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
-                    ByteBuffer.wrap(binaryData.getBytes()), true);
+                    ByteBuffer.wrap(finalChunk), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, webSocketChannelFuture, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY,
                     connectionInfo);
@@ -80,6 +127,12 @@ public class WebSocketConnector {
             WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
         }
         return null;
+    }
+
+    private static byte[] getChunk(int size, ByteBuf slice) {
+        byte[] part = new byte[size];
+        slice.getBytes(0, part);
+        return part;
     }
 
     public static Object ping(Environment env, BObject wsConnection, BArray binaryData) {
