@@ -105,13 +105,14 @@ public class WebSocketConnector {
                     .getNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE);
             while (index < noBytes - size) {
                 ByteBuf slice = byteBuf.retainedSlice(index, size);
-                byte[] part = getChunk(size, slice);
-                ChannelFuture future = connectionInfo.getWebSocketConnection().pushBinary(ByteBuffer.wrap(part), false);
+                byte[] chunk = getByteChunk(size, slice);
+                ChannelFuture future = connectionInfo.getWebSocketConnection()
+                        .pushBinary(ByteBuffer.wrap(chunk), false);
                 future.sync();
                 index += size;
             }
             ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
-            byte[] finalChunk = getChunk(noBytes - index, lastSlice);
+            byte[] finalChunk = getByteChunk(noBytes - index, lastSlice);
             lastSlice.release();
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
                     ByteBuffer.wrap(finalChunk), true);
@@ -129,10 +130,10 @@ public class WebSocketConnector {
         return null;
     }
 
-    private static byte[] getChunk(int size, ByteBuf slice) {
-        byte[] part = new byte[size];
-        slice.getBytes(0, part);
-        return part;
+    private static byte[] getByteChunk(int size, ByteBuf slice) {
+        byte[] chunk = new byte[size];
+        slice.getBytes(0, chunk);
+        return chunk;
     }
 
     public static Object ping(Environment env, BObject wsConnection, BArray binaryData) {

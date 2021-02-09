@@ -31,14 +31,11 @@ service /onBinaryData on l40 {
 service class WsService40 {
   *Service;
   remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
-      io:println("onBinaryMessage");
       BinData = data;
-      io:println(BinData);
-      //check caller->writeBinaryMessage(data);
   }
 }
 
-// Tests string support for writeTextMessage and onTextMessage
+// Tests writing binary data as continuation frames chunked by the given maxFrameSize.
 @test:Config {}
 public function testBinaryData() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21310/onBinaryData/", config = {maxFrameSize: 1});
