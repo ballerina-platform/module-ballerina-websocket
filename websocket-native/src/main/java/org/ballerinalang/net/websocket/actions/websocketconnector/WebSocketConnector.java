@@ -44,39 +44,50 @@ public class WebSocketConnector {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
-                WebSocketConstants.WRITE_TEXT_MESSAGE);
+        WebSocketObservabilityUtil
+                .observeResourceInvocation(env, connectionInfo, WebSocketConstants.WRITE_TEXT_MESSAGE);
+        ByteBuf byteBuf = null;
+        ByteBuf lastSlice = null;
         try {
-            ByteBuf byteBuf = fromText(text.getValue());
+            byteBuf = fromText(text.getValue());
             int noBytes = byteBuf.readableBytes();
             int index = 0;
             final int size = (int) connectionInfo.getWebSocketEndpoint()
-                    .getNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE);
+                .getNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE);
             while (index < noBytes - size) {
-                ByteBuf slice = byteBuf.retainedSlice(index, size);
-                String chunk = slice.toString(CharsetUtil.UTF_8);
-                slice.release();
-                ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(chunk, false);
-                future.sync();
-                index += size;
+                ByteBuf slice = null;
+                try {
+                    slice = byteBuf.retainedSlice(index, size);
+                    String chunk = slice.toString(CharsetUtil.UTF_8);
+                    ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(chunk, false);
+                    future.sync();
+                    index += size;
+                } finally {
+                    release(slice);
+                }
             }
-            ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
+            lastSlice = byteBuf.retainedSlice(index, noBytes - index);
             String chunk = lastSlice.toString(CharsetUtil.UTF_8);
-            lastSlice.release();
-            byteBuf.release();
             ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(chunk, true);
             WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
-            WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
-                    connectionInfo);
-        } catch (Exception e) {
+            WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, connectionInfo);
+        } catch (InterruptedException | IllegalAccessException | IllegalStateException e) {
             log.error("Error occurred when pushing text data", e);
             WebSocketObservabilityUtil.observeError(WebSocketObservabilityUtil.getConnectionInfo(wsConnection),
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
-                    WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
-                    e.getMessage());
+                    WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, e.getMessage());
             WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
+        } finally {
+            release(byteBuf);
+            release(lastSlice);
         }
         return null;
+    }
+
+    private static void release(ByteBuf byteBuf) {
+        if (byteBuf != null) {
+            byteBuf.release();
+        }
     }
 
     private static ByteBuf fromText(String text) {
@@ -97,36 +108,44 @@ public class WebSocketConnector {
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.WRITE_BINARY_MESSAGE);
+        ByteBuf byteBuf = null;
+        ByteBuf lastSlice = null;
         try {
-            ByteBuf byteBuf = fromByteArray(ByteBuffer.wrap(binaryData.getBytes()));
+            byteBuf = fromByteArray(ByteBuffer.wrap(binaryData.getBytes()));
             int noBytes = byteBuf.readableBytes();
             int index = 0;
             final int size = (int) connectionInfo.getWebSocketEndpoint()
                     .getNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE);
             while (index < noBytes - size) {
-                ByteBuf slice = byteBuf.retainedSlice(index, size);
-                byte[] chunk = getByteChunk(size, slice);
-                ChannelFuture future = connectionInfo.getWebSocketConnection()
-                        .pushBinary(ByteBuffer.wrap(chunk), false);
-                future.sync();
-                index += size;
+                ByteBuf slice = null;
+                try {
+                    slice = byteBuf.retainedSlice(index, size);
+                    byte[] chunk = getByteChunk(size, slice);
+                    ChannelFuture future = connectionInfo.getWebSocketConnection()
+                            .pushBinary(ByteBuffer.wrap(chunk), false);
+                    future.sync();
+                    index += size;
+                } finally {
+                    release(slice);
+                }
             }
-            ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
+            lastSlice = byteBuf.retainedSlice(index, noBytes - index);
             byte[] finalChunk = getByteChunk(noBytes - index, lastSlice);
-            lastSlice.release();
-            byteBuf.release();
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
                     ByteBuffer.wrap(finalChunk), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, webSocketChannelFuture, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY,
                     connectionInfo);
-        } catch (Exception e) {
+        } catch (InterruptedException | IllegalAccessException | IllegalStateException e) {
             log.error("Error occurred when pushing binary data", e);
             WebSocketObservabilityUtil.observeError(WebSocketObservabilityUtil.getConnectionInfo(wsConnection),
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY,
                     e.getMessage());
             WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
+        } finally {
+            release(byteBuf);
+            release(lastSlice);
         }
         return null;
     }
