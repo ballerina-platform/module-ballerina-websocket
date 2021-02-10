@@ -1,4 +1,4 @@
-## Module Overview
+## Package Overview
 
 This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates three types of network entry points as ‘Client’, ‘AsyncClient’, and ‘Listener’.
 
@@ -47,8 +47,8 @@ service class WsService {
 **onPong**: The received `pong` messages are dispatched to this remote method.
 
 For more information, see the following.
-* [WebSocket Basic Example](https://ballerina.io/swan-lake/learn/by-example/websocket-basic-sample.html)
-* [WebSocket Chat Application](https://ballerina.io/swan-lake/learn/by-example/websocket-chat-application.html)
-* [WebSocket Proxy Server](https://ballerina.io/swan-lake/learn/by-example/websocket-proxy-server.html)
-* [Client Endpoint](https://ballerina.io/swan-lake/learn/by-example/websocket-client.html) 
-* [Async Client Endpoint](https://ballerina.io/swan-lake/learn/by-example/websocket-async-client.html)  
+* [Basic Server Example](https://ballerina.io/learn/by-example/websocket-basic-sample.html)
+* [Chat Application](https://ballerina.io/learn/by-example/websocket-chat-application.html)
+* [Proxy Server](https://ballerina.io/learn/by-example/websocket-proxy-server.html)
+* [Client](https://ballerina.io/learn/by-example/websocket-text-client.html) 
+* [Async Client Endpoint](https://ballerina.io/learn/by-example/websocket-async-text-client.html)  
