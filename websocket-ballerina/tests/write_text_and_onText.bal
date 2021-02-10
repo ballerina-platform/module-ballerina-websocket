@@ -31,7 +31,6 @@ service /onTextString on l2 {
 service class WsService1 {
   *Service;
   remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      io:println("onTextMessage");
       check caller->writeTextMessage(data);
   }
 }
@@ -39,7 +38,6 @@ service class WsService1 {
 service class clientPushCallbackService {
     *Service;
     remote function onTextMessage(Caller wsEp, string text) {
-        io:println("onTextMessage client");
         data = <@untainted>text;
     }
 

@@ -46,7 +46,7 @@ public function testAutoPingPongSupport() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21020", new PongService());
    byte[] pingData = [5, 24, 56, 243];
    check wsClient->ping(pingData);
-   runtime:sleep(2);
+   runtime:sleep(0.5);
    test:assertEquals(expectedAutoPongData, pingData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

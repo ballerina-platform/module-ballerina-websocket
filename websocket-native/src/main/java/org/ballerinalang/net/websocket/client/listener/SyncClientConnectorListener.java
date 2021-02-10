@@ -57,30 +57,20 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
             boolean finalFragment = webSocketTextMessage.isFinalFragment();
-            BString txtMsg = getAggregatedTextMessage(webSocketTextMessage, stringAggregator, finalFragment);
-            callback.complete(txtMsg);
-            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+            if (finalFragment) {
+                stringAggregator.appendAggregateString(webSocketTextMessage.getText());
+                BString txtMsg = StringUtils.fromString(stringAggregator.getAggregateString());
+                stringAggregator.resetAggregateString();
+                callback.complete(txtMsg);
+                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+            } else {
+                stringAggregator.appendAggregateString(webSocketTextMessage.getText());
+                connectionInfo.getWebSocketConnection().readNextFrame();
+            }
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError));
         }
-    }
-
-    private BString getAggregatedTextMessage(WebSocketTextMessage webSocketTextMessage,
-            WebSocketConnectionInfo.StringAggregator stringAggregator, boolean finalFragment)
-            throws IllegalAccessException {
-        BString txtMsg;
-        while (true) {
-            stringAggregator.appendAggregateString(webSocketTextMessage.getText());
-            if (finalFragment) {
-                txtMsg = StringUtils.fromString(stringAggregator.getAggregateString());
-                stringAggregator.resetAggregateString();
-                break;
-            } else {
-                connectionInfo.getWebSocketConnection().readNextFrame();
-            }
-        }
-        return txtMsg;
     }
 
     @Override
@@ -88,30 +78,21 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
         try {
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
-            byte[] binMsg = getAggregatedBinMessage(webSocketBinaryMessage, byteArrAggregator);
-            callback.complete(ValueCreator.createArrayValue(binMsg));
-            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+            boolean finalFragment = webSocketBinaryMessage.isFinalFragment();
+            if (finalFragment) {
+                byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
+                byte[] binMsg = byteArrAggregator.getAggregateByteArr();
+                byteArrAggregator.resetAggregateByteArr();
+                callback.complete(ValueCreator.createArrayValue(binMsg));
+                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+            } else {
+                byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
+                connectionInfo.getWebSocketConnection().readNextFrame();
+            }
         } catch (IllegalAccessException | IOException e) {
             callback.complete(WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError));
         }
-    }
-
-    private byte[] getAggregatedBinMessage(WebSocketBinaryMessage webSocketBinaryMessage,
-            WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator) throws IOException, IllegalAccessException {
-        byte[] binMsg;
-        while (true) {
-            boolean finalFragment = webSocketBinaryMessage.isFinalFragment();
-            byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
-            if (finalFragment) {
-                binMsg = byteArrAggregator.getAggregateByteArr();
-                byteArrAggregator.resetAggregateByteArr();
-                break;
-            } else {
-                connectionInfo.getWebSocketConnection().readNextFrame();
-            }
-        }
-        return binMsg;
     }
 
     @Override

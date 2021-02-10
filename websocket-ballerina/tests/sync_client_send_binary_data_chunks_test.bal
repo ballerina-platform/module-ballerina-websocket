@@ -1,4 +1,4 @@
-// Copyright (c) 2020 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,35 +16,31 @@
 
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
-import ballerina/io;
 
-byte[] BinData = [];
+byte[] BinSyncData = [];
 
-listener Listener l40 = new(21310);
+listener Listener l41 = new(21311);
 
-service /onBinaryData on l40 {
+service /onBinaryDataSync on l41 {
    resource function get .() returns Service|UpgradeError {
-       return new WsService40();
+       return new WsService41();
    }
 }
 
-service class WsService40 {
+service class WsService41 {
   *Service;
   remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
-      BinData = data;
+      BinSyncData = data;
   }
 }
 
-// Tests writing binary data as continuation frames chunked by the given maxFrameSize.
+// Tests writing binary data as continuation frames chunked by the given maxFrameSize using the sync client.
 @test:Config {}
-public function testBinaryData() returns Error? {
-   AsyncClient wsClient = check new("ws://localhost:21310/onBinaryData/", config = {maxFrameSize: 1});
+public function testChunkBinaryDataSync() returns Error? {
+   Client wsClient = check new("ws://localhost:21311/onBinaryDataSync/", config = {maxFrameSize: 1});
    byte[] binaryData = [5, 24, 56];
    check wsClient->writeBinaryMessage(binaryData);
-   io:println("Sleeping 5 secs");
    runtime:sleep(5);
-   io:println("Slept 5 secs");
-   test:assertEquals(BinData, binaryData, msg = "Failed testBinaryData");
-   io:println("Asserted");
+   test:assertEquals(BinSyncData, binaryData, msg = "Failed testBinaryData");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

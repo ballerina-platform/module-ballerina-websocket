@@ -104,7 +104,7 @@ public function sslTextEcho() returns Error? {
            }
        });
    check wsClient->writeTextMessage("Hi madam");
-   runtime:sleep(1);
+   runtime:sleep(0.5);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
