@@ -47,8 +47,6 @@ service class WsService {
 **onPong**: The received `pong` messages are dispatched to this remote method.
 
 For more information, see the following.
-* [Basic Server Example](https://ballerina.io/learn/by-example/websocket-basic-sample.html)
-* [Chat Application](https://ballerina.io/learn/by-example/websocket-chat-application.html)
-* [Proxy Server](https://ballerina.io/learn/by-example/websocket-proxy-server.html)
+* [Server Example](https://ballerina.io/learn/by-example/websocket-basic-sample.html)
 * [Client](https://ballerina.io/learn/by-example/websocket-text-client.html) 
-* [Async Client Endpoint](https://ballerina.io/learn/by-example/websocket-async-text-client.html)  
+* [Async Client](https://ballerina.io/learn/by-example/websocket-async-text-client.html)  
