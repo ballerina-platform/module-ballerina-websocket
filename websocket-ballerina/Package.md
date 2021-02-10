@@ -1,6 +1,6 @@
 ## Package Overview
 
-This module provides an implementation for connecting and interacting with WebSocket endpoints. The module facilitates three types of network entry points as ‘Client’, ‘AsyncClient’, and ‘Listener’.
+This package provides an implementation for connecting and interacting with WebSocket endpoints. The package facilitates three types of network entry points as ‘Client’, ‘AsyncClient’, and ‘Listener’.
 
 The `websocket:Client` reads text and binary messages synchronously. A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive `ping/pong` control frames.
 The `websocket:AsyncClient`, which behaves asynchronously also has a callback `websocket:Service` that can be registered at the initialization of the client. It has a fixed set of remote methods in this service and they get called on the receipt of messages from the server. 
