@@ -34,7 +34,7 @@ service class WsService40 {
   }
 }
 
-// Tests writing binary data as continuation frames chunked by the given maxFrameSize.
+// Tests writing binary data as continuation frames chunked by the given maxFrameSize using Async client.
 @test:Config {}
 public function testBinaryData() returns Error? {
    AsyncClient wsClient = check new("ws://localhost:21310/onBinaryData/", config = {maxFrameSize: 1});

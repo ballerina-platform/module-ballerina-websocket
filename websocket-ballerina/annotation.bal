@@ -26,7 +26,7 @@
 #                          in the server service will be triggered. Note that this overrides the `timeoutInMillis` config
 #                          in the `http:Listener`.
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
-#                  If this is not set or is negative or zero, the default frame size will be used.
+#                  If this is not set or is negative or zero, the default frame size which is 65536 will be used.
 public type WSServiceConfig record {|
     string path = "";
     string[] subProtocols = [];

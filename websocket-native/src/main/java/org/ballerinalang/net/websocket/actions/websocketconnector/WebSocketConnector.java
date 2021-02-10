@@ -60,10 +60,10 @@ public class WebSocketConnector {
                 future.sync();
                 index += size;
             }
-
             ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
             String chunk = lastSlice.toString(CharsetUtil.UTF_8);
             lastSlice.release();
+            byteBuf.release();
             ChannelFuture future = connectionInfo.getWebSocketConnection().pushText(chunk, true);
             WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT,
@@ -87,7 +87,7 @@ public class WebSocketConnector {
         }
     }
 
-    private static ByteBuf getNettyByteBuf(ByteBuffer buffer) {
+    private static ByteBuf fromByteArray(ByteBuffer buffer) {
         return Unpooled.wrappedBuffer(buffer);
     }
 
@@ -98,7 +98,7 @@ public class WebSocketConnector {
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.WRITE_BINARY_MESSAGE);
         try {
-            ByteBuf byteBuf = getNettyByteBuf(ByteBuffer.wrap(binaryData.getBytes()));
+            ByteBuf byteBuf = fromByteArray(ByteBuffer.wrap(binaryData.getBytes()));
             int noBytes = byteBuf.readableBytes();
             int index = 0;
             final int size = (int) connectionInfo.getWebSocketEndpoint()
@@ -114,6 +114,7 @@ public class WebSocketConnector {
             ByteBuf lastSlice = byteBuf.retainedSlice(index, noBytes - index);
             byte[] finalChunk = getByteChunk(noBytes - index, lastSlice);
             lastSlice.release();
+            byteBuf.release();
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection().pushBinary(
                     ByteBuffer.wrap(finalChunk), true);
             WebSocketUtil.handleWebSocketCallback(balFuture, webSocketChannelFuture, log, connectionInfo);

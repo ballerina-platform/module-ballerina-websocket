@@ -197,6 +197,7 @@ public class DynamicListener {
 #
 # |                                                                              |
 # |:---------------------------------------------------------------------------- |
+# | callbackService - Copied from CommonWebSocketClientConfiguration             |
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
 # | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |

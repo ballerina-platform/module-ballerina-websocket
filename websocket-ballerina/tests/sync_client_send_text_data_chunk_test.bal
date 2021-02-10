@@ -34,13 +34,13 @@ service class WsService42 {
   }
 }
 
-// Tests writing binary data as continuation frames chunked by the given maxFrameSize.
+// Tests writing text data as continuation frames chunked by the given maxFrameSize using sync client.
 @test:Config {}
-public function testTextDataChunk() returns Error? {
+public function testSendTextDataChunkSync() returns Error? {
    Client wsClient = check new("ws://localhost:21312/onTextDataSync/", config = {maxFrameSize: 1});
    string textData = "text data";
    check wsClient->writeTextMessage(textData);
    runtime:sleep(5);
-   test:assertEquals(chunkTextData, textData, msg = "Failed testTextDataChunk");
+   test:assertEquals(chunkTextData, textData, msg = "Failed testSendTextDataChunkSync");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
