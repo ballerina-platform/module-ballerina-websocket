@@ -69,6 +69,7 @@ public class WebSocketConstants {
 
     public static final String NATIVE_DATA_WEBSOCKET_CONNECTION_INFO = "NATIVE_DATA_WEBSOCKET_CONNECTION_INFO";
     public static final String NATIVE_DATA_BASE_PATH = "BASE_PATH";
+    public static final String NATIVE_DATA_MAX_FRAME_SIZE = "MAX_FRAME_SIZE";
 
     public static final BString CLIENT_URL_CONFIG = StringUtils.fromString("url");
     public static final BString CLIENT_SERVICE_CONFIG = StringUtils.fromString("callbackService");
