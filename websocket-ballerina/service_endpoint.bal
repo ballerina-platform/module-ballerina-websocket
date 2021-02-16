@@ -172,10 +172,9 @@ public type Local record {|
 # + host - The host name/IP of the endpoint
 # + http1Settings - Configurations related to HTTP/1.x protocol
 # + secureSocket - The SSL configurations for the service endpoint. This needs to be configured in order to
-#                  communicate through HTTPS.
-# + httpVersion - Highest HTTP version supported by the endpoint
-# + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation. Use value 0 to
-#                   disable timeout
+#                  communicate through WSS.
+# + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation in the
+#                     initial upgrade request. Use value 0 to disable timeout
 # + server - The server name which should appear as a response header
 # + webSocketCompressionEnabled - Enable support for compression in WebSocket
 # + requestLimits - Configurations associated with inbound request size limits
@@ -183,7 +182,6 @@ public type ListenerConfiguration record {|
     string host = "0.0.0.0";
     ListenerHttp1Settings http1Settings = {};
     ListenerSecureSocket? secureSocket = ();
-    string httpVersion = "1.1";
     int timeoutInMillis = 120000;
     string? server = ();
     boolean webSocketCompressionEnabled = true;
