@@ -41,6 +41,9 @@ public client class Client {
     public isolated function init(string url, ClientService? callbackService = (), ClientConfiguration? config = ())
                               returns Error? {
         self.url = url;
+        if (config is ClientConfiguration) {
+           addCookies(config);
+        }
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
         return self.initEndpoint();
