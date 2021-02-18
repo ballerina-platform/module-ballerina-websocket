@@ -138,6 +138,8 @@ public class WebSocketConstants {
     public static final String WSS_ENDPOINT_STOPPED = "[ballerina/websocket] stopped WSS listener ";
     public static final String WS_ENDPOINT_STOPPED = "[ballerina/websocket] stopped WS listener ";
 
+    public static final String WEBSOCKET_DEFAULT_HOST = "0.0.0.0";
+
     public WebSocketConstants() {
     }
 
@@ -156,7 +158,8 @@ public class WebSocketConstants {
         WsGenericListenerError("GenericListenerError"),
         WsGenericClientError("GenericClientError"),
         HandshakeTimedOut("HandshakeTimedOut"),
-        ReadTimedOutError("ReadTimedOutError");
+        ReadTimedOutError("ReadTimedOutError"),
+        SslError("SslError");
 
         private String errorCode;
 
