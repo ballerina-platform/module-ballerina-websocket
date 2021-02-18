@@ -237,7 +237,8 @@ subprojects {
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
 
 release {
-    failOnPublishNeeded = false
+    failOnPublishNeeded = false    
+    failOnSnapshotDependencies = true
 
     buildTasks = ['build']
     versionPropertyFile = 'gradle.properties'
