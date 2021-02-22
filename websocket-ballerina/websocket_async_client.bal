@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/jballerina.java;
-//import ballerina/lang.array;
-//import ballerina/time;
+import ballerina/lang.array;
+import ballerina/time;
 import ballerina/http;
 import ballerina/mime;
 import ballerina/lang.runtime;
@@ -46,9 +46,9 @@ public client class AsyncClient {
     public isolated function init(string url, Service? callbackService = (), ClientConfiguration? config = ())
                 returns Error? {
         self.url = url;
-        //if (config is ClientConfiguration) {
-        //    addCookies(config);
-        //}
+        if (config is ClientConfiguration) {
+           addCookies(config);
+        }
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
         self.dynamicListener = new DynamicListener();
@@ -226,7 +226,7 @@ public type ClientConfiguration record {|
 # + handShakeTimeoutInSeconds - Time (in seconds) that a connection waits to get the response of
 #                               the webSocket handshake. If the timeout exceeds, then the connection is terminated with
 #                               an error.If the value < 0, then the value sets to the default value(300).
-//# + cookies - An Array of `http:Cookie`
+# + cookies - An Array of `http:Cookie`
 public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
@@ -236,40 +236,40 @@ public type CommonWebSocketClientConfiguration record {|
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     int handShakeTimeoutInSeconds = 300;
-    //http:Cookie[] cookies?;
+    http:Cookie[] cookies?;
 |};
 
-//# Adds cookies to the custom header.
-//#
-//# + config - Represents the cookies to be added
-//public isolated function addCookies(ClientConfiguration|WebSocketFailoverClientConfiguration config) {
-//    string cookieHeader = "";
-//    var cookiesToAdd = config["cookies"];
-//    if (cookiesToAdd is http:Cookie[]) {
-//        http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
-//            var cookiePath = c.path;
-//            int l = 0;
-//            if (cookiePath is string) {
-//                l = cookiePath.length();
-//            }
-//           return l;
-//        });
-//        foreach var cookie in sortedCookies {
-//            var cookieName = cookie.name;
-//            var cookieValue = cookie.value;
-//            if (cookieName is string && cookieValue is string) {
-//                cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
-//            }
-//            cookie.lastAccessedTime = time:currentTime();
-//        }
-//        if (cookieHeader != "") {
-//            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
-//            map<string> headers = config["customHeaders"];
-//            headers["Cookie"] = cookieHeader;
-//            config["customHeaders"] = headers;
-//        }
-//    }
-//}
+# Adds cookies to the custom header.
+#
+# + config - Represents the cookies to be added
+public isolated function addCookies(ClientConfiguration|WebSocketFailoverClientConfiguration config) {
+   string cookieHeader = "";
+   var cookiesToAdd = config["cookies"];
+   if (cookiesToAdd is http:Cookie[]) {
+       http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
+           var cookiePath = c.path;
+           int l = 0;
+           if (cookiePath is string) {
+               l = cookiePath.length();
+           }
+          return l;
+       });
+       foreach var cookie in sortedCookies {
+           var cookieName = cookie.name;
+           var cookieValue = cookie.value;
+           if (cookieName is string && cookieValue is string) {
+               cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
+           }
+           cookie.lastAccessedTime = time:currentTime();
+       }
+       if (cookieHeader != "") {
+           cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
+           map<string> headers = config["customHeaders"];
+           headers["Cookie"] = cookieHeader;
+           config["customHeaders"] = headers;
+       }
+   }
+}
 
 # Retry configurations for WebSocket.
 #
