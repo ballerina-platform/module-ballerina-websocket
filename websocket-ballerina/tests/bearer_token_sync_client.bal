@@ -25,10 +25,11 @@ service /bearerTokenSyncService on l54 {
        string|error header = req.getHeader("Authorization");
        if (header is string) {
            authHeader = header;
+           return new WsService54();
        } else {
            authHeader = "Header not found";
+           return error UpgradeError("Authorization failed");
        }
-       return new WsService54();
    }
 }
 

@@ -25,10 +25,11 @@ service /basicAuthService on l48 {
        string|error header = req.getHeader("Authorization");
        if (header is string) {
            authHeader = header;
+           return new WsService48();
        } else {
            authHeader = "Header not found";
+           return error UpgradeError("Authorization failed");
        }
-       return new WsService48();
    }
 }
 

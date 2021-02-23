@@ -23,17 +23,16 @@ string strSyncData = "";
 
 service /jwtSyncAuthService on l51 {
    resource function get .(http:Request req) returns Service|UpgradeError {
-       UpgradeError authErr = error UpgradeError("Authorization failed");
        string|error header = req.getHeader("Authorization");
        if (header is string) {
            string jwtAuthHeader = header;
            if (jwtAuthHeader.startsWith("Bearer eyJh")) {
               return new WsService51();
            } else {
-              return authErr;
+              return error UpgradeError("Authorization failed");
            }
        } else {
-           return authErr;
+           return error UpgradeError("Authorization failed");
        }
    }
 }
