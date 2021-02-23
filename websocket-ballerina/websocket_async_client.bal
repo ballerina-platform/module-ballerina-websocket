@@ -49,6 +49,12 @@ public client class AsyncClient {
         //if (config is ClientConfiguration) {
         //    addCookies(config);
         //}
+        if (config is ClientConfiguration) {
+           ClientAuthError? authHandler = initClientAuthHandler(config);
+           if (authHandler is ClientAuthError) {
+               return authHandler;
+           }
+        }
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
         self.dynamicListener = new DynamicListener();
@@ -227,6 +233,7 @@ public type ClientConfiguration record {|
 #                               the webSocket handshake. If the timeout exceeds, then the connection is terminated with
 #                               an error.If the value < 0, then the value sets to the default value(300).
 //# + cookies - An Array of `http:Cookie`
+# + auth - Configurations related to client authentication
 public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
@@ -237,6 +244,7 @@ public type CommonWebSocketClientConfiguration record {|
     boolean webSocketCompressionEnabled = true;
     int handShakeTimeoutInSeconds = 300;
     //http:Cookie[] cookies?;
+    ClientAuthConfig? auth = ();
 |};
 
 //# Adds cookies to the custom header.

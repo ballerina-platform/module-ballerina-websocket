@@ -47,7 +47,10 @@ public type HandshakeTimedOut distinct error;
 # Raised when the client creation fails
 public type ReadTimedOutError distinct error;
 
+# Defines the Auth error types that returned from client
+public type ClientAuthError distinct error;
+
 # The union of all the WebSocket related errors
 public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
 WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|
-WsGenericClientError|ReadTimedOutError|HandshakeTimedOut;
+WsGenericClientError|ReadTimedOutError|HandshakeTimedOut|ClientAuthError;
