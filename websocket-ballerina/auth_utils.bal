@@ -86,4 +86,3 @@ isolated function prepareClientAuthError(string message, error? err = ()) return
     }
     return error ClientAuthError(message);
 }
-

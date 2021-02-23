@@ -18,9 +18,9 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-listener Listener l47 = new(21316);
+listener Listener l54 = new(21324);
 
-service /bearerTokenSyncService on l47 {
+service /bearerTokenSyncService on l54 {
    resource function get .(http:Request req) returns Service|UpgradeError {
        string|error header = req.getHeader("Authorization");
        if (header is string) {
@@ -28,11 +28,11 @@ service /bearerTokenSyncService on l47 {
        } else {
            authHeader = "Header not found";
        }
-       return new WsService47();
+       return new WsService54();
    }
 }
 
-service class WsService47 {
+service class WsService54 {
   *Service;
   remote function onTextMessage(Caller caller, string data) returns Error? {
   }
@@ -40,7 +40,7 @@ service class WsService47 {
 
 @test:Config {}
 public function testSyncBearerToken() returns Error? {
-   Client wsClient = check new("ws://localhost:21316/bearerTokenSyncService/", config = {
+   Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", config = {
             auth: {
               token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn"
             }
