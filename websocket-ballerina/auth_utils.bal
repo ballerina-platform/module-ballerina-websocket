@@ -20,7 +20,7 @@ import ballerina/log;
 import ballerina/oauth2;
 
 // Call relevant auth handling function based on the provided configurations
-isolated function initClientAuthHandler(ClientConfiguration config) returns ClientAuthError? {
+isolated function initClientAuth(ClientConfiguration config) returns ClientAuthError? {
     ClientAuthConfig? authConfig = config.auth;
     if (authConfig is ()) {
        return;

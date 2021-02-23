@@ -43,10 +43,7 @@ public client class Client {
         self.url = url;
         if (config is ClientConfiguration) {
            addCookies(config);
-           ClientAuthError? authHandler = initClientAuthHandler(config);
-           if (authHandler is ClientAuthError) {
-               return authHandler;
-           }
+           check initClientAuth(config);
         }
         self.config = config ?: {};
         self.callbackService = callbackService ?: ();
