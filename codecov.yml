@@ -1,0 +1,5 @@
+fixes:
+  - "ballerina/websocket/*/::websocket-ballerina/"
+
+ignore:
+  - "**/tests"
