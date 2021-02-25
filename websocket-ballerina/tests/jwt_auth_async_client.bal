@@ -45,7 +45,7 @@ service /jwtAuthService on l50 {
        if (authn1 is jwt:Payload) {
            return new WsService50();
        } else {
-           return error UpgradeError("Authorization failed");
+           return error UpgradeError("Authentication failed");
        }
    }
 }
@@ -79,8 +79,8 @@ public function testAsyncJwtAuth() returns Error? {
                     }
                 }
             });
-   check wsClient->writeTextMessage("Authorization successful");
+   check wsClient->writeTextMessage("Authentication successful");
    runtime:sleep(0.5);
-   test:assertEquals(strData, "Authorization successful");
+   test:assertEquals(strData, "Authentication successful");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

@@ -28,7 +28,7 @@ service /basicAuthService on l48 {
            return new WsService48();
        } else {
            authHeader = "Header not found";
-           return error UpgradeError("Authorization failed");
+           return error UpgradeError("Authentication failed");
        }
    }
 }

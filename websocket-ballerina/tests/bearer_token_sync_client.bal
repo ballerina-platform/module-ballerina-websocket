@@ -28,7 +28,7 @@ service /bearerTokenSyncService on l54 {
            return new WsService54();
        } else {
            authHeader = "Header not found";
-           return error UpgradeError("Authorization failed");
+           return error UpgradeError("Authentication failed");
        }
    }
 }

@@ -30,7 +30,7 @@ service /bearerTokenService on l53 {
            return new WsService53();
        } else {
            authHeader = "Header not found";
-           return error UpgradeError("Authorization failed");
+           return error UpgradeError("Authentication failed");
        }
    }
 }

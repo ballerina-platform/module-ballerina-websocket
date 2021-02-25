@@ -29,7 +29,7 @@ service /oauthService on l55 {
            return new WsService55();
        } else {
            authHeader = "Header not found";
-           return error UpgradeError("Authorization failed");
+           return error UpgradeError("Authentication failed");
        }
    }
 }
