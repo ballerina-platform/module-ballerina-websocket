@@ -40,26 +40,26 @@ http:JwtValidatorConfig jwtConfig = {
 http:ListenerJwtAuthHandler handler = new(jwtConfig);
 
 service /jwtAuthService on l50 {
-   resource function get .(http:Request req) returns Service|UpgradeError {
-       jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
-       if (authn1 is jwt:Payload) {
-           return new WsService50();
-       } else {
-           return error UpgradeError("Authentication failed");
-       }
-   }
+    resource function get .(http:Request req) returns Service|UpgradeError {
+        jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
+        if (authn1 is jwt:Payload) {
+            return new WsService50();
+        } else {
+            return error UpgradeError("Authentication failed");
+        }
+    }
 }
 
 service class WsService50 {
-  *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-      strData = data;
-  }
+    *Service;
+    remote function onTextMessage(Caller caller, string data) returns Error? {
+        strData = data;
+    }
 }
 
 @test:Config {}
 public function testAsyncJwtAuth() returns Error? {
-   AsyncClient wsClient = check new("ws://localhost:21319/jwtAuthService/", config = {
+    AsyncClient wsClient = check new("ws://localhost:21319/jwtAuthService/", config = {
             auth: {
                     username: "wso2",
                     issuer: "ballerina",
@@ -79,8 +79,8 @@ public function testAsyncJwtAuth() returns Error? {
                     }
                 }
             });
-   check wsClient->writeTextMessage("Authentication successful");
-   runtime:sleep(0.5);
-   test:assertEquals(strData, "Authentication successful");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    check wsClient->writeTextMessage("Authentication successful");
+    runtime:sleep(0.5);
+    test:assertEquals(strData, "Authentication successful");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

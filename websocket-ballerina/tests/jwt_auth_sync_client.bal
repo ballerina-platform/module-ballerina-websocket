@@ -23,26 +23,26 @@ listener Listener l51 = new(21320);
 string strSyncData = "";
 
 service /jwtSyncAuthService on l51 {
-   resource function get .(http:Request req) returns Service|UpgradeError {
-       jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
-       if (authn1 is jwt:Payload) {
-           return new WsService51();
-       } else {
-           return error UpgradeError("Authentication failed");
-       }
-   }
+    resource function get .(http:Request req) returns Service|UpgradeError {
+        jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
+        if (authn1 is jwt:Payload) {
+            return new WsService51();
+        } else {
+            return error UpgradeError("Authentication failed");
+        }
+    }
 }
 
 service class WsService51 {
-  *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-      strSyncData = data;
-  }
+    *Service;
+    remote function onTextMessage(Caller caller, string data) returns Error? {
+        strSyncData = data;
+    }
 }
 
 @test:Config {}
 public function testSyncJwtAuth() returns Error? {
-   Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", config = {
+    Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", config = {
             auth: {
                     username: "wso2",
                     issuer: "ballerina",
@@ -62,8 +62,8 @@ public function testSyncJwtAuth() returns Error? {
                     }
                 }
             });
-   check wsClient->writeTextMessage("Authentication successful");
-   runtime:sleep(0.5);
-   test:assertEquals(strSyncData, "Authentication successful");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    check wsClient->writeTextMessage("Authentication successful");
+    runtime:sleep(0.5);
+    test:assertEquals(strSyncData, "Authentication successful");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

@@ -21,32 +21,32 @@ import ballerina/test;
 listener Listener l54 = new(21324);
 
 service /bearerTokenSyncService on l54 {
-   resource function get .(http:Request req) returns Service|UpgradeError {
-       string|error header = req.getHeader("Authorization");
-       if (header is string) {
-           authHeader = header;
-           return new WsService54();
-       } else {
-           authHeader = "Header not found";
-           return error UpgradeError("Authentication failed");
-       }
-   }
+    resource function get .(http:Request req) returns Service|UpgradeError {
+        string|error header = req.getHeader("Authorization");
+        if (header is string) {
+            authHeader = header;
+            return new WsService54();
+        } else {
+            authHeader = "Header not found";
+            return error UpgradeError("Authentication failed");
+        }
+    }
 }
 
 service class WsService54 {
-  *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-  }
+    *Service;
+    remote function onTextMessage(Caller caller, string data) returns Error? {
+    }
 }
 
 @test:Config {}
 public function testSyncBearerToken() returns Error? {
-   Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", config = {
+    Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", config = {
             auth: {
               token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn"
             }
         });
-   runtime:sleep(0.5);
-   test:assertEquals(authHeader, "Bearer JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    runtime:sleep(0.5);
+    test:assertEquals(authHeader, "Bearer JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }

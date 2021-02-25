@@ -23,32 +23,32 @@ string authHeader = "";
 listener Listener l53 = new(21321);
 
 service /bearerTokenService on l53 {
-   resource function get .(http:Request req) returns Service|UpgradeError {
-       string|error header = req.getHeader("Authorization");
-       if (header is string) {
-           authHeader = header;
-           return new WsService53();
-       } else {
-           authHeader = "Header not found";
-           return error UpgradeError("Authentication failed");
-       }
-   }
+    resource function get .(http:Request req) returns Service|UpgradeError {
+        string|error header = req.getHeader("Authorization");
+        if (header is string) {
+            authHeader = header;
+            return new WsService53();
+        } else {
+            authHeader = "Header not found";
+            return error UpgradeError("Authentication failed");
+        }
+    }
 }
 
 service class WsService53 {
-  *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-  }
+    *Service;
+    remote function onTextMessage(Caller caller, string data) returns Error? {
+    }
 }
 
 @test:Config {}
 public function testAsyncBearerToken() returns Error? {
-   AsyncClient wsClient = check new("ws://localhost:21321/bearerTokenService/", config = {
+    AsyncClient wsClient = check new("ws://localhost:21321/bearerTokenService/", config = {
             auth: {
               token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2In"
             }
         });
-   runtime:sleep(0.5);
-   test:assertEquals(authHeader, "Bearer JlbmMiOiJBMTI4Q0JDLUhTMjU2In");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    runtime:sleep(0.5);
+    test:assertEquals(authHeader, "Bearer JlbmMiOiJBMTI4Q0JDLUhTMjU2In");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 }
