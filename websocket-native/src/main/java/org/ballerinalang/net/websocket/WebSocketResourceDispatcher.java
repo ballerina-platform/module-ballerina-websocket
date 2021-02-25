@@ -65,6 +65,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.BACK_SLASH;
+import static org.ballerinalang.net.websocket.WebSocketConstants.PARAM_TYPE_BOOLEAN;
+import static org.ballerinalang.net.websocket.WebSocketConstants.PARAM_TYPE_FLOAT;
+import static org.ballerinalang.net.websocket.WebSocketConstants.PARAM_TYPE_INT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.PARAM_TYPE_STRING;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_CLOSE;
@@ -133,9 +136,10 @@ public class WebSocketResourceDispatcher {
         Object[] bValues = new Object[parameterTypes.length * 2];
         int index = 0;
         int pathParamIndex = 0;
-        for (Type param : parameterTypes) {
-            String typeName = param.getName();
-            switch (typeName) {
+        try {
+            for (Type param : parameterTypes) {
+                String typeName = param.getName();
+                switch (typeName) {
                 case HttpConstants.REQUEST:
                     bValues[index++] = inRequest;
                     bValues[index++] = true;
@@ -144,9 +148,25 @@ public class WebSocketResourceDispatcher {
                     bValues[index++] = StringUtils.fromString(pathParamArr.get(pathParamIndex++));
                     bValues[index++] = true;
                     break;
+                case PARAM_TYPE_INT:
+                    bValues[index++] = Long.parseLong(pathParamArr.get(pathParamIndex++));
+                    bValues[index++] = true;
+                    break;
+                case PARAM_TYPE_FLOAT:
+                    bValues[index++] = Double.parseDouble(pathParamArr.get(pathParamIndex++));
+                    bValues[index++] = true;
+                    break;
+                case PARAM_TYPE_BOOLEAN:
+                    bValues[index++] = Boolean.parseBoolean(pathParamArr.get(pathParamIndex++));
+                    bValues[index++] = true;
+                    break;
                 default:
                     break;
+                }
             }
+        } catch (NumberFormatException e) {
+            webSocketHandshaker.cancelHandshake(404, errMsg);
+            return;
         }
         wsService.getRuntime().invokeMethodAsync(wsService.getBalService(), resourceFunction.getName(), null,
                 ModuleUtils.getOnUpgradeMetaData(),
