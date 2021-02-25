@@ -14,23 +14,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
+import ballerina/jwt;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
-import ballerina/http;
 
 listener Listener l51 = new(21320);
 string strSyncData = "";
 
 service /jwtSyncAuthService on l51 {
    resource function get .(http:Request req) returns Service|UpgradeError {
-       string|error header = req.getHeader("Authorization");
-       if (header is string) {
-           string jwtAuthHeader = header;
-           if (jwtAuthHeader.startsWith("Bearer eyJh")) {
-              return new WsService51();
-           } else {
-              return error UpgradeError("Authorization failed");
-           }
+       jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
+       if (authn1 is jwt:Payload) {
+           return new WsService51();
        } else {
            return error UpgradeError("Authorization failed");
        }

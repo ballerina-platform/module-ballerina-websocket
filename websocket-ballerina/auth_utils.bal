@@ -21,7 +21,7 @@ import ballerina/oauth2;
 
 // Call relevant auth handling function based on the provided configurations
 isolated function initClientAuth(ClientConfiguration config) returns ClientAuthError? {
-    ClientAuthConfig? authConfig = config.auth;
+    ClientAuthConfig? authConfig = config?.auth;
     if (authConfig is ()) {
        return;
     } else if (authConfig is CredentialsConfig) {

@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.runtime as runtime;
-import ballerina/test;
 import ballerina/http;
 import ballerina/jwt;
+import ballerina/lang.runtime as runtime;
+import ballerina/test;
 
 listener Listener l50 = new(21319);
 string strData = "";

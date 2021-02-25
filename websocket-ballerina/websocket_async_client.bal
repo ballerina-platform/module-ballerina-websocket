@@ -239,7 +239,7 @@ public type CommonWebSocketClientConfiguration record {|
     boolean webSocketCompressionEnabled = true;
     int handShakeTimeoutInSeconds = 300;
     http:Cookie[] cookies?;
-    ClientAuthConfig? auth = ();
+    ClientAuthConfig auth?;
 |};
 
 # Adds cookies to the custom header.

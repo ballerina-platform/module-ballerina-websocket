@@ -14,9 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
-import ballerina/http;
 
 listener Listener l54 = new(21324);
 
