@@ -42,5 +42,5 @@ public function testSendTextDataChunkSync() returns Error? {
    check wsClient->writeTextMessage(textData);
    runtime:sleep(5);
    test:assertEquals(chunkTextData, textData, msg = "Failed testSendTextDataChunkSync");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

@@ -63,5 +63,5 @@ public function testSendCookieWithAsyncClient() returns error? {
    } else {
       test:assertFail("Cookie header is not present");
    }
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

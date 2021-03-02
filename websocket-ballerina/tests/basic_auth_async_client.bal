@@ -49,5 +49,5 @@ public function testAsyncBasicAuth() returns Error? {
         });
     runtime:sleep(0.5);
     test:assertEquals(authHeader, "Basic YWxpY2U6MTIz");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

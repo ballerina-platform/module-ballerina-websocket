@@ -69,5 +69,5 @@
 //    string|error value = 'string:fromBytes(binaryContent);
 //    string s = value is error ? value.toString() : value.toString();
 //    test:assertEquals(s, msg, msg = "Data mismatched");
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 // }

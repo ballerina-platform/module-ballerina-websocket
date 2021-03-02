@@ -80,7 +80,7 @@ public function testConnectionError() returns Error? {
    AsyncClient wsClient = check new ("ws://lmnop.ls", new errorResourceService(), config);
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "ConnectionError: IO Error");
-   error? err = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
+   error? err = wsClient->close(statusCode = 1000, timeout = 0);
 }
 
 // SSL/TLS error
@@ -89,7 +89,7 @@ public function testSslError() returns Error? {
    AsyncClient wsClient = check new ("wss://localhost:21030/websocket", new errorResourceService(), config);
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
-   error? err = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
+   error? err = wsClient->close(statusCode = 1000, timeout = 0);
 }
 
 // The frame exceeds the max frame length
@@ -107,14 +107,14 @@ public function testLongFrameError() returns Error? {
    } else {
        test:assertFail("Mismatched output");
    }
-   error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Close the connection and push text
 @test:Config {}
 public function testConnectionClosedError() returns Error? {
    AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
-   error? result = wsClientEp->close(timeoutInSeconds = 0);
+   error? result = wsClientEp->close(timeout = 0);
    runtime:sleep(2);
    var err = wsClientEp->writeTextMessage("some");
    if (err is error) {
@@ -131,5 +131,5 @@ public function testHandshakeError() returns Error? {
    var resp = wsClientEp->writeTextMessage("text");
    runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
-   error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
+   error? result = wsClientEp->close(statusCode = 1000, timeout = 0);
 }

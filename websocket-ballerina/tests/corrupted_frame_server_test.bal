@@ -71,5 +71,5 @@ public function testCorruptedFrame() returns Error? {
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(3);
    test:assertEquals(data2, "PayloadTooBigError: Max frame length of 1 has been exceeded.", msg = "Failed testCorruptedFrame");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

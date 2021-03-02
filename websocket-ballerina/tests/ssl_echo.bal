@@ -66,7 +66,7 @@ service class sslEchoCallbackService {
    }
 
    remote isolated function onClose(Caller wsEp, int statusCode, string reason) {
-       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
+       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
@@ -89,7 +89,7 @@ public function sslBinaryEcho() returns Error? {
    runtime:sleep(0.5);
    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Tests sending and receiving of text frames in WebSockets.
@@ -107,5 +107,5 @@ public function sslTextEcho() returns Error? {
    runtime:sleep(0.5);
    test:assertEquals(expectedString, "Hi madam", msg = "Data mismatched");
    test:assertEquals(expectedRawpath, "/sslEcho", msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

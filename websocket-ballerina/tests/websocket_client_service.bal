@@ -51,7 +51,7 @@ public function testClientSuccessWithoutService() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21021/client/service/bbe");
    runtime:sleep(0.5);
    test:assertTrue(isClientConnectionOpen);
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Tests the client initialization with a WebSocketClientService but without any resources.
@@ -62,7 +62,7 @@ public function testClientSuccessWithWebSocketClientService() returns Error? {
    check wsClient->writeTextMessage("Client worked");
    runtime:sleep(0.5);
    test:assertTrue(isClientConnectionOpen);
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Tests the client initialization failure when used with a WebSocketService.
@@ -79,5 +79,5 @@ public function testClientSuccessWithWebSocketClientService() returns Error? {
 //    } else {
 //        test:assertFail("Mismatched output");
 //    }
-//    error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
+//    error? result = wsClientEp->close(statusCode = 1000, timeout = 0);
 // }

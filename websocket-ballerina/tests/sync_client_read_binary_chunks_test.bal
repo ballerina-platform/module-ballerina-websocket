@@ -46,5 +46,5 @@ public function testReadBinaryDataChunkSync() returns Error? {
    runtime:sleep(3);
    byte[] resp = check wsClient->readBinaryMessage();
    test:assertEquals(resp, binaryData, msg = "Failed testReadBinaryDataChunkSync");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

@@ -21,14 +21,14 @@
 # Configurations for a WebSocket service.
 #
 # + subProtocols - Negotiable sub protocol by the service
-# + idleTimeoutInSeconds - Idle timeout for the client connection. Upon timeout, `onIdleTimeout` resource (if defined)
+# + idleTimeout - Idle timeout for the client connection. Upon timeout, `onIdleTimeout` resource (if defined)
 #                          in the server service will be triggered. Note that this overrides the `timeoutInMillis` config
 #                          in the `websocket:Listener` which is applicable only for the initial HTTP upgrade request.
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
 #                  If this is not set or is negative or zero, the default frame size which is 65536 will be used.
 public type WSServiceConfig record {|
     string[] subProtocols = [];
-    int idleTimeoutInSeconds = 0;
+    decimal idleTimeout = 0;
     int maxFrameSize = 65536;
 |};
 

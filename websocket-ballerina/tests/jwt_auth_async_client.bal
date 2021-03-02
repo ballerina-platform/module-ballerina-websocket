@@ -82,5 +82,5 @@ public function testAsyncJwtAuth() returns Error? {
     check wsClient->writeTextMessage("Authentication successful");
     runtime:sleep(0.5);
     test:assertEquals(strData, "Authentication successful");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

@@ -23,7 +23,7 @@ byte[] binData = [];
 byte[] expectedPingBinaryData = [];
 listener Listener l17 = new(21005);
 @ServiceConfig {
-   idleTimeoutInSeconds: 10
+   idleTimeout: 10
 }
 service /onlyOnBinary on l17 {
    resource isolated function get .(http:Request req) returns Service|UpgradeError {
@@ -78,7 +78,7 @@ public function testMissingOnText() returns Error? {
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(binData, binaryData, msg = "Data mismatched");
-   error? result = wsClient->close(timeoutInSeconds = 0);
+   error? result = wsClient->close(timeout = 0);
 }
 
 // Tests behavior when onPong resource is missing and a pong is received
@@ -93,7 +93,7 @@ public function testMissingOnPong() returns Error? {
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    test:assertEquals(binData, binaryData, msg = "Data mismatched");
-   error? result = wsClient->close(timeoutInSeconds = 0);
+   error? result = wsClient->close(timeout = 0);
 }
 
 // Tests behavior when onBinaryMessage resource is missing and binary message is received
@@ -108,7 +108,7 @@ public function testMissingOnBinary() returns Error? {
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
-   error? result = wsClient->close(timeoutInSeconds = 0);
+   error? result = wsClient->close(timeout = 0);
 }
 
 // Tests behavior when onBinaryMessage resource is missing and binary message is received
@@ -119,5 +119,5 @@ public function testMissingOnIdleTimeout() returns Error? {
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    test:assertEquals(expectedData, "Hi", msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

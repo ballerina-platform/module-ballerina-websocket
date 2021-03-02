@@ -68,15 +68,15 @@ public client class Caller {
     #
     # + statusCode - Status code for closing the connection
     # + reason - Reason for closing the connection
-    # + timeoutInSeconds - Time to wait for the close frame to be received from the remote endpoint before closing the
+    # + timeout - Time to wait for the close frame to be received from the remote endpoint before closing the
     #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
     #                   is not received from the remote endpoint. If the value < 0 (e.g., -1), then the connection waits
     #                   until a close frame is received. If WebSocket frame is received from the remote endpoint
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeoutInSeconds = 60) returns Error? {
-        return self.conn.close(statusCode, reason, timeoutInSeconds);
+        int timeout = 60) returns Error? {
+        return self.conn.close(statusCode, reason, timeout);
     }
 
     # Sets a connection related attribute.

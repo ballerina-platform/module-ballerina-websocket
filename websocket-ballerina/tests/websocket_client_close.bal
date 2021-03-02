@@ -36,7 +36,7 @@ service class clientCloseService {
 @test:Config {}
 public function testCloseWithCloseCode() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21004/clientClose");
-   error? result = wsClient->close(1001, "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(1001, "Close the connection", timeout = 0);
    runtime:sleep(0.5);
    test:assertEquals(expectedStatusCode, 1001, msg = "status code mismatched");
 }
@@ -45,7 +45,7 @@ public function testCloseWithCloseCode() returns Error? {
 @test:Config {}
 public function testCloseWithoutCloseCode() returns Error? {
    AsyncClient wsClient = check new ("ws://localhost:21004/clientClose");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
    runtime:sleep(5);
    test:assertEquals(expectedStatusCode, 1000, msg = "status code mismatched");
 }

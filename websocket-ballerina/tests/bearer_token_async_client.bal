@@ -50,5 +50,5 @@ public function testAsyncBearerToken() returns Error? {
         });
     runtime:sleep(0.5);
     test:assertEquals(authHeader, "Bearer JlbmMiOiJBMTI4Q0JDLUhTMjU2In");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

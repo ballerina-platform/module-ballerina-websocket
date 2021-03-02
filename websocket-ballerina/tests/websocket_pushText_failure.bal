@@ -28,7 +28,7 @@ service /pushTextFailureService on l20 {
 service class PushTextFailureService {
    *Service;
    remote function onOpen(Caller caller) {
-       Error? err1 = caller->close(timeoutInSeconds = 0);
+       Error? err1 = caller->close(timeout = 0);
        var err = caller->writeTextMessage("hey");
        if (err is Error) {
            errorMsg2 = <@untainted>err.message();
@@ -43,5 +43,5 @@ public function pushTextFailure() returns Error? {
    runtime:sleep(0.5);
    test:assertEquals(errorMsg2, "ConnectionClosureError: Close frame already sent. Cannot push text data!",
        msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, timeout = 0);
 }

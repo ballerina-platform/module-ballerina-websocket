@@ -98,7 +98,7 @@
 //    checkpanic wsClientEp->pushText("detach");
 //    runtime:sleep(500);
 //    test:assertEquals(attDettServerOutput, "GenericError: Cannot detach service. Service has not been registered");
-//    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+//    error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 //    //if (result is WebSocketError) {
 //    //   io:println("Error occurred when closing connection", result);
 //    //}
@@ -123,15 +123,15 @@
 //    checkpanic attachClient->pushText(msg);
 //    runtime:sleep(500);
 //    test:assertEquals(attDettExpectedData, msg);
-//    error? result1 = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 180);
+//    error? result1 = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeout = 180);
 //    if (result1 is WebSocketError) {
 //       io:println("Error occurred when closing connection", result1);
 //    }
-//    error? result2 = attachClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+//    error? result2 = attachClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 //    if (result2 is WebSocketError) {
 //       io:println("Error occurred when closing connection", result2);
 //    }
-//    error? result3 = pathClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+//    error? result3 = pathClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 //    if (result3 is WebSocketError) {
 //       io:println("Error occurred when closing connection", result3);
 //    }
