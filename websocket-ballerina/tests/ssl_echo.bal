@@ -40,14 +40,14 @@
 
 // service class WsService6 {
 //   *Service;
-//   remote isolated function onTextMessage(Client caller, string data) {
+//   remote isolated function onTextMessage(Caller caller, string data) {
 //        var returnVal = caller->writeTextMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote isolated function onBinaryMessage(Client caller, byte[] data) {
+//    remote isolated function onBinaryMessage(Caller caller, byte[] data) {
 //        var returnVal = caller->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
@@ -57,15 +57,15 @@
 
 // service class sslEchoCallbackService {
 //    *Service;
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        expectedString = <@untainted>text;
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        expectedBinaryData = <@untainted>data;
 //    }
 
-//    remote isolated function onClose(Client wsEp, int statusCode, string reason) {
+//    remote isolated function onClose(Caller wsEp, int statusCode, string reason) {
 //        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;

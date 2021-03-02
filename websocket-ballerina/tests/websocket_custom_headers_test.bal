@@ -50,7 +50,7 @@ service class MyWSService {
   public function init(map<string> customHeaders) {
      self.customHeaders = customHeaders;
   }
-  remote function onTextMessage(Client caller, string text) {
+  remote function onTextMessage(Caller caller, string text) {
       Error? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In service 1 onTextMessage isOpen " + caller.isOpen().toString());
   }
@@ -58,7 +58,7 @@ service class MyWSService {
 
 service class MyWSService2 {
   *Service;
-  remote function onTextMessage(Client caller, string text) {
+  remote function onTextMessage(Caller caller, string text) {
       Error? err = caller->close(timeoutInSeconds = 0);
       output = <@untainted>("In service 2 onTextMessage isOpen " + caller.isOpen().toString());
   }

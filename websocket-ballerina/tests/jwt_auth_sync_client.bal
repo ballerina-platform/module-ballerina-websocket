@@ -52,7 +52,7 @@ service /jwtSyncAuthService on l51 {
 
 service class WsService51 {
     *Service;
-    remote function onTextMessage(Client caller, string data) returns Error? {
+    remote function onTextMessage(Caller caller, string data) returns Error? {
         strSyncData = data;
     }
 }

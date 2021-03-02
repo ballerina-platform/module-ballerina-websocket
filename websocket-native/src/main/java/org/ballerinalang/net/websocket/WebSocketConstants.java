@@ -32,7 +32,7 @@ public class WebSocketConstants {
     public static final String SEPARATOR = ":";
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
-    public static final String WEBSOCKET_CALLER = "Client";
+    public static final String WEBSOCKET_CALLER = "Caller";
     public static final String WEBSOCKET_ASYNC_CLIENT = "AsyncClient";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
@@ -40,7 +40,7 @@ public class WebSocketConstants {
     public static final String WS_SCHEME = "ws";
     public static final String BACK_SLASH = "/";
     public static final String GET = "get";
-    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + "Client";
+    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
 
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");

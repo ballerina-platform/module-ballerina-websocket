@@ -30,35 +30,14 @@ service /onTextString on l2 {
 
 service class WsService1 {
   *Service;
-  remote isolated function onTextMessage(Client caller, string data) returns string? {
+  remote isolated function onTextMessage(Caller caller, string data) returns string? {
       io:println("server on text message");
-      var readErr = trap caller->readTextMessage();
-      if (readErr is error) {
-          io:println(readErr);
-      }
       return data;
   }
 
   remote isolated function onError(error err) returns Error? {
       io:println("server on error message");
   }
-}
-
-service class clientPushCallbackService {
-    *Service;
-    remote function onTextMessage(Client wsEp, string text) {
-        io:println("On client onTextMessage resource");
-        data = <@untainted>text;
-    }
-
-    remote isolated function onError(Client wsEp, error err) {
-        io:println("On client onError resource");
-        io:println(err);
-    }
-
-    remote isolated function onOpen(Client wsEp) {
-        io:println("On client connect resource");
-    }
 }
 
 // Tests string support for writeTextMessage and onTextMessage

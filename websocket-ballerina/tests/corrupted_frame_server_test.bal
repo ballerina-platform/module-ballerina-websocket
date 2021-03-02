@@ -33,14 +33,14 @@ service /onCorrupt on l30 {
 
 service class corruptedService {
   *Service;
-  remote isolated function onTextMessage(Client caller, string data) returns Error? {
+  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
       check caller->writeTextMessage("xyz");
   }
-  remote function onError(Client wsEp, error err) {
+  remote function onError(Caller wsEp, error err) {
       io:println("on server error");
       data2 = err.message();
   }
-  remote isolated function onClose(Client wsEp, error err) {
+  remote isolated function onClose(Caller wsEp, error err) {
       io:println(err);
   }
 }

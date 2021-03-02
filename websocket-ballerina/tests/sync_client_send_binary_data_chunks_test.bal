@@ -29,7 +29,7 @@ service /onBinaryDataSync on l41 {
 
 service class WsService41 {
   *Service;
-  remote function onBinaryMessage(Client wsEp, byte[] data) returns Error? {
+  remote function onBinaryMessage(Caller wsEp, byte[] data) returns Error? {
       BinSyncData = data;
   }
 }

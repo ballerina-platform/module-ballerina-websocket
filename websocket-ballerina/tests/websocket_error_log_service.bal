@@ -25,20 +25,20 @@ service UpgradeService /'error/ws on l16 {
 
 service class ErrorService {
    *Service;
-   remote function onOpen(Client ep) {
+   remote function onOpen(Caller ep) {
    }
 
-   remote function onTextMessage(Client ep, string text) {
+   remote function onTextMessage(Caller ep, string text) {
        var returnVal = ep->writeTextMessage(text);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote function onError(Client ep, error err) {
+   remote function onError(Caller ep, error err) {
        io:println(err.message());
    }
 
-   remote function onClose(Client ep, int statusCode, string reason) {
+   remote function onClose(Caller ep, int statusCode, string reason) {
    }
 }

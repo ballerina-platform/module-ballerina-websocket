@@ -29,7 +29,7 @@
 
 // service class WsService40 {
 //   *Service;
-//   remote function onBinaryMessage(Client caller, byte[] data) returns Error? {
+//   remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
 //       BinData = data;
 //   }
 // }

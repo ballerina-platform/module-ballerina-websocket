@@ -35,7 +35,7 @@ service class TestService {
 
 service class PongService {
    *Service;
-   remote function onPong(Client wsEp, byte[] data) {
+   remote function onPong(Caller wsEp, byte[] data) {
        expectedAutoPongData = <@untainted>data;
    }
 }

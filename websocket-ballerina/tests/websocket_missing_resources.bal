@@ -32,7 +32,7 @@
 // }
 // service class OnlyOnBinary {
 //   *Service;
-//    remote function onBinaryMessage(Client caller, byte[] data) returns Error? {
+//    remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
 //        check caller->writeBinaryMessage(data);
 //    }
 // }
@@ -46,22 +46,22 @@
 
 // service class OnlyOnText {
 //    *Service;
-//    remote function onTextMessage(Client caller, string data) returns Error? {
+//    remote function onTextMessage(Caller caller, string data) returns Error? {
 //        check caller->writeTextMessage(data);
 //    }
 // }
 
 // service class callbackService {
 //    *Service;
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        expectedData = <@untainted>text;
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        binData = <@untainted>data;
 //    }
 
-//    remote function onPing(Client wsEp, byte[] data) {
+//    remote function onPing(Caller wsEp, byte[] data) {
 //        expectedPingBinaryData = <@untainted>data;
 //    }
 // }

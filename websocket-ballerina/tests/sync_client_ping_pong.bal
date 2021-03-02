@@ -28,13 +28,13 @@ service /pingpong on l35 {
 
 service class WsServiceSyncPingPong {
     *Service;
-    remote isolated function onTextMessage(Client caller, string data) returns Error? {
+    remote isolated function onTextMessage(Caller caller, string data) returns Error? {
         io:println("On ping pong server text");
         byte[] pingData = [5, 24, 56, 243];
         check caller->ping(pingData);
     }
 
-    remote isolated function onPing(Client caller, byte[] localData) {
+    remote isolated function onPing(Caller caller, byte[] localData) {
         io:println("On server ping");
         var returnVal = caller->pong(localData);
         if (returnVal is Error) {
@@ -42,7 +42,7 @@ service class WsServiceSyncPingPong {
         }
     }
 
-    remote isolated function onPong(Client caller, byte[] localData) {
+    remote isolated function onPong(Caller caller, byte[] localData) {
         io:println("On server pong");
         var returnVal = caller->writeTextMessage("pong received");
         if (returnVal is Error) {
@@ -50,14 +50,14 @@ service class WsServiceSyncPingPong {
         }
     }
 
-    remote isolated function onClose(Client caller, string data) returns Error? {
+    remote isolated function onClose(Caller caller, string data) returns Error? {
         check caller->writeTextMessage(data);
     }
 }
 
 service class clientPingPongCallbackService {
     *ClientService;
-    remote isolated function onPing(Client caller, byte[] localData) {
+    remote isolated function onPing(Caller caller, byte[] localData) {
         io:println("On sync client ping");
         var returnVal = caller->pong(localData);
         if (returnVal is Error) {
@@ -65,7 +65,7 @@ service class clientPingPongCallbackService {
         }
     }
 
-    remote isolated function onPong(Client caller, byte[] localData) {
+    remote isolated function onPong(Caller caller, byte[] localData) {
         io:println("On sync client pong");
         var returnVal = caller->writeTextMessage("pong received");
         if (returnVal is Error) {

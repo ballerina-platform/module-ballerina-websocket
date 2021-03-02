@@ -37,7 +37,7 @@ service /sslTest on l37 {
 
 service class SyncSslService {
     *Service;
-    remote isolated function onTextMessage(Client caller, string data) {
+    remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
         if (returnVal is Error) {
             panic <error>returnVal;

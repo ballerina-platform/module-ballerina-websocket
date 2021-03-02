@@ -33,29 +33,29 @@
 
 // service class corruptedClService {
 //   *Service;
-//   remote isolated function onTextMessage(Client caller, string data) returns Error? {
+//   remote isolated function onTextMessage(Caller caller, string data) returns Error? {
 //       check caller->writeTextMessage("xyz");
 //   }
-//   remote function onError(Client wsEp, error err) {
+//   remote function onError(Caller wsEp, error err) {
 //       io:println("on server error");
 //   }
-//   remote isolated function onClose(Client wsEp, error err) {
+//   remote isolated function onClose(Caller wsEp, error err) {
 //       io:println(err);
 //   }
 // }
 
 // service class clientCBService {
 //     *Service;
-//     remote function onTextMessage(Client wsEp, string text) {
+//     remote function onTextMessage(Caller wsEp, string text) {
 //         data3 = <@untainted>text;
 //     }
 
-//     remote function onError(Client wsEp, error err) {
+//     remote function onError(Caller wsEp, error err) {
 //         data3 = err.message();
 //         io:println(err.message());
 //     }
 
-//     remote isolated function onClose(Client wsEp, error err) {
+//     remote isolated function onClose(Caller wsEp, error err) {
 //         io:println(err.message());
 //     }
 // }

@@ -23,7 +23,7 @@ string errMessage = "";
 ClientConfiguration config = {subProtocols: ["xml"]};
 
 service class errorResourceService {
-   remote function onError(Client clientCaller, error err) {
+   remote function onError(Caller clientCaller, error err) {
        errMessage = <@untainted>err.message();
    }
 }
@@ -38,39 +38,39 @@ service /websocket on l14 {
 
 service class ErrorServer {
   *Service;
-   remote isolated function onOpen(Client caller) {
+   remote isolated function onOpen(Caller caller) {
        io:println("The Connection ID websocket client exceptions test: " + caller.getConnectionId());
    }
 
-   remote isolated function onPing(Client caller, byte[] localData) {
+   remote isolated function onPing(Caller caller, byte[] localData) {
        var returnVal = caller->pong(localData);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onPong(Client caller, byte[] localData) {
+   remote isolated function onPong(Caller caller, byte[] localData) {
        var returnVal = caller->ping(localData);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onTextMessage(Client caller, string text) {
+   remote isolated function onTextMessage(Caller caller, string text) {
        var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message" + err.message());
        }
    }
 
-   remote isolated function onBinaryMessage(Client caller, byte[] data) {
+   remote isolated function onBinaryMessage(Caller caller, byte[] data) {
        var returnVal = caller->writeBinaryMessage(data);
        if (returnVal is Error) {
            panic <error>returnVal;
        }
    }
 
-   remote isolated function onClose(Client ep, int statusCode, string reason) {
+   remote isolated function onClose(Caller ep, int statusCode, string reason) {
    }
 }
 

@@ -29,25 +29,25 @@
 
 // service class ProxyService {
 //   *Service;
-//   remote function onOpen(Client wsEp) returns Error? {
+//   remote function onOpen(Caller wsEp) returns Error? {
 //        AsyncClient wsClientEp = check new ("ws://localhost:21019/websocket", new clientCallbackService9());
 //    }
 
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        var returnVal = wsEp->writeTextMessage(text);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        var returnVal = wsEp->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onClose(Client wsEp, int statusCode, string reason) {
+//    remote function onClose(Caller wsEp, int statusCode, string reason) {
 //        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
 //    }
 
@@ -62,18 +62,18 @@
 
 // service class ProxyService2 {
 //    *Service;
-//    remote function onOpen(Client caller) {
+//    remote function onOpen(Caller caller) {
 //        io:println("The Connection ID simple proxy server test: " + caller.getConnectionId());
 //    }
 
-//    remote function onTextMessage(Client caller, string text) {
+//    remote function onTextMessage(Caller caller, string text) {
 //        var err = caller->writeTextMessage(text);
 //        if (err is Error) {
 //            io:println("Error occurred when sending text message: ", err);
 //        }
 //    }
 
-//    remote function onBinaryMessage(Client caller, byte[] data) {
+//    remote function onBinaryMessage(Caller caller, byte[] data) {
 //        var returnVal = caller->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
@@ -83,36 +83,36 @@
 
 // service class clientCallbackService9 {
 //    *Service;
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        var returnVal = wsEp->writeTextMessage(text);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        var returnVal = wsEp->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onClose(Client wsEp, int statusCode, string reason) {
+//    remote function onClose(Caller wsEp, int statusCode, string reason) {
 //        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
 //    }
 // }
 
 // service class proxyCallbackService {
 //    *Service;
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        proxyData = <@untainted>text;
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        expectedBinData = <@untainted>data;
 //    }
 
-//    remote function onClose(Client wsEp, int statusCode, string reason) {
+//    remote function onClose(Caller wsEp, int statusCode, string reason) {
 //        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
 //    }
 // }

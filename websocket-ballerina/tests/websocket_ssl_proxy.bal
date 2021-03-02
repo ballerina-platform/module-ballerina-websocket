@@ -38,7 +38,7 @@
 // }
 // service class SslProxy {
 //    *Service;
-//    remote function onOpen(Client wsEp) returns Error? {
+//    remote function onOpen(Caller wsEp) returns Error? {
 //        AsyncClient wsClientEp = check new ("wss://localhost:21028/websocket", new sslClientService(), {
 //                secureSocket: {
 //                    trustStore: {
@@ -49,41 +49,41 @@
 //            });
 //    }
 
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        var returnVal = wsEp->writeTextMessage(text);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        var returnVal = wsEp->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onClose(Client wsEp, int statusCode, string reason) {
+//    remote function onClose(Caller wsEp, int statusCode, string reason) {
 //    }
 // }
 
 // service class sslClientService {
 //    *Service;
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        var returnVal = wsEp->writeTextMessage(text);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        var returnVal = wsEp->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
 //        }
 //    }
 
-//    remote function onClose(Client wsEp, int statusCode, string reason) {
+//    remote function onClose(Caller wsEp, int statusCode, string reason) {
 //        var returnVal = wsEp->close(statusCode, reason);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
@@ -107,18 +107,18 @@
 
 // service class SslProxyServer {
 //    *Service;
-//    remote function onOpen(Client caller) {
+//    remote function onOpen(Caller caller) {
 //        io:println("The Connection ID ssl proxy server: " + caller.getConnectionId());
 //    }
 
-//    remote function onTextMessage(Client caller, string text) {
+//    remote function onTextMessage(Caller caller, string text) {
 //        var err = caller->writeTextMessage(text);
 //        if (err is Error) {
 //            io:println("Error occurred when sending text message: ", err);
 //        }
 //    }
 
-//    remote function onBinaryMessage(Client caller, byte[] data) {
+//    remote function onBinaryMessage(Caller caller, byte[] data) {
 //        var returnVal = caller->writeBinaryMessage(data);
 //        if (returnVal is Error) {
 //            panic <error>returnVal;
@@ -128,15 +128,15 @@
 
 // service class sslProxyCallbackService {
 //    *Service;
-//    remote function onTextMessage(Client wsEp, string text) {
+//    remote function onTextMessage(Caller wsEp, string text) {
 //        sslProxyData = <@untainted>text;
 //    }
 
-//    remote function onBinaryMessage(Client wsEp, byte[] data) {
+//    remote function onBinaryMessage(Caller wsEp, byte[] data) {
 //        sslProxyBinData = <@untainted>data;
 //    }
 
-//    remote function onClose(Client wsEp, int statusCode, string reason) {
+//    remote function onClose(Caller wsEp, int statusCode, string reason) {
 //    }
 // }
 
