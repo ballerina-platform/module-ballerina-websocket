@@ -164,7 +164,6 @@ task updateTomlFile {
         def stdlibDependentTimeVersion = project.stdlibTimeVersion.replace("${snapshotVersion}", "")
         def stdlibDependentCryptoVersion = project.stdlibCryptoVersion.replace("${snapshotVersion}", "")
         def stdlibDependentFileVersion = project.stdlibFileVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentReflectVersion = project.stdlibReflectVersion.replace("${snapshotVersion}", "")
         def stdlibDependentOsVersion = project.stdlibOsVersion.replace("${snapshotVersion}", "")
         def stdlibDependentTaskVersion = project.stdlibTaskVersion.replace("${snapshotVersion}", "")
         def stdlibDependentNettyVersion = project.nettyVersion
@@ -195,7 +194,6 @@ task updateTomlFile {
         newDependencyConfig = newDependencyConfig.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
         newDependencyConfig = newDependencyConfig.replace("@stdlib.crypto.version@", stdlibDependentCryptoVersion)
         newDependencyConfig = newDependencyConfig.replace("@stdlib.file.version@", stdlibDependentFileVersion)
-        newDependencyConfig = newDependencyConfig.replace("@stdlib.reflect.version@", stdlibDependentReflectVersion)
         newDependencyConfig = newDependencyConfig.replace("@stdlib.os.version@", stdlibDependentOsVersion)
         newDependencyConfig = newDependencyConfig.replace("@stdlib.task.version@", stdlibDependentTaskVersion)
         ballerinaDependencyFile.text = newDependencyConfig
