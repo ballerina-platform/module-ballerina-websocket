@@ -25,7 +25,7 @@ service /'client/'service on l15 {
 }
 service class clientFailure200 {
   *Service;
-  remote function onOpen(Client wsEp) {
+  remote function onOpen(Caller wsEp) {
        isClientConnectionOpen = true;
    }
 }
@@ -36,7 +36,7 @@ service class callback200 {
 }
 service class ClientService200 {
    *Service;
-   remote function onTextMessage(Client caller, string text) {
+   remote function onTextMessage(Caller caller, string text) {
    }
 }
 // Tests the client initialization without a callback service.

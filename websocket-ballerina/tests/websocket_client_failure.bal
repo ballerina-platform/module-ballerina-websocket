@@ -20,7 +20,7 @@
 // string expectedErr = "";
 // service class errorHandlingService {
 //    *Service;
-//    remote function onError(Client caller, error err) {
+//    remote function onError(Caller caller, error err) {
 //        expectedErr = <@untainted>err.toString();
 //    }
 // }

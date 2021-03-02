@@ -36,7 +36,7 @@ service /basicAuthSyncService on l49 {
 
 service class WsService49 {
     *Service;
-    remote function onTextMessage(Client caller, string data) returns Error? {
+    remote function onTextMessage(Caller caller, string data) returns Error? {
     }
 }
 

@@ -131,13 +131,7 @@ public function testConnectionClosedError() returns Error? {
 public function testHandshakeError() returns Error? {
    Error|Client wsClientEp = new ("ws://localhost:21030/websocket", config = config);
    if (wsClientEp is Error) {
-      io:println("------Error-----------");
-      io:println(wsClientEp);
-      io:println("------Error-----------");
       errMessage = wsClientEp.message();
    }
-   //var resp = wsClientEp->writeTextMessage("text");
-   //runtime:sleep(0.5);
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
-  // error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
 }
