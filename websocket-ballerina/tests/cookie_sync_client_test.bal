@@ -39,10 +39,13 @@ service class WsService46 {
       self.customHeaders = customHeaders;
   }
   *Service;
-  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
+  remote isolated function onTextMessage(Client caller, string data) returns Error? {
       check caller->writeTextMessage(data);
   }
 }
+
+http:Cookie cookie = new ("username", "name");
+http:Cookie[] httpCookies = [cookie];
 
 ClientConfiguration clientConf = {
    cookies: httpCookies

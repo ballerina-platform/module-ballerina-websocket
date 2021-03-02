@@ -26,6 +26,7 @@ public client class Client {
     private boolean open = false;
     private http:Response? response = ();
     private map<any> attributes = {};
+    private boolean initializedByService = false;
 
     private WebSocketConnector conn = new;
     private string url = "";
@@ -41,6 +42,9 @@ public client class Client {
     public isolated function init(string url, ClientService? callbackService = (), ClientConfiguration? config = ())
                               returns Error? {
         self.url = url;
+        if (self.url == "") {
+            return;
+        }
         if (config is ClientConfiguration) {
            addCookies(config);
            check initClientAuth(config);
@@ -172,6 +176,10 @@ public client class Client {
     #
     # + return  - The text data sent by the server or an `error` if an error occurs when sending
     remote isolated function readTextMessage() returns string|Error {
+
+        if (self.initializedByService) {
+           panic error ("Can not call readTextMessage() within a remote function");
+        }
         return self.conn.readTextMessage();
     }
 
@@ -179,6 +187,10 @@ public client class Client {
     #
     # + return  - The binary data sent by the server or an `error` if an error occurs when sending
     remote isolated function readBinaryMessage() returns byte[]|Error {
+
+        if (self.initializedByService) {
+           panic error ("Can not call readBinaryMessage() within a remote function");
+        }
         return self.conn.readBinaryMessage();
     }
 }

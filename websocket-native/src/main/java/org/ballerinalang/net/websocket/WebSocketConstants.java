@@ -32,7 +32,7 @@ public class WebSocketConstants {
     public static final String SEPARATOR = ":";
     public static final String LISTENER = "Listener";
     public static final String WEBSOCKET_CONNECTOR = "WebSocketConnector";
-    public static final String WEBSOCKET_CALLER = "Caller";
+    public static final String WEBSOCKET_CALLER = "Client";
     public static final String WEBSOCKET_ASYNC_CLIENT = "AsyncClient";
     public static final String WEBSOCKET_SERVICE = "WebSocketService";
     public static final String WEBSOCKET_CLIENT_SERVICE = "WebSocketClientService";
@@ -40,7 +40,7 @@ public class WebSocketConstants {
     public static final String WS_SCHEME = "ws";
     public static final String BACK_SLASH = "/";
     public static final String GET = "get";
-    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
+    public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + "Client";
 
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
@@ -103,6 +103,7 @@ public class WebSocketConstants {
     public static final BString LISTENER_ID_FIELD = StringUtils.fromString("id");
     public static final BString LISTENER_NEGOTIATED_SUBPROTOCOLS_FIELD = StringUtils.fromString(
             "negotiatedSubProtocol");
+    public static final BString INITIALIZED_BY_SERVICE = StringUtils.fromString("initializedByService");
     public static final BString LISTENER_IS_SECURE_FIELD = StringUtils.fromString("secure");
     public static final BString LISTENER_IS_OPEN_FIELD = StringUtils.fromString("open");
     public static final BString LISTENER_CONNECTOR_FIELD = StringUtils.fromString("conn");
@@ -132,6 +133,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
 
     public static final String PARAM_TYPE_STRING = "string";
+    public static final String PARAM_TYPE_BYTE_ARR = "byte[]";
 
     public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
     public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";

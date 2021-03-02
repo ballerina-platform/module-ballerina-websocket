@@ -28,11 +28,11 @@ service /onCloseText on l32 {
 
 service class WsServiceSyncClose {
     *Service;
-    remote isolated function onTextMessage(Caller caller, string data) returns Error? {
+    remote isolated function onTextMessage(Client caller, string data) returns Error? {
         check caller->close(statusCode = 1000, reason = "Close the connection");
     }
 
-    remote isolated function onClose(Caller caller, string data) returns Error? {
+    remote isolated function onClose(Client caller, string data) returns Error? {
         check caller->writeTextMessage(data);
     }
 }

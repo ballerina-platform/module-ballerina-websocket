@@ -33,41 +33,22 @@ service /onCorrupt on l30 {
 
 service class corruptedService {
   *Service;
-  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
+  remote isolated function onTextMessage(Client caller, string data) returns Error? {
       check caller->writeTextMessage("xyz");
   }
-  remote function onError(Caller wsEp, error err) {
+  remote function onError(Client wsEp, error err) {
       io:println("on server error");
       data2 = err.message();
   }
-  remote isolated function onClose(Caller wsEp, error err) {
+  remote isolated function onClose(Client wsEp, error err) {
       io:println(err);
   }
-}
-
-service class clientCbackService {
-    *Service;
-    remote function onTextMessage(Caller wsEp, string text) {
-        data2 = <@untainted>text;
-    }
-
-    remote isolated function onError(Caller wsEp, error err) {
-        io:println(<@untainted>err.message());
-    }
-
-    remote isolated function onOpen(Caller wsEp) {
-        io:println("On connect resource");
-    }
-
-    remote isolated function onClose(Caller wsEp, error err) {
-        io:println(err.message());
-    }
 }
 
 // Tests the error when a corrupted frame is sent
 @test:Config {}
 public function testCorruptedFrame() returns Error? {
-   AsyncClient wsClient = check new("ws://localhost:21103/onCorrupt/", new clientCbackService());
+   Client wsClient = check new("ws://localhost:21103/onCorrupt/");
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(3);
    test:assertEquals(data2, "PayloadTooBigError: Max frame length of 1 has been exceeded.", msg = "Failed testCorruptedFrame");

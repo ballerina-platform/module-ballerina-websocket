@@ -32,8 +32,8 @@ service /onTxtDataSync on l43 {
 
 service class WsService43 {
   *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->writeTextMessage("chunked message");
+  remote function onTextMessage(string data) returns string? {
+      return "chunked message";
   }
 }
 
