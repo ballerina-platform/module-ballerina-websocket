@@ -32,7 +32,7 @@ service /onTxtDataSync on l43 {
 
 service class WsService43 {
   *Service;
-  remote function onTextMessage(string data) returns string? {
+  remote function onTextMessage(string data) returns string {
       return "chunked message";
   }
 }

@@ -52,7 +52,7 @@
 
 // service class WsService50 {
 //     *Service;
-//     remote function onTextMessage(Client caller, string data) returns Error? {
+//     remote function onTextMessage(Caller caller, string data) returns Error? {
 //         strData = data;
 //     }
 // }
