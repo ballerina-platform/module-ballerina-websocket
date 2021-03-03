@@ -30,31 +30,22 @@ service /onTextString on l2 {
 
 service class WsService1 {
   *Service;
-  remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->writeTextMessage(data);
+  remote isolated function onTextMessage(Caller caller, string data) returns string? {
+      io:println("server on text message");
+      return data;
   }
-}
 
-service class clientPushCallbackService {
-    *Service;
-    remote function onTextMessage(Caller wsEp, string text) {
-        data = <@untainted>text;
-    }
-
-    remote isolated function onError(Caller wsEp, error err) {
-        io:println(err);
-    }
-
-    remote isolated function onOpen(Caller wsEp) {
-        io:println("On connect resource");
-    }
+  remote isolated function onError(error err) returns Error? {
+      io:println("server on error message");
+  }
 }
 
 // Tests string support for writeTextMessage and onTextMessage
 @test:Config {}
 public function testString() returns Error? {
-   AsyncClient wsClient = check new("ws://localhost:21003/onTextString/", new clientPushCallbackService());
+   Client wsClient = check new("ws://localhost:21003/onTextString/");
    check wsClient->writeTextMessage("Hi");
+   data = check wsClient->readTextMessage();
    runtime:sleep(0.5);
    test:assertEquals(data, "Hi", msg = "Failed writeTextMessage");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
