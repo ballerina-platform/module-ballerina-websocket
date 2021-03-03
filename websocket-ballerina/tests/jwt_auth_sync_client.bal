@@ -22,6 +22,23 @@ import ballerina/test;
 listener Listener l51 = new(21320);
 string strSyncData = "";
 
+http:JwtValidatorConfig jwtConfig = {
+        issuer: "ballerina",
+        audience: ["ballerina", "ballerina.org", "ballerina.io"],
+        signatureConfig: {
+            trustStoreConfig: {
+                trustStore: {
+                    path: "tests/certsAndKeys/ballerinaKeystore.p12",
+                    password: "ballerina"
+                },
+                certAlias: "ballerina"
+            }
+        },
+        scopeKey: "scp"
+    };
+
+http:ListenerJwtAuthHandler handler = new(jwtConfig);
+
 service /jwtSyncAuthService on l51 {
     resource function get .(http:Request req) returns Service|UpgradeError {
         jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
@@ -49,7 +66,7 @@ public function testSyncJwtAuth() returns Error? {
                     audience: ["ballerina", "ballerina.org", "ballerina.io"],
                     keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
                     customClaims: { "scp": "hello" },
-                    expTimeInSeconds: 3600,
+                    expTime: 3600,
                     signatureConfig: {
                         config: {
                             keyAlias: "ballerina",
