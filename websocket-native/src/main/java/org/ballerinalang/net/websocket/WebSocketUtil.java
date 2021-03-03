@@ -214,7 +214,7 @@ public class WebSocketUtil {
                 return defaultValue;
             }
             return timeout;
-        } catch (Exception e) {
+        } catch (ArithmeticException e) {
             logger.warn("The value set for {} needs to be less than {} .The {} value is set to {} ", key,
                     Integer.MAX_VALUE, key, Integer.MAX_VALUE);
             return Integer.MAX_VALUE;

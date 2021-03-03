@@ -47,6 +47,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeout");
     public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeout");
+    public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";

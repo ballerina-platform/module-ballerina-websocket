@@ -75,7 +75,7 @@ service class clientPingPongCallbackService {
 // Ping messages are dispatched to the registered callback service.
 @test:Config {}
 public function testSyncClientPingPong() returns Error? {
-    Client wsClient = check new("ws://localhost:21057/pingpong", new clientPingPongCallbackService());
+    Client wsClient = check new("ws://localhost:21057/pingpong", pingPongService = new clientPingPongCallbackService());
     @strand {
         thread:"any"
     }

@@ -62,7 +62,7 @@ public function testClientSuccessWithoutService() returns Error? {
 //    check wsClient->writeTextMessage("Client worked");
 //    runtime:sleep(0.5);
 //    test:assertTrue(isClientConnectionOpen);
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
 // }
 
 // Tests the client initialization failure when used with a WebSocketService.
@@ -79,5 +79,5 @@ public function testClientSuccessWithoutService() returns Error? {
 //    } else {
 //        test:assertFail("Mismatched output");
 //    }
-//    error? result = wsClientEp->close(statusCode = 1000, timeout = 0);
+//    error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
 // }

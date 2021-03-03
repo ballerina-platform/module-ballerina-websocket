@@ -22,7 +22,7 @@
 #
 # + subProtocols - Negotiable sub protocol by the service
 # + idleTimeout - Idle timeout for the client connection. Upon timeout, `onIdleTimeout` resource (if defined)
-#                          in the server service will be triggered. Note that this overrides the `timeoutInMillis` config
+#                          in the server service will be triggered. Note that this overrides the `timeout` config
 #                          in the `websocket:Listener` which is applicable only for the initial HTTP upgrade request.
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
 #                  If this is not set or is negative or zero, the default frame size which is 65536 will be used.

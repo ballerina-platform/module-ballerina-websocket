@@ -117,7 +117,7 @@ public function testMissingOnBinary() returns Error? {
 // Tests behavior when onBinaryMessage resource is missing and binary message is received
 @test:Config {}
 public function testMissingOnIdleTimeout() returns Error? {
-   Client wsClient = check new ("ws://localhost:21006/onlyOnText", new callbackService());
+   Client wsClient = check new ("ws://localhost:21006/onlyOnText");
    runtime:sleep(0.5);
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);

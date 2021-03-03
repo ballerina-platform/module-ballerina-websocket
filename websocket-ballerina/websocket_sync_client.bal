@@ -38,17 +38,15 @@ public client class Client {
     # + callbackService - The callback service of the client. Resources in this service gets called on the
     #                     receipt of ping, pong, close from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, PingPongService? pingPongService = (), ClientConfiguration? config = ())
+    public isolated function init(string url, *ClientConfiguration config, PingPongService? pingPongService = ())
                               returns Error? {
         self.url = url;
         if (self.url == "") {
             return;
         }
-        if (config is ClientConfiguration) {
-           addCookies(config);
-           check initClientAuth(config);
-        }
-        self.config = config ?: {};
+        addCookies(config);
+        check initClientAuth(config);
+        self.config = config;
         self.pingPongService = pingPongService ?: ();
         return self.initEndpoint();
     }
