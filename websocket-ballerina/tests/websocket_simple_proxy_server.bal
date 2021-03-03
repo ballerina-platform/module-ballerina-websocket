@@ -18,9 +18,8 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
-string proxyData = "";
-byte[] expectedBinData = [];
 listener Listener l22 = new(21018);
+
 service / on l22 {
    resource isolated function get .() returns Service|UpgradeError {
        return new ProxyService();
@@ -30,7 +29,7 @@ service / on l22 {
 service class ProxyService {
   *Service;
   remote function onOpen(Caller wsEp) returns Error? {
-       AsyncClient wsClientEp = check new ("ws://localhost:21019/websocket", new clientCallbackService9());
+       Client wsClientEp = check new ("ws://localhost:21019/websocket");
    }
 
    remote function onTextMessage(Caller wsEp, string text) {
@@ -81,48 +80,13 @@ service class ProxyService2 {
    }
 }
 
-service class clientCallbackService9 {
-   *Service;
-   remote function onTextMessage(Caller wsEp, string text) {
-       var returnVal = wsEp->writeTextMessage(text);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
-
-   remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->writeBinaryMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
-
-   remote function onClose(Caller wsEp, int statusCode, string reason) {
-       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
-   }
-}
-
-service class proxyCallbackService {
-   *Service;
-   remote function onTextMessage(Caller wsEp, string text) {
-       proxyData = <@untainted>text;
-   }
-
-   remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       expectedBinData = <@untainted>data;
-   }
-
-   remote function onClose(Caller wsEp, int statusCode, string reason) {
-       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
-   }
-}
-
 // Tests sending and receiving of text frames in WebSockets.
 @test:Config {}
 public function testSendText() returns Error? {
-   AsyncClient wsClient = check new ("ws://localhost:21018", new proxyCallbackService());
+   Client wsClient = check new ("ws://localhost:21018");
    check wsClient->writeTextMessage("Hi kalai");
    runtime:sleep(0.5);
+   string proxyData = check wsClient->readTextMessage();
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
@@ -130,10 +94,11 @@ public function testSendText() returns Error? {
 // Tests sending and receiving of binary frames in WebSocket.
 @test:Config {}
 public function testSendBinary() returns Error? {
-   AsyncClient wsClient = check new ("ws://localhost:21018", new proxyCallbackService());
+   Client wsClient = check new ("ws://localhost:21018");
    byte[] binaryData = [5, 24, 56, 243];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
+   byte[] expectedBinData = check wsClient->readBinaryMessage();
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

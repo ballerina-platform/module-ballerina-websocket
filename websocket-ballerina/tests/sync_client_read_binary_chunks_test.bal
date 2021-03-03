@@ -25,26 +25,26 @@ listener Listener l44 = new(21314);
    maxFrameSize: 4
 }
 service /onBinDataSync on l44 {
-   resource function get .() returns Service|UpgradeError {
-       return new WsService44();
-   }
+    resource function get .() returns Service|UpgradeError {
+        return new WsService44();
+    }
 }
 
 service class WsService44 {
-  *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->writeBinaryMessage([5, 24, 56, 5, 56, 24]);
-  }
+    *Service;
+    remote function onTextMessage(string data) returns byte[]? {
+        return [5, 24, 56, 5, 56, 24];
+    }
 }
 
 // Tests reading binary data coming as continuation frames and aggragating them to a single binary message.
 @test:Config {}
 public function testReadBinaryDataChunkSync() returns Error? {
-   Client wsClient = check new("ws://localhost:21314/onBinDataSync/");
-   byte[] binaryData = [5, 24, 56, 5, 56, 24];
-   check wsClient->writeTextMessage("Hi");
-   runtime:sleep(3);
-   byte[] resp = check wsClient->readBinaryMessage();
-   test:assertEquals(resp, binaryData, msg = "Failed testReadBinaryDataChunkSync");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    Client wsClient = check new("ws://localhost:21314/onBinDataSync/");
+    byte[] binaryData = [5, 24, 56, 5, 56, 24];
+    check wsClient->writeTextMessage("Hi");
+    runtime:sleep(3);
+    byte[] resp = check wsClient->readBinaryMessage();
+    test:assertEquals(resp, binaryData, msg = "Failed testReadBinaryDataChunkSync");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

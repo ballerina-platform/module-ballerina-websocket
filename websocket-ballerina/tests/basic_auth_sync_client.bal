@@ -18,6 +18,7 @@ import ballerina/http;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
+string authHeader = "";
 listener Listener l49 = new(21318);
 
 service /basicAuthSyncService on l49 {

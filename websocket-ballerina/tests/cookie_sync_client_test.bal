@@ -44,6 +44,9 @@ service class WsService46 {
   }
 }
 
+http:Cookie cookie = new ("username", "name");
+http:Cookie[] httpCookies = [cookie];
+
 ClientConfiguration clientConf = {
    cookies: httpCookies
 };

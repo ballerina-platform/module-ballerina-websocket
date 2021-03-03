@@ -71,7 +71,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
+import static org.ballerinalang.net.websocket.WebSocketConstants.INITIALIZED_BY_SERVICE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_ASYNC_CLIENT;
 
 /**
@@ -91,13 +93,15 @@ public class WebSocketUtil {
             WebSocketServerService wsService,
             WebSocketConnectionManager connectionManager) {
         BObject webSocketCaller = ValueCreator
-                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CALLER);
+                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CALLER,
+                        StringUtils.fromString(""), null, null);
         BObject webSocketConnector = ValueCreator
                 .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CONNECTOR);
         webSocketCaller.addNativeData(NATIVE_DATA_MAX_FRAME_SIZE, wsService.getMaxFrameSize());
 
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
+        webSocketCaller.set(INITIALIZED_BY_SERVICE, true);
         WebSocketConnectionInfo connectionInfo =
                 new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller);
         connectionManager.addConnection(webSocketConnection.getChannelId(), connectionInfo);
@@ -131,6 +135,23 @@ public class WebSocketUtil {
                 // This is needed because since the same strand is used in all actions if an action is called before
                 // this one it will cause this action to return the return value of the previous action.
                 balFuture.complete(null);
+            }
+        });
+    }
+
+    public static void handlePingWebSocketCallback(Future balFuture,
+            ChannelFuture webSocketChannelFuture, Logger log,
+            WebSocketConnectionInfo connectionInfo) {
+        webSocketChannelFuture.addListener(future -> {
+            Throwable cause = future.cause();
+            if (!future.isSuccess() && cause != null) {
+                log.error(ERROR_MESSAGE, cause);
+                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause);
+            } else {
+                balFuture.complete(null);
+                if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
+                    connectionInfo.getWebSocketConnection().readNextFrame();
+                }
             }
         });
     }

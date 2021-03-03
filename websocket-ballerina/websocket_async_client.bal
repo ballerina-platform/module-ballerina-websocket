@@ -14,183 +14,182 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/jballerina.java;
+//import ballerina/jballerina.java;
 import ballerina/lang.array;
 import ballerina/time;
 import ballerina/http;
 import ballerina/mime;
-import ballerina/lang.runtime;
+//import ballerina/lang.runtime;
 
-# Represents a WebSocket client endpoint.
-public client class AsyncClient {
+// # Represents a WebSocket client endpoint.
+// public client class AsyncClient {
 
-    private string id = "";
-    private string? negotiatedSubProtocol = ();
-    private boolean secure = false;
-    private boolean open = false;
-    private http:Response? response = ();
-    private map<any> attributes = {};
+//     private string id = "";
+//     private string? negotiatedSubProtocol = ();
+//     private boolean secure = false;
+//     private boolean open = false;
+//     private http:Response? response = ();
+//     private map<any> attributes = {};
 
-    private WebSocketConnector conn = new;
-    private string url = "";
-    private ClientConfiguration config = {};
-    private Service? callbackService = ();
-    private DynamicListener dynamicListener = new;
+//     private WebSocketConnector conn = new;
+//     private string url = "";
+//     private ClientConfiguration config = {};
+//     private Service? callbackService = ();
+//     private DynamicListener dynamicListener = new;
 
-    # Initializes the client when called.
-    #
-    # + url - URL of the target service
-    # + callbackService - The callback service of the client. Resources in this service gets called on the
-    #                     receipt of messages from the server
-    # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, Service? callbackService = (), ClientConfiguration? config = ())
-                returns Error? {
-        self.url = url;
-        if (config is ClientConfiguration) {
-           addCookies(config);
-           check initClientAuth(config);
-        }
-        self.config = config ?: {};
-        self.callbackService = callbackService ?: ();
-        self.dynamicListener = new DynamicListener();
-        runtime:registerListener(self.dynamicListener);
-        return self.initEndpoint();
-    }
+//     # Initializes the client when called.
+//     #
+//     # + url - URL of the target service
+//     # + callbackService - The callback service of the client. Resources in this service gets called on the
+//     #                     receipt of messages from the server
+//     # + config - The configurations to be used when initializing the client
+//     public isolated function init(string url, Service? callbackService = (), ClientConfiguration? config = ())
+//                 returns Error? {
+//         self.url = url;
+//         if (config is ClientConfiguration) {
+//            addCookies(config);
+//            check initClientAuth(config);
+//         }
+//         self.config = config ?: {};
+//         self.callbackService = callbackService ?: ();
+//         self.dynamicListener = new DynamicListener();
+//         runtime:registerListener(self.dynamicListener);
+//         return self.initEndpoint();
+//     }
 
-    public isolated function initEndpoint() returns Error? {
-        var retryConfig = self.config?.retryConfig;
-        if (retryConfig is WebSocketRetryConfig) {
-            return externRetryInitEndpoint(self);
-        } else {
-            return externWSInitEndpoint(self);
-        }
-    }
+//     public isolated function initEndpoint() returns Error? {
+//         var retryConfig = self.config?.retryConfig;
+//         if (retryConfig is WebSocketRetryConfig) {
+//             return externRetryInitEndpoint(self);
+//         } else {
+//             return externWSInitEndpoint(self);
+//         }
+//     }
 
-    # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
-    # will be lost.
-    #
-    # + data - Data to be sent.
-    # + return  - An `error` if an error occurs when sending
-    remote isolated function writeTextMessage(string data) returns Error? {
-        return self.conn.writeTextMessage(data);
-    }
+//     # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
+//     # will be lost.
+//     #
+//     # + data - Data to be sent.
+//     # + return  - An `error` if an error occurs when sending
+//     remote isolated function writeTextMessage(string data) returns Error? {
+//         return self.conn.writeTextMessage(data);
+//     }
 
-    # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
-    # that message will be lost.
-    #
-    # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
-    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
-        return self.conn.writeBinaryMessage(data);
-    }
+//     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
+//     # that message will be lost.
+//     #
+//     # + data - Binary data to be sent
+//     # + return  - An `error` if an error occurs when sending
+//     remote isolated function writeBinaryMessage(byte[] data) returns Error? {
+//         return self.conn.writeBinaryMessage(data);
+//     }
 
-    # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
-    #
-    # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
-    remote isolated function ping(byte[] data) returns Error? {
-        return self.conn.ping(data);
-    }
+//     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
+//     #
+//     # + data - Binary data to be sent
+//     # + return  - An `error` if an error occurs when sending
+//     remote isolated function ping(byte[] data) returns Error? {
+//         return self.conn.ping(data);
+//     }
 
-    # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
-    # frame will be lost.
-    #
-    # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
-    remote isolated function pong(byte[] data) returns Error? {
-        return self.conn.pong(data);
-    }
+//     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
+//     # frame will be lost.
+//     #
+//     # + data - Binary data to be sent
+//     # + return  - An `error` if an error occurs when sending
+//     remote isolated function pong(byte[] data) returns Error? {
+//         return self.conn.pong(data);
+//     }
 
-    # Closes the connection.
-    #
-    # + statusCode - Status code for closing the connection
-    # + reason - Reason for closing the connection
-    # + timeout - Time to wait for the close frame to be received from the remote endpoint before closing the
-    #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
-    #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
-    #                   waits until a close frame is received. If the WebSocket frame is received from the remote
-    #                   endpoint within the waiting period, the connection is terminated immediately.
-    # + return - An `error` if an error occurs while closing the WebSocket connection
-    remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeout = 60) returns Error? {
-        Error? err = self.conn.close(statusCode, reason, timeout);
-        runtime:deregisterListener(self.dynamicListener);
-        return err;
-    }
+//     # Closes the connection.
+//     #
+//     # + statusCode - Status code for closing the connection
+//     # + reason - Reason for closing the connection
+//     # + timeout - Time to wait for the close frame to be received from the remote endpoint before closing the
+//     #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
+//     #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
+//     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
+//     #                   endpoint within the waiting period, the connection is terminated immediately.
+//     # + return - An `error` if an error occurs while closing the WebSocket connection
+//     remote isolated function close(int? statusCode = 1000, string? reason = (),
+//         int timeout = 60) returns Error? {
+//         Error? err = self.conn.close(statusCode, reason, timeoutInSeconds);
+//         runtime:deregisterListener(self.dynamicListener);
+//         return err;
+//     }
 
-    # Sets a connection-related attribute.
-    #
-    # + key - The key, which identifies the attribute
-    # + value - The value of the attribute
-    public isolated function setAttribute(string key, any value) {
-        self.attributes[key] = value;
-    }
+//     # Sets a connection-related attribute.
+//     #
+//     # + key - The key, which identifies the attribute
+//     # + value - The value of the attribute
+//     public isolated function setAttribute(string key, any value) {
+//         self.attributes[key] = value;
+//     }
 
-    # Gets connection-related attributes if any.
-    #
-    # + key - The key to identify the attribute
-    # + return - The attribute related to the given key or `nil`
-    public isolated function getAttribute(string key) returns any {
-        return self.attributes[key];
-    }
+//     # Gets connection-related attributes if any.
+//     #
+//     # + key - The key to identify the attribute
+//     # + return - The attribute related to the given key or `nil`
+//     public isolated function getAttribute(string key) returns any {
+//         return self.attributes[key];
+//     }
 
-    # Removes connection related attribute if any.
-    #
-    # + key - The key to identify the attribute
-    # + return - The attribute related to the given key or `nil`
-    public isolated function removeAttribute(string key) returns any {
-        return self.attributes.remove(key);
-    }
+//     # Removes connection related attribute if any.
+//     #
+//     # + key - The key to identify the attribute
+//     # + return - The attribute related to the given key or `nil`
+//     public isolated function removeAttribute(string key) returns any {
+//         return self.attributes.remove(key);
+//     }
 
-    # Gives the connection id associated with this connection.
-    #
-    # + return - The unique ID associated with the connection
-    public isolated function getConnectionId() returns string {
-        return self.id;
-    }
+//     # Gives the connection id associated with this connection.
+//     #
+//     # + return - The unique ID associated with the connection
+//     public isolated function getConnectionId() returns string {
+//         return self.id;
+//     }
 
-    # Gives the subprotocol if any that is negotiated with the client.
-    #
-    # + return - The subprotocol if any negotiated with the client or `nil`
-    public isolated function getNegotiatedSubProtocol() returns string? {
-        return self.negotiatedSubProtocol;
-    }
+//     # Gives the subprotocol if any that is negotiated with the client.
+//     #
+//     # + return - The subprotocol if any negotiated with the client or `nil`
+//     public isolated function getNegotiatedSubProtocol() returns string? {
+//         return self.negotiatedSubProtocol;
+//     }
 
-    # Gives the secured status of the connection.
-    #
-    # + return - `true` if the connection is secure
-    public isolated function isSecure() returns boolean {
-        return self.secure;
-    }
+//     # Gives the secured status of the connection.
+//     #
+//     # + return - `true` if the connection is secure
+//     public isolated function isSecure() returns boolean {
+//         return self.secure;
+//     }
 
-    # Gives the open or closed status of the connection.
-    #
-    # + return - `true` if the connection is open
-    public isolated function isOpen() returns boolean {
-        return self.open;
-    }
+//     # Gives the open or closed status of the connection.
+//     #
+//     # + return - `true` if the connection is open
+//     public isolated function isOpen() returns boolean {
+//         return self.open;
+//     }
 
-    # Gives the HTTP response if any received for the client handshake request.
-    #
-    # + return - The HTTP response received from the client handshake request
-    public isolated function getHttpResponse() returns http:Response? {
-        return self.response;
-    }
-}
+//     # Gives the HTTP response if any received for the client handshake request.
+//     #
+//     # + return - The HTTP response received from the client handshake request
+//     public isolated function getHttpResponse() returns http:Response? {
+//         return self.response;
+//     }
+// }
 
+// public class DynamicListener {
 
-public class DynamicListener {
+//    *runtime:DynamicListener;
 
-   *runtime:DynamicListener;
+//    public isolated function init(){}
 
-   public isolated function init(){}
+//    public isolated function 'start() returns error? {}
 
-   public isolated function 'start() returns error? {}
+//    public isolated function gracefulStop() returns error? {}
 
-   public isolated function gracefulStop() returns error? {}
-
-   public isolated function immediateStop() returns error? {}
-}
+//    public isolated function immediateStop() returns error? {}
+// }
 
 # Configurations for the WebSocket client.
 # Following fields are inherited from the other configuration records in addition to the Client specific
@@ -293,12 +292,12 @@ const SPACE = " ";
 const SEMICOLON = ";";
 string dummy = mime:MULTIPART_MIXED;
 
-isolated function externWSInitEndpoint(AsyncClient wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
-    name: "initEndpoint"
-} external;
+// isolated function externWSInitEndpoint(AsyncClient wsClient) returns Error? = @java:Method {
+//     'class: "org.ballerinalang.net.websocket.client.InitEndpoint",
+//     name: "initEndpoint"
+// } external;
 
-isolated function externRetryInitEndpoint(AsyncClient wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
-    name: "initEndpoint"
-} external;
+// isolated function externRetryInitEndpoint(AsyncClient wsClient) returns Error? = @java:Method {
+//     'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
+//     name: "initEndpoint"
+// } external;

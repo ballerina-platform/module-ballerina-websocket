@@ -22,6 +22,7 @@ public client class Caller {
     private boolean secure = false;
     private boolean open = false;
     private map<any> attributes = {};
+    private boolean initializedByService = false;
 
     private WebSocketConnector conn = new;
 

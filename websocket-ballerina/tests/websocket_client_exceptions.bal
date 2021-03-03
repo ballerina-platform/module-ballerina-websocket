@@ -77,20 +77,22 @@ service class ErrorServer {
 // Connection refused IO error.
 @test:Config {}
 public function testConnectionError() returns Error? {
-   AsyncClient wsClient = check new ("ws://lmnop.ls", new errorResourceService(), config);
-   runtime:sleep(0.5);
-   test:assertEquals(errMessage, "ConnectionError: IO Error");
-   error? err = wsClient->close(statusCode = 1000, timeout = 0);
+   Error|Client wsClient = new ("ws://lmnop.ls", config = config);
+   if (wsClient is Error) {
+       test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
+   } else {
+       test:assertFail("Expected a connection error to be returned");
+   }
 }
 
-// SSL/TLS error
-@test:Config {}
-public function testSslError() returns Error? {
-   AsyncClient wsClient = check new ("wss://localhost:21030/websocket", new errorResourceService(), config);
-   runtime:sleep(0.5);
-   test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
-   error? err = wsClient->close(statusCode = 1000, timeout = 0);
-}
+// // SSL/TLS error
+// @test:Config {}
+// public function testSslError() returns Error? {
+//    AsyncClient wsClient = check new ("wss://localhost:21030/websocket", new errorResourceService(), config);
+//    runtime:sleep(0.5);
+//    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
+//    error? err = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
+// }
 
 // The frame exceeds the max frame length
 @test:Config {}
@@ -98,7 +100,7 @@ public function testLongFrameError() returns Error? {
    string ping = "pingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingpingping"
        + "pingpingpingpingpingpingpingpingpingpingpingpingpingping";
    byte[] pingData = ping.toBytes();
-   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
+   Client wsClientEp = check new ("ws://localhost:21030/websocket");
    runtime:sleep(0.5);
    var err = wsClientEp->ping(pingData);
    if (err is error) {
@@ -113,7 +115,7 @@ public function testLongFrameError() returns Error? {
 // Close the connection and push text
 @test:Config {}
 public function testConnectionClosedError() returns Error? {
-   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService());
+   Client wsClientEp = check new ("ws://localhost:21030/websocket");
    error? result = wsClientEp->close(timeout = 0);
    runtime:sleep(2);
    var err = wsClientEp->writeTextMessage("some");
@@ -127,9 +129,9 @@ public function testConnectionClosedError() returns Error? {
 // Handshake failing because of missing subprotocol
 @test:Config {}
 public function testHandshakeError() returns Error? {
-   AsyncClient wsClientEp = check new ("ws://localhost:21030/websocket", new errorResourceService(), config);
-   var resp = wsClientEp->writeTextMessage("text");
-   runtime:sleep(0.5);
+   Error|Client wsClientEp = new ("ws://localhost:21030/websocket", config = config);
+   if (wsClientEp is Error) {
+      errMessage = wsClientEp.message();
+   }
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");
-   error? result = wsClientEp->close(statusCode = 1000, timeout = 0);
 }
