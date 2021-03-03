@@ -352,7 +352,7 @@ public class WebSocketResourceDispatcher {
         try {
             WebSocketService wsService = connectionInfo.getService();
             MethodType onPingMessageResource = null;
-            BObject balservice;
+            BObject balservice = null;
             if (server) {
                 Object dispatchingService = wsService
                         .getWsService(connectionInfo.getWebSocketConnection().getChannelId());

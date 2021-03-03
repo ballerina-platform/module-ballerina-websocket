@@ -66,7 +66,7 @@ public function testSyncJwtAuth() returns Error? {
                     audience: ["ballerina", "ballerina.org", "ballerina.io"],
                     keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
                     customClaims: { "scp": "hello" },
-                    expTimeInSeconds: 3600,
+                    expTime: 3600,
                     signatureConfig: {
                         config: {
                             keyAlias: "ballerina",

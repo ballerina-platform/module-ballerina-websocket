@@ -27,7 +27,7 @@ service /clientClose on l13 {
 
 service class clientCloseService {
    *Service;
-   remote function onClose(int statusCode) {
+   remote function onClose(Caller wsEp, int statusCode, string reason) {
        expectedStatusCode = <@untainted>statusCode;
    }
 }
