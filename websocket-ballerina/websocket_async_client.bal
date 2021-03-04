@@ -216,9 +216,9 @@ public type ClientConfiguration record {|
 #
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
-# + idleTimeout - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
+# + idleTimeout - Idle timeout (in seconds) of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
 #                          of the client service will be triggered
-# + readTimeout - Read timeout of the client. This is applicable only for the Sync client
+# + readTimeout - Read timeout (in seconds) of the client. This is applicable only for the Sync client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
