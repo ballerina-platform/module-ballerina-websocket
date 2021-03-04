@@ -33,7 +33,7 @@ service class WsService61 {
   *Service;
   remote function onBinaryMessage(Caller caller, byte[] data) returns byte[] {
       io:println("On binary message");
-      error? result = caller->close(1001, "Close the connection", timeoutInSeconds = 0);
+      error? result = caller->close(1001, "Close the connection", timeout = 0);
       return data;
   }
 

@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -82,7 +83,7 @@ public class WebSocketUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketUtil.class);
     private static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
-    private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeoutInSeconds");
+    private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeout");
     private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_WEBSOCKET +
             WebSocketConstants.SEPARATOR + WebSocketConstants.FAILOVER_WEBSOCKET_CLIENT;
     public static final String ERROR_MESSAGE = "Error occurred: ";
@@ -207,12 +208,12 @@ public class WebSocketUtil {
     }
 
     public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key, int defaultValue) {
-        long timeout = config.getIntValue(key);
-        if (timeout < 0) {
-            return defaultValue;
-        }
         try {
-            return Math.toIntExact(timeout);
+            int timeout = (int) ((BDecimal) config.get(key)).floatValue();
+            if (timeout < 0) {
+                return defaultValue;
+            }
+            return timeout;
         } catch (ArithmeticException e) {
             logger.warn("The value set for {} needs to be less than {} .The {} value is set to {} ", key,
                     Integer.MAX_VALUE, key, Integer.MAX_VALUE);

@@ -48,5 +48,5 @@ public function testString() returns Error? {
    data = check wsClient->readTextMessage();
    runtime:sleep(0.5);
    test:assertEquals(data, "Hi", msg = "Failed writeTextMessage");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

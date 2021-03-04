@@ -51,7 +51,7 @@ service class MyWSService {
      self.customHeaders = customHeaders;
   }
   remote function onTextMessage(Caller caller, string text) {
-      Error? err = caller->close(timeoutInSeconds = 0);
+      Error? err = caller->close(timeout = 0);
       output = <@untainted>("In service 1 onTextMessage isOpen " + caller.isOpen().toString());
   }
 }
@@ -59,7 +59,7 @@ service class MyWSService {
 service class MyWSService2 {
   *Service;
   remote function onTextMessage(Caller caller, string text) {
-      Error? err = caller->close(timeoutInSeconds = 0);
+      Error? err = caller->close(timeout = 0);
       output = <@untainted>("In service 2 onTextMessage isOpen " + caller.isOpen().toString());
   }
 }
@@ -87,8 +87,8 @@ public function testIsOpenCloseCalled() returns error? {
     runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onTextMessage isOpen false");
     test:assertEquals(pathParam, "tuv");
-    error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-    error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Test isOpen when a close frame is received
@@ -96,8 +96,8 @@ public function testIsOpenCloseCalled() returns error? {
 @test:Config {enable : false}
 public function testIsOpenCloseFrameReceived() returns error? {
     Client wsClient = check new ("ws://localhost:21001");
-    check wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
+    check wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 300);
     runtime:sleep(0.5);
     test:assertEquals(output, "In onClose isOpen true");
-    error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, timeout = 0);
 }

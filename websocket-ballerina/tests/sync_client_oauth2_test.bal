@@ -93,7 +93,7 @@ public function testOAuth2ClientCredentialsGrant() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config1});
     runtime:sleep(0.5);
     test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
@@ -101,7 +101,7 @@ public function testOAuth2PasswordGrant() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config2});
     runtime:sleep(0.5);
     test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
@@ -109,5 +109,5 @@ public function testOAuth2DirectToken() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config3});
     runtime:sleep(0.5);
     test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
-    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

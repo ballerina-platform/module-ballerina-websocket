@@ -77,9 +77,9 @@ public class Listener {
     #
     # + port - Listening port of the websocket service listener
     # + config - Configurations for the websocket service listener
-    public isolated function init(int|http:Listener 'listener, ListenerConfiguration? config = ()) returns Error? {
+    public isolated function init(int|http:Listener 'listener, *ListenerConfiguration config) returns Error? {
         self.instanceId = uuid();
-        self.config = config ?: {};
+        self.config = config;
         if ('listener is http:Listener) {
            self.port = 'listener.getPort();
         } else {
@@ -173,7 +173,7 @@ public type Local record {|
 # + http1Settings - Configurations related to HTTP/1.x protocol
 # + secureSocket - The SSL configurations for the service endpoint. This needs to be configured in order to
 #                  communicate through WSS.
-# + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation in the
+# + timeout - Period of time in seconds that a connection waits for a read/write operation in the
 #                     initial upgrade request. Use value 0 to disable timeout
 # + server - The server name which should appear as a response header
 # + webSocketCompressionEnabled - Enable support for compression in WebSocket
@@ -182,7 +182,7 @@ public type ListenerConfiguration record {|
     string host = "0.0.0.0";
     ListenerHttp1Settings http1Settings = {};
     ListenerSecureSocket? secureSocket = ();
-    int timeoutInMillis = 120000;
+    decimal timeout = 120;
     string? server = ();
     boolean webSocketCompressionEnabled = true;
     RequestLimitConfigs requestLimits = {};

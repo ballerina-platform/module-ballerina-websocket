@@ -80,15 +80,15 @@ public client class WebSocketFailoverClient {
     #
     # + statusCode - Status code for closing the connection
     # + reason - Reason for closing the connection
-    # + timeoutInSeconds - Time to wait for the close frame to be received from the remote endpoint before closing the
+    # + timeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
     #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
     #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the webSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-    int timeoutInSeconds = 60) returns Error? {
-        return self.conn.close(statusCode, reason, timeoutInSeconds);
+    int timeout = 60) returns Error? {
+        return self.conn.close(statusCode, reason, timeout);
     }
 
     # Sets a connection-related attribute.
@@ -158,11 +158,11 @@ public client class WebSocketFailoverClient {
 # | callbackService - Copied from CommonWebSocketClientConfiguration             |
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
-# | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
+# | idleTimeout - Copied from CommonWebSocketClientConfiguration        |
 # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
 # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
-# | handShakeTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration   |
+# | handShake - Copied from CommonWebSocketClientConfiguration   |
 # | cookieConfig - Copied from CommonWebSocketClientConfiguration                |
 # + targetUrls - The set of URLs, which are used to connect to the server
 # + failoverIntervalInMillis - The maximum number of milliseconds to delay a failover attempt

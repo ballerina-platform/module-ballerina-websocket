@@ -18,6 +18,7 @@
 
 package org.ballerinalang.net.websocket.serviceendpoint;
 
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -65,6 +66,7 @@ import static org.ballerinalang.net.http.HttpConstants.SSL_CONFIG_SSL_VERIFY_CLI
 import static org.ballerinalang.net.http.HttpConstants.SSL_PROTOCOL_VERSION;
 import static org.ballerinalang.net.http.HttpUtil.setInboundMgsSizeValidationConfig;
 import static org.ballerinalang.net.transport.contract.Constants.HTTP_1_1_VERSION;
+import static org.ballerinalang.net.websocket.WebSocketConstants.ANNOTATION_ATTR_TIMEOUT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ENDPOINT_CONFIG_PORT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.HTTP_SERVER_CONNECTOR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SERVICE_ENDPOINT_CONFIG;
@@ -105,7 +107,7 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
     private static ListenerConfiguration getListenerConfig(long port, BMap endpointConfig) {
         String host = endpointConfig.getStringValue(HttpConstants.ENDPOINT_CONFIG_HOST).getValue();
         BMap sslConfig = endpointConfig.getMapValue(HttpConstants.ENDPOINT_CONFIG_SECURE_SOCKET);
-        long idleTimeout = endpointConfig.getIntValue(HttpConstants.ENDPOINT_CONFIG_TIMEOUT);
+        long idleTimeout = ((long) ((BDecimal) endpointConfig.get(ANNOTATION_ATTR_TIMEOUT)).floatValue()) * 1000;
 
         ListenerConfiguration listenerConfiguration = new ListenerConfiguration();
         BMap<BString, Object> http1Settings = (BMap<BString, Object>) endpointConfig.get(HttpConstants.HTTP1_SETTINGS);

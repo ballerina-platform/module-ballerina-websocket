@@ -47,7 +47,7 @@ service class ProxyService {
    }
 
    remote function onClose(Caller wsEp, int statusCode, string reason) {
-       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
+       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
    }
 
 }
@@ -88,7 +88,7 @@ public function testSendText() returns Error? {
    runtime:sleep(0.5);
    string proxyData = check wsClient->readTextMessage();
    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Tests sending and receiving of binary frames in WebSocket.
@@ -100,5 +100,5 @@ public function testSendBinary() returns Error? {
    runtime:sleep(0.5);
    byte[] expectedBinData = check wsClient->readBinaryMessage();
    test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

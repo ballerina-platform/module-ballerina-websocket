@@ -105,14 +105,14 @@ import ballerina/mime;
 //     #
 //     # + statusCode - Status code for closing the connection
 //     # + reason - Reason for closing the connection
-//     # + timeoutInSeconds - Time to wait for the close frame to be received from the remote endpoint before closing the
+//     # + timeout - Time to wait for the close frame to be received from the remote endpoint before closing the
 //     #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
 //     #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
 //     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
 //     #                   endpoint within the waiting period, the connection is terminated immediately.
 //     # + return - An `error` if an error occurs while closing the WebSocket connection
 //     remote isolated function close(int? statusCode = 1000, string? reason = (),
-//         int timeoutInSeconds = 60) returns Error? {
+//         int timeout = 60) returns Error? {
 //         Error? err = self.conn.close(statusCode, reason, timeoutInSeconds);
 //         runtime:deregisterListener(self.dynamicListener);
 //         return err;
@@ -200,11 +200,11 @@ import ballerina/mime;
 # | callbackService - Copied from CommonWebSocketClientConfiguration             |
 # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
 # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
-# | idleTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration        |
+# | idleTimeout - Copied from CommonWebSocketClientConfiguration        |
 # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
 # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
-# | handShakeTimeoutInSeconds - Copied from CommonWebSocketClientConfiguration   |
+# | handShakeTimeout - Copied from CommonWebSocketClientConfiguration   |
 # | cookies - Copied from CommonWebSocketClientConfiguration                     |
 # + retryConfig - Retry related configurations
 public type ClientConfiguration record {|
@@ -216,14 +216,14 @@ public type ClientConfiguration record {|
 #
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
-# + idleTimeoutInSeconds - Idle timeout of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
+# + idleTimeout - Idle timeout (in seconds) of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
 #                          of the client service will be triggered
-# + readTimeoutInSeconds - Read timeout of the client. This is applicable only for the Sync client
+# + readTimeout - Read timeout (in seconds) of the client. This is applicable only for the Sync client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
 # + webSocketCompressionEnabled - Enable support for compression in the WebSocket
-# + handShakeTimeoutInSeconds - Time (in seconds) that a connection waits to get the response of
+# + handShakeTimeout - Time (in seconds) that a connection waits to get the response of
 #                               the webSocket handshake. If the timeout exceeds, then the connection is terminated with
 #                               an error.If the value < 0, then the value sets to the default value(300).
 # + cookies - An Array of `http:Cookie`
@@ -231,12 +231,12 @@ public type ClientConfiguration record {|
 public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
-    int idleTimeoutInSeconds = -1;
-    int readTimeoutInSeconds = -1;
+    decimal idleTimeout = -1;
+    decimal readTimeout = -1;
     http:ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
-    int handShakeTimeoutInSeconds = 300;
+    decimal handShakeTimeout = 300;
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
 |};

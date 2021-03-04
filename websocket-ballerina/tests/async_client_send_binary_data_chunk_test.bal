@@ -42,5 +42,5 @@
 //    check wsClient->writeBinaryMessage(binaryData);
 //    runtime:sleep(5);
 //    test:assertEquals(BinData, binaryData, msg = "Failed testBinaryData");
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 // }

@@ -32,7 +32,7 @@ service class WsService60 {
   *Service;
   remote function onTextMessage(Caller caller, string data) returns string? {
       io:println("On text message");
-      error? result = caller->close(1001, "Close the connection", timeoutInSeconds = 0);
+      error? result = caller->close(1001, "Close the connection", timeout = 0);
       return data;
   }
 

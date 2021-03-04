@@ -109,14 +109,14 @@ public function testLongFrameError() returns Error? {
    } else {
        test:assertFail("Mismatched output");
    }
-   error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClientEp->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Close the connection and push text
 @test:Config {}
 public function testConnectionClosedError() returns Error? {
    Client wsClientEp = check new ("ws://localhost:21030/websocket");
-   error? result = wsClientEp->close(timeoutInSeconds = 0);
+   error? result = wsClientEp->close(timeout = 0);
    runtime:sleep(2);
    var err = wsClientEp->writeTextMessage("some");
    if (err is error) {

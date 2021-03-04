@@ -62,12 +62,12 @@ service class pingPongCallbackService {
 // Tests ping to Ballerina WebSocket server
 @test:Config {}
 public function testPingToBallerinaServer() returns Error? {
-   Client wsClient = check new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
+   Client wsClient = check new ("ws://localhost:21014/pingpong/ws", pingPongService = new pingPongCallbackService());
    byte[] pongData = [5, 24, 56, 243];
    check wsClient->ping(pongData);
    runtime:sleep(0.5);
    test:assertEquals(expectedPongData, pongData);
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // // Tests pong to Ballerina WebSocket server

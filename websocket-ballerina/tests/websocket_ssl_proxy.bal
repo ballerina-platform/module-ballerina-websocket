@@ -114,7 +114,7 @@ public function testSslProxySendText() returns Error? {
    runtime:sleep(0.5);
    string sslProxyData = check wsClient->readTextMessage();
    test:assertEquals(sslProxyData, "Hi", msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 // Tests sending and receiving of binary frames in WebSocket over SSL.
@@ -133,5 +133,5 @@ public function testSslProxySendBinary() returns Error? {
    runtime:sleep(0.5);
    byte[] sslProxyBinData = check wsClient->readBinaryMessage();
    test:assertEquals(sslProxyBinData, binaryData, msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
