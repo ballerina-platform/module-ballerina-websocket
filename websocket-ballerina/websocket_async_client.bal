@@ -206,10 +206,10 @@ import ballerina/mime;
 # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
 # | handShakeTimeout - Copied from CommonWebSocketClientConfiguration   |
 # | cookies - Copied from CommonWebSocketClientConfiguration                     |
-# + retryConfig - Retry related configurations
+//# + retryConfig - Retry related configurations
 public type ClientConfiguration record {|
     *CommonWebSocketClientConfiguration;
-    WebSocketRetryConfig retryConfig?;
+    //WebSocketRetryConfig retryConfig?;
 |};
 
 # Common client configurations for WebSocket clients.
@@ -244,7 +244,7 @@ public type CommonWebSocketClientConfiguration record {|
 # Adds cookies to the custom header.
 #
 # + config - Represents the cookies to be added
-public isolated function addCookies(ClientConfiguration|WebSocketFailoverClientConfiguration config) {
+public isolated function addCookies(ClientConfiguration config) {
    string cookieHeader = "";
    var cookiesToAdd = config["cookies"];
    if (cookiesToAdd is http:Cookie[]) {
@@ -273,19 +273,19 @@ public isolated function addCookies(ClientConfiguration|WebSocketFailoverClientC
    }
 }
 
-# Retry configurations for WebSocket.
-#
-# + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely
-# + intervalInMillis - The number of milliseconds to delay before attempting to reconnect
-# + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
-#                persist
-# + maxWaitIntervalInMillis - Maximum time of the retry interval in milliseconds
-public type WebSocketRetryConfig record {|
-    int maxCount = 0;
-    int intervalInMillis = 1000;
-    float backOffFactor = 1.0;
-    int maxWaitIntervalInMillis = 30000;
-|};
+// # Retry configurations for WebSocket.
+// #
+// # + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely
+// # + intervalInMillis - The number of milliseconds to delay before attempting to reconnect
+// # + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
+// #                persist
+// # + maxWaitIntervalInMillis - Maximum time of the retry interval in milliseconds
+// public type WebSocketRetryConfig record {|
+//     int maxCount = 0;
+//     int intervalInMillis = 1000;
+//     float backOffFactor = 1.0;
+//     int maxWaitIntervalInMillis = 30000;
+// |};
 
 const EQUALS = "=";
 const SPACE = " ";

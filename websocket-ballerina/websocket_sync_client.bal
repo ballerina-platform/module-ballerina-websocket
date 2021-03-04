@@ -36,14 +36,11 @@ public client class Client {
     #
     # + url - URL of the target service
     # + callbackService - The callback service of the client. Resources in this service gets called on the
-    #                     receipt of ping, pong, close from the server
+    #                     receipt of ping, pong from the server
     # + config - The configurations to be used when initializing the client
     public isolated function init(string url, *ClientConfiguration config, PingPongService? pingPongService = ())
                               returns Error? {
         self.url = url;
-        if (self.url == "") {
-            return;
-        }
         addCookies(config);
         check initClientAuth(config);
         self.config = config;
@@ -52,12 +49,12 @@ public client class Client {
     }
 
     public isolated function initEndpoint() returns Error? {
-        var retryConfig = self.config?.retryConfig;
-        if (retryConfig is WebSocketRetryConfig) {
-            return externSyncRetryInitEndpoint(self);
-        } else {
+        //var retryConfig = self.config?.retryConfig;
+        //if (retryConfig is WebSocketRetryConfig) {
+        //    return externSyncRetryInitEndpoint(self);
+        //} else {
             return externSyncWSInitEndpoint(self);
-        }
+        //}
     }
 
     # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
