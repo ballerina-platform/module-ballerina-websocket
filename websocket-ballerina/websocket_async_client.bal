@@ -216,8 +216,6 @@ public type ClientConfiguration record {|
 #
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
-# + idleTimeout - Idle timeout (in seconds) of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
-#                          of the client service will be triggered
 # + readTimeout - Read timeout (in seconds) of the client. This is applicable only for the Sync client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
@@ -231,7 +229,6 @@ public type ClientConfiguration record {|
 public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
-    decimal idleTimeout = -1;
     decimal readTimeout = -1;
     http:ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 65536;
