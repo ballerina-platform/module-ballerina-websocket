@@ -43,7 +43,7 @@ service class PongService {
 // Tests the auto ping pong support in Ballerina if there is no onPing resource
 @test:Config {}
 public function testAutoPingPongSupport() returns Error? {
-   Client wsClient = check new ("ws://localhost:21020", {pingPongHandler:new PongService()});
+   Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PongService()});
    byte[] pingData = [5, 24, 56, 243];
    check wsClient->ping(pingData);
    runtime:sleep(0.5);
