@@ -216,8 +216,6 @@ public type ClientConfiguration record {|
 #
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
-# + idleTimeout - Idle timeout (in seconds) of the client. Upon timeout, the `onIdleTimeout` resource (if defined)
-#                          of the client service will be triggered
 # + readTimeout - Read timeout (in seconds) of the client. This is applicable only for the Sync client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
@@ -228,10 +226,11 @@ public type ClientConfiguration record {|
 #                               an error.If the value < 0, then the value sets to the default value(300).
 # + cookies - An Array of `http:Cookie`
 # + auth - Configurations related to client authentication
+# + pingPongHandler - A service to handle ping/pong frames.
+#                     Resources in this service gets called on the receipt of ping, pong from the server
 public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
-    decimal idleTimeout = -1;
     decimal readTimeout = -1;
     http:ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 65536;
@@ -239,6 +238,7 @@ public type CommonWebSocketClientConfiguration record {|
     decimal handShakeTimeout = 300;
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
+    PingPongService pingPongHandler?;
 |};
 
 # Adds cookies to the custom header.

@@ -35,16 +35,16 @@ public client class Client {
     # Initializes the synchronous client when called.
     #
     # + url - URL of the target service
-    # + callbackService - The callback service of the client. Resources in this service gets called on the
-    #                     receipt of ping, pong from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, *ClientConfiguration config, PingPongService? pingPongService = ())
-                              returns Error? {
+    public isolated function init(string url, *ClientConfiguration config) returns Error? {
         self.url = url;
         addCookies(config);
         check initClientAuth(config);
         self.config = config;
-        self.pingPongService = pingPongService ?: ();
+        var pingPongHandler = config["pingPongHandler"];
+        if (pingPongHandler is PingPongService) {
+            self.pingPongService = pingPongHandler;
+        }
         return self.initEndpoint();
     }
 
@@ -102,8 +102,7 @@ public client class Client {
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
-    remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeout = 60) returns Error? {
+    remote isolated function close(int? statusCode = 1000, string? reason = (), int timeout = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeout);
     }
 

@@ -51,7 +51,7 @@ ClientConfiguration clientConf = {
    cookies: httpCookies
 };
 
-// Tests string support for sending cookies from Async client
+// Tests string support for sending cookies from Sync client
 @test:Config {}
 public function testSendCookieWithSyncClient() returns error? {
    Client wsClient = check new("ws://localhost:21316/testCookieSync/", config = clientConf);
