@@ -226,6 +226,8 @@ public type ClientConfiguration record {|
 #                               an error.If the value < 0, then the value sets to the default value(300).
 # + cookies - An Array of `http:Cookie`
 # + auth - Configurations related to client authentication
+# + pingPongHandler - A service to handle ping/pong frames.
+#                     Resources in this service gets called on the receipt of ping, pong from the server
 public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
@@ -236,6 +238,7 @@ public type CommonWebSocketClientConfiguration record {|
     decimal handShakeTimeout = 300;
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
+    PingPongService? pingPongHandler?;
 |};
 
 # Adds cookies to the custom header.
