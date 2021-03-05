@@ -36,14 +36,15 @@ public client class Client {
     #
     # + url - URL of the target service
     # + config - The configurations to be used when initializing the client
-    # + pingPongService - Resources in this service gets called on the receipt of ping, pong from the server    
-    public isolated function init(string url, *ClientConfiguration config, PingPongService? pingPongService = ())
-                              returns Error? {
+    public isolated function init(string url, *ClientConfiguration config) returns Error? {
         self.url = url;
         addCookies(config);
         check initClientAuth(config);
         self.config = config;
-        self.pingPongService = pingPongService ?: ();
+        var pingPongHandler = config["pingPongHandler"];
+        if (pingPongHandler is PingPongService) {
+            self.pingPongService = pingPongHandler;
+        }
         return self.initEndpoint();
     }
 
