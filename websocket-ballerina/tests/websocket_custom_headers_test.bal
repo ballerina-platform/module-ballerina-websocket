@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-http:Listener hl = check new(21001);
+listener http:Listener hl = check new(21001);
 listener Listener socketListener = new(<@untainted> hl);
 string output = "";
 string errorMsg = "";
@@ -62,6 +62,12 @@ service class MyWSService2 {
       Error? err = caller->close(timeout = 0);
       output = <@untainted>("In service 2 onTextMessage isOpen " + caller.isOpen().toString());
   }
+}
+
+service /helloWorld on hl {
+    resource function get hello(http:Caller caller, http:Request req) {
+        var result = caller->respond("Hello World!");
+    }
 }
 
 // Test isOpen when close is called

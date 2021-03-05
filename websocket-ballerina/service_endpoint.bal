@@ -32,6 +32,7 @@ public class Listener {
     private int port = 0;
     private ListenerConfiguration config = {};
     private string instanceId;
+    private http:Listener? httpListener = ();
 
     # Starts the registered service programmatically.
     #
@@ -81,6 +82,7 @@ public class Listener {
         self.instanceId = uuid();
         self.config = config;
         if ('listener is http:Listener) {
+           self.httpListener = 'listener;
            self.port = 'listener.getPort();
         } else {
            self.port = 'listener;

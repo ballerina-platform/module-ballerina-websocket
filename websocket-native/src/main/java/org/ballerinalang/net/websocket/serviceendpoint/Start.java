@@ -18,6 +18,7 @@
 
 package org.ballerinalang.net.websocket.serviceendpoint;
 
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.transport.contract.ServerConnector;
@@ -35,9 +36,15 @@ import static org.ballerinalang.net.http.HttpConstants.SERVICE_ENDPOINT_CONFIG;
  */
 public class Start extends AbstractWebsocketNativeFunction {
     public static Object start(BObject listener) {
-        if (!isConnectorStarted(listener)) {
+        BObject httpListener = (BObject) listener.get(StringUtils.fromString("httpListener"));
+        if (!isConnectorStarted(listener) && !isConnectorStarted(httpListener)) {
             return startServerConnector(listener);
         }
+        ServerConnectorFuture serverConnectorFuture = (ServerConnectorFuture) ((BObject) listener
+                .get(StringUtils.fromString("httpListener"))).getNativeData("ServerConnectorFuture");
+        WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(listener),
+                listener.getMapValue(SERVICE_ENDPOINT_CONFIG));
+        serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         return null;
     }
 
