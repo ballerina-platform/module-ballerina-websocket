@@ -14,43 +14,45 @@
 // specific language governing permissions and limitations
 // under the License.
 
+public type Error distinct error;
+
 # Raised during failures in connection closure
-public type WsConnectionClosureError distinct error;
+public type ConnectionClosureError distinct Error;
 
 # Raised during the handshake when the WebSocket upgrade fails
-public type WsInvalidHandshakeError distinct error;
+public type InvalidHandshakeError distinct Error;
 
 # Raised when receiving a frame with a payload exceeding the maximum size
-public type WsPayloadTooBigError distinct error;
+public type PayloadTooBigError distinct Error;
 
 # Raised when the other side breaks the protocol
-public type WsProtocolError distinct error;
+public type ProtocolError distinct Error;
 
 # Raised during connection failures
-public type WsConnectionError distinct error;
+public type ConnectionError distinct Error;
 
 # Raised when an out of order/invalid continuation frame is received
-public type WsInvalidContinuationFrameError distinct error;
+public type InvalidContinuationFrameError distinct Error;
 
 # Raised for errors not captured by the specific errors
-public type WsGenericError distinct error;
+public type GenericError distinct Error;
 
 # Raised when the websocket upgrade is not accepted
-public type UpgradeError distinct error;
+public type UpgradeError distinct Error;
 
 # Raised when the client creation fails
-public type WsGenericClientError distinct error;
+public type GenericClientError distinct Error;
 
 # Raised when the initial WebSocket handshake timed out
-public type HandshakeTimedOut distinct error;
+public type HandshakeTimedOut distinct Error;
 
 # Raised when the client creation fails
-public type ReadTimedOutError distinct error;
+public type ReadTimedOutError distinct Error;
 
 # Defines the Auth error types that returned from client
-public type ClientAuthError distinct error;
+public type ClientAuthError distinct Error;
 
-# The union of all the WebSocket related errors
-public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
-WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|
-WsGenericClientError|ReadTimedOutError|HandshakeTimedOut|ClientAuthError;
+//# The union of all the WebSocket related errors
+//public type Error ConnectionClosureError|InvalidHandshakeError|PayloadTooBigError|
+//ProtocolError|ConnectionError|InvalidContinuationFrameError|GenericError|UpgradeError|
+//GenericClientError|ReadTimedOutError|HandshakeTimedOut|ClientAuthError;

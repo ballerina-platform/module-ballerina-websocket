@@ -242,15 +242,15 @@ public class WebSocketUtil {
         if (throwable instanceof WebSocketException) {
             return ((WebSocketException) throwable).getWsError();
         }
-        String errorCode = WebSocketConstants.ErrorCode.WsGenericError.errorCode();
+        String errorCode = WebSocketConstants.ErrorCode.GenericError.errorCode();
         BError cause = null;
         String message = getErrorMessage(throwable);
         if (throwable instanceof CorruptedWebSocketFrameException) {
             WebSocketCloseStatus status = ((CorruptedWebSocketFrameException) throwable).closeStatus();
             if (status == WebSocketCloseStatus.MESSAGE_TOO_BIG) {
-                errorCode = WebSocketConstants.ErrorCode.WsPayloadTooBigError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.PayloadTooBigError.errorCode();
             } else {
-                errorCode = WebSocketConstants.ErrorCode.WsProtocolError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
             }
         } else if (throwable instanceof SSLException) {
             cause = createErrorCause(throwable.getMessage(), HttpErrorType.SSL_ERROR.getReason(),
@@ -258,25 +258,25 @@ public class WebSocketUtil {
             message = "SSL/TLS Error";
         } else if (throwable instanceof IllegalStateException) {
             if (throwable.getMessage().contains("frame continuation")) {
-                errorCode = WebSocketConstants.ErrorCode.WsInvalidContinuationFrameError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.InvalidContinuationFrameError.errorCode();
             } else if (throwable.getMessage().toLowerCase(Locale.ENGLISH).contains("close frame")) {
-                errorCode = WebSocketConstants.ErrorCode.WsConnectionClosureError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.ConnectionClosureError.errorCode();
             }
         } else if (throwable instanceof IllegalAccessException &&
                 throwable.getMessage().equals(WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE)) {
-            errorCode = WebSocketConstants.ErrorCode.WsConnectionError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.ConnectionError.errorCode();
             if (throwable.getMessage() == null) {
                 message = WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE;
             }
         } else if (throwable instanceof TooLongFrameException) {
-            errorCode = WebSocketConstants.ErrorCode.WsPayloadTooBigError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.PayloadTooBigError.errorCode();
         } else if (throwable instanceof CodecException) {
-            errorCode = WebSocketConstants.ErrorCode.WsProtocolError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
         } else if (throwable instanceof WebSocketHandshakeException) {
-            errorCode = WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode();
         } else if (throwable instanceof IOException) {
-            errorCode = WebSocketConstants.ErrorCode.WsConnectionError.errorCode();
-            cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.WsGenericError.
+            errorCode = WebSocketConstants.ErrorCode.ConnectionError.errorCode();
+            cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.GenericError.
                     errorCode(), ModuleUtils.getWebsocketModule());
             message = "IO Error";
         }
@@ -436,7 +436,7 @@ public class WebSocketUtil {
                     WebSocketUtil.failover(webSocketClient, wsService);
                 } else {
                     throw getWebSocketError("Waiting for WebSocket handshake has not been successful", null,
-                            WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), WebSocketUtil
+                            WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode(), WebSocketUtil
                                     .createErrorCause("Connection timeout",
                                             WebSocketConstants.ErrorCode.HandshakeTimedOut.errorCode(),
                                             ModuleUtils.getWebsocketModule()));
@@ -445,7 +445,7 @@ public class WebSocketUtil {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw WebSocketUtil.getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.GenericError.errorCode(), null);
         }
     }
 
@@ -463,7 +463,7 @@ public class WebSocketUtil {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw WebSocketUtil.getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.GenericError.errorCode(), null);
         }
     }
 
@@ -547,7 +547,7 @@ public class WebSocketUtil {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.GenericError.errorCode(), null);
         }
     }
 
@@ -578,7 +578,7 @@ public class WebSocketUtil {
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a WebSocket Client Service",
-                        null, WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                        null, WebSocketConstants.ErrorCode.GenericError.errorCode(), null);
             }
             return new WebSocketService(callbackService, runtime);
         } else {
@@ -601,7 +601,7 @@ public class WebSocketUtil {
     public static BError getWebSocketError(String msg, Throwable throwable, String errorCode,
             BError cause) {
         WebSocketException exception;
-        String message = errorCode.substring(2) + ": " + msg;
+        String message = errorCode + ": " + msg;
         if (throwable != null) {
             exception = new WebSocketException(throwable, errorCode);
         } else if (cause != null) {
@@ -614,7 +614,7 @@ public class WebSocketUtil {
 
     public static void setNotifyFailure(String msg, Future balFuture) {
         balFuture.complete(getWebSocketError(msg, null,
-                WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), null));
+                WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode(), null));
     }
 
     public static BError createWebsocketError(String message, WebSocketConstants.ErrorCode errorType) {

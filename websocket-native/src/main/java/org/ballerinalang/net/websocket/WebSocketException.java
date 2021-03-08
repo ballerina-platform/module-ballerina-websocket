@@ -36,7 +36,7 @@ public class WebSocketException extends RuntimeException {
     private BError wsError;
 
     public WebSocketException(Throwable ex, String typeIdName) {
-        this(WebSocketConstants.ErrorCode.WsGenericError.errorCode().substring(2) + ":" +
+        this(WebSocketConstants.ErrorCode.GenericError.errorCode() + ":" +
                 WebSocketUtil.getErrorMessage(ex), typeIdName);
     }
 

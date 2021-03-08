@@ -47,7 +47,7 @@ public class Ready {
                         put(WebSocketConstants.CLIENT_READY_ON_CONNECT, true);
             } else {
                 return WebSocketUtil.getWebSocketError("Already started reading frames", null,
-                        WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                        WebSocketConstants.ErrorCode.GenericError.errorCode(), null);
             }
         } catch (Exception e) {
             log.error("Error occurred when calling ready", e);

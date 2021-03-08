@@ -35,7 +35,7 @@ public class GracefulStop extends AbstractWebsocketNativeFunction {
             resetRegistry(serverEndpoint);
         } catch (Exception ex) {
             return WebSocketUtil
-                    .createWebsocketError(ex.getMessage(), WebSocketConstants.ErrorCode.WsGenericListenerError);
+                    .createWebsocketError(ex.getMessage(), WebSocketConstants.ErrorCode.GenericListenerError);
         }
         return null;
     }

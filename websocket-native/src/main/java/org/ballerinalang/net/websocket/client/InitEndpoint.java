@@ -77,7 +77,7 @@ public class InitEndpoint {
                 return e;
             }
             return WebSocketUtil.getWebSocketError(e.getMessage(),
-                    null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
+                    null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
         return null;
     }
