@@ -83,7 +83,6 @@ public class Listener {
         self.config = config;
         if ('listener is http:Listener) {
            self.httpListener = 'listener;
-           self.port = 'listener.getPort();
         } else {
            self.port = 'listener;
         }

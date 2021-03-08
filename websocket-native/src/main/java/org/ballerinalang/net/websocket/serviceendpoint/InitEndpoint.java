@@ -69,6 +69,7 @@ import static org.ballerinalang.net.http.HttpUtil.setInboundMgsSizeValidationCon
 import static org.ballerinalang.net.transport.contract.Constants.HTTP_1_1_VERSION;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ANNOTATION_ATTR_TIMEOUT;
 import static org.ballerinalang.net.websocket.WebSocketConstants.ENDPOINT_CONFIG_PORT;
+import static org.ballerinalang.net.websocket.WebSocketConstants.HTTP_LISTENER;
 import static org.ballerinalang.net.websocket.WebSocketConstants.HTTP_SERVER_CONNECTOR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SERVICE_ENDPOINT_CONFIG;
 import static org.ballerinalang.net.websocket.WebSocketUtil.createWebsocketError;
@@ -79,25 +80,23 @@ import static org.ballerinalang.net.websocket.WebSocketUtil.createWebsocketError
  */
 public class InitEndpoint extends AbstractWebsocketNativeFunction {
     public static Object initEndpoint(BObject serviceEndpoint) {
+        ServerConnector httpServerConnector;
         try {
-            if (serviceEndpoint.get(StringUtils.fromString("httpListener")) != null) {
-                ServerConnector httpServerConnector = (ServerConnector) ((BObject) serviceEndpoint
-                        .get(StringUtils.fromString("httpListener"))).getNativeData(HTTP_SERVER_CONNECTOR);
-                serviceEndpoint.addNativeData(HTTP_SERVER_CONNECTOR, httpServerConnector);
-                //Adding service registries to native data
-                resetRegistry(serviceEndpoint);
+            if (serviceEndpoint.get(StringUtils.fromString(HTTP_LISTENER)) != null) {
+                // Get the server connector started by the HTTP module
+                httpServerConnector = (ServerConnector) ((BObject) serviceEndpoint
+                        .get(StringUtils.fromString(HTTP_LISTENER))).getNativeData(HTTP_SERVER_CONNECTOR);
             } else {
                 // Creating server connector
                 BMap serviceEndpointConfig = serviceEndpoint.getMapValue(SERVICE_ENDPOINT_CONFIG);
                 long port = serviceEndpoint.getIntValue(ENDPOINT_CONFIG_PORT);
                 ListenerConfiguration listenerConfiguration = getListenerConfig(port, serviceEndpointConfig);
-                ServerConnector httpServerConnector = HttpConnectionManager.getInstance()
+                httpServerConnector = HttpConnectionManager.getInstance()
                         .createHttpServerConnector(listenerConfiguration);
-                serviceEndpoint.addNativeData(HTTP_SERVER_CONNECTOR, httpServerConnector);
-
-                //Adding service registries to native data
-                resetRegistry(serviceEndpoint);
             }
+            serviceEndpoint.addNativeData(HTTP_SERVER_CONNECTOR, httpServerConnector);
+            //Adding service registries to native data
+            resetRegistry(serviceEndpoint);
             return null;
         } catch (BError errorValue) {
             return errorValue;
