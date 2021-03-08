@@ -238,7 +238,7 @@ public type CommonWebSocketClientConfiguration record {|
     decimal handShakeTimeout = 300;
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
-    PingPongService? pingPongHandler?;
+    PingPongService pingPongHandler?;
 |};
 
 # Adds cookies to the custom header.

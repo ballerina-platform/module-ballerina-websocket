@@ -29,6 +29,7 @@ import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketServerListener;
 
 import static org.ballerinalang.net.http.HttpConstants.SERVICE_ENDPOINT_CONFIG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.HTTP_LISTENER;
 
 /**
  * Start the Websocket listener instance.
@@ -36,12 +37,12 @@ import static org.ballerinalang.net.http.HttpConstants.SERVICE_ENDPOINT_CONFIG;
  */
 public class Start extends AbstractWebsocketNativeFunction {
     public static Object start(BObject listener) {
-        BObject httpListener = (BObject) listener.get(StringUtils.fromString("httpListener"));
+        BObject httpListener = (BObject) listener.get(StringUtils.fromString(HTTP_LISTENER));
         if (!isConnectorStarted(listener) && !isConnectorStarted(httpListener)) {
             return startServerConnector(listener);
         }
         ServerConnectorFuture serverConnectorFuture = (ServerConnectorFuture) ((BObject) listener
-                .get(StringUtils.fromString("httpListener"))).getNativeData("ServerConnectorFuture");
+                .get(StringUtils.fromString(HTTP_LISTENER))).getNativeData(HttpConstants.SERVER_CONNECTOR_FUTURE);
         WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(listener),
                 listener.getMapValue(SERVICE_ENDPOINT_CONFIG));
         serverConnectorFuture.setWebSocketConnectorListener(wsListener);
