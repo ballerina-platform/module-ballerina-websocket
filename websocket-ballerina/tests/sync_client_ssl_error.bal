@@ -41,7 +41,7 @@ service class SyncSslErrorService {
 public function testSyncClientSslError() {
     Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
                        secureSocket: {
-                           trustStore: {
+                           cert: {
                                path: "tests/certsAndKeys/ballerinaTruststore.p12",
                                password: "ballerina"
                            }
