@@ -30,32 +30,31 @@ public client class Client {
     private WebSocketConnector conn = new;
     private string url = "";
     private ClientConfiguration config = {};
-    private ClientService? callbackService = ();
+    private PingPongService? pingPongService = ();
 
     # Initializes the synchronous client when called.
     #
     # + url - URL of the target service
-    # + callbackService - The callback service of the client. Resources in this service gets called on the
-    #                     receipt of ping, pong, close from the server
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, ClientService? callbackService = (), ClientConfiguration? config = ())
-                              returns Error? {
+    public isolated function init(string url, *ClientConfiguration config) returns Error? {
         self.url = url;
-        if (config is ClientConfiguration) {
-           addCookies(config);
+        addCookies(config);
+        check initClientAuth(config);
+        self.config = config;
+        var pingPongHandler = config["pingPongHandler"];
+        if (pingPongHandler is PingPongService) {
+            self.pingPongService = pingPongHandler;
         }
-        self.config = config ?: {};
-        self.callbackService = callbackService ?: ();
         return self.initEndpoint();
     }
 
     public isolated function initEndpoint() returns Error? {
-        var retryConfig = self.config?.retryConfig;
-        if (retryConfig is WebSocketRetryConfig) {
-            return externSyncRetryInitEndpoint(self);
-        } else {
+        //var retryConfig = self.config?.retryConfig;
+        //if (retryConfig is WebSocketRetryConfig) {
+        //    return externSyncRetryInitEndpoint(self);
+        //} else {
             return externSyncWSInitEndpoint(self);
-        }
+        //}
     }
 
     # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
@@ -97,15 +96,14 @@ public client class Client {
     #
     # + statusCode - Status code for closing the connection
     # + reason - Reason for closing the connection
-    # + timeoutInSeconds - Time to wait for the close frame to be received from the remote endpoint before closing the
+    # + timeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
     #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
     #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
-    remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeoutInSeconds = 60) returns Error? {
-        return self.conn.close(statusCode, reason, timeoutInSeconds);
+    remote isolated function close(int? statusCode = 1000, string? reason = (), int timeout = 60) returns Error? {
+        return self.conn.close(statusCode, reason, timeout);
     }
 
     # Sets a connection-related attribute.

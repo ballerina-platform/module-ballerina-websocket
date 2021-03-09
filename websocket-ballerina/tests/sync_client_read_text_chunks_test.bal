@@ -32,8 +32,8 @@ service /onTxtDataSync on l43 {
 
 service class WsService43 {
   *Service;
-  remote function onTextMessage(Caller caller, string data) returns Error? {
-      check caller->writeTextMessage("chunked message");
+  remote function onTextMessage(string data) returns string {
+      return "chunked message";
   }
 }
 
@@ -45,5 +45,5 @@ public function testReadTextDataChunkSync() returns Error? {
    runtime:sleep(3);
    string resp = check wsClient->readTextMessage();
    test:assertEquals("chunked message", resp, msg = "Failed testReadTextDataChunkSync");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

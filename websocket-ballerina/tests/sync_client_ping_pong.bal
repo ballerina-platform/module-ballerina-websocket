@@ -34,12 +34,9 @@ service class WsServiceSyncPingPong {
         check caller->ping(pingData);
     }
 
-    remote isolated function onPing(Caller caller, byte[] localData) {
+    remote isolated function onPing(Caller caller, byte[] localData) returns byte[] {
         io:println("On server ping");
-        var returnVal = caller->pong(localData);
-        if (returnVal is Error) {
-            panic <error>returnVal;
-        }
+        return localData;
     }
 
     remote isolated function onPong(Caller caller, byte[] localData) {
@@ -56,7 +53,7 @@ service class WsServiceSyncPingPong {
 }
 
 service class clientPingPongCallbackService {
-    *ClientService;
+    *PingPongService;
     remote isolated function onPing(Caller caller, byte[] localData) {
         io:println("On sync client ping");
         var returnVal = caller->pong(localData);
@@ -78,7 +75,7 @@ service class clientPingPongCallbackService {
 // Ping messages are dispatched to the registered callback service.
 @test:Config {}
 public function testSyncClientPingPong() returns Error? {
-    Client wsClient = check new("ws://localhost:21057/pingpong", new clientPingPongCallbackService());
+    Client wsClient = check new("ws://localhost:21057/pingpong", config = {pingPongHandler : new clientPingPongCallbackService()});
     @strand {
         thread:"any"
     }

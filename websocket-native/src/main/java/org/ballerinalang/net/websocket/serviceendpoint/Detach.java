@@ -51,7 +51,7 @@ public class Detach extends AbstractWebsocketNativeFunction {
             }
         } catch (Exception ex) {
             return WebSocketUtil
-                    .createWebsocketError(ex.getMessage(), WebSocketConstants.ErrorCode.WsGenericListenerError);
+                    .createWebsocketError(ex.getMessage(), WebSocketConstants.ErrorCode.Error);
         }
         return null;
     }

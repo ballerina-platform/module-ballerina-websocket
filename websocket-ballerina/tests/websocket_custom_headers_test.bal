@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-http:Listener hl = check new(21001);
+listener http:Listener hl = check new(21001);
 listener Listener socketListener = new(<@untainted> hl);
 string output = "";
 string errorMsg = "";
@@ -51,7 +51,7 @@ service class MyWSService {
      self.customHeaders = customHeaders;
   }
   remote function onTextMessage(Caller caller, string text) {
-      Error? err = caller->close(timeoutInSeconds = 0);
+      Error? err = caller->close(timeout = 0);
       output = <@untainted>("In service 1 onTextMessage isOpen " + caller.isOpen().toString());
   }
 }
@@ -59,15 +59,21 @@ service class MyWSService {
 service class MyWSService2 {
   *Service;
   remote function onTextMessage(Caller caller, string text) {
-      Error? err = caller->close(timeoutInSeconds = 0);
+      Error? err = caller->close(timeout = 0);
       output = <@untainted>("In service 2 onTextMessage isOpen " + caller.isOpen().toString());
   }
+}
+
+service /helloWorld on hl {
+    resource function get hello(http:Caller caller, http:Request req) {
+        var result = caller->respond("Hello World!");
+    }
 }
 
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() returns error? {
-    AsyncClient wsClient = check new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
+    Client wsClient = check new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
     check wsClient->writeTextMessage("Hi");
     runtime:sleep(0.5);
 
@@ -82,22 +88,30 @@ public function testIsOpenCloseCalled() returns error? {
        test:assertFail("Couldn't find the expected values");
     }
 
-    AsyncClient wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
+    Client wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
     check wsClient2->writeTextMessage("Hi");
     runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onTextMessage isOpen false");
     test:assertEquals(pathParam, "tuv");
-    error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-    error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+    error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testPortSharingHttpService() returns error? {
+    http:Client clientEndpoint = check new ("http://localhost:21001/helloWorld");
+    http:Response response = check clientEndpoint->get("/hello");
+    string payload = check response.getTextPayload();
+    test:assertEquals(payload, "Hello World!");
 }
 
 // Test isOpen when a close frame is received
 // Disable due to https://github.com/ballerina-platform/module-ballerina-http/issues/71#issuecomment-707017984
 @test:Config {enable : false}
 public function testIsOpenCloseFrameReceived() returns error? {
-    AsyncClient wsClient = check new ("ws://localhost:21001");
-    check wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 300);
+    Client wsClient = check new ("ws://localhost:21001");
+    check wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 300);
     runtime:sleep(0.5);
     test:assertEquals(output, "In onClose isOpen true");
-    error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
+    error? result = wsClient->close(statusCode = 1000, timeout = 0);
 }

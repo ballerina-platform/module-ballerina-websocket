@@ -97,13 +97,13 @@ public class WebSocketConnector {
         return null;
     }
 
-    private static void release(ByteBuf byteBuf) {
+    public static void release(ByteBuf byteBuf) {
         if (byteBuf != null) {
             byteBuf.release();
         }
     }
 
-    private static ByteBuf fromText(String text) {
+    public static ByteBuf fromText(String text) {
         if (text == null || text.isEmpty()) {
             return Unpooled.EMPTY_BUFFER;
         } else {
@@ -111,7 +111,7 @@ public class WebSocketConnector {
         }
     }
 
-    private static ByteBuf fromByteArray(ByteBuffer buffer) {
+    public static ByteBuf fromByteArray(ByteBuffer buffer) {
         return Unpooled.wrappedBuffer(buffer);
     }
 
@@ -171,7 +171,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    private static byte[] getByteChunk(int size, ByteBuf slice) {
+    public static byte[] getByteChunk(int size, ByteBuf slice) {
         byte[] chunk = new byte[size];
         slice.getBytes(0, chunk);
         return chunk;
@@ -185,7 +185,7 @@ public class WebSocketConnector {
                 WebSocketConstants.RESOURCE_NAME_PING);
         try {
             ChannelFuture future = connectionInfo.getWebSocketConnection().ping(ByteBuffer.wrap(binaryData.getBytes()));
-            WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
+            WebSocketUtil.handlePingWebSocketCallback(balFuture, future, log, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_PING,
                     connectionInfo);
         } catch (Exception e) {

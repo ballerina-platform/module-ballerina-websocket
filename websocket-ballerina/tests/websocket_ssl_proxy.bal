@@ -18,14 +18,11 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
-string sslProxyData = "";
-byte[] sslProxyBinData = [];
-
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
 listener Listener l24 = new(21027, {
                       secureSocket: {
-                          keyStore: {
+                          key: {
                               path: KEYSTORE_PATH,
                               password: "ballerina"
                           }
@@ -39,9 +36,9 @@ service /sslEcho on l24 {
 service class SslProxy {
    *Service;
    remote function onOpen(Caller wsEp) returns Error? {
-       AsyncClient wsClientEp = check new ("wss://localhost:21028/websocket", new sslClientService(), {
+       Client wsClientEp = check new ("wss://localhost:21028/websocket", config = {
                secureSocket: {
-                   trustStore: {
+                   cert: {
                        path: TRUSTSTORE_PATH,
                        password: "ballerina"
                    }
@@ -67,33 +64,9 @@ service class SslProxy {
    }
 }
 
-service class sslClientService {
-   *Service;
-   remote function onTextMessage(Caller wsEp, string text) {
-       var returnVal = wsEp->writeTextMessage(text);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
-
-   remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->writeBinaryMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
-
-   remote function onClose(Caller wsEp, int statusCode, string reason) {
-       var returnVal = wsEp->close(statusCode, reason);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
-   }
-}
-
 listener Listener l27 = new(21028, {
                               secureSocket: {
-                                  keyStore: {
+                                  key: {
                                       path: KEYSTORE_PATH,
                                       password: "ballerina"
                                   }
@@ -126,26 +99,12 @@ service class SslProxyServer {
    }
 }
 
-service class sslProxyCallbackService {
-   *Service;
-   remote function onTextMessage(Caller wsEp, string text) {
-       sslProxyData = <@untainted>text;
-   }
-
-   remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       sslProxyBinData = <@untainted>data;
-   }
-
-   remote function onClose(Caller wsEp, int statusCode, string reason) {
-   }
-}
-
-// Tests sending and receiving of text frames in WebSockets.
+// Tests sending and receiving of text frames in WebSockets over SSL.
 @test:Config {}
 public function testSslProxySendText() returns Error? {
-   AsyncClient wsClient = check new ("wss://localhost:21027/sslEcho", new sslProxyCallbackService(), {
+   Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
            secureSocket: {
-               trustStore: {
+               cert: {
                    path: TRUSTSTORE_PATH,
                    password: "ballerina"
                }
@@ -153,16 +112,17 @@ public function testSslProxySendText() returns Error? {
        });
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
+   string sslProxyData = check wsClient->readTextMessage();
    test:assertEquals(sslProxyData, "Hi", msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
-// Tests sending and receiving of binary frames in WebSocket.
+// Tests sending and receiving of binary frames in WebSocket over SSL.
 @test:Config {}
 public function testSslProxySendBinary() returns Error? {
-   AsyncClient wsClient = check new ("wss://localhost:21027/sslEcho", new sslProxyCallbackService(), {
+   Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
            secureSocket: {
-               trustStore: {
+               cert: {
                    path: TRUSTSTORE_PATH,
                    password: "ballerina"
                }
@@ -171,6 +131,7 @@ public function testSslProxySendBinary() returns Error? {
    byte[] binaryData = [5, 24, 56];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
+   byte[] sslProxyBinData = check wsClient->readBinaryMessage();
    test:assertEquals(sslProxyBinData, binaryData, msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

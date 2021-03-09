@@ -1,6 +1,10 @@
 name: PR build
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   ubuntu-build:
@@ -31,6 +35,9 @@ jobs:
           name: Code Coverage JSON
           path: websocket-ballerina/target/report/test_results.json
           if-no-files-found: ignore
+      - name: Generate Codecov Report
+        if:  github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
 
   windows-build:
 

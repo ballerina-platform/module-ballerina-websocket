@@ -45,8 +45,9 @@ public class WebSocketConstants {
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_PATH = StringUtils.fromString("path");
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
-    public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeoutInSeconds");
-    public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeoutInSeconds");
+    public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeout");
+    public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeout");
+    public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
@@ -73,6 +74,7 @@ public class WebSocketConstants {
 
     public static final BString CLIENT_URL_CONFIG = StringUtils.fromString("url");
     public static final BString CLIENT_SERVICE_CONFIG = StringUtils.fromString("callbackService");
+    public static final BString SYNC_CLIENT_SERVICE_CONFIG = StringUtils.fromString("pingPongService");
     public static final BString CUSTOM_HEADERS = StringUtils.fromString("customHeaders");
     public static final BString CLIENT_READY_ON_CONNECT = StringUtils.fromString("readyOnConnect");
     public static final BString WEBSOCKET_UPGRADE_SERVICE_CONFIG = StringUtils.fromString("upgradeService");
@@ -103,6 +105,7 @@ public class WebSocketConstants {
     public static final BString LISTENER_ID_FIELD = StringUtils.fromString("id");
     public static final BString LISTENER_NEGOTIATED_SUBPROTOCOLS_FIELD = StringUtils.fromString(
             "negotiatedSubProtocol");
+    public static final BString INITIALIZED_BY_SERVICE = StringUtils.fromString("initializedByService");
     public static final BString LISTENER_IS_SECURE_FIELD = StringUtils.fromString("secure");
     public static final BString LISTENER_IS_OPEN_FIELD = StringUtils.fromString("open");
     public static final BString LISTENER_CONNECTOR_FIELD = StringUtils.fromString("conn");
@@ -130,8 +133,10 @@ public class WebSocketConstants {
     public static final BString ENDPOINT_CONFIG_PORT = StringUtils.fromString("port");
     public static final String HTTP_SERVER_CONNECTOR = "HTTP_SERVER_CONNECTOR";
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
+    public static final String HTTP_LISTENER = "httpListener";
 
     public static final String PARAM_TYPE_STRING = "string";
+    public static final String PARAM_TYPE_BYTE_ARR = "byte[]";
 
     public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
     public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";
@@ -148,18 +153,16 @@ public class WebSocketConstants {
      */
     public enum ErrorCode {
 
-        WsConnectionClosureError("WsConnectionClosureError"),
-        WsInvalidHandshakeError("WsInvalidHandshakeError"),
-        WsPayloadTooBigError("WsPayloadTooBigError"),
-        WsProtocolError("WsProtocolError"),
-        WsConnectionError("WsConnectionError"),
-        WsInvalidContinuationFrameError("WsInvalidContinuationFrameError"),
-        WsGenericError("WsGenericError"),
-        WsGenericListenerError("GenericListenerError"),
-        WsGenericClientError("GenericClientError"),
+        ConnectionClosureError("ConnectionClosureError"),
+        InvalidHandshakeError("InvalidHandshakeError"),
+        PayloadTooLargeError("PayloadTooLargeError"),
+        ProtocolError("ProtocolError"),
+        ConnectionError("ConnectionError"),
+        InvalidContinuationFrameError("InvalidContinuationFrameError"),
         HandshakeTimedOut("HandshakeTimedOut"),
         ReadTimedOutError("ReadTimedOutError"),
-        SslError("SslError");
+        SslError("SslError"),
+        Error("Error");
 
         private String errorCode;
 

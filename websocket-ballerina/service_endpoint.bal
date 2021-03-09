@@ -15,11 +15,6 @@
 // under the License.
 
 import ballerina/jballerina.java;
-//import ballerina/cache;
-import ballerina/crypto;
-//import ballerina/io;
-//import ballerina/lang.'object as lang;
-//import ballerina/runtime;
 import ballerina/http;
 
 /////////////////////////////
@@ -32,6 +27,7 @@ public class Listener {
     private int port = 0;
     private ListenerConfiguration config = {};
     private string instanceId;
+    private http:Listener? httpListener = ();
 
     # Starts the registered service programmatically.
     #
@@ -77,11 +73,11 @@ public class Listener {
     #
     # + port - Listening port of the websocket service listener
     # + config - Configurations for the websocket service listener
-    public isolated function init(int|http:Listener 'listener, ListenerConfiguration? config = ()) returns Error? {
+    public isolated function init(int|http:Listener 'listener, *ListenerConfiguration config) returns Error? {
         self.instanceId = uuid();
-        self.config = config ?: {};
+        self.config = config;
         if ('listener is http:Listener) {
-           self.port = 'listener.getPort();
+           self.httpListener = 'listener;
         } else {
            self.port = 'listener;
         }
@@ -173,7 +169,7 @@ public type Local record {|
 # + http1Settings - Configurations related to HTTP/1.x protocol
 # + secureSocket - The SSL configurations for the service endpoint. This needs to be configured in order to
 #                  communicate through WSS.
-# + timeoutInMillis - Period of time in milliseconds that a connection waits for a read/write operation in the
+# + timeout - Period of time in seconds that a connection waits for a read/write operation in the
 #                     initial upgrade request. Use value 0 to disable timeout
 # + server - The server name which should appear as a response header
 # + webSocketCompressionEnabled - Enable support for compression in WebSocket
@@ -181,95 +177,28 @@ public type Local record {|
 public type ListenerConfiguration record {|
     string host = "0.0.0.0";
     ListenerHttp1Settings http1Settings = {};
-    ListenerSecureSocket? secureSocket = ();
-    int timeoutInMillis = 120000;
+    ListenerSecureSocket secureSocket?;
+    decimal timeout = 120;
     string? server = ();
     boolean webSocketCompressionEnabled = true;
     RequestLimitConfigs requestLimits = {};
 |};
 
 # Provides settings related to HTTP/1.x protocol.
-#
-# + keepAlive - Can be set to either `KEEPALIVE_AUTO`, which respects the `connection` header, or `KEEPALIVE_ALWAYS`,
-#               which always keeps the connection alive, or `KEEPALIVE_NEVER`, which always closes the connection
-# + maxPipelinedRequests - Defines the maximum number of requests that can be processed at a given time on a single
-#                          connection. By default 10 requests can be pipelined on a single cinnection and user can
-#                          change this limit appropriately.
 public type ListenerHttp1Settings record {|
-    KeepAlive keepAlive = KEEPALIVE_AUTO;
-    int maxPipelinedRequests = 10;
+    *http:ListenerHttp1Settings;
 |};
 
 # Provides inbound request URI, total header and entity body size threshold configurations.
-#
-# + maxUriLength - Maximum allowed length for a URI. Exceeding this limit will result in a `414 - URI Too Long`
-#                  response
-# + maxHeaderSize - Maximum allowed size for headers. Exceeding this limit will result in a
-#                   `431 - Request Header Fields Too Large` response
-# + maxEntityBodySize - Maximum allowed size for the entity body. By default it is set to -1 which means there
-#                       is no restriction `maxEntityBodySize`, On the Exceeding this limit will result in a
-#                       `413 - Payload Too Large` response
 public type RequestLimitConfigs record {|
-    int maxUriLength = 4096;
-    int maxHeaderSize = 8192;
-    int maxEntityBodySize = -1;
+    *http:RequestLimitConfigs;
 |};
 
 
-# Configures the SSL/TLS options to be used for HTTP service.
-#
-# + trustStore - Configures the trust store to be used
-# + keyStore - Configures the key store to be used
-# + certFile - A file containing the certificate of the server
-# + keyFile - A file containing the private key of the server
-# + keyPassword - Password of the private key if it is encrypted
-# + trustedCertFile - A file containing a list of certificates or a single certificate that the server trusts
-# + protocol - SSL/TLS protocol related options
-# + certValidation - Certificate validation against CRL or OCSP related options
-# + ciphers - List of ciphers to be used (e.g.: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-#             TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA)
-# + sslVerifyClient - The type of client certificate verification. (e.g.: "require" or "optional")
-# + shareSession - Enable/disable new SSL session creation
-# + handshakeTimeoutInSeconds - SSL handshake time out
-# + sessionTimeoutInSeconds - SSL session time out
-# + ocspStapling - Enable/disable OCSP stapling
+# Configures the SSL/TLS options to be used for WebSocket service.
 public type ListenerSecureSocket record {|
-    crypto:TrustStore? trustStore = ();
-    crypto:KeyStore? keyStore = ();
-    string certFile = "";
-    string keyFile = "";
-    string keyPassword = "";
-    string trustedCertFile = "";
-    http:Protocols? protocol = ();
-    http:ValidateCert? certValidation = ();
-    string[] ciphers = ["TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
-                        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
-                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
-                        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-                        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"];
-    string sslVerifyClient = "";
-    boolean shareSession = true;
-    int? handshakeTimeoutInSeconds = ();
-    int? sessionTimeoutInSeconds = ();
-    http:ListenerOcspStapling? ocspStapling = ();
+    *http:ListenerSecureSocket;
 |};
-
-# Defines the possible values for the keep-alive configuration in service and client endpoints.
-public type KeepAlive KEEPALIVE_AUTO|KEEPALIVE_ALWAYS|KEEPALIVE_NEVER;
-
-# Decides to keep the connection alive or not based on the `connection` header of the client request }
-public const KEEPALIVE_AUTO = "AUTO";
-# Keeps the connection alive irrespective of the `connection` header value }
-public const KEEPALIVE_ALWAYS = "ALWAYS";
-# Closes the connection irrespective of the `connection` header value }
-public const KEEPALIVE_NEVER = "NEVER";
-
-# Constant for the service name reference.
-public const SERVICE_NAME = "SERVICE_NAME";
-# Constant for the resource name reference.
-public const RESOURCE_NAME = "RESOURCE_NAME";
-# Constant for the request method reference.
-public const REQUEST_METHOD = "REQUEST_METHOD";
 
 # Returns a random UUID string.
 #

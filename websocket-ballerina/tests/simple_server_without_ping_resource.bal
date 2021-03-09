@@ -28,7 +28,7 @@ service / on l23 {
 
 service class TestService {
    *Service;
-   remote function onOpen(Caller wsEp) {
+   remote function onOpen() {
        io:println("New Client Connected");
    }
 }
@@ -43,10 +43,10 @@ service class PongService {
 // Tests the auto ping pong support in Ballerina if there is no onPing resource
 @test:Config {}
 public function testAutoPingPongSupport() returns Error? {
-   AsyncClient wsClient = check new ("ws://localhost:21020", new PongService());
+   Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PongService()});
    byte[] pingData = [5, 24, 56, 243];
    check wsClient->ping(pingData);
    runtime:sleep(0.5);
    test:assertEquals(expectedAutoPongData, pingData, msg = "Data mismatched");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

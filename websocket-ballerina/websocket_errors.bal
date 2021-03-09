@@ -14,40 +14,38 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Raised during failures in connection closure
-public type WsConnectionClosureError distinct error;
+# Represents any error related to the WebSocket module
+public type Error distinct error;
 
 # Raised during the handshake when the WebSocket upgrade fails
-public type WsInvalidHandshakeError distinct error;
+public type InvalidHandshakeError distinct Error;
 
 # Raised when receiving a frame with a payload exceeding the maximum size
-public type WsPayloadTooBigError distinct error;
+public type PayloadTooLargeError distinct Error;
 
 # Raised when the other side breaks the protocol
-public type WsProtocolError distinct error;
+public type ProtocolError distinct Error;
 
 # Raised during connection failures
-public type WsConnectionError distinct error;
+public type ConnectionError distinct Error;
+
+# Raised during failures in connection closure
+public type ConnectionClosureError distinct ConnectionError;
 
 # Raised when an out of order/invalid continuation frame is received
-public type WsInvalidContinuationFrameError distinct error;
+public type InvalidContinuationFrameError distinct ProtocolError;
 
-# Raised for errors not captured by the specific errors
-public type WsGenericError distinct error;
-
-# Raised when the websocket upgrade is not accepted
-public type UpgradeError distinct error;
-
-# Raised when the client creation fails
-public type WsGenericClientError distinct error;
+# Raised when the WebSocket upgrade is not accepted
+public type UpgradeError distinct Error;
 
 # Raised when the initial WebSocket handshake timed out
-public type HandshakeTimedOut distinct error;
+public type HandshakeTimedOut distinct Error;
 
-# Raised when the client creation fails
-public type ReadTimedOutError distinct error;
+# Raised when the client read time out reaches
+public type ReadTimedOutError distinct Error;
 
-# The union of all the WebSocket related errors
-public type Error WsConnectionClosureError|WsInvalidHandshakeError|WsPayloadTooBigError|
-WsProtocolError|WsConnectionError|WsInvalidContinuationFrameError|WsGenericError|UpgradeError|
-WsGenericClientError|ReadTimedOutError|HandshakeTimedOut;
+# Defines the Auth error types that returned from the client
+public type AuthError distinct Error;
+
+# Raised when the SSL handshake fails
+public type SslError distinct Error;

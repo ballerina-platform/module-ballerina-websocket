@@ -36,7 +36,7 @@ import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
-import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_SERVICE_CONFIG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT_SERVICE_CONFIG;
 import static org.ballerinalang.net.websocket.WebSocketUtil.createErrorByType;
 import static org.ballerinalang.net.websocket.WebSocketUtil.findMaxFrameSize;
 
@@ -50,7 +50,7 @@ public class SyncInitEndpoint {
             @SuppressWarnings(WebSocketConstants.UNCHECKED) BMap<BString, Object> clientEndpointConfig = wsSyncClient
                     .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
             String remoteUrl = wsSyncClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
-            BObject callbackService = wsSyncClient.getObjectValue(CLIENT_SERVICE_CONFIG);
+            BObject callbackService = wsSyncClient.getObjectValue(SYNC_CLIENT_SERVICE_CONFIG);
             WebSocketService wsService = WebSocketUtil
                     .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
             HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
@@ -79,7 +79,7 @@ public class SyncInitEndpoint {
                 return e;
             }
             return WebSocketUtil.getWebSocketError(e.getMessage(),
-                    null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
+                    null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
         return null;
     }
