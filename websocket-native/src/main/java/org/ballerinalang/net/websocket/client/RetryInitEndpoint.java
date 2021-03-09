@@ -60,7 +60,7 @@ public class RetryInitEndpoint {
             InitEndpoint.initEndpoint(env, retryClient);
         } catch (Exception e) {
             return WebSocketUtil.getWebSocketError(e.getMessage(),
-                    null, WebSocketConstants.ErrorCode.WsGenericClientError.errorCode(), null);
+                    null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
         return null;
     }

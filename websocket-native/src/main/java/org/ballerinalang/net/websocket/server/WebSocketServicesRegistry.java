@@ -70,7 +70,7 @@ public class WebSocketServicesRegistry {
             sortedServiceURIs.sort((basePath1, basePath2) -> basePath2.length() - basePath1.length());
         } catch (URITemplateException | UnsupportedEncodingException e) {
             logger.error("Error when registering service", e);
-            throw WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.WsGenericError.
+            throw WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.Error.
                     errorCode(), null);
         }
         logger.info("WebSocketService deployed with context {}", basePath);
@@ -86,13 +86,13 @@ public class WebSocketServicesRegistry {
             String basePath = (String) serviceObj.getNativeData(WebSocketConstants.NATIVE_DATA_BASE_PATH);
             if (basePath == null) {
                 throw WebSocketUtil.getWebSocketError("Cannot detach service. Service has not been registered",
-                        null, WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                        null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
             }
             uriTemplate.parse(basePath, null, new WebSocketDataElementFactory());
             serviceObj.addNativeData(WebSocketConstants.NATIVE_DATA_BASE_PATH, null);
         } catch (URITemplateException | UnsupportedEncodingException e) {
             logger.error("Error when unRegistering service", e);
-            return WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.WsGenericError.
+            return WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.Error.
                     errorCode(), null);
         } catch (BError e) {
             return e;

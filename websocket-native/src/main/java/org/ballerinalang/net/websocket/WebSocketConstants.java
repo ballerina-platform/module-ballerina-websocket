@@ -152,18 +152,16 @@ public class WebSocketConstants {
      */
     public enum ErrorCode {
 
-        WsConnectionClosureError("WsConnectionClosureError"),
-        WsInvalidHandshakeError("WsInvalidHandshakeError"),
-        WsPayloadTooBigError("WsPayloadTooBigError"),
-        WsProtocolError("WsProtocolError"),
-        WsConnectionError("WsConnectionError"),
-        WsInvalidContinuationFrameError("WsInvalidContinuationFrameError"),
-        WsGenericError("WsGenericError"),
-        WsGenericListenerError("GenericListenerError"),
-        WsGenericClientError("GenericClientError"),
+        ConnectionClosureError("ConnectionClosureError"),
+        InvalidHandshakeError("InvalidHandshakeError"),
+        PayloadTooLargeError("PayloadTooLargeError"),
+        ProtocolError("ProtocolError"),
+        ConnectionError("ConnectionError"),
+        InvalidContinuationFrameError("InvalidContinuationFrameError"),
         HandshakeTimedOut("HandshakeTimedOut"),
         ReadTimedOutError("ReadTimedOutError"),
-        SslError("SslError");
+        SslError("SslError"),
+        Error("Error");
 
         private String errorCode;
 

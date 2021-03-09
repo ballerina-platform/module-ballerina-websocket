@@ -39,7 +39,7 @@ public class WebSocketSyncConnector {
             readContentFromConnection(wsConnection, callback);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError);
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
         }
         return null;
     }
@@ -64,7 +64,7 @@ public class WebSocketSyncConnector {
             readContentFromConnection(wsConnection, callback);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError);
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
         }
         return null;
     }

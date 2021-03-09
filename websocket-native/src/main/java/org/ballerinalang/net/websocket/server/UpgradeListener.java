@@ -56,7 +56,7 @@ class UpgradeListener implements ServerHandshakeListener {
     public void onError(Throwable throwable) {
         String msg = "Unable to complete WebSocket handshake: ";
         logger.error(msg, throwable);
-        throw WebSocketUtil.getWebSocketError("", throwable, WebSocketConstants.ErrorCode.WsGenericError.
+        throw WebSocketUtil.getWebSocketError("", throwable, WebSocketConstants.ErrorCode.Error.
                 errorCode(), null);
     }
 }

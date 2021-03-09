@@ -56,7 +56,7 @@ public class Start extends AbstractWebsocketNativeFunction {
         } catch (Exception ex) {
             throw WebSocketUtil.createWebsocketError(
                     "failed to start server connector '" + serverConnector.getConnectorID() + "': " + ex.getMessage(),
-                    WebSocketConstants.ErrorCode.WsGenericListenerError);
+                    WebSocketConstants.ErrorCode.Error);
         }
 
         serviceEndpoint.addNativeData(HttpConstants.CONNECTOR_STARTED, true);

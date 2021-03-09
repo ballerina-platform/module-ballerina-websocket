@@ -20,7 +20,7 @@ import ballerina/log;
 import ballerina/oauth2;
 
 // Call relevant auth handling function based on the provided configurations
-isolated function initClientAuth(ClientConfiguration config) returns ClientAuthError? {
+isolated function initClientAuth(ClientConfiguration config) returns AuthError? {
     ClientAuthConfig? authConfig = config?.auth;
     if (authConfig is ()) {
        return;
@@ -36,7 +36,7 @@ isolated function initClientAuth(ClientConfiguration config) returns ClientAuthE
 }
 
 isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientConfiguration clientConfig)
-                     returns ClientAuthError? {
+                     returns AuthError? {
     jwt:ClientSelfSignedJwtAuthProvider provider = new(config);
     string|jwt:Error jwtToken = provider.generateToken();
     if (jwtToken is jwt:Error) {
@@ -47,7 +47,7 @@ isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientCo
 }
 
 isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfiguration clientConfig)
-                       returns ClientAuthError? {
+                       returns AuthError? {
     auth:ClientBasicAuthProvider provider = new(config);
     string|auth:Error basicAuthToken = provider.generateToken();
     if (basicAuthToken is auth:Error) {
@@ -62,7 +62,7 @@ isolated function handleClientBearerTokenAuth(BearerTokenConfig config, ClientCo
 }
 
 isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientConfiguration clientConfig)
-                        returns ClientAuthError? {
+                        returns AuthError? {
     oauth2:ClientOAuth2Provider provider = new(config);
     string|oauth2:Error oauthToken = provider.generateToken();
     if (oauthToken is oauth2:Error) {
@@ -78,11 +78,11 @@ isolated function setAuthHeader(ClientConfiguration clientConfig, string authSch
     clientConfig[CUSTOM_HEADERS] = headers;
 }
 
-// Logs and prepares the `error` as an `websocket:ClientAuthError`.
-isolated function prepareClientAuthError(string message, error? err = ()) returns ClientAuthError {
+// Logs and prepares the `error` as an `websocket:AuthError`.
+isolated function prepareClientAuthError(string message, error? err = ()) returns AuthError {
     log:printError(message, err = err);
     if (err is error) {
-        return error ClientAuthError(message, err);
+        return error AuthError(message, err);
     }
-    return error ClientAuthError(message);
+    return error AuthError(message);
 }

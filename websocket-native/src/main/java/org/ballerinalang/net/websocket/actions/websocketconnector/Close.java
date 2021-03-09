@@ -125,7 +125,7 @@ public class Close {
 
     private static void addError(String errMsg, List<BError> errors) {
         errors.add(WebSocketUtil.getWebSocketError(
-                errMsg, null, WebSocketConstants.ErrorCode.WsConnectionClosureError.errorCode(), null));
+                errMsg, null, WebSocketConstants.ErrorCode.ConnectionClosureError.errorCode(), null));
     }
 
     private Close() {

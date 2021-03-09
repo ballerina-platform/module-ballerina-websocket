@@ -69,7 +69,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
             }
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError));
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
         }
     }
 
@@ -91,7 +91,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
             }
         } catch (IllegalAccessException | IOException e) {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsConnectionClosureError));
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
         }
     }
 
@@ -108,14 +108,14 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
                     "Connection closed: Status code: " + closeCode :
                     webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
             callback.complete(WebSocketUtil
-                    .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.WsConnectionClosureError));
+                    .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
 
             WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
             wsConnection.removeReadIdleStateHandler();
             WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
-                    WebSocketConstants.ErrorCode.WsConnectionClosureError));
+                    WebSocketConstants.ErrorCode.ConnectionClosureError));
         }
     }
 
@@ -123,7 +123,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
         try {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.WsGenericError));
+                    .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.Error));
             connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);

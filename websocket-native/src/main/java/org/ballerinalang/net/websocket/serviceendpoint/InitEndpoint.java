@@ -75,7 +75,7 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         } catch (BError errorValue) {
             return errorValue;
         } catch (Exception e) {
-            return createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.WsGenericListenerError);
+            return createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.Error);
         }
     }
 
