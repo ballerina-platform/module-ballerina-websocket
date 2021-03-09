@@ -515,9 +515,8 @@ public class WebSocketUtil {
 
         clientConnectorConfig.setMaxFrameSize(findMaxFrameSize(clientEndpointConfig));
 
-        BMap<BString, Object> secureSocket =
-                (BMap<BString, Object>) clientEndpointConfig.getMapValue(
-                        HttpConstants.ENDPOINT_CONFIG_SECURE_SOCKET);
+        BMap<BString, Object> secureSocket = (BMap<BString, Object>) clientEndpointConfig
+                .getMapValue(HttpConstants.ENDPOINT_CONFIG_SECURESOCKET);
         if (secureSocket != null) {
             HttpUtil.populateSSLConfiguration(clientConnectorConfig, secureSocket);
         } else if (scheme.equals(WebSocketConstants.WSS_SCHEME)) {
