@@ -155,19 +155,19 @@
 // #
 // # |                                                                              |
 // # |:---------------------------------------------------------------------------- |
-// # | callbackService - Copied from CommonWebSocketClientConfiguration             |
-// # | subProtocols - Copied from CommonWebSocketClientConfiguration                |
-// # | customHeaders - Copied from CommonWebSocketClientConfiguration               |
-// # | idleTimeout - Copied from CommonWebSocketClientConfiguration        |
-// # | secureSocket - Copied from CommonWebSocketClientConfiguration                |
-// # | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
-// # | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
-// # | handShake - Copied from CommonWebSocketClientConfiguration   |
-// # | cookieConfig - Copied from CommonWebSocketClientConfiguration                |
+// # | callbackService - Copied from CommonClientConfiguration             |
+// # | subProtocols - Copied from CommonClientConfiguration                |
+// # | customHeaders - Copied from CommonClientConfiguration               |
+// # | idleTimeout - Copied from CommonClientConfiguration        |
+// # | secureSocket - Copied from CommonClientConfiguration                |
+// # | maxFrameSize - Copied from CommonClientConfiguration                |
+// # | webSocketCompressionEnabled - Copied from CommonClientConfiguration |
+// # | handShake - Copied from CommonClientConfiguration   |
+// # | cookieConfig - Copied from CommonClientConfiguration                |
 // # + targetUrls - The set of URLs, which are used to connect to the server
 // # + failoverIntervalInMillis - The maximum number of milliseconds to delay a failover attempt
 // public type WebSocketFailoverClientConfiguration record {|
-//     *CommonWebSocketClientConfiguration;
+//     *CommonClientConfiguration;
 //     string[] targetUrls = [];
 //     int failoverIntervalInMillis = 1000;
 // |};
