@@ -218,7 +218,7 @@ public type RequestLimitConfigs record {|
 
 # Configures the SSL/TLS options to be used for WebSocket service.
 #
-# + key - Configurations associated with `crypto:KeyStore` or combination of certificate and private key of the server
+# + key - Configurations associated with `crypto:KeyStore` or combination of certificate and (PKCS8) private key of the server
 # + mutualSsl - Configures associated with mutual SSL operations
 # + protocol - SSL/TLS protocol related options
 # + certValidation - Certificate validation against OCSP_CRL, OCSP_STAPLING related options
