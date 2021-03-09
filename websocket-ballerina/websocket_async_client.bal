@@ -232,13 +232,18 @@ public type CommonWebSocketClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     decimal readTimeout = -1;
-    http:ClientSecureSocket? secureSocket = ();
+    ClientSecureSocket secureSocket?;
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     decimal handShakeTimeout = 300;
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
     PingPongService pingPongHandler?;
+|};
+
+# Configures the SSL/TLS options to be used for WebSocket client.
+public type ClientSecureSocket record {|
+    *http:ClientSecureSocket;
 |};
 
 # Adds cookies to the custom header.
