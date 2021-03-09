@@ -22,7 +22,7 @@ final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
 listener Listener l24 = new(21027, {
                       secureSocket: {
-                          keyStore: {
+                          key: {
                               path: KEYSTORE_PATH,
                               password: "ballerina"
                           }
@@ -38,7 +38,7 @@ service class SslProxy {
    remote function onOpen(Caller wsEp) returns Error? {
        Client wsClientEp = check new ("wss://localhost:21028/websocket", config = {
                secureSocket: {
-                   trustStore: {
+                   cert: {
                        path: TRUSTSTORE_PATH,
                        password: "ballerina"
                    }
@@ -66,7 +66,7 @@ service class SslProxy {
 
 listener Listener l27 = new(21028, {
                               secureSocket: {
-                                  keyStore: {
+                                  key: {
                                       path: KEYSTORE_PATH,
                                       password: "ballerina"
                                   }
@@ -104,7 +104,7 @@ service class SslProxyServer {
 public function testSslProxySendText() returns Error? {
    Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
            secureSocket: {
-               trustStore: {
+               cert: {
                    path: TRUSTSTORE_PATH,
                    password: "ballerina"
                }
@@ -122,7 +122,7 @@ public function testSslProxySendText() returns Error? {
 public function testSslProxySendBinary() returns Error? {
    Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
            secureSocket: {
-               trustStore: {
+               cert: {
                    path: TRUSTSTORE_PATH,
                    password: "ballerina"
                }

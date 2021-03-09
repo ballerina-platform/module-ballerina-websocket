@@ -22,7 +22,7 @@ import ballerina/io;
 string sslString = "";
 listener Listener l37 = new(21059, {
                 secureSocket: {
-                    keyStore: {
+                    key: {
                         path: "tests/certsAndKeys/ballerinaKeystore.p12",
                         password: "ballerina"
                     }
@@ -50,7 +50,7 @@ service class SyncSslService {
 public function testSyncClientSsl() returns Error? {
     Client wsClient = check new("wss://localhost:21059/sslTest", config = {
                        secureSocket: {
-                           trustStore: {
+                           cert: {
                                path: "tests/certsAndKeys/ballerinaTruststore.p12",
                                password: "ballerina"
                            }
