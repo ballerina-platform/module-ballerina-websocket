@@ -47,7 +47,7 @@ OAuth2ClientCredentialsGrantConfig config1 = {
     scopes: ["token-scope1", "token-scope2"],
     clientConfig: {
         secureSocket: {
-           trustStore: {
+           cert: {
                path: "tests/certsAndKeys/ballerinaTruststore.p12",
                password: "ballerina"
            }
@@ -64,7 +64,7 @@ OAuth2PasswordGrantConfig config2 = {
     scopes: ["token-scope1", "token-scope2"],
     clientConfig: {
         secureSocket: {
-           trustStore: {
+           cert: {
                path: "tests/certsAndKeys/ballerinaTruststore.p12",
                password: "ballerina"
            }
@@ -80,7 +80,7 @@ OAuth2DirectTokenConfig config3 = {
     scopes: ["token-scope1", "token-scope2"],
     clientConfig: {
         secureSocket: {
-           trustStore: {
+           cert: {
                path: "tests/certsAndKeys/ballerinaTruststore.p12",
                password: "ballerina"
            }

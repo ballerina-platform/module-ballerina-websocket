@@ -21,7 +21,7 @@ const string ACCESS_TOKEN = "2YotnFZFEjr1zCsicMWpAA";
 // Mock OAuth2 authorization server implementation, which treats the APIs with successful responses.
 listener http:Listener oauth2Listener = new(9401, {
     secureSocket: {
-        keyStore: {
+        key: {
             path: "tests/certsAndKeys/ballerinaKeystore.p12",
             password: "ballerina"
         }
