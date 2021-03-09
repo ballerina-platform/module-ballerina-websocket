@@ -133,6 +133,7 @@ public class WebSocketConstants {
     public static final BString ENDPOINT_CONFIG_PORT = StringUtils.fromString("port");
     public static final String HTTP_SERVER_CONNECTOR = "HTTP_SERVER_CONNECTOR";
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
+    public static final String HTTP_LISTENER = "httpListener";
 
     public static final String PARAM_TYPE_STRING = "string";
     public static final String PARAM_TYPE_BYTE_ARR = "byte[]";

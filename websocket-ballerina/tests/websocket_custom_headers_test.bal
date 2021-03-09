@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-http:Listener hl = check new(21001);
+listener http:Listener hl = check new(21001);
 listener Listener socketListener = new(<@untainted> hl);
 string output = "";
 string errorMsg = "";
@@ -64,6 +64,12 @@ service class MyWSService2 {
   }
 }
 
+service /helloWorld on hl {
+    resource function get hello(http:Caller caller, http:Request req) {
+        var result = caller->respond("Hello World!");
+    }
+}
+
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() returns error? {
@@ -89,6 +95,14 @@ public function testIsOpenCloseCalled() returns error? {
     test:assertEquals(pathParam, "tuv");
     error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
     error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testPortSharingHttpService() returns error? {
+    http:Client clientEndpoint = check new ("http://localhost:21001/helloWorld");
+    http:Response response = check clientEndpoint->get("/hello");
+    string payload = check response.getTextPayload();
+    test:assertEquals(payload, "Hello World!");
 }
 
 // Test isOpen when a close frame is received
