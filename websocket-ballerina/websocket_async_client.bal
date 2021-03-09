@@ -197,18 +197,18 @@ import ballerina/mime;
 #
 # |                                                                              |
 # |:---------------------------------------------------------------------------- |
-# | callbackService - Copied from CommonWebSocketClientConfiguration             |
-# | subProtocols - Copied from CommonWebSocketClientConfiguration                |
-# | customHeaders - Copied from CommonWebSocketClientConfiguration               |
-# | idleTimeout - Copied from CommonWebSocketClientConfiguration        |
-# | secureSocket - Copied from CommonWebSocketClientConfiguration                |
-# | maxFrameSize - Copied from CommonWebSocketClientConfiguration                |
-# | webSocketCompressionEnabled - Copied from CommonWebSocketClientConfiguration |
-# | handShakeTimeout - Copied from CommonWebSocketClientConfiguration   |
-# | cookies - Copied from CommonWebSocketClientConfiguration                     |
+# | callbackService - Copied from CommonClientConfiguration             |
+# | subProtocols - Copied from CommonClientConfiguration                |
+# | customHeaders - Copied from CommonClientConfiguration               |
+# | idleTimeout - Copied from CommonClientConfiguration        |
+# | secureSocket - Copied from CommonClientConfiguration                |
+# | maxFrameSize - Copied from CommonClientConfiguration                |
+# | webSocketCompressionEnabled - Copied from CommonClientConfiguration |
+# | handShakeTimeout - Copied from CommonClientConfiguration   |
+# | cookies - Copied from CommonClientConfiguration                     |
 //# + retryConfig - Retry related configurations
 public type ClientConfiguration record {|
-    *CommonWebSocketClientConfiguration;
+    *CommonClientConfiguration;
     //WebSocketRetryConfig retryConfig?;
 |};
 
@@ -228,17 +228,22 @@ public type ClientConfiguration record {|
 # + auth - Configurations related to client authentication
 # + pingPongHandler - A service to handle ping/pong frames.
 #                     Resources in this service gets called on the receipt of ping, pong from the server
-public type CommonWebSocketClientConfiguration record {|
+public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     decimal readTimeout = -1;
-    http:ClientSecureSocket? secureSocket = ();
+    ClientSecureSocket secureSocket?;
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     decimal handShakeTimeout = 300;
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
     PingPongService pingPongHandler?;
+|};
+
+# Configures the SSL/TLS options to be used for WebSocket client.
+public type ClientSecureSocket record {|
+    *http:ClientSecureSocket;
 |};
 
 # Adds cookies to the custom header.
