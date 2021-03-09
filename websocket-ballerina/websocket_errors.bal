@@ -14,16 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
+# Represents any error related to the WebSocket module
 public type Error distinct error;
-
-# Raised during failures in connection closure
-public type ConnectionClosureError distinct Error;
 
 # Raised during the handshake when the WebSocket upgrade fails
 public type InvalidHandshakeError distinct Error;
 
 # Raised when receiving a frame with a payload exceeding the maximum size
-public type PayloadTooBigError distinct Error;
+public type PayloadTooLargeError distinct Error;
 
 # Raised when the other side breaks the protocol
 public type ProtocolError distinct Error;
@@ -31,28 +29,23 @@ public type ProtocolError distinct Error;
 # Raised during connection failures
 public type ConnectionError distinct Error;
 
+# Raised during failures in connection closure
+public type ConnectionClosureError distinct ConnectionError;
+
 # Raised when an out of order/invalid continuation frame is received
-public type InvalidContinuationFrameError distinct Error;
+public type InvalidContinuationFrameError distinct ProtocolError;
 
-# Raised for errors not captured by the specific errors
-public type GenericError distinct Error;
-
-# Raised when the websocket upgrade is not accepted
+# Raised when the WebSocket upgrade is not accepted
 public type UpgradeError distinct Error;
-
-# Raised when the client creation fails
-public type GenericClientError distinct Error;
 
 # Raised when the initial WebSocket handshake timed out
 public type HandshakeTimedOut distinct Error;
 
-# Raised when the client creation fails
+# Raised when the client read time out reaches
 public type ReadTimedOutError distinct Error;
 
-# Defines the Auth error types that returned from client
-public type ClientAuthError distinct Error;
+# Defines the Auth error types that returned from the client
+public type AuthError distinct Error;
 
-//# The union of all the WebSocket related errors
-//public type Error ConnectionClosureError|InvalidHandshakeError|PayloadTooBigError|
-//ProtocolError|ConnectionError|InvalidContinuationFrameError|GenericError|UpgradeError|
-//GenericClientError|ReadTimedOutError|HandshakeTimedOut|ClientAuthError;
+# Raised when the SSL handshake fails
+public type SslError distinct Error;

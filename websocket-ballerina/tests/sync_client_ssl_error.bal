@@ -50,5 +50,5 @@ public function testSyncClientSslError() {
     if (wsClient is Error) {
         sslErrString = wsClient.message();
     }
-    test:assertEquals(sslErrString, "GenericError: SSL/TLS Error");
+    test:assertEquals(sslErrString, "Error: SSL/TLS Error");
 }

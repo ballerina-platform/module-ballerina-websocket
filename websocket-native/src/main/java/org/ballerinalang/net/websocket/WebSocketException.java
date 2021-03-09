@@ -36,8 +36,7 @@ public class WebSocketException extends RuntimeException {
     private BError wsError;
 
     public WebSocketException(Throwable ex, String typeIdName) {
-        this(WebSocketConstants.ErrorCode.GenericError.errorCode() + ":" +
-                WebSocketUtil.getErrorMessage(ex), typeIdName);
+        this(WebSocketConstants.ErrorCode.Error.errorCode() + ":" + WebSocketUtil.getErrorMessage(ex), typeIdName);
     }
 
     public WebSocketException(String message, String typeIdName) {
@@ -46,14 +45,16 @@ public class WebSocketException extends RuntimeException {
 
     public WebSocketException(String message, BError cause, String typeIdName) {
         this.message = message;
-        this.wsError = ErrorCreator.createDistinctError(typeIdName, ModuleUtils.getWebsocketModule(),
-                StringUtils.fromString(message), cause);
+        this.wsError = ErrorCreator
+                .createError(ModuleUtils.getWebsocketModule(), typeIdName, StringUtils.fromString(message), cause,
+                        null);
     }
 
     public WebSocketException(String message, BMap<BString, Object> details, String typeIdName) {
         this.message = message;
-        this.wsError = ErrorCreator.createDistinctError(typeIdName, ModuleUtils.getWebsocketModule(),
-                StringUtils.fromString(message), details);
+        this.wsError = ErrorCreator
+                .createError(ModuleUtils.getWebsocketModule(), typeIdName, StringUtils.fromString(message), null,
+                        details);
     }
 
     public String detailMessage() {

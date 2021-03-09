@@ -123,7 +123,7 @@ public class SyncClientConnectorListener implements ExtendedConnectorListener {
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
         try {
             callback.complete(WebSocketUtil
-                    .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.GenericError));
+                    .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.Error));
             connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);

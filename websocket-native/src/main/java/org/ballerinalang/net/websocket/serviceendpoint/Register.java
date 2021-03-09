@@ -59,10 +59,10 @@ public class Register extends AbstractWebsocketNativeFunction {
             } else if (resourceList.length > 1) {
                 return WebSocketUtil
                         .createWebsocketError("Invalid websocket Service. There should be only one get resource",
-                                WebSocketConstants.ErrorCode.GenericListenerError);
+                                WebSocketConstants.ErrorCode.Error);
             } else {
                 return WebSocketUtil.createWebsocketError("Invalid websocket Service.",
-                        WebSocketConstants.ErrorCode.GenericListenerError);
+                        WebSocketConstants.ErrorCode.Error);
             }
         } catch (BError ex) {
             return ex;
