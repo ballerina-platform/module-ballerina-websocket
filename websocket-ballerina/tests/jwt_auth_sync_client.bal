@@ -57,7 +57,7 @@ service class WsService51 {
     }
 }
 
-@test:Config {}
+@test:Config {enable : false}
 public function testSyncJwtAuth() returns Error? {
     Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", config = {
             auth: {
