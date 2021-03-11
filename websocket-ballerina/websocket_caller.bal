@@ -76,7 +76,7 @@ public client class Caller {
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-        int timeout = 60) returns Error? {
+        decimal timeout = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeout);
     }
 
