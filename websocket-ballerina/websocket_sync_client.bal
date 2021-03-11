@@ -102,7 +102,7 @@ public client class Client {
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs while closing the WebSocket connection
-    remote isolated function close(int? statusCode = 1000, string? reason = (), int timeout = 60) returns Error? {
+    remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeout);
     }
 

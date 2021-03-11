@@ -79,7 +79,7 @@ class WebSocketConnector {
     #                   until a close frame is received. If WebSocket frame is received from the remote endpoint
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
-    public isolated function close(int? statusCode = 1000, string? reason = (), int timeoutInSecs = 60) returns Error? {
+    public isolated function close(int? statusCode = 1000, string? reason = (), decimal timeoutInSecs = 60) returns Error? {
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {
@@ -116,7 +116,7 @@ isolated function externPong(WebSocketConnector wsConnector, byte[] data) return
     name: "pong"
 } external;
 
-isolated function externClose(WebSocketConnector wsConnector, int statusCode, string reason, int timeoutInSecs)
+isolated function externClose(WebSocketConnector wsConnector, int statusCode, string reason, decimal timeoutInSecs)
                      returns Error? =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
