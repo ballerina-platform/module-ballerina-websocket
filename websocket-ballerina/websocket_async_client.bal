@@ -267,7 +267,7 @@ public isolated function addCookies(ClientConfiguration config) {
            if (cookieName is string && cookieValue is string) {
                cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
            }
-           cookie.lastAccessedTime = time:currentTime();
+           cookie.lastAccessedTime = time:utcNow();
        }
        if (cookieHeader != "") {
            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);

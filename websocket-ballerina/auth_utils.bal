@@ -80,7 +80,7 @@ isolated function setAuthHeader(ClientConfiguration clientConfig, string authSch
 
 // Logs and prepares the `error` as an `websocket:AuthError`.
 isolated function prepareClientAuthError(string message, error? err = ()) returns AuthError {
-    log:printError(message, err = err);
+    log:printError(message, 'error = err);
     if (err is error) {
         return error AuthError(message, err);
     }
