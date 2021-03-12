@@ -41,7 +41,7 @@ service class WsService54 {
 
 @test:Config {}
 public function testSyncBearerToken() returns Error? {
-    Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", config = {
+    Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", options = {
             auth: {
               token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn"
             }

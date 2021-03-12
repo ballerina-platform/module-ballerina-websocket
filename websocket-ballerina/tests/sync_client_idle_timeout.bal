@@ -42,7 +42,7 @@ service class OnIdleTimeoutService {
 // to check if the idle state handler gets reset.
 @test:Config {}
 public function testSyncIdleTimeOutError() returns Error? {
-    Client wsClient = check new("ws://localhost:21056/onIdleTimeoutService", config = {readTimeout: 2});
+    Client wsClient = check new("ws://localhost:21056/onIdleTimeoutService", options = {readTimeout: 2});
     @strand {
         thread:"any"
     }

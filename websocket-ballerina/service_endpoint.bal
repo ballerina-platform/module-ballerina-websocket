@@ -25,7 +25,7 @@ import ballerina/http;
 public class Listener {
 
     private int port = 0;
-    private ListenerConfiguration config = {};
+    private ListenerOptions config = {};
     private string instanceId;
     private http:Listener? httpListener = ();
 
@@ -73,9 +73,9 @@ public class Listener {
     #
     # + port - Listening port of the websocket service listener
     # + config - Configurations for the websocket service listener
-    public isolated function init(int|http:Listener 'listener, *ListenerConfiguration config) returns Error? {
+    public isolated function init(int|http:Listener 'listener, *ListenerOptions options) returns Error? {
         self.instanceId = uuid();
-        self.config = config;
+        self.config = options;
         if ('listener is http:Listener) {
            self.httpListener = 'listener;
         } else {
@@ -174,7 +174,7 @@ public type Local record {|
 # + server - The server name which should appear as a response header
 # + webSocketCompressionEnabled - Enable support for compression in WebSocket
 # + requestLimits - Configurations associated with inbound request size limits
-public type ListenerConfiguration record {|
+public type ListenerOptions record {|
     string host = "0.0.0.0";
     ListenerHttp1Settings http1Settings = {};
     ListenerSecureSocket secureSocket?;

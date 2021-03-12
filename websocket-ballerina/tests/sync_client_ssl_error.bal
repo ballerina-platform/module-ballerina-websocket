@@ -39,7 +39,7 @@ service class SyncSslErrorService {
 // Tests the Ssl error returned when creating the sync client
 @test:Config {}
 public function testSyncClientSslError() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
+    Client|Error wsClient = new("wss://localhost:21058/sslTest", options = {
                        secureSocket: {
                            cert: {
                                path: "tests/certsAndKeys/ballerinaTruststore.p12",

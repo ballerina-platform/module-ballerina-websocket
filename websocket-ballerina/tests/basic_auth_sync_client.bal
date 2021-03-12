@@ -42,7 +42,7 @@ service class WsService49 {
 
 @test:Config {}
 public function testSyncBasicAuth() returns Error? {
-    Client wsClient = check new("ws://localhost:21318/basicAuthSyncService/", config = {
+    Client wsClient = check new("ws://localhost:21318/basicAuthSyncService/", options = {
             auth: {
                 username: "alice2",
                 password: "1234"

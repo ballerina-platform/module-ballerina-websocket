@@ -47,14 +47,14 @@ service class WsService46 {
 http:Cookie cookie = new ("username", "name");
 http:Cookie[] httpCookies = [cookie];
 
-ClientConfiguration clientConf = {
+ClientOptions clientConf = {
    cookies: httpCookies
 };
 
 // Tests string support for sending cookies from Sync client
 @test:Config {}
 public function testSendCookieWithSyncClient() returns error? {
-   Client wsClient = check new("ws://localhost:21316/testCookieSync/", config = clientConf);
+   Client wsClient = check new("ws://localhost:21316/testCookieSync/", options = clientConf);
    var resp = wsClient.getHttpResponse();
    if (resp is http:Response) {
       http:Cookie[] respCookies = resp.getCookies();

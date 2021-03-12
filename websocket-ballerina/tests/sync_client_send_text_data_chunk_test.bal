@@ -37,7 +37,7 @@ service class WsService42 {
 // Tests writing text data as continuation frames chunked by the given maxFrameSize using sync client.
 @test:Config {}
 public function testSendTextDataChunkSync() returns Error? {
-   Client wsClient = check new("ws://localhost:21312/onTextDataSync/", config = {maxFrameSize: 1});
+   Client wsClient = check new("ws://localhost:21312/onTextDataSync/", options = {maxFrameSize: 1});
    string textData = "text data";
    check wsClient->writeTextMessage(textData);
    runtime:sleep(5);

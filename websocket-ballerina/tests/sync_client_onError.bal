@@ -40,7 +40,7 @@ service class WsServiceSyncError {
 // Tests the corrupted frame error returned from readTextMessage
 @test:Config {}
 public function testSyncClientError() returns Error? {
-    Client wsClient = check new("ws://localhost:21055/onErrorText", config = {maxFrameSize: 1});
+    Client wsClient = check new("ws://localhost:21055/onErrorText", options = {maxFrameSize: 1});
     @strand {
         thread:"any"
     }

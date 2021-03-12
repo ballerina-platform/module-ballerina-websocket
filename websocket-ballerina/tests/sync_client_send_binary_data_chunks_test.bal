@@ -37,7 +37,7 @@ service class WsService41 {
 // Tests writing binary data as continuation frames chunked by the given maxFrameSize using the sync client.
 @test:Config {}
 public function testChunkBinaryDataSync() returns Error? {
-   Client wsClient = check new("ws://localhost:21311/onBinaryDataSync/", config = {maxFrameSize: 1});
+   Client wsClient = check new("ws://localhost:21311/onBinaryDataSync/", options = {maxFrameSize: 1});
    byte[] binaryData = [5, 24, 56];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(5);

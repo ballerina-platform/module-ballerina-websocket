@@ -36,7 +36,7 @@ service /sslEcho on l24 {
 service class SslProxy {
    *Service;
    remote function onOpen(Caller wsEp) returns Error? {
-       Client wsClientEp = check new ("wss://localhost:21028/websocket", config = {
+       Client wsClientEp = check new ("wss://localhost:21028/websocket", options = {
                secureSocket: {
                    cert: {
                        path: TRUSTSTORE_PATH,
@@ -102,7 +102,7 @@ service class SslProxyServer {
 // Tests sending and receiving of text frames in WebSockets over SSL.
 @test:Config {}
 public function testSslProxySendText() returns Error? {
-   Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
+   Client wsClient = check new ("wss://localhost:21027/sslEcho", options = {
            secureSocket: {
                cert: {
                    path: TRUSTSTORE_PATH,
@@ -120,7 +120,7 @@ public function testSslProxySendText() returns Error? {
 // Tests sending and receiving of binary frames in WebSocket over SSL.
 @test:Config {}
 public function testSslProxySendBinary() returns Error? {
-   Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
+   Client wsClient = check new ("wss://localhost:21027/sslEcho", options = {
            secureSocket: {
                cert: {
                    path: TRUSTSTORE_PATH,

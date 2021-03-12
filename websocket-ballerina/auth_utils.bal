@@ -20,7 +20,7 @@ import ballerina/log;
 import ballerina/oauth2;
 
 // Call relevant auth handling function based on the provided configurations
-isolated function initClientAuth(ClientConfiguration config) returns AuthError? {
+isolated function initClientAuth(ClientOptions config) returns AuthError? {
     ClientAuthConfig? authConfig = config?.auth;
     if (authConfig is ()) {
        return;
@@ -35,7 +35,7 @@ isolated function initClientAuth(ClientConfiguration config) returns AuthError? 
     }
 }
 
-isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientConfiguration clientConfig)
+isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientOptions clientConfig)
                      returns AuthError? {
     jwt:ClientSelfSignedJwtAuthProvider provider = new(config);
     string|jwt:Error jwtToken = provider.generateToken();
@@ -46,7 +46,7 @@ isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientCo
     }
 }
 
-isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfiguration clientConfig)
+isolated function handleClientBasicAuth(CredentialsConfig config, ClientOptions clientConfig)
                        returns AuthError? {
     auth:ClientBasicAuthProvider provider = new(config);
     string|auth:Error basicAuthToken = provider.generateToken();
@@ -57,11 +57,11 @@ isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfigur
     }
 }
 
-isolated function handleClientBearerTokenAuth(BearerTokenConfig config, ClientConfiguration clientConfig) {
+isolated function handleClientBearerTokenAuth(BearerTokenConfig config, ClientOptions clientConfig) {
     setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, config.token);
 }
 
-isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientConfiguration clientConfig)
+isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientOptions clientConfig)
                         returns AuthError? {
     oauth2:ClientOAuth2Provider provider = new(config);
     string|oauth2:Error oauthToken = provider.generateToken();
@@ -72,7 +72,7 @@ isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientConfigurati
     }
 }
 
-isolated function setAuthHeader(ClientConfiguration clientConfig, string authScheme, string token) {
+isolated function setAuthHeader(ClientOptions clientConfig, string authScheme, string token) {
     map<string> headers = clientConfig[CUSTOM_HEADERS];
     headers[AUTH_HEADER] = authScheme + " " + token;
     clientConfig[CUSTOM_HEADERS] = headers;

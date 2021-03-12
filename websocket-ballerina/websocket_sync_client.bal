@@ -29,19 +29,19 @@ public client class Client {
 
     private WebSocketConnector conn = new;
     private string url = "";
-    private ClientConfiguration config = {};
+    private ClientOptions config = {};
     private PingPongService? pingPongService = ();
 
     # Initializes the synchronous client when called.
     #
     # + url - URL of the target service
     # + config - The configurations to be used when initializing the client
-    public isolated function init(string url, *ClientConfiguration config) returns Error? {
+    public isolated function init(string url, *ClientOptions options) returns Error? {
         self.url = url;
-        addCookies(config);
-        check initClientAuth(config);
-        self.config = config;
-        var pingPongHandler = config["pingPongHandler"];
+        addCookies(options);
+        check initClientAuth(options);
+        self.config = options;
+        var pingPongHandler = options["pingPongHandler"];
         if (pingPongHandler is PingPongService) {
             self.pingPongService = pingPongHandler;
         }

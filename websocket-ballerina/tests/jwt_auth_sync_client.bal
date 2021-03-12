@@ -59,7 +59,7 @@ service class WsService51 {
 
 @test:Config {}
 public function testSyncJwtAuth() returns Error? {
-    Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", config = {
+    Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", options = {
             auth: {
                     username: "wso2",
                     issuer: "ballerina",

@@ -20,7 +20,7 @@ import ballerina/io;
 
 string errMessage = "";
 
-ClientConfiguration config = {subProtocols: ["xml"]};
+ClientOptions config = {subProtocols: ["xml"]};
 
 service class errorResourceService {
    remote function onError(Caller clientCaller, error err) {
@@ -77,7 +77,7 @@ service class ErrorServer {
 // Connection refused IO error.
 @test:Config {}
 public function testConnectionError() returns Error? {
-   Error|Client wsClient = new ("ws://lmnop.ls", config = config);
+   Error|Client wsClient = new ("ws://lmnop.ls", options = config);
    if (wsClient is Error) {
        test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
    } else {
@@ -129,7 +129,7 @@ public function testConnectionClosedError() returns Error? {
 // Handshake failing because of missing subprotocol
 @test:Config {}
 public function testHandshakeError() returns Error? {
-   Error|Client wsClientEp = new ("ws://localhost:21030/websocket", config = config);
+   Error|Client wsClientEp = new ("ws://localhost:21030/websocket", options = config);
    if (wsClientEp is Error) {
       errMessage = wsClientEp.message();
    }

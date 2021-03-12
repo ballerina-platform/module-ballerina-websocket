@@ -207,7 +207,7 @@ import ballerina/mime;
 # | handShakeTimeout - Copied from CommonClientConfiguration   |
 # | cookies - Copied from CommonClientConfiguration                     |
 //# + retryConfig - Retry related configurations
-public type ClientConfiguration record {|
+public type ClientOptions record {|
     *CommonClientConfiguration;
     //WebSocketRetryConfig retryConfig?;
 |};
@@ -249,7 +249,7 @@ public type ClientSecureSocket record {|
 # Adds cookies to the custom header.
 #
 # + config - Represents the cookies to be added
-public isolated function addCookies(ClientConfiguration config) {
+public isolated function addCookies(ClientOptions config) {
    string cookieHeader = "";
    var cookiesToAdd = config["cookies"];
    if (cookiesToAdd is http:Cookie[]) {
