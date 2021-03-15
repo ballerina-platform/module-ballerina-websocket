@@ -72,7 +72,7 @@ OAuth2PasswordGrantConfig config2 = {
     }
 };
 
-OAuth2DirectTokenConfig config3 = {
+OAuth2RefreshTokenGrantConfig config3 = {
     refreshUrl: "https://localhost:9401/oauth2/token/refresh",
     refreshToken: "XlfBs91yquexJqDaKEMzVg==",
     clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
@@ -105,7 +105,7 @@ public function testOAuth2PasswordGrant() returns Error? {
 }
 
 @test:Config {}
-public function testOAuth2DirectToken() returns Error? {
+public function testOAuth2RefreshTokenGrant() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config3});
     runtime:sleep(0.5);
     test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
