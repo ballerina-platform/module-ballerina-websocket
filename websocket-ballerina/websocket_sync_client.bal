@@ -185,7 +185,7 @@ isolated function externSyncWSInitEndpoint(Client wsClient) returns Error? = @ja
     name: "initEndpoint"
 } external;
 
-isolated function externSyncRetryInitEndpoint(Client wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
-    name: "initEndpoint"
-} external;
+//isolated function externSyncRetryInitEndpoint(Client wsClient) returns Error? = @java:Method {
+//    'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
+//    name: "initEndpoint"
+//} external;
