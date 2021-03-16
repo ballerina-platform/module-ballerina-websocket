@@ -57,10 +57,6 @@ public class WebSocketException extends RuntimeException {
                         details);
     }
 
-    public String detailMessage() {
-        return message;
-    }
-
     public BError getWsError() {
         return wsError;
     }

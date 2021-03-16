@@ -22,8 +22,6 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
-import org.ballerinalang.net.websocket.WebSocketUtil;
-import org.ballerinalang.net.websocket.client.FailoverContext;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import org.ballerinalang.net.websocket.server.WebSocketServerService;
 import org.slf4j.Logger;
@@ -205,14 +203,8 @@ public class WebSocketObservabilityUtil {
         if (service instanceof WebSocketServerService) {
             return ((WebSocketServerService) service).getBasePath();
         } else {
-            if (WebSocketUtil.isFailoverClient(connectionInfo.getWebSocketEndpoint())) {
-                FailoverContext failoverConfig = (FailoverContext) connectionInfo.getWebSocketEndpoint().
-                        getNativeData(WebSocketConstants.FAILOVER_CONTEXT);
-                return failoverConfig.getTargetUrls().get(failoverConfig.getCurrentIndex());
-            } else {
-                return connectionInfo.getWebSocketEndpoint().getStringValue(WebSocketConstants.CLIENT_URL_CONFIG)
-                        .getValue();
-            }
+            return connectionInfo.getWebSocketEndpoint().getStringValue(WebSocketConstants.CLIENT_URL_CONFIG)
+                    .getValue();
         }
     }
 

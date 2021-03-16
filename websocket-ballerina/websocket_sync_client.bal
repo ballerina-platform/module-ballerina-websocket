@@ -14,7 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.array;
 import ballerina/jballerina.java;
+import ballerina/time;
 import ballerina/http;
 
 # Represents a WebSocket synchronous client endpoint.
@@ -49,12 +51,7 @@ public client class Client {
     }
 
     public isolated function initEndpoint() returns Error? {
-        //var retryConfig = self.config?.retryConfig;
-        //if (retryConfig is WebSocketRetryConfig) {
-        //    return externSyncRetryInitEndpoint(self);
-        //} else {
-            return externSyncWSInitEndpoint(self);
-        //}
+        return externSyncWSInitEndpoint(self);
     }
 
     # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
@@ -180,12 +177,96 @@ public client class Client {
     }
 }
 
+# Configurations for the WebSocket client.
+# Following fields are inherited from the other configuration records in addition to the Client specific
+# configs.
+#
+# |                                                                              |
+# |:---------------------------------------------------------------------------- |
+# | callbackService - Copied from CommonClientConfiguration             |
+# | subProtocols - Copied from CommonClientConfiguration                |
+# | customHeaders - Copied from CommonClientConfiguration               |
+# | idleTimeout - Copied from CommonClientConfiguration                 |
+# | secureSocket - Copied from CommonClientConfiguration                |
+# | maxFrameSize - Copied from CommonClientConfiguration                |
+# | webSocketCompressionEnabled - Copied from CommonClientConfiguration |
+# | handShakeTimeout - Copied from CommonClientConfiguration            |
+# | cookies - Copied from CommonClientConfiguration                     |
+public type ClientConfiguration record {|
+    *CommonClientConfiguration;
+|};
+
+# Common client configurations for WebSocket clients.
+#
+# + subProtocols - Negotiable sub protocols of the client
+# + customHeaders - Custom headers, which should be sent to the server
+# + readTimeout - Read timeout (in seconds) of the client. This is applicable only for the Sync client
+# + secureSocket - SSL/TLS-related options
+# + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
+#                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
+# + webSocketCompressionEnabled - Enable support for compression in the WebSocket
+# + handShakeTimeout - Time (in seconds) that a connection waits to get the response of
+#                               the webSocket handshake. If the timeout exceeds, then the connection is terminated with
+#                               an error.If the value < 0, then the value sets to the default value(300).
+# + cookies - An Array of `http:Cookie`
+# + auth - Configurations related to client authentication
+# + pingPongHandler - A service to handle ping/pong frames.
+#                     Resources in this service gets called on the receipt of ping, pong from the server
+public type CommonClientConfiguration record {|
+    string[] subProtocols = [];
+    map<string> customHeaders = {};
+    decimal readTimeout = -1;
+    ClientSecureSocket secureSocket?;
+    int maxFrameSize = 65536;
+    boolean webSocketCompressionEnabled = true;
+    decimal handShakeTimeout = 300;
+    http:Cookie[] cookies?;
+    ClientAuthConfig auth?;
+    PingPongService pingPongHandler?;
+|};
+
+# Configures the SSL/TLS options to be used for WebSocket client.
+public type ClientSecureSocket record {|
+    *http:ClientSecureSocket;
+|};
+
+# Adds cookies to the custom header.
+#
+# + config - Represents the cookies to be added
+public isolated function addCookies(ClientConfiguration config) {
+   string cookieHeader = "";
+   var cookiesToAdd = config["cookies"];
+   if (cookiesToAdd is http:Cookie[]) {
+       http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
+           var cookiePath = c.path;
+           int l = 0;
+           if (cookiePath is string) {
+               l = cookiePath.length();
+           }
+          return l;
+       });
+       foreach var cookie in sortedCookies {
+           var cookieName = cookie.name;
+           var cookieValue = cookie.value;
+           if (cookieName is string && cookieValue is string) {
+               cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
+           }
+           cookie.lastAccessedTime = time:utcNow();
+       }
+       if (cookieHeader != "") {
+           cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
+           map<string> headers = config["customHeaders"];
+           headers["Cookie"] = cookieHeader;
+           config["customHeaders"] = headers;
+       }
+   }
+}
+
+const EQUALS = "=";
+const SPACE = " ";
+const SEMICOLON = ";";
+
 isolated function externSyncWSInitEndpoint(Client wsClient) returns Error? = @java:Method {
     'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
-    name: "initEndpoint"
-} external;
-
-isolated function externSyncRetryInitEndpoint(Client wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.RetryInitEndpoint",
     name: "initEndpoint"
 } external;
