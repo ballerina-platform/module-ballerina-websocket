@@ -1,0 +1,6 @@
+[plugin]
+id = "websocket-compiler-plugin"
+class = "org.ballerinalang.websocket.plugin.WebsocketCompilerPlugin"
+
+[[dependency]]
+path = "../websocket-compiler-plugin/build/libs/websocket-compiler-plugin-@project.version@.jar"
