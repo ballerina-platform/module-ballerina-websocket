@@ -74,13 +74,13 @@ public function testSyncClientByteArray() returns Error? {
    worker w2 {
       io:println("Waiting till client starts reading byte[].");
       runtime:sleep(2);
-      var resp1 = wsClient->writeBinaryMessage("Hello".toBytes());
+      checkpanic wsClient->writeBinaryMessage("Hello".toBytes());
       runtime:sleep(2);
-      var resp2 = wsClient->writeBinaryMessage("Hello2".toBytes());
+      checkpanic wsClient->writeBinaryMessage("Hello2".toBytes());
       runtime:sleep(2);
-      var resp3 = wsClient->writeBinaryMessage("Hello3".toBytes());
-      var resp4 = wsClient->writeBinaryMessage("Hello4".toBytes());
-      var resp5 = wsClient->writeBinaryMessage("Hello5".toBytes());
+      checkpanic wsClient->writeBinaryMessage("Hello3".toBytes());
+      checkpanic wsClient->writeBinaryMessage("Hello4".toBytes());
+      checkpanic wsClient->writeBinaryMessage("Hello5".toBytes());
    }
    _ = wait {w1, w2};
    string msg = "[72,101,108,108,111][72,101,108,108,111,50][72,101,108,108,111,51][72,101,108,108,111,52][72,101,108,108,111,53]";

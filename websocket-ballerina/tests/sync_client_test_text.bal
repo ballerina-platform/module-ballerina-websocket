@@ -75,13 +75,13 @@ public function testSyncClient() returns Error? {
    worker w2 {
       io:println("Waiting till client starts reading text.");
       runtime:sleep(2);
-      var resp1 = wsClient->writeTextMessage("Hi world1");
+      checkpanic wsClient->writeTextMessage("Hi world1");
       runtime:sleep(2);
-      var resp2 = wsClient->writeTextMessage("Hi world2");
+      checkpanic wsClient->writeTextMessage("Hi world2");
       runtime:sleep(2);
-      var resp3 = wsClient->writeTextMessage("Hi world3");
-      var resp4 = wsClient->writeTextMessage("Hi world4");
-      var resp5 = wsClient->writeTextMessage("Hi world5");
+      checkpanic wsClient->writeTextMessage("Hi world3");
+      checkpanic wsClient->writeTextMessage("Hi world4");
+      checkpanic wsClient->writeTextMessage("Hi world5");
    }
    _ = wait {w1, w2};
    string msg = "Hi world1Hi world2Hi world3Hi world4Hi world5";

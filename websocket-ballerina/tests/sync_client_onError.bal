@@ -60,7 +60,10 @@ public function testSyncClientError() returns Error? {
     worker w2 {
         io:println("Waiting till error client starts reading text.");
         runtime:sleep(2);
-        var resp1 = wsClient->writeTextMessage("Hi world1");
+        Error? resp1 = wsClient->writeTextMessage("Hi world1");
+        if (resp1 is Error) {
+            io:println("Error occured when writing content in on error test client");
+        }
         runtime:sleep(2);
     }
     _ = wait {w1, w2};

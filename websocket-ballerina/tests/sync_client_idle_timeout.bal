@@ -68,7 +68,10 @@ public function testSyncIdleTimeOutError() returns Error? {
     worker w2 {
         io:println("Waiting till idle timeout client starts reading text.");
         runtime:sleep(3);
-        var resp1 = wsClient->writeTextMessage("Hi world1");
+        Error? resp1 = wsClient->writeTextMessage("Hi world1");
+        if (resp1 is Error) {
+           io:println("Error occured when writing content in idle timeout client");
+        }
         runtime:sleep(2);
     }
     _ = wait {w1, w2};
