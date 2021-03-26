@@ -15,11 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package io.ballerina.stdlib.websocket.plugin;
 
-module io.ballerina.stdlib.websocket.plugin {
-    requires io.ballerina.lang;
-    requires io.ballerina.parser;
-    requires io.ballerina.tools.api;
-    requires io.ballerina.stdlib.websocket;
-    exports io.ballerina.stdlib.websocket.plugin;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.projects.plugins.CodeAnalysisContext;
+import io.ballerina.projects.plugins.CodeAnalyzer;
+
+/**
+ * The {@code CodeAnalyzer} for Ballerina WebSocket services.
+ */
+public class WebSocketServiceAnalyzer extends CodeAnalyzer {
+    @Override
+    public void init(CodeAnalysisContext codeAnalysisContext) {
+        codeAnalysisContext
+                .addSyntaxNodeAnalysisTask(new WebSocketServiceValidatorTask(), SyntaxKind.SERVICE_DECLARATION);
+    }
 }

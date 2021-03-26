@@ -286,7 +286,7 @@ test {
 task ballerinaBuild {
     inputs.dir file(project.projectDir)
     dependsOn(":${packageName}-native:build")
-    ballerinaTest.dependsOn ":${packageName}-compiler-plugin:build"
+    dependsOn(":${packageName}-compiler-plugin:build")
     dependsOn(initializeVariables)
     finalizedBy(revertTomlFile)
 
