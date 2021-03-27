@@ -46,10 +46,9 @@ service class ProxyService {
        }
    }
 
-   remote function onClose(Caller wsEp, int statusCode, string reason) {
-       var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
+   remote function onClose(Caller wsEp, int statusCode, string reason) returns Error? {
+       check wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
    }
-
 }
 
 listener Listener l26 = new(21019);
