@@ -65,8 +65,8 @@ service class MyWSService2 {
 }
 
 service /helloWorld on hl {
-    resource function get hello(http:Caller caller, http:Request req) {
-        var result = caller->respond("Hello World!");
+    resource function get hello(http:Caller caller, http:Request req) returns error? {
+        check caller->respond("Hello World!");
     }
 }
 
