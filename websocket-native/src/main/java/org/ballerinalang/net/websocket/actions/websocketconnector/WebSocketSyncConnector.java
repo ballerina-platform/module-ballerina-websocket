@@ -68,4 +68,15 @@ public class WebSocketSyncConnector {
         }
         return null;
     }
+
+    public static Object externReadMessage(Environment env, BObject wsConnection) {
+        final Future callback = env.markAsync();
+        try {
+            readContentFromConnection(wsConnection, callback);
+        } catch (IllegalAccessException e) {
+            return WebSocketUtil
+                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
+        }
+        return null;
+    }
 }

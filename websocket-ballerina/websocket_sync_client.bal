@@ -175,6 +175,14 @@ public client class Client {
     remote isolated function readBinaryMessage() returns byte[]|Error {
         return self.conn.readBinaryMessage();
     }
+
+    # Reads data from the WebSocket connection
+    #
+    # + return  - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
+    #             if an error occurs when receiving
+    remote isolated function readMessage() returns string|byte[]|Error {
+        return self.conn.readMessage();
+    }
 }
 
 # Configurations for the WebSocket client.
