@@ -39,7 +39,7 @@ service class wsService66 {
     }
 }
 
-// Tests the idle timeout error returned from readTextMessage and then read again
+// Tests the idle timeout error returned from readMessage and then read again
 // to check if the idle state handler gets reset.
 @test:Config {}
 public function testSyncReadMessageIdleTimeOutError() returns Error? {
@@ -48,13 +48,13 @@ public function testSyncReadMessageIdleTimeOutError() returns Error? {
         thread:"any"
     }
     worker w1 {
-        io:println("Reading message starting: sync read message idle timeout client");
+        io:println("Start reading messages: readMessage() API to test idle timeout error");
 
         string|byte[]|Error resp1 = wsClient->readMessage();
         if (resp1 is Error) {
             readMessageIdleTimeOutError = resp1.message();
         } else {
-            io:println("1st response received at sync read message idle timeout client");
+            io:println("Invalid 1st message received at readMessage()");
         }
         string|byte[]|Error resp2 = wsClient->readMessage();
         if (resp2 is Error) {
@@ -67,7 +67,6 @@ public function testSyncReadMessageIdleTimeOutError() returns Error? {
         thread:"any"
     }
     worker w2 {
-        io:println("Waiting till idle timeout client starts reading text.");
         runtime:sleep(3);
         Error? resp1 = wsClient->writeBinaryMessage("Hi world1".toBytes());
         runtime:sleep(2);
