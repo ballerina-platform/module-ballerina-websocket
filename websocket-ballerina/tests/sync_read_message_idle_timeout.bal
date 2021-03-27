@@ -16,7 +16,7 @@
 
 import ballerina/test;
 import ballerina/io;
-import ballerina/lang.runtime as runtime;
+import ballerina/lang.runtime;
 
 string readMessageIdleTimeOutError = "";
 string readMessageSecondReadResp = "";
