@@ -74,8 +74,7 @@ public class WebSocketSyncConnector {
         try {
             readContentFromConnection(wsConnection, callback);
         } catch (IllegalAccessException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
+            // ignore as it is not possible to get an illegal access at this point
         }
         return null;
     }
