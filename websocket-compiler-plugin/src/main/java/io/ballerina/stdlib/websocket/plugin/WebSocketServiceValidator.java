@@ -133,5 +133,3 @@ public class WebSocketServiceValidator {
                 functionDefinitionNode.location(), functionDefinitionNode.functionName().toString()));
     }
 }
-
-

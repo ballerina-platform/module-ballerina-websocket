@@ -3,4 +3,4 @@ id = "websocket-compiler-plugin"
 class = "io.ballerina.stdlib.websocket.plugin.WebSocketCompilerPlugin"
 
 [[dependency]]
-path = "../websocket-compiler-plugin/build/libs/websocket-compiler-plugin-1.2.0-alpha5.jar"
+path = "../websocket-compiler-plugin/build/libs/websocket-compiler-plugin-@project.version@.jar"
