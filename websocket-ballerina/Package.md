@@ -49,4 +49,3 @@ service class WsService {
 For more information, see the following.
 * [Server Example](https://ballerina.io/learn/by-example/websocket-basic-sample.html)
 * [Client](https://ballerina.io/learn/by-example/websocket-text-client.html) 
-* [Async Client](https://ballerina.io/learn/by-example/websocket-async-text-client.html)  

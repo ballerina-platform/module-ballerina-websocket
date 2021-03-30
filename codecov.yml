@@ -1,8 +1,0 @@
-codecov:
-  require_ci_to_pass: no
-
-fixes:
-  - "ballerina/websocket/*/::websocket-ballerina/"
-
-ignore:
-  - "**/tests"
