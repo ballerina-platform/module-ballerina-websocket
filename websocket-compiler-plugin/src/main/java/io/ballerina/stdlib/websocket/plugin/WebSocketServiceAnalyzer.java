@@ -28,6 +28,8 @@ public class WebSocketServiceAnalyzer extends CodeAnalyzer {
     @Override
     public void init(CodeAnalysisContext codeAnalysisContext) {
         codeAnalysisContext
-                .addSyntaxNodeAnalysisTask(new WebSocketServiceValidatorTask(), SyntaxKind.SERVICE_DECLARATION);
+                .addSyntaxNodeAnalysisTask(new WebSocketUpgradeServiceValidatorTask(), SyntaxKind.SERVICE_DECLARATION);
+        codeAnalysisContext
+                .addSyntaxNodeAnalysisTask(new WebSocketServiceValidatorTask(), SyntaxKind.CLASS_DEFINITION);
     }
 }

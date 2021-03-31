@@ -15,68 +15,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.ballerina.stdlib.websocket.plugin;
 
-import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
+import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import org.ballerinalang.net.websocket.WebSocketConstants;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Validates a Ballerina WebSocket Service.
  */
 public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     @Override
-    public void perform(SyntaxNodeAnalysisContext ctx) {
-        ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
-        SeparatedNodeList<ExpressionNode> expressions = serviceDeclarationNode.expressions();
-        AtomicReference<WebSocketServiceValidator> wsServiceValidator = new AtomicReference<>();
-        expressions.forEach(expressionNode -> {
-            if (expressionNode.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
-                TypeDescriptorNode typeDescriptorNode = ((ExplicitNewExpressionNode) expressionNode).typeDescriptor();
-                Node moduleIdentifierTokenOfListener = typeDescriptorNode.children().get(0);
-                if (moduleIdentifierTokenOfListener.syntaxTree().rootNode().kind() == SyntaxKind.MODULE_PART) {
-                    ModulePartNode modulePartNode = moduleIdentifierTokenOfListener.syntaxTree().rootNode();
-                    modulePartNode.imports().forEach(importDeclaration -> {
-                        if (importDeclaration.moduleName().get(0).toString().split(" ")[0]
-                                .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                            if (importDeclaration.prefix().isEmpty() && moduleIdentifierTokenOfListener.toString()
-                                    .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                                wsServiceValidator.set(new WebSocketServiceValidator(ctx));
-                            } else if (importDeclaration.prefix().isPresent()
-                                    && moduleIdentifierTokenOfListener.toString().
-                                    compareTo(importDeclaration.prefix().get().children().get(1).toString()) == 0) {
-                                wsServiceValidator.set(new WebSocketServiceValidator(ctx));
-                            }
-                        }
-                    });
-                }
-            } else if (expressionNode.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
-                Node moduleIdentifierTokenOfListener = expressionNode.children().get(0);
-                if (moduleIdentifierTokenOfListener.syntaxTree().rootNode().kind() == SyntaxKind.MODULE_PART) {
-                    ModulePartNode modulePartNode = moduleIdentifierTokenOfListener.syntaxTree().rootNode();
-                    modulePartNode.imports().forEach(importDeclaration -> {
-                        if (importDeclaration.moduleName().get(0).toString().split(" ")[0]
-                                .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                            wsServiceValidator.set(new WebSocketServiceValidator(ctx));
-                        }
-                    });
-                }
+    public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
+        //SemanticModel xx = syntaxNodeAnalysisContext.semanticModel();
+        ClassDefinitionNode classDefNode = (ClassDefinitionNode) syntaxNodeAnalysisContext.node();
+        classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.TYPE_REFERENCE).forEach(node -> {
+            TypeReferenceNode wsServiceNode = (TypeReferenceNode) node;
+            if (wsServiceNode.typeName().toString().equals("websocket:Service")) {
+                classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION)
+                        .forEach(methodNode -> {
+                            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
+                        });
             }
         });
-
-        if (wsServiceValidator.get() != null) {
-            wsServiceValidator.get().validate();
-        }
     }
 }
