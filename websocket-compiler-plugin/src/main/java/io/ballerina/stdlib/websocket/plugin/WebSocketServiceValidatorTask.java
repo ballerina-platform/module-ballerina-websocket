@@ -18,7 +18,6 @@
 package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.projects.plugins.AnalysisTask;
@@ -30,15 +29,14 @@ import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
-        //SemanticModel xx = syntaxNodeAnalysisContext.semanticModel();
         ClassDefinitionNode classDefNode = (ClassDefinitionNode) syntaxNodeAnalysisContext.node();
+        String modulePrefix = Utils.getPrefix(syntaxNodeAnalysisContext);
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.TYPE_REFERENCE).forEach(node -> {
             TypeReferenceNode wsServiceNode = (TypeReferenceNode) node;
-            if (wsServiceNode.typeName().toString().equals("websocket:Service")) {
-                classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION)
-                        .forEach(methodNode -> {
-                            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
-                        });
+            if (wsServiceNode.typeName().toString().equals(modulePrefix + ":Service")) {
+                WebSocketServiceValidator webSocketServiceValidator = new WebSocketServiceValidator(
+                        syntaxNodeAnalysisContext, modulePrefix + SyntaxKind.COLON_TOKEN.stringValue());
+                webSocketServiceValidator.validate();
             }
         });
     }

@@ -1,7 +1,6 @@
 import ballerina/websocket;
-import ballerina/http;
 
-listener http:Listener hl = check new(21001);
+listener websocket:Listener hl = check new(21001);
 
 service /basic/ws on hl {
    resource isolated function post .() returns websocket:Service|websocket:UpgradeError {

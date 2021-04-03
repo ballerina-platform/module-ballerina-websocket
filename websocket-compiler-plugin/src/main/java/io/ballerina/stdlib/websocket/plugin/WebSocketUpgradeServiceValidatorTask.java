@@ -18,19 +18,20 @@
 
 package io.ballerina.stdlib.websocket.plugin;
 
-import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Validates a Ballerina WebSocket Upgrade Service.
@@ -39,44 +40,31 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
-        SeparatedNodeList<ExpressionNode> expressions = serviceDeclarationNode.expressions();
-        AtomicReference<WebSocketServiceValidator> wsServiceValidator = new AtomicReference<>();
-        expressions.forEach(expressionNode -> {
-            if (expressionNode.kind() == SyntaxKind.EXPLICIT_NEW_EXPRESSION) {
-                TypeDescriptorNode typeDescriptorNode = ((ExplicitNewExpressionNode) expressionNode).typeDescriptor();
-                Node moduleIdentifierTokenOfListener = typeDescriptorNode.children().get(0);
-                if (moduleIdentifierTokenOfListener.syntaxTree().rootNode().kind() == SyntaxKind.MODULE_PART) {
-                    ModulePartNode modulePartNode = moduleIdentifierTokenOfListener.syntaxTree().rootNode();
-                    modulePartNode.imports().forEach(importDeclaration -> {
-                        if (importDeclaration.moduleName().get(0).toString().split(" ")[0]
-                                .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                            if (importDeclaration.prefix().isEmpty() && moduleIdentifierTokenOfListener.toString()
-                                    .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                                wsServiceValidator.set(new WebSocketServiceValidator(ctx));
-                            } else if (importDeclaration.prefix().isPresent()
-                                    && moduleIdentifierTokenOfListener.toString().
-                                    compareTo(importDeclaration.prefix().get().children().get(1).toString()) == 0) {
-                                wsServiceValidator.set(new WebSocketServiceValidator(ctx));
-                            }
-                        }
-                    });
-                }
-            } else if (expressionNode.kind() == SyntaxKind.SIMPLE_NAME_REFERENCE) {
-                Node moduleIdentifierTokenOfListener = expressionNode.children().get(0);
-                if (moduleIdentifierTokenOfListener.syntaxTree().rootNode().kind() == SyntaxKind.MODULE_PART) {
-                    ModulePartNode modulePartNode = moduleIdentifierTokenOfListener.syntaxTree().rootNode();
-                    modulePartNode.imports().forEach(importDeclaration -> {
-                        if (importDeclaration.moduleName().get(0).toString().split(" ")[0]
-                                .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                            wsServiceValidator.set(new WebSocketServiceValidator(ctx));
-                        }
-                    });
+
+        String modulePrefix = Utils.getPrefix(ctx);
+        Optional<Symbol> serviceDeclarationSymbol = ctx.semanticModel().symbol(serviceDeclarationNode);
+        if (serviceDeclarationSymbol.isPresent()) {
+            List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceDeclarationSymbol.get())
+                    .listenerTypes();
+            for (TypeSymbol listenerType : listenerTypes) {
+                if ((listenerType.typeKind() == TypeDescKind.UNION) && (
+                        ((UnionTypeSymbol) listenerType).memberTypeDescriptors().get(0).getModule()
+                                .flatMap(Symbol::getName).orElse("").compareTo(WebSocketConstants.PACKAGE_WEBSOCKET)
+                                == 0)) {
+                    validateService(ctx, modulePrefix);
+                } else if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE &&
+                        ((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().flatMap(Symbol::getName)
+                                .orElse("").compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
+                    validateService(ctx, modulePrefix);
                 }
             }
-        });
-
-        if (wsServiceValidator.get() != null) {
-            wsServiceValidator.get().validate();
         }
+    }
+
+    private void validateService(SyntaxNodeAnalysisContext ctx, String modulePrefix) {
+        WebSocketUpgradeServiceValidator wsServiceValidator;
+        wsServiceValidator = new WebSocketUpgradeServiceValidator(ctx,
+                modulePrefix + SyntaxKind.COLON_TOKEN.stringValue());
+        wsServiceValidator.validate();
     }
 }

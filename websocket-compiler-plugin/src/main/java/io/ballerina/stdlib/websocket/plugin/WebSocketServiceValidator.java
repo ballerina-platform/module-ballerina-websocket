@@ -15,121 +15,213 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.ballerina.stdlib.websocket.plugin;
 
+import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import java.util.Optional;
 
 /**
- * Class to validate WebSocket services.
+ * A class for validating websocket service.
  */
 public class WebSocketServiceValidator {
     private SyntaxNodeAnalysisContext ctx;
     private FunctionDefinitionNode resourceNode;
-    private static final String HTTP_REQUEST = "http:Request";
-    private static final String CODE = "WS_101";
-    private static final String INVALID_RESOURCE_ERROR =
-            "There should be only one `get` resource for the service";
-    private static final String MORE_THAN_ONE_RESOURCE_PARAM_ERROR =
-            "There should be only http:Request as a parameter";
-    private static final String INVALID_RESOURCE_PARAMETER_ERROR =
-            "Invalid parameter `{0}` provided for `{1}`";
-    private static final String INVALID_RETURN_TYPES_IN_RESOURCE =
-            "Invalid return type `{0}` provided for function `{1}`, return type should be a subtype of `{2}`";
-    private static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE = "Function `{0}` not accepted by the service";
-
-    WebSocketServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
-        ctx = syntaxNodeAnalysisContext;
+    private String modulePrefix;
+    public static final String CALLER = "Caller";
+    public static final String BYTE_ARRAY = "byte[]";
+    public static final String ERROR = "Error";
+    public static final String OPTIONAL = "?";
+    private static final String CODE = "WS_110";
+    public static final String INVALID_INPUT_PARAM_FOR_ONOPEN =
+            "Invalid parameters `{0}` provided for onOpen remote function";
+    public static final String INVALID_INPUT_PARAM_FOR_ONCLOSE =
+            "Invalid parameters `{0}` provided for onClose remote function";
+    public static final String INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS =
+            "Invalid parameters `{0}` provided for onClose remote function. `string` is the mandatory parameter";
+    public static final String INVALID_INPUT_PARAMS_FOR_ONOPEN =
+            "Invalid parameters provided for onOpen remote function. Only `{0}`:Caller is allowed as the parameter";
+    public static final String INVALID_RETURN_TYPES =
+            "Invalid return types provided for `{0}` remote function, return type should be either `error?` or `{1}` ";
+    public static final String INVALID_INPUT_PARAMS_FOR_ONCLOSE =
+            "Invalid parameters provided for onClose remote function";
+    public static final String INVALID_INPUT_PARAMS_FOR_ONERROR =
+            "Invalid parameters provided for onError remote function";
+    public static final String INVALID_INPUT_FOR_ONERROR_WITH_ONE_PARAMS =
+            "Invalid parameters `{0}` provided for onError remote function. `error` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ONERROR =
+            "Invalid parameters `{0}` provided for onError remote function";
+    public static final String INVALID_INPUT_PARAMS_FOR_ONIDLETIMEOUT = "Invalid parameters provided for "
+            + "OnIdleTimeout remote function. Only `{0}`:Caller is allowed as the parameter";
+    public static final String INVALID_INPUT_PARAM_FOR_ONIDLETIMEOUT =
+            "Invalid parameters `{0}` provided for onIdleTimeout remote function";
+    WebSocketServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext, String modulePrefix) {
+        this.ctx = syntaxNodeAnalysisContext;
+        this.modulePrefix = modulePrefix;
     }
 
-    void validate() {
-        ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
-        if (serviceDeclarationNode.members().size() > 1) {
-            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RESOURCE_ERROR, DiagnosticSeverity.ERROR);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
-        } else {
-            serviceDeclarationNode.members().stream()
-                    .filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
-                            || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(node -> {
-                FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
-                String functionName = functionDefinitionNode.functionName().toString().split(" ")[0];
-                if (functionName.compareTo(WebSocketConstants.GET) == 0
-                        && functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
-                    resourceNode = functionDefinitionNode;
-                } else {
-                    reportInvalidFunction(functionDefinitionNode);
-                }
-            });
-            validateResourceParams(resourceNode);
-            validateResourceReturnTypes(resourceNode);
-        }
-
+    public void validate() {
+        ClassDefinitionNode classDefNode = (ClassDefinitionNode) ctx.node();
+        classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION)
+                .forEach(methodNode -> {
+                    FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
+                    switch (functionDefinitionNode.functionName().toString()) {
+                    case "onOpen":
+                        validateonOpenFunction(functionDefinitionNode);
+                        break;
+                    case "onClose":
+                        validateonCloseFunction(functionDefinitionNode);
+                        break;
+                    case "onError":
+                        validateonErrorFunction(functionDefinitionNode);
+                        break;
+                    case "onIdleTimeout":
+                        validateonIdleTimeoutFunction(functionDefinitionNode);
+                        break;
+                    }
+                });
     }
 
-    private void validateResourceParams(FunctionDefinitionNode resourceNode) {
+    private void validateonOpenFunction(FunctionDefinitionNode resourceNode) {
         if (resourceNode != null) {
             SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
             if (parameterNodes.size() > 1) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, MORE_THAN_ONE_RESOURCE_PARAM_ERROR,
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAMS_FOR_ONOPEN,
                         DiagnosticSeverity.ERROR);
-                ctx.reportDiagnostic(DiagnosticFactory
-                        .createDiagnostic(diagnosticInfo, resourceNode.location()));
-            } else if (!parameterNodes.isEmpty()) {
+                ctx.reportDiagnostic(
+                        DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(), modulePrefix));
+            } else if (parameterNodes.size() == 1) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
                 Node parameterTypeName = requiredParameterNode.typeName();
-                if (!parameterTypeName.toString().contains(HTTP_REQUEST)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RESOURCE_PARAMETER_ERROR,
+                if (!parameterTypeName.toString().contains(modulePrefix + "Caller")) {
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAM_FOR_ONOPEN,
                             DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString(),
-                                    HTTP_REQUEST));
+                            .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
                 }
             }
+            Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode.functionSignature().returnTypeDesc();
+            if (returnTypesNode.isPresent()) {
+                validateErrorReturnTypes(resourceNode, returnTypesNode);
+            }
         }
     }
 
-    private void validateResourceReturnTypes(FunctionDefinitionNode resourceNode) {
+    private void validateonCloseFunction(FunctionDefinitionNode resourceNode) {
         if (resourceNode != null) {
-            Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode
-                    .functionSignature().returnTypeDesc();
-            if (resourceNode.functionSignature().returnTypeDesc().isEmpty()) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES_IN_RESOURCE,
+            SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
+            if (parameterNodes.size() > 3) {
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAMS_FOR_ONCLOSE,
                         DiagnosticSeverity.ERROR);
-                ctx.reportDiagnostic(DiagnosticFactory
-                        .createDiagnostic(diagnosticInfo, resourceNode.location()));
+                ctx.reportDiagnostic(
+                        DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(), modulePrefix));
+            } else if (parameterNodes.size() == 1) {
+                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
+                Node parameterTypeName = requiredParameterNode.typeName();
+                if (!parameterTypeName.toString().contains("string")) {
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS,
+                            DiagnosticSeverity.ERROR);
+                    ctx.reportDiagnostic(DiagnosticFactory
+                            .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
+                }
+            } else {
+                parameterNodes.forEach(parameterNode -> {
+                    String parameterTypeName = ((RequiredParameterNode) parameterNode).typeName().toString().trim();
+                    if (!parameterTypeName.equals("string") && !parameterTypeName.equals("int")
+                            && !parameterTypeName.equals(modulePrefix + CALLER)) {
+                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAM_FOR_ONCLOSE,
+                                DiagnosticSeverity.ERROR);
+                        ctx.reportDiagnostic(DiagnosticFactory
+                                .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName));
+                    }
+                });
             }
-            Node returnTypeDescriptor = returnTypesNode.get().type();
-            String returnTypeDescWithoutTrailingSpace = returnTypeDescriptor.toString().split(" ")[0];
-            if (!(returnTypeDescWithoutTrailingSpace.contains("websocket:Service") && returnTypeDescWithoutTrailingSpace
-                    .contains("websocket:UpgradeError"))) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES_IN_RESOURCE,
-                        DiagnosticSeverity.ERROR);
-                ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                        returnTypeDescriptor.location(), returnTypeDescriptor.toString(), resourceNode.functionName(),
-                        "`websocket:Service|websocket:UpgradeError`"));
+            Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode.functionSignature().returnTypeDesc();
+            if (returnTypesNode.isPresent()) {
+                validateErrorReturnTypes(resourceNode, returnTypesNode);
             }
-
         }
     }
 
-    private void reportInvalidFunction(FunctionDefinitionNode functionDefinitionNode) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE,
-                DiagnosticSeverity.ERROR);
-        ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                functionDefinitionNode.location(), functionDefinitionNode.functionName().toString()));
+    private void validateonErrorFunction(FunctionDefinitionNode resourceNode) {
+        if (resourceNode != null) {
+            SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
+            if (parameterNodes.size() == 1) {
+                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
+                Node parameterTypeName = requiredParameterNode.typeName();
+                if (!parameterTypeName.toString().contains("error") || parameterTypeName.toString()
+                        .contains(modulePrefix + ERROR)) {
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ONERROR_WITH_ONE_PARAMS,
+                            DiagnosticSeverity.ERROR);
+                    ctx.reportDiagnostic(DiagnosticFactory
+                            .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
+                }
+            } else {
+                parameterNodes.forEach(parameterNode -> {
+                    String parameterTypeName = ((RequiredParameterNode) parameterNode).typeName().toString().trim();
+                    if (!parameterTypeName.equals("error") && !parameterTypeName.equals(modulePrefix + ERROR)
+                            && !parameterTypeName.equals(modulePrefix + CALLER)) {
+                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ONERROR,
+                                DiagnosticSeverity.ERROR);
+                        ctx.reportDiagnostic(DiagnosticFactory
+                                .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName));
+                    }
+                });
+            }
+            Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode.functionSignature().returnTypeDesc();
+            if (returnTypesNode.isPresent()) {
+                validateErrorReturnTypes(resourceNode, returnTypesNode);
+            }
+        }
+    }
+
+    private void validateonIdleTimeoutFunction(FunctionDefinitionNode resourceNode) {
+        if (resourceNode != null) {
+            SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
+            if (parameterNodes.size() > 1) {
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAMS_FOR_ONIDLETIMEOUT,
+                        DiagnosticSeverity.ERROR);
+                ctx.reportDiagnostic(
+                        DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(), modulePrefix));
+            } else if (parameterNodes.size() == 1) {
+                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
+                Node parameterTypeName = requiredParameterNode.typeName();
+                if (!parameterTypeName.toString().contains(modulePrefix + CALLER)) {
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAM_FOR_ONIDLETIMEOUT,
+                            DiagnosticSeverity.ERROR);
+                    ctx.reportDiagnostic(DiagnosticFactory
+                            .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
+                }
+            }
+            Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode.functionSignature().returnTypeDesc();
+            if (returnTypesNode.isPresent()) {
+                validateErrorReturnTypes(resourceNode, returnTypesNode);
+            }
+        }
+    }
+
+    private void validateErrorReturnTypes(FunctionDefinitionNode resourceNode,
+            Optional<ReturnTypeDescriptorNode> returnTypesNode) {
+        Node returnTypeDescriptor = returnTypesNode.get().type();
+        String returnTypeDescWithoutTrailingSpace = returnTypeDescriptor.toString().split(" ")[0];
+        if (!(returnTypeDescriptor.kind() == SyntaxKind.OPTIONAL_TYPE_DESC
+                && returnTypeDescWithoutTrailingSpace.compareTo(modulePrefix + ERROR + OPTIONAL) == 0
+                || returnTypeDescWithoutTrailingSpace.compareTo("error?") == 0)) {
+            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES, DiagnosticSeverity.ERROR);
+            ctx.reportDiagnostic(DiagnosticFactory
+                    .createDiagnostic(diagnosticInfo, resourceNode.location(), resourceNode.functionName(),
+                            modulePrefix + ERROR + OPTIONAL));
+        }
     }
 }
