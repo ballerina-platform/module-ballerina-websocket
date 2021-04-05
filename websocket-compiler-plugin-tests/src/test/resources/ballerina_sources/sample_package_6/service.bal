@@ -14,4 +14,7 @@ service class WsService {
     *websocket:Service;
     remote function onOpen(websocket:Caller caller) {
     }
+
+    remote function onTextMessage(websocket:Caller caller, string text) returns error? {
+    }
 }
