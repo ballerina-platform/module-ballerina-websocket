@@ -11,6 +11,6 @@ service class WsService {
     remote function onOpen(websocket:Caller caller) {
     }
 
-    //remote function onTextMessage(websocket:Caller caller, string text) {
-    //}
+    remote function onTextMessage(string text) returns byte[]? {
+    }
 }
