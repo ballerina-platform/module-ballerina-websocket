@@ -32,12 +32,13 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE;
+
 /**
  * A class for validating websocket service.
  */
 public class WebSocketServiceValidator {
     private SyntaxNodeAnalysisContext ctx;
-    private FunctionDefinitionNode resourceNode;
     private String modulePrefix;
     public static final String CALLER = "Caller";
     public static final String BYTE_ARRAY = "byte[]";
@@ -89,6 +90,8 @@ public class WebSocketServiceValidator {
                     case "onIdleTimeout":
                         validateonIdleTimeoutFunction(functionDefinitionNode);
                         break;
+                    default:
+                        reportInvalidFunction(functionDefinitionNode);
                     }
                 });
     }
@@ -209,6 +212,13 @@ public class WebSocketServiceValidator {
                 validateErrorReturnTypes(resourceNode, returnTypesNode);
             }
         }
+    }
+
+    private void reportInvalidFunction(FunctionDefinitionNode functionDefinitionNode) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE,
+                DiagnosticSeverity.ERROR);
+        ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                functionDefinitionNode.location(), functionDefinitionNode.functionName().toString()));
     }
 
     private void validateErrorReturnTypes(FunctionDefinitionNode resourceNode,
