@@ -76,8 +76,10 @@ public class WebSocketUpgradeServiceValidator {
                     reportInvalidFunction(functionDefinitionNode);
                 }
             });
-            validateResourceParams(resourceNode);
-            validateResourceReturnTypes(resourceNode);
+            if (resourceNode != null) {
+                validateResourceParams(resourceNode);
+                validateResourceReturnTypes(resourceNode);
+            }
         }
 
     }

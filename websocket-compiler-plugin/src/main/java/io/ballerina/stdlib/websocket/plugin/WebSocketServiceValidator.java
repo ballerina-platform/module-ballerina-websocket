@@ -53,6 +53,7 @@ public class WebSocketServiceValidator {
     private static final String ON_IDLE_TIMEOUT = "onIdleTimeout";
     private static final String ON_TEXT_MESSAGE = "onTextMessage";
     private static final String ON_BINARY_MESSAGE = "onBinaryMessage";
+    private static final String REMOTE_KEY_WORD = "remote";
     public static final String INVALID_INPUT_PARAM_FOR_ONOPEN =
             "Invalid parameters `{0}` provided for onOpen remote function";
     public static final String INVALID_INPUT_PARAM_FOR_ONCLOSE =
@@ -97,29 +98,35 @@ public class WebSocketServiceValidator {
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION)
                 .forEach(methodNode -> {
                     FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
-                    switch (functionDefinitionNode.functionName().toString()) {
-                        case ON_OPEN:
-                            validateOnOpenFunction(functionDefinitionNode);
-                            break;
-                        case ON_CLOSE:
-                            validateOnCloseFunction(functionDefinitionNode);
-                            break;
-                        case ON_ERROR:
-                            validateOnErrorFunction(functionDefinitionNode);
-                            break;
-                        case ON_IDLE_TIMEOUT:
-                            validateOnIdleTimeoutFunction(functionDefinitionNode);
-                            break;
-                        case ON_TEXT_MESSAGE:
-                            validateOnTextMessageFunction(functionDefinitionNode);
-                            break;
-                        case ON_BINARY_MESSAGE:
-                            validateOnBinaryMessageFunction(functionDefinitionNode);
-                            break;
-                        default:
-                            reportInvalidFunction(functionDefinitionNode);
+                    if (functionDefinitionNode.qualifierList().get(0).text().equals(REMOTE_KEY_WORD)) {
+                        filterRemoteFunctions(functionDefinitionNode);
                     }
                 });
+    }
+
+    private void filterRemoteFunctions(FunctionDefinitionNode functionDefinitionNode) {
+        switch (functionDefinitionNode.functionName().toString()) {
+            case ON_OPEN:
+                validateOnOpenFunction(functionDefinitionNode);
+                break;
+            case ON_CLOSE:
+                validateOnCloseFunction(functionDefinitionNode);
+                break;
+            case ON_ERROR:
+                validateOnErrorFunction(functionDefinitionNode);
+                break;
+            case ON_IDLE_TIMEOUT:
+                validateOnIdleTimeoutFunction(functionDefinitionNode);
+                break;
+            case ON_TEXT_MESSAGE:
+                validateOnTextMessageFunction(functionDefinitionNode);
+                break;
+            case ON_BINARY_MESSAGE:
+                validateOnBinaryMessageFunction(functionDefinitionNode);
+                break;
+            default:
+                reportInvalidFunction(functionDefinitionNode);
+        }
     }
 
     private void validateOnOpenFunction(FunctionDefinitionNode resourceNode) {
