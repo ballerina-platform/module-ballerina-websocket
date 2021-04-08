@@ -35,6 +35,8 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValidator.INVALID_RETURN_TYPES_IN_RESOURCE_CODE;
+
 /**
  * This is the compiler plugin for Ballerina WebSocket package.
  */
@@ -53,7 +55,8 @@ public class UpgradeServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(), "WS_101");
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
+                WebSocketUpgradeServiceValidator.INVALID_RESOURCE_ERROR_CODE);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
                 WebSocketUpgradeServiceValidator.INVALID_RESOURCE_ERROR);
     }
@@ -84,7 +87,8 @@ public class UpgradeServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(), "WS_101");
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
+                WebSocketUpgradeServiceValidator.MORE_THAN_ONE_RESOURCE_PARAM_ERROR_CODE);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
                 WebSocketUpgradeServiceValidator.MORE_THAN_ONE_RESOURCE_PARAM_ERROR);
     }
@@ -97,7 +101,8 @@ public class UpgradeServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(), "WS_101");
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
+                WebSocketUpgradeServiceValidator.INVALID_RESOURCE_PARAMETER_ERROR_CODE);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
                 WebSocketUpgradeServiceValidator.INVALID_RESOURCE_PARAMETER_ERROR);
     }
@@ -119,7 +124,8 @@ public class UpgradeServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(), "WS_101");
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
+                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
                 WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
     }
@@ -132,7 +138,8 @@ public class UpgradeServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(), "WS_101");
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
+                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
                 WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
     }
@@ -154,7 +161,7 @@ public class UpgradeServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(), "WS_101");
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(), INVALID_RETURN_TYPES_IN_RESOURCE_CODE);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
                 WebSocketUpgradeServiceValidator.INVALID_RETURN_TYPES_IN_RESOURCE);
     }
@@ -209,9 +216,9 @@ public class UpgradeServiceValidationTest {
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
         Diagnostic diagnostic3 = (Diagnostic) diagnosticResult.diagnostics().toArray()[2];
         Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ONOPEN);
+                WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_OPEN);
         Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ONCLOSE);
+                WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_CLOSE);
         Assert.assertEquals(diagnostic3.diagnosticInfo().messageFormat(),
                 WebSocketServiceValidator.INVALID_RETURN_TYPES);
     }
@@ -225,7 +232,7 @@ public class UpgradeServiceValidationTest {
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ONOPEN);
+                WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
     }
 
     @Test
@@ -249,7 +256,7 @@ public class UpgradeServiceValidationTest {
         Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
                 WebSocketServiceValidator.INVALID_RETURN_TYPES);
         Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ONCLOSE);
+                WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_CLOSE);
     }
 
     @Test
@@ -286,9 +293,9 @@ public class UpgradeServiceValidationTest {
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
         Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_FOR_ONERROR_WITH_ONE_PARAMS);
+                WebSocketServiceValidator.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
         Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ONIDLETIMEOUT);
+                WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
 
     }
 
@@ -302,9 +309,9 @@ public class UpgradeServiceValidationTest {
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
         Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_FOR_ONERROR);
+                WebSocketServiceValidator.INVALID_INPUT_FOR_ON_ERROR);
         Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ONIDLETIMEOUT);
+                WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT);
 
     }
 

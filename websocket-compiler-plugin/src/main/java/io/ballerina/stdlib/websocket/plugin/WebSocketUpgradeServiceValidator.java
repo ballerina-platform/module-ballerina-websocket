@@ -42,16 +42,21 @@ public class WebSocketUpgradeServiceValidator {
     private FunctionDefinitionNode resourceNode;
     private String modulePrefix;
     private static final String HTTP_REQUEST = "http:Request";
-    public static final String CODE = "WS_101";
+    public static final String INVALID_RESOURCE_ERROR_CODE = "WS_101";
     public static final String INVALID_RESOURCE_ERROR =
             "There should be only one `get` resource for the service";
     public static final String MORE_THAN_ONE_RESOURCE_PARAM_ERROR =
             "There should be only http:Request as a parameter";
+    public static final String MORE_THAN_ONE_RESOURCE_PARAM_ERROR_CODE = "WS_102";
     public static final String INVALID_RESOURCE_PARAMETER_ERROR =
             "Invalid parameter `{0}` provided for `{1}`";
+    public static final String INVALID_RESOURCE_PARAMETER_ERROR_CODE = "WS_103";
     public static final String INVALID_RETURN_TYPES_IN_RESOURCE =
             "Invalid return type `{0}` provided for function `{1}`, return type should be a subtype of `{2}`";
+    public static final String INVALID_RETURN_TYPES_IN_RESOURCE_CODE =
+            "WS_104";
     public static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE = "Function `{0}` not accepted by the service";
+    public static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE = "WS_105";
 
     WebSocketUpgradeServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext, String modulePrefix) {
         this.ctx = syntaxNodeAnalysisContext;
@@ -61,7 +66,8 @@ public class WebSocketUpgradeServiceValidator {
     void validate() {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
         if (serviceDeclarationNode.members().size() > 1) {
-            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RESOURCE_ERROR, DiagnosticSeverity.ERROR);
+            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RESOURCE_ERROR_CODE, INVALID_RESOURCE_ERROR,
+                    DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
         } else {
             serviceDeclarationNode.members().stream()
@@ -88,16 +94,16 @@ public class WebSocketUpgradeServiceValidator {
         if (resourceNode != null) {
             SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
             if (parameterNodes.size() > 1) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, MORE_THAN_ONE_RESOURCE_PARAM_ERROR,
-                        DiagnosticSeverity.ERROR);
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(MORE_THAN_ONE_RESOURCE_PARAM_ERROR_CODE,
+                        MORE_THAN_ONE_RESOURCE_PARAM_ERROR, DiagnosticSeverity.ERROR);
                 ctx.reportDiagnostic(DiagnosticFactory
                         .createDiagnostic(diagnosticInfo, resourceNode.location()));
             } else if (!parameterNodes.isEmpty()) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
                 Node parameterTypeName = requiredParameterNode.typeName();
                 if (!parameterTypeName.toString().contains(HTTP_REQUEST)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RESOURCE_PARAMETER_ERROR,
-                            DiagnosticSeverity.ERROR);
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RESOURCE_PARAMETER_ERROR_CODE,
+                            INVALID_RESOURCE_PARAMETER_ERROR, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString(),
                                     HTTP_REQUEST));
@@ -111,17 +117,16 @@ public class WebSocketUpgradeServiceValidator {
             Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode
                     .functionSignature().returnTypeDesc();
             if (resourceNode.functionSignature().returnTypeDesc().isEmpty()) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES_IN_RESOURCE,
-                        DiagnosticSeverity.ERROR);
-                ctx.reportDiagnostic(DiagnosticFactory
-                        .createDiagnostic(diagnosticInfo, resourceNode.location()));
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_IN_RESOURCE_CODE,
+                        INVALID_RETURN_TYPES_IN_RESOURCE, DiagnosticSeverity.ERROR);
+                ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location()));
             }
             Node returnTypeDescriptor = returnTypesNode.get().type();
             String returnTypeDescWithoutTrailingSpace = returnTypeDescriptor.toString().split(" ")[0];
             if (!(returnTypeDescWithoutTrailingSpace.contains(modulePrefix + "Service")
                     && returnTypeDescWithoutTrailingSpace.contains(modulePrefix + "UpgradeError"))) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES_IN_RESOURCE,
-                        DiagnosticSeverity.ERROR);
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_IN_RESOURCE_CODE,
+                        INVALID_RETURN_TYPES_IN_RESOURCE, DiagnosticSeverity.ERROR);
                 ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, returnTypeDescriptor.location(),
                         returnTypeDescriptor.toString(), resourceNode.functionName(),
                         modulePrefix + "Service| " + modulePrefix + "UpgradeError"));
@@ -131,9 +136,9 @@ public class WebSocketUpgradeServiceValidator {
     }
 
     private void reportInvalidFunction(FunctionDefinitionNode functionDefinitionNode) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE,
-                DiagnosticSeverity.ERROR);
-        ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                functionDefinitionNode.location(), functionDefinitionNode.functionName().toString()));
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE,
+                FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE, DiagnosticSeverity.ERROR);
+        ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, functionDefinitionNode.location(),
+                functionDefinitionNode.functionName().toString()));
     }
 }
