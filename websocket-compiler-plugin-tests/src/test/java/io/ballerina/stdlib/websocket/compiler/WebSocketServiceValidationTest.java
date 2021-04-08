@@ -386,6 +386,64 @@ public class WebSocketServiceValidationTest {
 
     }
 
+    @Test
+    public void testOnTextWithInvalidMandatoryInputParamAndWrongReturn() {
+        Package currentPackage = loadPackage("sample_package_23");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
+        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
+        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
+                WebSocketServiceValidator.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
+        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
+                WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA);
+
+    }
+
+    @Test
+    public void testOnTextWithInvalidInputParams() {
+        Package currentPackage = loadPackage("sample_package_24");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
+                WebSocketServiceValidator.INVALID_INPUT_FOR_ON_TEXT);
+
+    }
+
+    @Test
+    public void testOnBinaryWithInvalidMandatoryInputParams() {
+        Package currentPackage = loadPackage("sample_package_25");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
+                WebSocketServiceValidator.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS);
+
+    }
+
+    @Test
+    public void testOnBinaryWithInvalidReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_26");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
+        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
+                WebSocketServiceValidator.INVALID_INPUT_FOR_ON_BINARY);
+        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
+        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
+                WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA);
+
+    }
+
     private Package loadPackage(String path) {
         Path projectDirPath = RESOURCE_DIRECTORY.resolve(path);
         BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectDirPath);
