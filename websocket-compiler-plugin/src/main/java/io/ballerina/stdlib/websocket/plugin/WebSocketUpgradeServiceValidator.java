@@ -57,6 +57,7 @@ public class WebSocketUpgradeServiceValidator {
             "WS_104";
     public static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE = "Function `{0}` not accepted by the service";
     public static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE = "WS_105";
+    public static final String UPGRADE_ERROR = "UpgradeError";
 
     WebSocketUpgradeServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext, String modulePrefix) {
         this.ctx = syntaxNodeAnalysisContext;
@@ -66,9 +67,14 @@ public class WebSocketUpgradeServiceValidator {
     void validate() {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
         if (serviceDeclarationNode.members().size() > 1) {
-            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RESOURCE_ERROR_CODE, INVALID_RESOURCE_ERROR,
-                    DiagnosticSeverity.ERROR);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
+            int numResources = (int) serviceDeclarationNode.members().stream()
+                    .filter(child -> child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).count();
+            if (numResources > 1) {
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RESOURCE_ERROR_CODE, INVALID_RESOURCE_ERROR,
+                        DiagnosticSeverity.ERROR);
+                ctx.reportDiagnostic(
+                        DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
+            }
         } else {
             serviceDeclarationNode.members().stream()
                     .filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
@@ -87,7 +93,6 @@ public class WebSocketUpgradeServiceValidator {
                 validateResourceReturnTypes(resourceNode);
             }
         }
-
     }
 
     private void validateResourceParams(FunctionDefinitionNode resourceNode) {
@@ -124,12 +129,12 @@ public class WebSocketUpgradeServiceValidator {
             Node returnTypeDescriptor = returnTypesNode.get().type();
             String returnTypeDescWithoutTrailingSpace = returnTypeDescriptor.toString().split(" ")[0];
             if (!(returnTypeDescWithoutTrailingSpace.contains(modulePrefix + "Service")
-                    && returnTypeDescWithoutTrailingSpace.contains(modulePrefix + "UpgradeError"))) {
+                    && returnTypeDescWithoutTrailingSpace.contains(modulePrefix + UPGRADE_ERROR))) {
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_IN_RESOURCE_CODE,
                         INVALID_RETURN_TYPES_IN_RESOURCE, DiagnosticSeverity.ERROR);
                 ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, returnTypeDescriptor.location(),
                         returnTypeDescriptor.toString(), resourceNode.functionName(),
-                        modulePrefix + "Service| " + modulePrefix + "UpgradeError"));
+                        modulePrefix + "Service| " + modulePrefix + UPGRADE_ERROR));
             }
 
         }

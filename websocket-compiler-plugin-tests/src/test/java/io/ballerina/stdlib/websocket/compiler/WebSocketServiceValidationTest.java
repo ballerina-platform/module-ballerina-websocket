@@ -40,7 +40,7 @@ import static io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValida
 /**
  * This is the compiler plugin for Ballerina WebSocket package.
  */
-public class UpgradeServiceValidationTest {
+public class WebSocketServiceValidationTest {
     private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources", "ballerina_sources")
             .toAbsolutePath();
     private static final PrintStream OUT = System.out;
@@ -370,6 +370,19 @@ public class UpgradeServiceValidationTest {
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
         Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
                 WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA);
+
+    }
+
+    @Test
+    public void testWebSocketServiceWithResources() {
+        Package currentPackage = loadPackage("sample_package_27");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
+                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
 
     }
 

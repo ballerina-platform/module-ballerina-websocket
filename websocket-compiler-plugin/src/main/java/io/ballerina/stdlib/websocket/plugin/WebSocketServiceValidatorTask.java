@@ -33,7 +33,8 @@ public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAna
         String modulePrefix = Utils.getPrefix(syntaxNodeAnalysisContext);
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.TYPE_REFERENCE).forEach(node -> {
             TypeReferenceNode wsServiceNode = (TypeReferenceNode) node;
-            if (wsServiceNode.typeName().toString().equals(modulePrefix + ":Service")) {
+            if (wsServiceNode.typeName().toString()
+                    .equals(modulePrefix + SyntaxKind.COLON_TOKEN.stringValue() + "Service")) {
                 WebSocketServiceValidator webSocketServiceValidator = new WebSocketServiceValidator(
                         syntaxNodeAnalysisContext, modulePrefix + SyntaxKind.COLON_TOKEN.stringValue());
                 webSocketServiceValidator.validate();

@@ -54,6 +54,7 @@ public class WebSocketServiceValidator {
     private static final String ON_TEXT_MESSAGE = "onTextMessage";
     private static final String ON_BINARY_MESSAGE = "onBinaryMessage";
     private static final String REMOTE_KEY_WORD = "remote";
+    private static final String RESOURCE_KEY_WORD = "resource";
     public static final String INVALID_INPUT_PARAM_FOR_ON_OPEN =
             "Invalid parameters `{0}` provided for onOpen remote function";
     public static final String INVALID_INPUT_PARAM_FOR_ON_OPEN_CODE = "WS_201";
@@ -82,19 +83,26 @@ public class WebSocketServiceValidator {
     public static final String INVALID_INPUT_FOR_ON_ERROR_CODE = "WS_208";
     public static final String INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT = "Invalid parameters provided for "
             + "OnIdleTimeout remote function. Only `{0}`:Caller is allowed as the parameter";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT_CODE = "WS_209";
     public static final String INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT =
             "Invalid parameters `{0}` provided for onIdleTimeout remote function";
+    public static final String INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT_CODE = "WS_210";
     public static final String INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS =
             "Invalid parameters `{0}` provided for onTextMessage remote function. `string` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS_CODE = "WS_211";
     public static final String INVALID_INPUT_FOR_ON_TEXT =
             "Invalid parameters `{0}` provided for onTextMessage remote function";
+    public static final String INVALID_INPUT_FOR_ON_TEXT_CODE = "WS_212";
     public static final String INVALID_RETURN_TYPES_ON_DATA =
             "Invalid return type `{0}` provided for `{1}` remote function";
+    public static final String INVALID_RETURN_TYPES_ON_DATA_CODE = "WS_213";
     public static final String INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS =
             "Invalid parameters `{0}` provided for onBinaryMessage remote function. "
                     + "`byte[]` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS_CODE = "WS_214";
     public static final String INVALID_INPUT_FOR_ON_BINARY =
             "Invalid parameters `{0}` provided for onBinaryMessage remote function";
+    public static final String INVALID_INPUT_FOR_ON_BINARY_CODE = "WS_215";
 
     WebSocketServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext, String modulePrefix) {
         this.ctx = syntaxNodeAnalysisContext;
@@ -103,13 +111,15 @@ public class WebSocketServiceValidator {
 
     public void validate() {
         ClassDefinitionNode classDefNode = (ClassDefinitionNode) ctx.node();
-        classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION)
-                .forEach(methodNode -> {
-                    FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
-                    if (functionDefinitionNode.qualifierList().get(0).text().equals(REMOTE_KEY_WORD)) {
-                        filterRemoteFunctions(functionDefinitionNode);
-                    }
-                });
+        classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
+                || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(methodNode -> {
+            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
+            if (functionDefinitionNode.qualifierList().get(0).text().equals(REMOTE_KEY_WORD)) {
+                filterRemoteFunctions(functionDefinitionNode);
+            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(RESOURCE_KEY_WORD)) {
+                reportInvalidFunction(functionDefinitionNode);
+            }
+        });
     }
 
     private void filterRemoteFunctions(FunctionDefinitionNode functionDefinitionNode) {
@@ -216,8 +226,8 @@ public class WebSocketServiceValidator {
                     String parameterTypeName = ((RequiredParameterNode) parameterNode).typeName().toString().trim();
                     if (!parameterTypeName.equals(GENERIC_ERROR) && !parameterTypeName.equals(modulePrefix + ERROR)
                             && !parameterTypeName.equals(modulePrefix + CALLER)) {
-                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ON_ERROR,
-                                DiagnosticSeverity.ERROR);
+                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_FOR_ON_ERROR_CODE,
+                                INVALID_INPUT_FOR_ON_ERROR, DiagnosticSeverity.ERROR);
                         ctx.reportDiagnostic(DiagnosticFactory
                                 .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName));
                     }
@@ -234,16 +244,16 @@ public class WebSocketServiceValidator {
         if (resourceNode != null) {
             SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
             if (parameterNodes.size() > 1) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT,
-                        DiagnosticSeverity.ERROR);
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT_CODE,
+                        INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT, DiagnosticSeverity.ERROR);
                 ctx.reportDiagnostic(
                         DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(), modulePrefix));
             } else if (parameterNodes.size() == 1) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
                 Node parameterTypeName = requiredParameterNode.typeName();
                 if (!parameterTypeName.toString().contains(modulePrefix + CALLER)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT,
-                            DiagnosticSeverity.ERROR);
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT_CODE,
+                            INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
                 }
@@ -262,8 +272,8 @@ public class WebSocketServiceValidator {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
                 Node parameterTypeName = requiredParameterNode.typeName();
                 if (!parameterTypeName.toString().contains(STRING)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
-                            DiagnosticSeverity.ERROR);
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS_CODE,
+                            INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
                 }
@@ -271,8 +281,8 @@ public class WebSocketServiceValidator {
                 parameterNodes.forEach(parameterNode -> {
                     String parameterTypeName = ((RequiredParameterNode) parameterNode).typeName().toString().trim();
                     if (!parameterTypeName.equals(STRING) && !parameterTypeName.equals(modulePrefix + CALLER)) {
-                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ON_TEXT,
-                                DiagnosticSeverity.ERROR);
+                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_FOR_ON_TEXT_CODE,
+                                INVALID_INPUT_FOR_ON_TEXT, DiagnosticSeverity.ERROR);
                         ctx.reportDiagnostic(DiagnosticFactory
                                 .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName));
                     }
@@ -292,7 +302,7 @@ public class WebSocketServiceValidator {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
                 Node parameterTypeName = requiredParameterNode.typeName();
                 if (!parameterTypeName.toString().contains(BYTE_ARRAY)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE,
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS_CODE,
                             INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString()));
@@ -301,8 +311,8 @@ public class WebSocketServiceValidator {
                 parameterNodes.forEach(parameterNode -> {
                     String parameterTypeName = ((RequiredParameterNode) parameterNode).typeName().toString().trim();
                     if (!parameterTypeName.equals(BYTE_ARRAY) && !parameterTypeName.equals(modulePrefix + CALLER)) {
-                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_INPUT_FOR_ON_BINARY,
-                                DiagnosticSeverity.ERROR);
+                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_INPUT_FOR_ON_BINARY_CODE,
+                                INVALID_INPUT_FOR_ON_BINARY, DiagnosticSeverity.ERROR);
                         ctx.reportDiagnostic(DiagnosticFactory
                                 .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName));
                     }
@@ -348,20 +358,20 @@ public class WebSocketServiceValidator {
                         && !retType.equals(BYTE_ARRAY + OPTIONAL) && !retType.equals(GENERIC_ERROR) && !retType
                         .equals(GENERIC_ERROR + OPTIONAL) && !retType.equals(modulePrefix + ERROR) && !retType
                         .equals(modulePrefix + ERROR + OPTIONAL)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES_ON_DATA,
-                            DiagnosticSeverity.ERROR);
+                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_ON_DATA_CODE,
+                            INVALID_RETURN_TYPES_ON_DATA, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), retType,
                                     resourceNode.functionName()));
                 }
             }
         } else if (returnTypeDescriptor.kind() == SyntaxKind.OPTIONAL_TYPE_DESC
-                && !(returnTypeDescWithoutTrailingSpace.compareTo(GENERIC_ERROR + OPTIONAL) == 0)
-                && !(returnTypeDescWithoutTrailingSpace.compareTo(modulePrefix + ERROR + OPTIONAL) == 0)
-                && !(returnTypeDescWithoutTrailingSpace.compareTo(STRING + OPTIONAL) == 0)
-                && !(returnTypeDescWithoutTrailingSpace.compareTo(BYTE_ARRAY + OPTIONAL) == 0)) {
-            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(CODE, INVALID_RETURN_TYPES_ON_DATA,
-                    DiagnosticSeverity.ERROR);
+                && !(returnTypeDescWithoutTrailingSpace.compareTo(GENERIC_ERROR + OPTIONAL) == 0) && !(
+                returnTypeDescWithoutTrailingSpace.compareTo(modulePrefix + ERROR + OPTIONAL) == 0) && !(
+                returnTypeDescWithoutTrailingSpace.compareTo(STRING + OPTIONAL) == 0) && !(
+                returnTypeDescWithoutTrailingSpace.compareTo(BYTE_ARRAY + OPTIONAL) == 0)) {
+            DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_ON_DATA_CODE,
+                    INVALID_RETURN_TYPES_ON_DATA, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory
                     .createDiagnostic(diagnosticInfo, resourceNode.location(), returnTypeDescWithoutTrailingSpace,
                             resourceNode.functionName()));

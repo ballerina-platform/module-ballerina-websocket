@@ -21,7 +21,7 @@
 <suite name="BallerinaGraphqlCompilerPluginTests">
     <test name="UnitTests">
         <classes>
-            <class name="io.ballerina.stdlib.websocket.compiler.UpgradeServiceValidationTest"/>
+            <class name="io.ballerina.stdlib.websocket.compiler.WebSocketServiceValidationTest"/>
         </classes>
     </test>
 </suite>
