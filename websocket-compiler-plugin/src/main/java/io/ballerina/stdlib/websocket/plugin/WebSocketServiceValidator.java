@@ -48,8 +48,8 @@ public class WebSocketServiceValidator {
     public static final String OPTIONAL = "?";
     private static final String CODE = "WS_110";
     private static final String ON_ERROR = "onError";
-    private static final String ON_OPEN = "onOpen";
-    private static final String ON_CLOSE = "onClose";
+    static final String ON_OPEN = "onOpen";
+    static final String ON_CLOSE = "onClose";
     private static final String ON_IDLE_TIMEOUT = "onIdleTimeout";
     private static final String ON_TEXT_MESSAGE = "onTextMessage";
     private static final String ON_BINARY_MESSAGE = "onBinaryMessage";
