@@ -9,13 +9,13 @@ service /basic/ws on hl {
 }
 
 service class WsService {
-    remote function onOpen(websocket:Caller caller) returns int {
-        return 5;
+    remote function onError(websocket:Caller caller) returns websocket:Error? {
     }
 
-    remote function onClose(websocket:Caller caller, string message, int status) {
+    remote function onIdleTimeout(websocket:Client caller) returns string {
+        return "text";
     }
 
-    remote function onError(error err) returns error? {
+    remote function onTextMessage(websocket:Caller caller, int status) returns websocket:Error? {
     }
 }

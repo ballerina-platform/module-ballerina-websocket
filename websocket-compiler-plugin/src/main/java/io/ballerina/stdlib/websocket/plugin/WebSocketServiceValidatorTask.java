@@ -36,7 +36,7 @@ public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAna
             if (wsServiceNode.typeName().toString()
                     .equals(modulePrefix + SyntaxKind.COLON_TOKEN.stringValue() + "Service")) {
                 WebSocketServiceValidator webSocketServiceValidator = new WebSocketServiceValidator(
-                        syntaxNodeAnalysisContext, modulePrefix + SyntaxKind.COLON_TOKEN.stringValue());
+                        syntaxNodeAnalysisContext);
                 webSocketServiceValidator.validate();
             }
         });

@@ -9,10 +9,9 @@ service /basic/ws on hl {
 }
 
 service class WsService {
-    remote function onOpen(websocket:Caller caller, string xyz) returns websocket:Error? {
+    remote function onError(websocket:Caller caller) returns websocket:Error? {
     }
 
-    remote function onBinaryMessage(websocket:Caller caller, byte[] data) returns byte[]? {
-         return "hello".toBytes();
+    remote function onIdleTimeout(websocket:Client caller) {
     }
 }
