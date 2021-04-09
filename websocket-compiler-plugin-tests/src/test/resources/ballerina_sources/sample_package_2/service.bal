@@ -4,8 +4,10 @@ import ballerina/io;
 
 service /basic/ws on new websocket:Listener(9090) {
    resource isolated function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
-       self.testFunc();
-       return new WsService();
+       lock {
+           self.testFunc();
+           return new WsService();
+       }
    }
 
    isolated function testFunc() {
