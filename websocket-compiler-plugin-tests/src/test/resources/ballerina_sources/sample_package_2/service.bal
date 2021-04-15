@@ -2,6 +2,10 @@ import ballerina/websocket;
 import ballerina/http;
 import ballerina/io;
 
+@websocket:ServiceConfig {
+    subProtocols: ["xml", "json"],
+    idleTimeout: 120
+}
 service /basic/ws on new websocket:Listener(9090) {
    resource isolated function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
        lock {

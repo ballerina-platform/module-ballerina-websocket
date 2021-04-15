@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.websocket.plugin;
 
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
@@ -37,6 +38,9 @@ import java.util.Optional;
  * Validates a Ballerina WebSocket Upgrade Service.
  */
 public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
+
+    private static final String ORG_NAME = "ballerina";
+
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
@@ -47,18 +51,32 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceDeclarationSymbol.get())
                     .listenerTypes();
             for (TypeSymbol listenerType : listenerTypes) {
-                if ((listenerType.typeKind() == TypeDescKind.UNION) && (
-                        ((UnionTypeSymbol) listenerType).memberTypeDescriptors().get(0).getModule()
-                                .flatMap(Symbol::getName).orElse("").compareTo(WebSocketConstants.PACKAGE_WEBSOCKET)
-                                == 0)) {
+                if (isListenerBelongsToWebSocketModule(listenerType)) {
                     validateService(ctx, modulePrefix);
-                } else if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE &&
-                        ((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().flatMap(Symbol::getName)
-                                .orElse("").compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
-                    validateService(ctx, modulePrefix);
+                    return;
                 }
             }
         }
+    }
+
+    private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {
+        if (listenerType.typeKind() == TypeDescKind.UNION) {
+            return ((UnionTypeSymbol) listenerType).memberTypeDescriptors().stream()
+                    .filter(typeDescriptor -> typeDescriptor instanceof TypeReferenceTypeSymbol)
+                    .map(typeReferenceTypeSymbol -> (TypeReferenceTypeSymbol) typeReferenceTypeSymbol)
+                    .anyMatch(typeReferenceTypeSymbol -> isWebSocketModule(typeReferenceTypeSymbol.getModule().get()));
+        }
+
+        if (listenerType.typeKind() == TypeDescKind.TYPE_REFERENCE) {
+            return isWebSocketModule(((TypeReferenceTypeSymbol) listenerType).typeDescriptor().getModule().get());
+        }
+
+        return false;
+    }
+
+    private boolean isWebSocketModule(ModuleSymbol moduleSymbol) {
+        return Utils.equals(moduleSymbol.getName().get(), WebSocketConstants.PACKAGE_WEBSOCKET)
+                && Utils.equals(moduleSymbol.id().orgName(), ORG_NAME);
     }
 
     private void validateService(SyntaxNodeAnalysisContext ctx, String modulePrefix) {

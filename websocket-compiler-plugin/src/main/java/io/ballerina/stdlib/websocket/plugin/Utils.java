@@ -328,4 +328,8 @@ public class Utils {
         }
         return moduleId;
     }
+
+    public static boolean equals(String actual, String expected) {
+        return actual.compareTo(expected) == 0;
+    }
 }
