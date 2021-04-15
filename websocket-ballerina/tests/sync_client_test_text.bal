@@ -19,7 +19,14 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 
 string aggregatedTextOutput = "";
+string connId1 = "1";
+string connId2 = "2";
+string subProtocol = "";
 listener Listener l11 = new(21000);
+
+@ServiceConfig {
+    subProtocols: ["xml", "json"]
+}
 service /onTextString on l11 {
    resource function get .() returns Service|UpgradeError {
        return new WsServiceSync();
@@ -40,16 +47,24 @@ service class WsServiceSync {
 // Tests the readTextMessage in synchronous client
 @test:Config {}
 public function testSyncClient() returns Error? {
-   Client wsClient = check new("ws://localhost:21000/onTextString");
+   Client wsClient = check new("ws://localhost:21000/onTextString", config = {
+                               subProtocols: ["xml"]
+                           });
+   string? protocol = wsClient.getNegotiatedSubProtocol();
+   if (protocol is string) {
+       subProtocol = protocol;
+   }
    @strand {
       thread:"any"
    }
    worker w1 {
-      io:println("Reading message starting: sync text client");
-
+      io:println("Reading message starting: sync text client. Connection id" + wsClient.getConnectionId());
+      connId1 = wsClient.getConnectionId();
       string resp1 = checkpanic wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp1;
       io:println("1st response received at sync text client :" + resp1);
+
+      wsClient.setAttribute("test", "testSyncClient");
 
       var resp2 = checkpanic wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp2;
@@ -73,6 +88,7 @@ public function testSyncClient() returns Error? {
       thread:"any"
    }
    worker w2 {
+      connId2 = wsClient.getConnectionId();
       io:println("Waiting till client starts reading text.");
       runtime:sleep(2);
       Error? resp1 = wsClient->writeTextMessage("Hi world1");
@@ -85,6 +101,11 @@ public function testSyncClient() returns Error? {
    }
    _ = wait {w1, w2};
    string msg = "Hi world1Hi world2Hi world3Hi world4Hi world5";
-   test:assertEquals(aggregatedTextOutput, msg, msg = "");
-   runtime:sleep(3);
+   test:assertEquals(aggregatedTextOutput, msg);
+   test:assertEquals(wsClient.isSecure(), false);
+   test:assertEquals(wsClient.isOpen(), true);
+   string attr = <string> wsClient.getAttribute("test");
+   test:assertEquals(attr, "testSyncClient");
+   test:assertEquals(connId1, connId2);
+   test:assertEquals(subProtocol, "xml");
 }

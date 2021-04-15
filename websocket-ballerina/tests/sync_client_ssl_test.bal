@@ -56,6 +56,7 @@ public function testSyncClientSsl() returns Error? {
                            }
                        }
                    });
+    wsClient.setAttribute("test", "testSyncClientSsl");
     @strand {
         thread:"any"
     }
@@ -78,6 +79,8 @@ public function testSyncClientSsl() returns Error? {
         io:println("Waiting till SSL client starts reading text.");
         runtime:sleep(2);
         var resp1 = wsClient->writeTextMessage("Hi world1");
+        string removedAttr = <string> wsClient.removeAttribute("test");
+        test:assertEquals(removedAttr, "testSyncClientSsl");
         if (resp1 is Error) {
             io:println("Error occured when sending the text to ssl server");
         } else {
@@ -88,4 +91,5 @@ public function testSyncClientSsl() returns Error? {
     _ = wait {w1, w2};
     string msg = "Hi world1";
     test:assertEquals(sslString, msg);
+    test:assertEquals(wsClient.isSecure(), true);
 }
