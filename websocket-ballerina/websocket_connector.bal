@@ -122,11 +122,6 @@ isolated function externClose(WebSocketConnector wsConnector, int statusCode, st
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
 } external;
 
-isolated function externReady(WebSocketConnector wsConnector) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Ready",
-    name: "ready"
-} external;
-
 isolated function externReadTextMessage(WebSocketConnector wsConnector) returns string|Error =
 @java:Method {
     'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
