@@ -115,22 +115,22 @@ public class WebSocketUpgradeServiceValidator {
                             if (symbol.qualifiers().get(0).name().equals("REMOTE")) {
                                 String functionName = symbol.getName().get();
                                 switch (functionName) {
-                                case WebSocketServiceValidator.ON_OPEN:
+                                case Utils.ON_OPEN:
                                     Utils.validateOnOpenFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case WebSocketServiceValidator.ON_CLOSE:
+                                case Utils.ON_CLOSE:
                                     Utils.validateOnCloseFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case WebSocketServiceValidator.ON_IDLE_TIMEOUT:
+                                case Utils.ON_IDLE_TIMEOUT:
                                     Utils.validateOnIdleTimeoutFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case WebSocketServiceValidator.ON_ERROR:
+                                case Utils.ON_ERROR:
                                     Utils.validateOnErrorFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case WebSocketServiceValidator.ON_TEXT_MESSAGE:
+                                case Utils.ON_TEXT_MESSAGE:
                                     Utils.validateOnTextMessageFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case WebSocketServiceValidator.ON_BINARY_MESSAGE:
+                                case Utils.ON_BINARY_MESSAGE:
                                     Utils.validateOnBinaryMessageFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
                                 default:

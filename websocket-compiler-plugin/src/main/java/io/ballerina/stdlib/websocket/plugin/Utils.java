@@ -33,16 +33,6 @@ import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import java.util.List;
 
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.BYTE_ARRAY;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.CALLER;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.ERROR;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.GENERIC_ERROR;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.INT;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.INVALID_RETURN_TYPES;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.INVALID_RETURN_TYPES_CODE;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.ON_OPEN;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.OPTIONAL;
-import static io.ballerina.stdlib.websocket.plugin.WebSocketServiceValidator.STRING;
 import static io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValidator.COLON;
 
 /**
@@ -51,6 +41,65 @@ import static io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValida
 public class Utils {
 
     public static final String PREFIX = "ballerina/websocket:";
+    public static final String CALLER = "Caller";
+    public static final String BYTE_ARRAY = "byte[]";
+    public static final String STRING = "string";
+    public static final String INT = "int";
+    public static final String ERROR = "Error";
+    public static final String GENERIC_ERROR = "error";
+    public static final String OPTIONAL = "?";
+    public static final String INVALID_INPUT_PARAM_FOR_ON_CLOSE =
+            "Invalid parameters `{0}` provided for onClose remote function";
+    public static final String INVALID_INPUT_PARAM_FOR_ON_CLOSE_CODE = "WS_202";
+    public static final String INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS =
+            "Invalid parameters `{0}` provided for onClose remote function. `string` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS_CODE = "WS_203";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_OPEN =
+            "Invalid parameters provided for onOpen remote function. Only `{0}`:Caller is allowed as the parameter";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_OPEN_CODE = "WS_204";
+    public static final String INVALID_RETURN_TYPES =
+            "Invalid return types provided for `{0}` remote function, return type should be either `error?` or `{1}` ";
+    public static final String INVALID_RETURN_TYPES_CODE = "WS_205";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_CLOSE =
+            "Invalid parameters provided for onClose remote function";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_CLOSE_CODE = "WS_206";
+    public static final String INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS =
+            "Invalid parameters `{0}` provided for onError remote function. `error` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS_CODE = "WS_207";
+    public static final String INVALID_INPUT_FOR_ON_ERROR = "Invalid parameters `{0}` provided for onError "
+            + "remote function";
+    public static final String INVALID_INPUT_FOR_ON_ERROR_CODE = "WS_208";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT = "Invalid parameters provided for "
+            + "OnIdleTimeout remote function. Only `{0}`:Caller is allowed as the parameter";
+    public static final String INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT_CODE = "WS_209";
+    public static final String INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT =
+            "Invalid parameters `{0}` provided for onIdleTimeout remote function";
+    public static final String INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT_CODE = "WS_210";
+    public static final String INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS =
+            "Invalid parameters `{0}` provided for onTextMessage remote function. `string` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS_CODE = "WS_211";
+    public static final String INVALID_INPUT_FOR_ON_TEXT =
+            "Invalid parameters `{0}` provided for onTextMessage remote function";
+    public static final String INVALID_INPUT_FOR_ON_TEXT_CODE = "WS_212";
+    public static final String INVALID_RETURN_TYPES_ON_DATA =
+            "Invalid return type `{0}` provided for `{1}` remote function";
+    public static final String INVALID_RETURN_TYPES_ON_DATA_CODE = "WS_213";
+    public static final String INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS =
+            "Invalid parameters `{0}` provided for onBinaryMessage remote function. "
+                    + "`byte[]` is the mandatory parameter";
+    public static final String INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS_CODE = "WS_214";
+    public static final String INVALID_INPUT_FOR_ON_BINARY =
+            "Invalid parameters `{0}` provided for onBinaryMessage remote function";
+    public static final String INVALID_INPUT_FOR_ON_BINARY_CODE = "WS_215";
+    static final String CODE = "WS_110";
+    static final String ON_ERROR = "onError";
+    static final String ON_OPEN = "onOpen";
+    static final String ON_CLOSE = "onClose";
+    static final String ON_IDLE_TIMEOUT = "onIdleTimeout";
+    static final String ON_TEXT_MESSAGE = "onTextMessage";
+    static final String ON_BINARY_MESSAGE = "onBinaryMessage";
+    static final String REMOTE_KEY_WORD = "remote";
+    static final String RESOURCE_KEY_WORD = "resource";
 
     public static String getPrefix(SyntaxNodeAnalysisContext ctx) {
         ModulePartNode modulePartNode = ctx.syntaxTree().rootNode();
@@ -74,8 +123,8 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.startsWith("ballerina/websocket:") || !paramSignature.endsWith(CALLER)) {
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                            WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_OPEN_CODE,
-                            WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_OPEN, DiagnosticSeverity.ERROR);
+                            INVALID_INPUT_PARAMS_FOR_ON_OPEN_CODE,
+                            INVALID_INPUT_PARAMS_FOR_ON_OPEN, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
                             WebSocketConstants.PACKAGE_WEBSOCKET));
                 }
@@ -90,8 +139,8 @@ public class Utils {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(BYTE_ARRAY)) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS_CODE,
-                    WebSocketServiceValidator.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
+                    INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS_CODE,
+                    INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
                     inputParams.get(0).typeDescriptor().signature()));
         } else {
@@ -100,15 +149,15 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.equals(BYTE_ARRAY) && !paramSignature.equals(moduleId + COLON + CALLER)) {
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                            WebSocketServiceValidator.INVALID_INPUT_FOR_ON_BINARY_CODE,
-                            WebSocketServiceValidator.INVALID_INPUT_FOR_ON_BINARY, DiagnosticSeverity.ERROR);
+                            INVALID_INPUT_FOR_ON_BINARY_CODE,
+                            INVALID_INPUT_FOR_ON_BINARY, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
                 }
             }
         }
         TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
-        validateOnDataReturnTypes(returnStatement, WebSocketServiceValidator.ON_BINARY_MESSAGE, resourceNode, ctx);
+        validateOnDataReturnTypes(returnStatement, ON_BINARY_MESSAGE, resourceNode, ctx);
     }
 
     public static void validateOnDataReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
@@ -118,8 +167,8 @@ public class Utils {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
                         symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)) {
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                            WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA_CODE,
-                            WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA, DiagnosticSeverity.ERROR);
+                            INVALID_RETURN_TYPES_ON_DATA_CODE,
+                            INVALID_RETURN_TYPES_ON_DATA, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), symbol.signature(),
                                     functionName));
@@ -128,8 +177,8 @@ public class Utils {
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !(returnTypeSymbol.typeKind()
                 == TypeDescKind.ARRAY) && !(returnTypeSymbol.typeKind() == TypeDescKind.STRING)) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA_CODE,
-                    WebSocketServiceValidator.INVALID_RETURN_TYPES_ON_DATA, DiagnosticSeverity.ERROR);
+                    INVALID_RETURN_TYPES_ON_DATA_CODE,
+                    INVALID_RETURN_TYPES_ON_DATA, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory
                     .createDiagnostic(diagnosticInfo, resourceNode.location(), returnTypeSymbol.signature(),
                             functionName));
@@ -146,8 +195,8 @@ public class Utils {
             if (!inputParamTypeDescSignature.contains(GENERIC_ERROR) && !inputParamTypeDescSignature
                     .equals(moduleId + COLON + ERROR)) {
                 DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                        WebSocketServiceValidator.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS_CODE,
-                        WebSocketServiceValidator.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
+                        INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS_CODE,
+                        INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
                 ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
                         inputParamTypeDescSignature));
             }
@@ -158,14 +207,14 @@ public class Utils {
                 if (!paramSignature.contains(GENERIC_ERROR) && !paramSignature.equals(moduleId + COLON + CALLER)
                         && !paramSignature.equals(moduleId + COLON + ERROR)) {
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                            WebSocketServiceValidator.INVALID_INPUT_FOR_ON_ERROR_CODE,
-                            WebSocketServiceValidator.INVALID_INPUT_FOR_ON_ERROR, DiagnosticSeverity.ERROR);
+                            INVALID_INPUT_FOR_ON_ERROR_CODE,
+                            INVALID_INPUT_FOR_ON_ERROR, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
                 }
             }
         }
-        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), WebSocketServiceValidator.ON_ERROR,
+        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), ON_ERROR,
                 resourceNode, ctx);
     }
 
@@ -195,15 +244,15 @@ public class Utils {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() > 3 || inputParams.size() < 1) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_CLOSE_CODE,
-                    WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_CLOSE, DiagnosticSeverity.ERROR);
+                    INVALID_INPUT_PARAMS_FOR_ON_CLOSE_CODE,
+                    INVALID_INPUT_PARAMS_FOR_ON_CLOSE, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory
                     .createDiagnostic(diagnosticInfo, resourceNode.location(), WebSocketConstants.PACKAGE_WEBSOCKET));
         } else if (inputParams.size() == 1 && inputParams.get(0).typeDescriptor().signature()
-                .equals(WebSocketServiceValidator.STRING)) {
+                .equals(STRING)) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS_CODE,
-                    WebSocketServiceValidator.INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
+                    INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS_CODE,
+                    INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
                     inputParams.get(0).typeDescriptor().signature()));
         } else {
@@ -213,14 +262,14 @@ public class Utils {
                 if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)
                         && !paramSignature.equals(INT)) {
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                            WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_CLOSE_CODE,
-                            WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_CLOSE, DiagnosticSeverity.ERROR);
+                            INVALID_INPUT_PARAM_FOR_ON_CLOSE_CODE,
+                            INVALID_INPUT_PARAM_FOR_ON_CLOSE, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
                 }
             }
         }
-        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), WebSocketServiceValidator.ON_CLOSE,
+        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), ON_CLOSE,
                 resourceNode, ctx);
     }
 
@@ -229,20 +278,20 @@ public class Utils {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() > 1) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT_CODE,
-                    WebSocketServiceValidator.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT, DiagnosticSeverity.ERROR);
+                    INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT_CODE,
+                    INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory
                     .createDiagnostic(diagnosticInfo, resourceNode.location(), WebSocketConstants.PACKAGE_WEBSOCKET));
         } else if (inputParams.size() == 1 && (!inputParams.get(0).typeDescriptor().signature().endsWith(":Caller")
                 || !inputParams.get(0).typeDescriptor().signature().startsWith(PREFIX))) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT_CODE,
-                    WebSocketServiceValidator.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT, DiagnosticSeverity.ERROR);
+                    INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT_CODE,
+                    INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
                     inputParams.get(0).typeDescriptor().signature()));
         }
         validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(),
-                WebSocketServiceValidator.ON_IDLE_TIMEOUT, resourceNode, ctx);
+                ON_IDLE_TIMEOUT, resourceNode, ctx);
     }
 
     static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
@@ -250,8 +299,8 @@ public class Utils {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                    WebSocketServiceValidator.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS_CODE,
-                    WebSocketServiceValidator.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
+                    INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS_CODE,
+                    INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS, DiagnosticSeverity.ERROR);
             ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
                     inputParams.get(0).typeDescriptor().signature()));
         } else {
@@ -260,15 +309,15 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
                     DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
-                            WebSocketServiceValidator.INVALID_INPUT_FOR_ON_TEXT_CODE,
-                            WebSocketServiceValidator.INVALID_INPUT_FOR_ON_TEXT, DiagnosticSeverity.ERROR);
+                            INVALID_INPUT_FOR_ON_TEXT_CODE,
+                            INVALID_INPUT_FOR_ON_TEXT, DiagnosticSeverity.ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
                 }
             }
         }
         TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
-        validateOnDataReturnTypes(returnStatement, WebSocketServiceValidator.ON_TEXT_MESSAGE, resourceNode, ctx);
+        validateOnDataReturnTypes(returnStatement, ON_TEXT_MESSAGE, resourceNode, ctx);
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {
