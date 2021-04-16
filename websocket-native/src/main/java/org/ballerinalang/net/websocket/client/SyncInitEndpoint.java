@@ -56,6 +56,10 @@ public class SyncInitEndpoint {
             HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
             WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
             String scheme = URI.create(remoteUrl).getScheme();
+            if (scheme == null) {
+                return WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
+                        null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
+            }
             populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
             WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
             wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
