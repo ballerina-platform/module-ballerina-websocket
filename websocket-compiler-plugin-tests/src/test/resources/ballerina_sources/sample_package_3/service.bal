@@ -1,4 +1,5 @@
 import ballerina/websocket;
+import ballerina/io;
 
 service /basic/ws on new websocket:Listener(9090) {
    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
@@ -11,6 +12,11 @@ service class WsService {
     }
 
     remote function onTextMessage(websocket:Caller caller, string text) returns byte[] {
-         return "hello".toBytes();
+        self.testFunc();
+        return "hello".toBytes();
+    }
+
+    isolated function testFunc() {
+        io:println("Invoked the function");
     }
 }

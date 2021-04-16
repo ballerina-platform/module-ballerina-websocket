@@ -36,37 +36,21 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.PIPE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.REMOTE_KEY_WORD;
+
 /**
  * Class to validate WebSocket services.
  */
 public class WebSocketUpgradeServiceValidator {
-    public static final String COLON = ":";
     private SyntaxNodeAnalysisContext ctx;
     private FunctionDefinitionNode resourceNode;
     private String modulePrefix;
-    private static final String HTTP_REQUEST = "http:Request";
-    public static final String INVALID_RESOURCE_ERROR_CODE = "WS_101";
-    public static final String INVALID_RESOURCE_ERROR =
-            "There should be only one `get` resource for the service";
-    public static final String MORE_THAN_ONE_RESOURCE_PARAM_ERROR =
-            "There should be only http:Request as a parameter";
-    public static final String MORE_THAN_ONE_RESOURCE_PARAM_ERROR_CODE = "WS_102";
-    public static final String INVALID_RESOURCE_PARAMETER_ERROR =
-            "Invalid parameter `{0}` provided for `{1}`";
-    public static final String INVALID_RESOURCE_PARAMETER_ERROR_CODE = "WS_103";
-    public static final String INVALID_RETURN_TYPES_IN_RESOURCE =
-            "Invalid return type `{0}` provided for function `{1}`, return type should be a subtype of `{2}`";
-    public static final String INVALID_RETURN_TYPES_IN_RESOURCE_CODE =
-            "WS_104";
-    public static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE = "Function `{0}` not accepted by the service";
-    public static final String FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE = "WS_105";
-    public static final String UPGRADE_ERROR = "UpgradeError";
 
     WebSocketUpgradeServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext, String modulePrefix) {
         this.ctx = syntaxNodeAnalysisContext;
@@ -79,8 +63,8 @@ public class WebSocketUpgradeServiceValidator {
             int numResources = (int) serviceDeclarationNode.members().stream()
                     .filter(child -> child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).count();
             if (numResources > 1) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RESOURCE_ERROR_CODE, INVALID_RESOURCE_ERROR,
-                        DiagnosticSeverity.ERROR);
+                DiagnosticInfo diagnosticInfo = Utils
+                        .getDiagnosticInfo(PluginConstants.CompilationErrors.INVALID_RESOURCE_ERROR);
                 ctx.reportDiagnostic(
                         DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
             }
@@ -92,7 +76,7 @@ public class WebSocketUpgradeServiceValidator {
             if (functionName.compareTo(WebSocketConstants.GET) == 0
                     && functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
                 resourceNode = functionDefinitionNode;
-            } else if (functionDefinitionNode.qualifierList().get(0).text().equals("remote")
+            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(REMOTE_KEY_WORD)
                     || functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
                 reportInvalidFunction(functionDefinitionNode);
             }
@@ -115,22 +99,22 @@ public class WebSocketUpgradeServiceValidator {
                             if (symbol.qualifiers().get(0).name().equals("REMOTE")) {
                                 String functionName = symbol.getName().get();
                                 switch (functionName) {
-                                case Utils.ON_OPEN:
+                                case PluginConstants.ON_OPEN:
                                     Utils.validateOnOpenFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case Utils.ON_CLOSE:
+                                case PluginConstants.ON_CLOSE:
                                     Utils.validateOnCloseFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case Utils.ON_IDLE_TIMEOUT:
+                                case PluginConstants.ON_IDLE_TIMEOUT:
                                     Utils.validateOnIdleTimeoutFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case Utils.ON_ERROR:
+                                case PluginConstants.ON_ERROR:
                                     Utils.validateOnErrorFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case Utils.ON_TEXT_MESSAGE:
+                                case PluginConstants.ON_TEXT_MESSAGE:
                                     Utils.validateOnTextMessageFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
-                                case Utils.ON_BINARY_MESSAGE:
+                                case PluginConstants.ON_BINARY_MESSAGE:
                                     Utils.validateOnBinaryMessageFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
                                 default:
@@ -148,19 +132,19 @@ public class WebSocketUpgradeServiceValidator {
         if (resourceNode != null) {
             SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
             if (parameterNodes.size() > 1) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(MORE_THAN_ONE_RESOURCE_PARAM_ERROR_CODE,
-                        MORE_THAN_ONE_RESOURCE_PARAM_ERROR, DiagnosticSeverity.ERROR);
+                DiagnosticInfo diagnosticInfo = Utils
+                        .getDiagnosticInfo(PluginConstants.CompilationErrors.MORE_THAN_ONE_RESOURCE_PARAM_ERROR);
                 ctx.reportDiagnostic(DiagnosticFactory
                         .createDiagnostic(diagnosticInfo, resourceNode.location()));
             } else if (!parameterNodes.isEmpty()) {
                 RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
                 Node parameterTypeName = requiredParameterNode.typeName();
-                if (!parameterTypeName.toString().contains(HTTP_REQUEST)) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RESOURCE_PARAMETER_ERROR_CODE,
-                            INVALID_RESOURCE_PARAMETER_ERROR, DiagnosticSeverity.ERROR);
+                if (!parameterTypeName.toString().contains(PluginConstants.HTTP_REQUEST)) {
+                    DiagnosticInfo diagnosticInfo = Utils
+                            .getDiagnosticInfo(PluginConstants.CompilationErrors.INVALID_RESOURCE_PARAMETER_ERROR);
                     ctx.reportDiagnostic(DiagnosticFactory
                             .createDiagnostic(diagnosticInfo, resourceNode.location(), parameterTypeName.toString(),
-                                    HTTP_REQUEST));
+                                    PluginConstants.HTTP_REQUEST));
                 }
             }
         }
@@ -171,27 +155,30 @@ public class WebSocketUpgradeServiceValidator {
             Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode
                     .functionSignature().returnTypeDesc();
             if (resourceNode.functionSignature().returnTypeDesc().isEmpty()) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_IN_RESOURCE_CODE,
-                        INVALID_RETURN_TYPES_IN_RESOURCE, DiagnosticSeverity.ERROR);
+                DiagnosticInfo diagnosticInfo = Utils
+                        .getDiagnosticInfo(PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE);
                 ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location()));
             }
             Node returnTypeDescriptor = returnTypesNode.get().type();
             String returnTypeDescWithoutTrailingSpace = returnTypeDescriptor.toString().split(" ")[0];
-            if (!(returnTypeDescWithoutTrailingSpace.contains(modulePrefix + "Service")
-                    && returnTypeDescWithoutTrailingSpace.contains(modulePrefix + UPGRADE_ERROR))) {
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(INVALID_RETURN_TYPES_IN_RESOURCE_CODE,
-                        INVALID_RETURN_TYPES_IN_RESOURCE, DiagnosticSeverity.ERROR);
+            if (!(returnTypeDescWithoutTrailingSpace.equals(
+                    modulePrefix + PluginConstants.SERVICE + PIPE + modulePrefix + PluginConstants.UPGRADE_ERROR))
+                    && !(returnTypeDescWithoutTrailingSpace.equals(
+                    modulePrefix + PluginConstants.UPGRADE_ERROR + PIPE + modulePrefix + PluginConstants.SERVICE))) {
+                DiagnosticInfo diagnosticInfo = Utils
+                        .getDiagnosticInfo(PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE);
                 ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, returnTypeDescriptor.location(),
                         returnTypeDescriptor.toString(), resourceNode.functionName(),
-                        modulePrefix + "Service| " + modulePrefix + UPGRADE_ERROR));
+                        modulePrefix + PluginConstants.SERVICE + PluginConstants.PIPE + modulePrefix
+                                + PluginConstants.UPGRADE_ERROR));
             }
 
         }
     }
 
     void reportInvalidFunction(FunctionDefinitionNode functionDefinitionNode) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE,
-                FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE, DiagnosticSeverity.ERROR);
+        DiagnosticInfo diagnosticInfo = Utils
+                .getDiagnosticInfo(PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
         ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, functionDefinitionNode.location(),
                 functionDefinitionNode.functionName().toString()));
     }

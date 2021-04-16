@@ -25,8 +25,7 @@ import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
-import io.ballerina.stdlib.websocket.plugin.Utils;
-import io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValidator;
+import io.ballerina.stdlib.websocket.plugin.PluginConstants;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -51,10 +50,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
-                WebSocketUpgradeServiceValidator.INVALID_RESOURCE_ERROR_CODE);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.INVALID_RESOURCE_ERROR);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RESOURCE_ERROR);
     }
 
     @Test
@@ -83,10 +79,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
-                WebSocketUpgradeServiceValidator.MORE_THAN_ONE_RESOURCE_PARAM_ERROR_CODE);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.MORE_THAN_ONE_RESOURCE_PARAM_ERROR);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.MORE_THAN_ONE_RESOURCE_PARAM_ERROR);
     }
 
     @Test
@@ -97,10 +90,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
-                WebSocketUpgradeServiceValidator.INVALID_RESOURCE_PARAMETER_ERROR_CODE);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.INVALID_RESOURCE_PARAMETER_ERROR);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RESOURCE_PARAMETER_ERROR);
     }
 
     @Test
@@ -120,10 +110,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
-                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
     }
 
     @Test
@@ -134,10 +121,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
-                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE_CODE);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
     }
 
     @Test
@@ -157,10 +141,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().code(),
-                WebSocketUpgradeServiceValidator.INVALID_RETURN_TYPES_IN_RESOURCE_CODE);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.INVALID_RETURN_TYPES_IN_RESOURCE);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE);
     }
 
     @Test
@@ -171,8 +152,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.INVALID_RETURN_TYPES_IN_RESOURCE);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE);
     }
 
     @Test
@@ -210,14 +190,11 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 3);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_CLOSE);
         Diagnostic diagnostic3 = (Diagnostic) diagnosticResult.diagnostics().toArray()[2];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAM_FOR_ON_CLOSE);
-        Assert.assertEquals(diagnostic3.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES);
+        assertDiagnostic(diagnostic3, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
     }
 
     @Test
@@ -228,8 +205,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
     }
 
     @Test
@@ -249,8 +225,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAMS_FOR_ON_CLOSE);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_CLOSE);
     }
 
     @Test
@@ -261,8 +236,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
     }
 
     @Test
@@ -273,8 +247,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES);
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
     }
 
     @Test
@@ -285,11 +258,9 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
     }
 
     @Test
@@ -300,11 +271,9 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_ERROR);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT);
 
     }
 
@@ -316,11 +285,9 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES_ON_DATA);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
 
     }
 
@@ -332,8 +299,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_TEXT);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT);
 
     }
 
@@ -345,8 +311,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS);
 
     }
 
@@ -358,11 +323,9 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_BINARY);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES_ON_DATA);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
 
     }
 
@@ -374,8 +337,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
 
     }
 
@@ -387,8 +349,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
 
     }
 
@@ -400,8 +361,7 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES_ON_DATA);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
 
     }
 
@@ -413,11 +373,9 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAMS_FOR_ON_CLOSE);
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_CLOSE);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
     }
 
     @Test
@@ -428,11 +386,9 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
     }
 
     @Test
@@ -443,17 +399,13 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 4);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
         Diagnostic diagnostic3 = (Diagnostic) diagnosticResult.diagnostics().toArray()[2];
+        assertDiagnostic(diagnostic3, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
         Diagnostic diagnostic4 = (Diagnostic) diagnosticResult.diagnostics().toArray()[3];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
-        Assert.assertEquals(diagnostic3.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES);
-        Assert.assertEquals(diagnostic4.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_TEXT);
+        assertDiagnostic(diagnostic4, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT);
     }
 
     @Test
@@ -464,12 +416,16 @@ public class WebSocketServiceValidationTest {
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.diagnostics().toArray()[1];
-        Assert.assertEquals(diagnostic1.diagnosticInfo().messageFormat(),
-                Utils.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-        Assert.assertEquals(diagnostic2.diagnosticInfo().messageFormat(),
-                Utils.INVALID_RETURN_TYPES_ON_DATA);
+        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
 
+    }
+
+    private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
+        Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
+        Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
+                error.getError());
     }
 
     private Package loadPackage(String path) {

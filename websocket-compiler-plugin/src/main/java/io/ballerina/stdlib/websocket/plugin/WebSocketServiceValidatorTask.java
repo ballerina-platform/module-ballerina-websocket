@@ -23,6 +23,8 @@ import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.SERVICE;
+
 /**
  * Validates a Ballerina WebSocket Service.
  */
@@ -34,7 +36,7 @@ public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAna
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.TYPE_REFERENCE).forEach(node -> {
             TypeReferenceNode wsServiceNode = (TypeReferenceNode) node;
             if (wsServiceNode.typeName().toString()
-                    .equals(modulePrefix + SyntaxKind.COLON_TOKEN.stringValue() + "Service")) {
+                    .equals(modulePrefix + SyntaxKind.COLON_TOKEN.stringValue() + SERVICE)) {
                 WebSocketServiceValidator webSocketServiceValidator = new WebSocketServiceValidator(
                         syntaxNodeAnalysisContext);
                 webSocketServiceValidator.validate();

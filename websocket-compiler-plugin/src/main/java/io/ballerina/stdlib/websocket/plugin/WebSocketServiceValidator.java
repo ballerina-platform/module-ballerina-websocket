@@ -25,9 +25,6 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
-import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-
-import static io.ballerina.stdlib.websocket.plugin.WebSocketUpgradeServiceValidator.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE;
 
 /**
  * A class for validating websocket service.
@@ -44,9 +41,9 @@ public class WebSocketServiceValidator {
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
                 || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(methodNode -> {
             FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
-            if (functionDefinitionNode.qualifierList().get(0).text().equals(Utils.REMOTE_KEY_WORD)) {
+            if (functionDefinitionNode.qualifierList().get(0).text().equals(PluginConstants.REMOTE_KEY_WORD)) {
                 filterRemoteFunctions(functionDefinitionNode);
-            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(Utils.RESOURCE_KEY_WORD)) {
+            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(PluginConstants.RESOURCE_KEY_WORD)) {
                 reportInvalidFunction(functionDefinitionNode);
             }
         });
@@ -56,22 +53,22 @@ public class WebSocketServiceValidator {
         FunctionTypeSymbol functionTypeSymbol = ((MethodSymbol) ctx.semanticModel().symbol(functionDefinitionNode)
                 .get()).typeDescriptor();
         switch (functionDefinitionNode.functionName().toString()) {
-            case Utils.ON_OPEN:
+            case PluginConstants.ON_OPEN:
                 Utils.validateOnOpenFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
-            case Utils.ON_CLOSE:
+            case PluginConstants.ON_CLOSE:
                 Utils.validateOnCloseFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
-            case Utils.ON_ERROR:
+            case PluginConstants.ON_ERROR:
                 Utils.validateOnErrorFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
-            case Utils.ON_IDLE_TIMEOUT:
+            case PluginConstants.ON_IDLE_TIMEOUT:
                 Utils.validateOnIdleTimeoutFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
-            case Utils.ON_TEXT_MESSAGE:
+            case PluginConstants.ON_TEXT_MESSAGE:
                 Utils.validateOnTextMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
-            case Utils.ON_BINARY_MESSAGE:
+            case PluginConstants.ON_BINARY_MESSAGE:
                 Utils.validateOnBinaryMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
             default:
@@ -80,8 +77,8 @@ public class WebSocketServiceValidator {
     }
 
     private void reportInvalidFunction(FunctionDefinitionNode functionDefinitionNode) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(Utils.CODE, FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE,
-                DiagnosticSeverity.ERROR);
+        DiagnosticInfo diagnosticInfo = Utils
+                .getDiagnosticInfo(PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
         ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
                 functionDefinitionNode.location(), functionDefinitionNode.functionName().toString()));
     }
