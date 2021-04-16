@@ -27,7 +27,6 @@ public class PluginConstants {
     public static final String SERVICE = "Service";
     public static final String PIPE = "|";
     public static final String UPGRADE_ERROR = "UpgradeError";
-    static final String CODE = "WS_110";
     static final String ON_ERROR = "onError";
     static final String ON_OPEN = "onOpen";
     static final String ON_CLOSE = "onClose";
@@ -43,39 +42,42 @@ public class PluginConstants {
      */
     public enum CompilationErrors {
         INVALID_INPUT_PARAM_FOR_ON_CLOSE("Invalid parameters `{0}` provided for onClose remote function",
-                "WS_202"),
+                "WEBSOCKET_202"),
         INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS("Invalid parameters `{0}` provided for onClose remote "
-                + "function. `string` is the mandatory parameter", "WS_203"),
+                + "function. `string` is the mandatory parameter", "WEBSOCKET_203"),
         INVALID_INPUT_PARAMS_FOR_ON_OPEN("Invalid parameters provided for onOpen remote function. "
-                + "Only `{0}`:Caller is allowed as the parameter", "WS_204"),
+                + "Only `{0}`:Caller is allowed as the parameter", "WEBSOCKET_204"),
         INVALID_RETURN_TYPES("Invalid return types provided for `{0}` remote function, return type should be "
-                + "either `error?` or `{1}` ", "WS_205"),
+                + "either `error?` or `{1}` ", "WEBSOCKET_205"),
         INVALID_INPUT_PARAMS_FOR_ON_CLOSE("Invalid parameters provided for onClose remote function",
-                "WS_206"),
+                "WEBSOCKET_206"),
         INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS("Invalid parameters `{0}` provided for onError remote function."
-                + " `error` is the mandatory parameter", "WS_207"),
+                + " `error` is the mandatory parameter", "WEBSOCKET_207"),
         INVALID_INPUT_FOR_ON_ERROR("Invalid parameters `{0}` provided for onError remote function",
-                "WS_208"),
+                "WEBSOCKET_208"),
         INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT("Invalid parameters provided for OnIdleTimeout remote function. "
-                + "Only `{0}`:Caller is allowed as the parameter", "WS_209"),
+                + "Only `{0}`:Caller is allowed as the parameter", "WEBSOCKET_209"),
         INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT("Invalid parameters `{0}` provided for onIdleTimeout remote "
-                + "function", "WS_210"),
+                + "function", "WEBSOCKET_210"),
         INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS("Invalid parameters `{0}` provided for onTextMessage remote "
-                + "function. `string` is the mandatory parameter", "WS_211"),
+                + "function. `string` is the mandatory parameter", "WEBSOCKET_211"),
         INVALID_INPUT_FOR_ON_TEXT("Invalid parameters `{0}` provided for onTextMessage remote function",
-                "WS_212"),
+                "WEBSOCKET_212"),
         INVALID_RETURN_TYPES_ON_DATA("Invalid return type `{0}` provided for `{1}` remote function",
-                "WS_213"),
+                "WEBSOCKET_213"),
         INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS("Invalid parameters `{0}` provided for onBinaryMessage "
-                + "remote function. `byte[]` is the mandatory parameter", "WS_214"),
+                + "remote function. `byte[]` is the mandatory parameter", "WEBSOCKET_214"),
         INVALID_INPUT_FOR_ON_BINARY("Invalid parameters `{0}` provided for onBinaryMessage remote function",
-                "WS_215"),
-        INVALID_RESOURCE_ERROR("There should be only one `get` resource for the service", "WS_101"),
-        MORE_THAN_ONE_RESOURCE_PARAM_ERROR("There should be only http:Request as a parameter", "WS_102"),
-        INVALID_RESOURCE_PARAMETER_ERROR("Invalid parameter `{0}` provided for `{1}`", "WS_103"),
+                "WEBSOCKET_215"),
+        INVALID_RESOURCE_ERROR("There should be only one `get` resource for the service",
+                "WEBSOCKET_101"),
+        MORE_THAN_ONE_RESOURCE_PARAM_ERROR("There should be only http:Request as a parameter",
+                "WEBSOCKET_102"),
+        INVALID_RESOURCE_PARAMETER_ERROR("Invalid parameter `{0}` provided for `{1}`", "WEBSOCKET_103"),
         INVALID_RETURN_TYPES_IN_RESOURCE("Invalid return type `{0}` provided for function `{1}`, return type "
-                + "should be a subtype of `{2}`", "WS_104"),
-        FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE("Function `{0}` not accepted by the service", "WS_105");
+                + "should be a subtype of `{2}`", "WEBSOCKET_104"),
+        FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE("Function `{0}` not accepted by the service",
+                "WEBSOCKET_105");
 
         private final String error;
         private final String errorCode;
