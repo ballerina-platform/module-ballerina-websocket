@@ -117,7 +117,6 @@ task unpackStdLibs() {
 
 def packageName = "websocket"
 def packageOrg = "ballerina"
-def snapshotVersion = "-SNAPSHOT"
 def platform = "java11"
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
@@ -125,12 +124,26 @@ def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def artifactCodeCoverageReport = file("$project.projectDir/target/cache/tests_cache/coverage/ballerina.exec")
-def tomlVersion = project.version.replace("${snapshotVersion}", "")
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
 def distributionPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def distributionBinPath = distributionPath + "/bin"
 def originalConfig = ballerinaConfigFile.text
 def originalDependencyConfig = ballerinaDependencyFile.text
+
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-');
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", "")
+    }
+}
 
 task copyStdlibs(type: Copy) {
     def ballerinaDist = "build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
@@ -156,17 +169,17 @@ task updateTomlFile {
     doLast {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
         def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
-        def stdlibDependentIoVersion = project.stdlibIoVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentHttpVersion = project.stdlibHttpVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentLogVersion = project.stdlibLogVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentMimeVersion = project.stdlibMimeVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentAuthVersion = project.stdlibAuthVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentCacheVersion = project.stdlibCacheVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentTimeVersion = project.stdlibTimeVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentCryptoVersion = project.stdlibCryptoVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentFileVersion = project.stdlibFileVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentOsVersion = project.stdlibOsVersion.replace("${snapshotVersion}", "")
-        def stdlibDependentTaskVersion = project.stdlibTaskVersion.replace("${snapshotVersion}", "")
+        def stdlibDependentIoVersion = stripBallerinaExtensionVersion(project.stdlibIoVersion)
+        def stdlibDependentHttpVersion = stripBallerinaExtensionVersion(project.stdlibHttpVersion)
+        def stdlibDependentLogVersion = stripBallerinaExtensionVersion(project.stdlibLogVersion)
+        def stdlibDependentMimeVersion = stripBallerinaExtensionVersion(project.stdlibMimeVersion)
+        def stdlibDependentAuthVersion = stripBallerinaExtensionVersion(project.stdlibAuthVersion)
+        def stdlibDependentCacheVersion = stripBallerinaExtensionVersion(project.stdlibCacheVersion)
+        def stdlibDependentTimeVersion = stripBallerinaExtensionVersion(project.stdlibTimeVersion)
+        def stdlibDependentCryptoVersion = stripBallerinaExtensionVersion(project.stdlibCryptoVersion)
+        def stdlibDependentFileVersion = stripBallerinaExtensionVersion(project.stdlibFileVersion)
+        def stdlibDependentOsVersion = stripBallerinaExtensionVersion(project.stdlibOsVersion)
+        def stdlibDependentTaskVersion = stripBallerinaExtensionVersion(project.stdlibTaskVersion)
         def stdlibDependentNettyVersion = project.nettyVersion
         def stdlibDependentWso2CommonsPoolVersion = project.wso2CommonsPoolVersion
         def stdlibDependentWso2SnakeYamlVersion = project.wso2SnakeYamlVersion
