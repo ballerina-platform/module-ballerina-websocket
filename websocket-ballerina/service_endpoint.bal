@@ -145,24 +145,6 @@ isolated function externDetach(Listener listenerObj, Service s) returns error? =
     name: "detach"
 } external;
 
-# Presents a read-only view of the remote address.
-#
-# + host - The remote host IP
-# + port - The remote port
-public type Remote record {|
-    string host = "";
-    int port = 0;
-|};
-
-# Presents a read-only view of the local address.
-#
-# + host - The local host name/IP
-# + port - The local port
-public type Local record {|
-    string host = "";
-    int port = 0;
-|};
-
 # Provides a set of configurations for HTTP service endpoints.
 #
 # + host - The host name/IP of the endpoint
