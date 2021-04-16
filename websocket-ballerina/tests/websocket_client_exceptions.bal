@@ -23,7 +23,7 @@ string errMessage = "";
 ClientConfiguration config = {subProtocols: ["xml"]};
 
 service class errorResourceService {
-   remote function onError(Caller clientCaller, error err) {
+   remote function onError(Caller clientCaller, Error err) {
        errMessage = <@untainted>err.message();
    }
 }

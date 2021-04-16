@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [1.2.0-alpha8] - 2021-04-22
 
+### Added
+- [Add compiler plugin validation for WebSocket](https://github.com/ballerina-platform/ballerina-standard-library/issues/778)
+
 ### Fixed
 - [Improve error message when creating the WebSocket client with an invalid URL](https://github.com/ballerina-platform/ballerina-standard-library/issues/1142)
 
