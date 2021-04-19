@@ -230,9 +230,6 @@ public class WebSocketUtil {
         } else if (throwable instanceof SSLException) {
             cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.SslError.errorCode(),
                     ModuleUtils.getWebsocketModule());
-            if (message == null) {
-                message = "SSL/TLS Error";
-            }
         } else if (throwable instanceof IllegalStateException) {
             if (throwable.getMessage().contains("frame continuation")) {
                 errorCode = WebSocketConstants.ErrorCode.InvalidContinuationFrameError.errorCode();

@@ -29,7 +29,7 @@ listener Listener l68 = new(21068, {
                         name: http:TLS,
                         versions: ["TLSv1.1"]
                     }
-                }
+                }, host: "localhost"
             });
 
 service /sslTest on l68 {
@@ -64,9 +64,7 @@ public function testSslProtocolError() returns Error? {
                        }
                    });
     if (wsClient is Error) {
-        io:println("+++++++++++++++++++++++++++++++++++++++++++");
         io:println(wsClient.message());
-        io:println("+++++++++++++++++++++++++++++++++++++++++++");
         test:assertTrue(strings:includes(wsClient.message(), "Received fatal alert"));
     } else {
         test:assertFail(msg = "Found unexpected output: Expected an error" );
