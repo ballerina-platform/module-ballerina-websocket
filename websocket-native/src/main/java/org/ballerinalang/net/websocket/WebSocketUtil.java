@@ -75,7 +75,6 @@ public class WebSocketUtil {
     private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_WEBSOCKET +
             WebSocketConstants.SEPARATOR + WebSocketConstants.FAILOVER_WEBSOCKET_CLIENT;
     public static final String ERROR_MESSAGE = "Error occurred: ";
-    public static final String LOG_MESSAGE = "{} {}";
 
     public static BObject createAndPopulateWebSocketCaller(WebSocketConnection webSocketConnection,
             WebSocketServerService wsService,
@@ -231,7 +230,9 @@ public class WebSocketUtil {
         } else if (throwable instanceof SSLException) {
             cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.SslError.errorCode(),
                     ModuleUtils.getWebsocketModule());
-            message = "SSL/TLS Error";
+            if (message == null) {
+                message = "SSL/TLS Error";
+            }
         } else if (throwable instanceof IllegalStateException) {
             if (throwable.getMessage().contains("frame continuation")) {
                 errorCode = WebSocketConstants.ErrorCode.InvalidContinuationFrameError.errorCode();
@@ -391,11 +392,6 @@ public class WebSocketUtil {
             exception = new WebSocketException(message, errorCode);
         }
         return exception.getWsError();
-    }
-
-    public static void setNotifyFailure(String msg, Future balFuture) {
-        balFuture.complete(getWebSocketError(msg, null,
-                WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode(), null));
     }
 
     public static BError createWebsocketError(String message, WebSocketConstants.ErrorCode errorType) {

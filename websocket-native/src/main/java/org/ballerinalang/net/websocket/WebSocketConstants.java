@@ -73,7 +73,6 @@ public class WebSocketConstants {
     public static final BString CLIENT_READY_ON_CONNECT = StringUtils.fromString("readyOnConnect");
     public static final String SYNC_CLIENT = "Client";
 
-    public static final BString RETRY_CONTEXT = StringUtils.fromString("retryConfig");
     public static final String COUNT_DOWN_LATCH = "countDownLatch";
     public static final String CLIENT_LISTENER = "clientListener";
     public static final String CLIENT_CONNECTOR = "clientConnector";

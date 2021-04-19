@@ -16,25 +16,29 @@
 
 import ballerina/test;
 import ballerina/http;
+import ballerina/io;
 import ballerina/lang.'string as strings;
 
-string sslErrString = "";
-listener Listener l36 = new(21058, {
+listener Listener l68 = new(21068, {
                 secureSocket: {
                     key: {
-                        certFile: "tests/certsAndKeys/public.crt",
-                        keyFile: "tests/certsAndKeys/private.key"
+                        path: "tests/certsAndKeys/ballerinaKeystore.p12",
+                        password: "ballerina"
+                    },
+                    protocol: {
+                        name: http:TLS,
+                        versions: ["TLSv1.1"]
                     }
                 }
             });
 
-service /sslTest on l36 {
-    resource function get .(http:Request req) returns Service {
-        return new SyncSslErrorService();
+service /sslTest on l68 {
+    resource function get .() returns Service {
+        return new SslService4();
     }
 }
 
-service class SyncSslErrorService {
+service class SslService4 {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
@@ -44,19 +48,27 @@ service class SyncSslErrorService {
     }
 }
 
-// Tests the Ssl error returned when creating the sync client
+// Tests the successful connection of sync client over mutual SSL with certs and keys
 @test:Config {}
-public function testSyncClientSslError() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
+public function testSslProtocolError() returns Error? {
+    Client|Error wsClient = new("wss://localhost:21068/sslTest", config = {
                        secureSocket: {
                            cert: {
                                path: "tests/certsAndKeys/ballerinaTruststore.p12",
                                password: "ballerina"
+                           },
+                           protocol: {
+                               name: http:TLS,
+                               versions: ["TLSv1.2"]
                            }
                        }
                    });
     if (wsClient is Error) {
-        sslErrString = wsClient.message();
+        io:println("+++++++++++++++++++++++++++++++++++++++++++");
+        io:println(wsClient.message());
+        io:println("+++++++++++++++++++++++++++++++++++++++++++");
+        test:assertTrue(strings:includes(wsClient.message(), "Received fatal alert"));
+    } else {
+        test:assertFail(msg = "Found unexpected output: Expected an error" );
     }
-    test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
 }
