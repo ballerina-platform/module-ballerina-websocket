@@ -18,11 +18,7 @@
 
 package org.ballerinalang.net.websocket.client.listener;
 
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.MethodType;
-import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
@@ -37,7 +33,6 @@ import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import java.util.concurrent.CountDownLatch;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
-import static org.ballerinalang.net.websocket.WebSocketConstants.RESOURCE_NAME_ON_OPEN;
 
 /**
  * The `WebSocketHandshakeListener` implements the `{@link ExtendedHandshakeListener}` interface directly.
@@ -71,40 +66,10 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
         WebSocketUtil.populateWebSocketEndpoint(webSocketConnection, webSocketClient);
         // Calls the `countDown()` function to initialize the count down latch of the connection.
         WebSocketUtil.countDownForHandshake(webSocketClient);
-        if (readyOnConnect) {
-            WebSocketUtil.readFirstFrame(webSocketConnection, webSocketConnector);
-        }
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketConnector, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
-        dispatchClientOnOpen(webSocketConnection, connectionInfo, wsService);
         countDownLatch.countDown();
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
-    }
-
-    private static void dispatchClientOnOpen(WebSocketConnection webSocketConnection,
-            WebSocketConnectionInfo connectionInfo, WebSocketService wsService) {
-        BObject dispatchingService = wsService.getBalService();
-        MethodType onOpenResource = wsService.getResourceByName(RESOURCE_NAME_ON_OPEN);
-        if (onOpenResource != null) {
-            Type[] parameterTypes = onOpenResource.getParameterTypes();
-            Object[] bValues = new Object[parameterTypes.length * 2];
-            bValues[0] = connectionInfo.getWebSocketEndpoint();
-            bValues[1] = true;
-            Callback onOpenCallback = new Callback() {
-                @Override
-                public void notifySuccess(Object result) {
-                }
-
-                @Override
-                public void notifyFailure(BError error) {
-                    error.getPrintableStackTrace();
-                    WebSocketUtil.closeDuringUnexpectedCondition(webSocketConnection);
-                }
-            };
-            wsService.getRuntime()
-                    .invokeMethodAsync(dispatchingService, RESOURCE_NAME_ON_OPEN, null, ModuleUtils.getOnOpenMetaData(),
-                            onOpenCallback, bValues);
-        }
     }
 
     @Override

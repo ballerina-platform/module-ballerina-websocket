@@ -34,7 +34,9 @@ listener Listener l65 = new(21065, {
                         name: http:TLS,
                         versions: ["TLSv1.2","TLSv1.1"]
                     },
-                    ciphers:["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"]
+                    ciphers:["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"],
+                    handshakeTimeout: 20,
+                    sessionTimeout: 200
                 }
             });
 
@@ -71,7 +73,9 @@ public function testMutualSslWithKeyStores() returns Error? {
                                name: http:TLS,
                                versions: ["TLSv1.2", "TLSv1.1"]
                            },
-                           ciphers: ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"]
+                           ciphers: ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"],
+                           handshakeTimeout: 20,
+                           sessionTimeout: 200
                        }
                    });
     if (wsClient is Error) {

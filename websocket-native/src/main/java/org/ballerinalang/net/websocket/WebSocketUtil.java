@@ -148,11 +148,6 @@ public class WebSocketUtil {
         balFuture.complete(WebSocketUtil.createErrorByType(error));
     }
 
-    public static void readFirstFrame(WebSocketConnection webSocketConnection, BObject wsConnector) {
-        webSocketConnection.readNextFrame();
-        wsConnector.set(WebSocketConstants.CONNECTOR_IS_READY_FIELD, true);
-    }
-
     /**
      * Closes the connection with the unexpected failure status code.
      *
@@ -231,9 +226,7 @@ public class WebSocketUtil {
             cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.SslError.errorCode(),
                     ModuleUtils.getWebsocketModule());
         } else if (throwable instanceof IllegalStateException) {
-            if (throwable.getMessage().contains("frame continuation")) {
-                errorCode = WebSocketConstants.ErrorCode.InvalidContinuationFrameError.errorCode();
-            } else if (throwable.getMessage().toLowerCase(Locale.ENGLISH).contains("close frame")) {
+            if (throwable.getMessage().toLowerCase(Locale.ENGLISH).contains("close frame")) {
                 errorCode = WebSocketConstants.ErrorCode.ConnectionClosureError.errorCode();
             }
         } else if (throwable instanceof IllegalAccessException &&

@@ -240,12 +240,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                 if (keyPassword != null && !keyPassword.getValue().isBlank()) {
                     sslConfiguration.setServerKeyPassword(keyPassword.getValue());
                 }
-            } else {
-                sslConfiguration.setClientCertificates(certFile);
-                sslConfiguration.setClientKeyFile(keyFile);
-                if (keyPassword != null && !keyPassword.getValue().isBlank()) {
-                    sslConfiguration.setClientKeyPassword(keyPassword.getValue());
-                }
             }
         }
     }

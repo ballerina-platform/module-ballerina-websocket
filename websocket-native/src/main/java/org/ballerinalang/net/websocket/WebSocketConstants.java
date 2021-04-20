@@ -58,7 +58,6 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_PONG = "pong";
     public static final String WRITE_BINARY_MESSAGE = "writeBinaryMessage";
     public static final String WRITE_TEXT_MESSAGE = "writeTextMessage";
-    public static final String RESOURCE_NAME_READY = "ready";
     public static final String RESOURCE_NAME_UPGRADE = "onUpgrade";
 
     public static final String WEBSOCKET_HANDSHAKER = "WEBSOCKET_MESSAGE";
@@ -70,7 +69,6 @@ public class WebSocketConstants {
     public static final BString CLIENT_URL_CONFIG = StringUtils.fromString("url");
     public static final BString SYNC_CLIENT_SERVICE_CONFIG = StringUtils.fromString("pingPongService");
     public static final BString CUSTOM_HEADERS = StringUtils.fromString("customHeaders");
-    public static final BString CLIENT_READY_ON_CONNECT = StringUtils.fromString("readyOnConnect");
     public static final String SYNC_CLIENT = "Client";
 
     public static final String COUNT_DOWN_LATCH = "countDownLatch";
@@ -128,7 +126,7 @@ public class WebSocketConstants {
 
     public static final String WEBSOCKET_DEFAULT_HOST = "0.0.0.0";
 
-    public WebSocketConstants() {
+    private WebSocketConstants() {
     }
 
     /**
