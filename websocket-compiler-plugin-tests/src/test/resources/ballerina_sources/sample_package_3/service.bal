@@ -1,7 +1,14 @@
 import ballerina/websocket;
 import ballerina/io;
 
-service /basic/ws on new websocket:Listener(9090) {
+service /basic/ws on new websocket:Listener(9090, {
+                 secureSocket: {
+                          key: {
+                              path: "tests/certsAndKeys/ballerinaKeystore.p12",
+                              password: "ballerina"
+                          }
+                      }
+                 }) {
    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
        return new WsService();
    }

@@ -25,10 +25,17 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
+import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
+import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.DiagnosticFactory;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import java.util.List;
@@ -52,6 +59,9 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                     .listenerTypes();
             for (TypeSymbol listenerType : listenerTypes) {
                 if (isListenerBelongsToWebSocketModule(listenerType)) {
+                    ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor();
+                    serviceDeclarationNode.syntaxTree().rootNode().accept(visitor);
+                    validateListenerArguments(ctx, visitor);
                     validateService(ctx, modulePrefix);
                     return;
                 }
@@ -72,6 +82,43 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         }
 
         return false;
+    }
+
+    private void validateListenerArguments(SyntaxNodeAnalysisContext context,
+            ListenerInitExpressionNodeVisitor visitor) {
+        visitor.getExplicitNewExpressionNodes()
+                .forEach(explicitNewExpressionNode -> {
+                    SeparatedNodeList<FunctionArgumentNode> functionArgs = explicitNewExpressionNode
+                            .parenthesizedArgList().arguments();
+                    verifyListenerArgType(context, explicitNewExpressionNode.location(), functionArgs);
+                });
+
+        visitor.getImplicitNewExpressionNodes()
+                .forEach(implicitNewExpressionNode -> {
+                    Optional<ParenthesizedArgList> argListOpt = implicitNewExpressionNode.parenthesizedArgList();
+                    if (argListOpt.isPresent()) {
+                        SeparatedNodeList<FunctionArgumentNode> functionArgs = argListOpt.get().arguments();
+                        verifyListenerArgType(context, implicitNewExpressionNode.location(), functionArgs);
+                    }
+                });
+    }
+
+    private void verifyListenerArgType(SyntaxNodeAnalysisContext context, NodeLocation location,
+            SeparatedNodeList<FunctionArgumentNode> functionArgs) {
+        if (functionArgs.size() >= 2) {
+            PositionalArgumentNode firstArg = (PositionalArgumentNode) functionArgs.get(0);
+            PositionalArgumentNode secondArg = (PositionalArgumentNode) functionArgs.get(1);
+            SyntaxKind firstArgSyntaxKind = firstArg.expression().kind();
+            SyntaxKind secondArgSyntaxKind = secondArg.expression().kind();
+            if (!(firstArgSyntaxKind == SyntaxKind.NUMERIC_LITERAL && (
+                    secondArgSyntaxKind == SyntaxKind.SIMPLE_NAME_REFERENCE
+                            || secondArgSyntaxKind == SyntaxKind.MAPPING_CONSTRUCTOR))) {
+                DiagnosticInfo diagnosticInfo = Utils.getDiagnosticInfo(
+                        PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS);
+                context.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location,
+                        WebSocketConstants.PACKAGE_WEBSOCKET));
+            }
+        }
     }
 
     private boolean isWebSocketModule(ModuleSymbol moduleSymbol) {
