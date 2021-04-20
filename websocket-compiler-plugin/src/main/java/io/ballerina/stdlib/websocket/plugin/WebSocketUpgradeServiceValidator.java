@@ -20,6 +20,7 @@ package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.symbols.ClassSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.Qualifier;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -96,7 +97,7 @@ public class WebSocketUpgradeServiceValidator {
                     List<TypeSymbol> typeInclusions = classSymbol.typeInclusions();
                     if (typeInclusions.isEmpty()) {
                         for (MethodSymbol symbol : methodSymbols) {
-                            if (symbol.qualifiers().get(0).name().equals("REMOTE")) {
+                            if (symbol.qualifiers().contains(Qualifier.REMOTE)) {
                                 String functionName = symbol.getName().get();
                                 switch (functionName) {
                                 case PluginConstants.ON_OPEN:
