@@ -62,10 +62,6 @@ public class WebSocketUpgradeServiceValidator {
             int numResources = (int) serviceDeclarationNode.members().stream()
                     .filter(child -> child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).count();
             if (numResources > 1) {
-//                DiagnosticInfo diagnosticInfo = Utils
-//                        .getDiagnosticInfo(PluginConstants.CompilationErrors.INVALID_RESOURCE_ERROR);
-//                ctx.reportDiagnostic(
-//                        DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
                 Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RESOURCE_ERROR,
                         serviceDeclarationNode.location());
             }
