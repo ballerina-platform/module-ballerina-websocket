@@ -1,5 +1,6 @@
 import ballerina/websocket;
 import ballerina/http;
+import ballerina/io;
 
 listener http:Listener hl = check new(21001);
 websocket:ListenerConfiguration conf = {
@@ -14,6 +15,7 @@ listener websocket:Listener socketListener = new(hl, conf);
 
 service /basic/ws on socketListener {
    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
+       io:println("hello");
        return new WsService();
    }
 }

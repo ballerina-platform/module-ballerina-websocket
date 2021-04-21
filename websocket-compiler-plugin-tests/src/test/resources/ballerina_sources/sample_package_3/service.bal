@@ -10,6 +10,7 @@ service /basic/ws on new websocket:Listener(9090, {
                       }
                  }) {
    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
+       io:println("Invoked the function");
        return new WsService();
    }
 }
