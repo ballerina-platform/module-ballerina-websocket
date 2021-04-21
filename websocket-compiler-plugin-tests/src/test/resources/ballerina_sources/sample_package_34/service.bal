@@ -2,7 +2,17 @@ import ballerina/websocket;
 import ballerina/http;
 import ballerina/io;
 
-listener http:Listener hl = check new(21001);
+http:ListenerConfiguration httpConf = {
+               secureSocket: {
+                        key: {
+                            path: "tests/certsAndKeys/ballerinaKeystore.p12",
+                            password: "ballerina"
+                        }
+                    }
+               };
+
+listener http:Listener hl = new(21001, httpConf);
+
 websocket:ListenerConfiguration conf = {
                secureSocket: {
                         key: {

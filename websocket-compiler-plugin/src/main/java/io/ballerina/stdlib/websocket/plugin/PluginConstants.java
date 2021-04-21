@@ -27,6 +27,7 @@ public class PluginConstants {
     public static final String SERVICE = "Service";
     public static final String PIPE = "|";
     public static final String UPGRADE_ERROR = "UpgradeError";
+    public static final String ORG_NAME = "ballerina";
     static final String ON_ERROR = "onError";
     static final String ON_OPEN = "onOpen";
     static final String ON_CLOSE = "onClose";
@@ -36,6 +37,7 @@ public class PluginConstants {
     static final String REMOTE_KEY_WORD = "remote";
     static final String RESOURCE_KEY_WORD = "resource";
     static final String HTTP_REQUEST = "http:Request";
+    static final String LISTENER_IDENTIFIER = "Listener";
 
     /**
      * Compilation Errors of WebSocket module.

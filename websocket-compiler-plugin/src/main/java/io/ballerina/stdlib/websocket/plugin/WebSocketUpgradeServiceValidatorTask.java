@@ -34,19 +34,17 @@ import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticFactory;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
+
 /**
  * Validates a Ballerina WebSocket Upgrade Service.
  */
 public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
-
-    private static final String ORG_NAME = "ballerina";
 
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
@@ -59,7 +57,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                     .listenerTypes();
             for (TypeSymbol listenerType : listenerTypes) {
                 if (isListenerBelongsToWebSocketModule(listenerType)) {
-                    ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor();
+                    ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor(ctx);
                     serviceDeclarationNode.syntaxTree().rootNode().accept(visitor);
                     validateListenerArguments(ctx, visitor);
                     validateService(ctx, modulePrefix);
@@ -113,10 +111,8 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             if (!(firstArgSyntaxKind == SyntaxKind.NUMERIC_LITERAL && (
                     secondArgSyntaxKind == SyntaxKind.SIMPLE_NAME_REFERENCE
                             || secondArgSyntaxKind == SyntaxKind.MAPPING_CONSTRUCTOR))) {
-                DiagnosticInfo diagnosticInfo = Utils.getDiagnosticInfo(
-                        PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS);
-                context.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location,
-                        WebSocketConstants.PACKAGE_WEBSOCKET));
+                Utils.reportDiagnostics(context, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS,
+                        location, WebSocketConstants.PACKAGE_WEBSOCKET);
             }
         }
     }

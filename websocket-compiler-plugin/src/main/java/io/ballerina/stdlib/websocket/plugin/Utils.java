@@ -25,7 +25,9 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
@@ -70,10 +72,8 @@ public class Utils {
             if (!inputParams.isEmpty()) {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.startsWith(PREFIX) || !paramSignature.endsWith(CALLER)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_OPEN);
-                    ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
-                            WebSocketConstants.PACKAGE_WEBSOCKET));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_OPEN,
+                            resourceNode.location(), resourceNode.location(), WebSocketConstants.PACKAGE_WEBSOCKET);
                 }
             }
         }
@@ -85,19 +85,15 @@ public class Utils {
             SyntaxNodeAnalysisContext ctx, FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(BYTE_ARRAY)) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
-                    inputParams.get(0).typeDescriptor().signature()));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS,
+                    resourceNode.location(), resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
         } else {
             for (ParameterSymbol inputParam : inputParams) {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.equals(BYTE_ARRAY) && !paramSignature.equals(moduleId + COLON + CALLER)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY);
-                    ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY,
+                            resourceNode.location(), resourceNode.location(), paramSignature);
                 }
             }
         }
@@ -111,20 +107,16 @@ public class Utils {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
                         symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
-                    ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), symbol.signature(),
-                                    functionName));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
+                            resourceNode.location(), symbol.signature(),
+                            functionName);
                 }
             }
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !(returnTypeSymbol.typeKind()
                 == TypeDescKind.ARRAY) && !(returnTypeSymbol.typeKind() == TypeDescKind.STRING)) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
-            ctx.reportDiagnostic(DiagnosticFactory
-                    .createDiagnostic(diagnosticInfo, resourceNode.location(), returnTypeSymbol.signature(),
-                            functionName));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
+                    resourceNode.location(), returnTypeSymbol.signature(),
+                    functionName);
         }
     }
 
@@ -137,10 +129,8 @@ public class Utils {
             String inputParamTypeDescSignature = inputParam.typeDescriptor().signature();
             if (!inputParamTypeDescSignature.contains(GENERIC_ERROR) && !inputParamTypeDescSignature
                     .equals(moduleId + COLON + ERROR)) {
-                DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                        PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
-                ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
-                        inputParamTypeDescSignature));
+                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS,
+                        resourceNode.location(), inputParamTypeDescSignature);
             }
         } else {
             for (ParameterSymbol inputParam : inputParams) {
@@ -148,10 +138,8 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.contains(GENERIC_ERROR) && !paramSignature.equals(moduleId + COLON + CALLER)
                         && !paramSignature.equals(moduleId + COLON + ERROR)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR);
-                    ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR,
+                            resourceNode.location(), paramSignature);
                 }
             }
         }
@@ -164,19 +152,14 @@ public class Utils {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
-                    ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), functionName,
-                                    WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES,
+                            resourceNode.location(), functionName,
+                            WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL);
                 }
             }
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL)) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
-            ctx.reportDiagnostic(DiagnosticFactory
-                    .createDiagnostic(diagnosticInfo, resourceNode.location(), functionName,
-                            WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, resourceNode.location(),
+                    functionName, WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL);
         }
     }
 
@@ -184,26 +167,20 @@ public class Utils {
             FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() > 3 || inputParams.size() < 1) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_CLOSE);
-            ctx.reportDiagnostic(DiagnosticFactory
-                    .createDiagnostic(diagnosticInfo, resourceNode.location(), WebSocketConstants.PACKAGE_WEBSOCKET));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_CLOSE,
+                    resourceNode.location());
         } else if (inputParams.size() == 1 && inputParams.get(0).typeDescriptor().signature()
                 .equals(STRING)) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
-                    inputParams.get(0).typeDescriptor().signature()));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ONCLOSE_WITH_ONE_PARAMS,
+                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
         } else {
             for (ParameterSymbol inputParam : inputParams) {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)
                         && !paramSignature.equals(INT)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_CLOSE);
-                    ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_CLOSE,
+                            resourceNode.location(), paramSignature);
                 }
             }
         }
@@ -211,26 +188,25 @@ public class Utils {
                 resourceNode, ctx);
     }
 
-    public static DiagnosticInfo getDiagnosticInfo(PluginConstants.CompilationErrors error) {
+    public static void reportDiagnostics(SyntaxNodeAnalysisContext context, PluginConstants.CompilationErrors error,
+            NodeLocation location, Object... args) {
         String errorMessage = error.getError();
         String diagnosticCode = error.getErrorCode();
-        return new DiagnosticInfo(diagnosticCode, errorMessage, DiagnosticSeverity.ERROR);
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(diagnosticCode, errorMessage, DiagnosticSeverity.ERROR);
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location, args);
+        context.reportDiagnostic(diagnostic);
     }
 
     static void validateOnIdleTimeoutFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
             FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() > 1) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT);
-            ctx.reportDiagnostic(DiagnosticFactory
-                    .createDiagnostic(diagnosticInfo, resourceNode.location(), WebSocketConstants.PACKAGE_WEBSOCKET));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_IDLE_TIMEOUT,
+                    resourceNode.location());
         } else if (inputParams.size() == 1 && (!inputParams.get(0).typeDescriptor().signature().endsWith(":Caller")
                 || !inputParams.get(0).typeDescriptor().signature().startsWith(PREFIX))) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
-                    inputParams.get(0).typeDescriptor().signature()));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT,
+                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
         }
         validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(),
                 PluginConstants.ON_IDLE_TIMEOUT, resourceNode, ctx);
@@ -240,19 +216,15 @@ public class Utils {
             FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
-            DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                    PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, resourceNode.location(),
-                    inputParams.get(0).typeDescriptor().signature()));
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
         } else {
             for (ParameterSymbol inputParam : inputParams) {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
-                    DiagnosticInfo diagnosticInfo = getDiagnosticInfo(
-                            PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT);
-                    ctx.reportDiagnostic(DiagnosticFactory
-                            .createDiagnostic(diagnosticInfo, resourceNode.location(), paramSignature));
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
+                            resourceNode.location(), paramSignature);
                 }
             }
         }
