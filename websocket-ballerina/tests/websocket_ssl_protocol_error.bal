@@ -27,7 +27,7 @@ listener Listener l68 = new(21068, {
                     },
                     protocol: {
                         name: http:TLS,
-                        versions: ["TLSv1.1"]
+                        versions: ["TLSv1.2"]
                     }
                 }, host: "localhost"
             });
@@ -59,7 +59,7 @@ public function testSslProtocolError() returns Error? {
                            },
                            protocol: {
                                name: http:TLS,
-                               versions: ["TLSv1.2"]
+                               versions: ["TLSv1.3"]
                            }
                        }
                    });
