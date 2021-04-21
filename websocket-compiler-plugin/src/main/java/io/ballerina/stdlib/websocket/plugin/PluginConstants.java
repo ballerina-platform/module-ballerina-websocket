@@ -27,6 +27,7 @@ public class PluginConstants {
     public static final String SERVICE = "Service";
     public static final String PIPE = "|";
     public static final String UPGRADE_ERROR = "UpgradeError";
+    public static final String ORG_NAME = "ballerina";
     static final String ON_ERROR = "onError";
     static final String ON_OPEN = "onOpen";
     static final String ON_CLOSE = "onClose";
@@ -36,6 +37,7 @@ public class PluginConstants {
     static final String REMOTE_KEY_WORD = "remote";
     static final String RESOURCE_KEY_WORD = "resource";
     static final String HTTP_REQUEST = "http:Request";
+    static final String LISTENER_IDENTIFIER = "Listener";
 
     /**
      * Compilation Errors of WebSocket module.
@@ -77,7 +79,9 @@ public class PluginConstants {
         INVALID_RETURN_TYPES_IN_RESOURCE("Invalid return type `{0}` provided for function `{1}`, return type "
                 + "should be a subtype of `{2}`", "WEBSOCKET_104"),
         FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE("Function `{0}` not accepted by the service",
-                "WEBSOCKET_105");
+                "WEBSOCKET_105"),
+        INVALID_LISTENER_INIT_PARAMS("`websocket:ListenerConfiguration` not allowed with `http:Listener` "
+                + "as the `websocket:Listener` ", "WEBSOCKET_106");
 
         private final String error;
         private final String errorCode;
