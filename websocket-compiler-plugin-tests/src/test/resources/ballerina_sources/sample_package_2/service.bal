@@ -16,7 +16,8 @@ websocket:ListenerConfiguration conf = {
     idleTimeout: 120
 }
 service /basic/ws on new websocket:Listener(9090, conf) {
-   resource isolated function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
+   resource function get [string name](http:Request req) returns
+                            websocket:Service|websocket:UpgradeError {
        lock {
            self.testFunc();
            return new WsService();

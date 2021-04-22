@@ -9,7 +9,8 @@ service /basic/ws on hl {
 }
 
 service class WsService {
-    remote function onTextMessage(websocket:Caller caller) returns string|int? {
+    remote function onTextMessage(websocket:Caller caller)
+                   returns string|int? {
         return "hello";
     }
 }
