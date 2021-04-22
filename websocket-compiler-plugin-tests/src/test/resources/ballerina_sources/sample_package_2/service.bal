@@ -2,11 +2,20 @@ import ballerina/websocket;
 import ballerina/http;
 import ballerina/io;
 
+websocket:ListenerConfiguration conf = {
+               secureSocket: {
+                        key: {
+                            path: "tests/certsAndKeys/ballerinaKeystore.p12",
+                            password: "ballerina"
+                        }
+                    }
+               };
+
 @websocket:ServiceConfig {
     subProtocols: ["xml", "json"],
     idleTimeout: 120
 }
-service /basic/ws on new websocket:Listener(9090) {
+service /basic/ws on new websocket:Listener(9090, conf) {
    resource isolated function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
        lock {
            self.testFunc();

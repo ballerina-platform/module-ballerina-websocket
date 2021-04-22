@@ -23,8 +23,6 @@ import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticFactory;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
 
 /**
  * A class for validating websocket service.
@@ -77,9 +75,7 @@ public class WebSocketServiceValidator {
     }
 
     private void reportInvalidFunction(FunctionDefinitionNode functionDefinitionNode) {
-        DiagnosticInfo diagnosticInfo = Utils
-                .getDiagnosticInfo(PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE);
-        ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                functionDefinitionNode.location(), functionDefinitionNode.functionName().toString()));
+        Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE,
+                functionDefinitionNode.location(), functionDefinitionNode.functionName().toString());
     }
 }
