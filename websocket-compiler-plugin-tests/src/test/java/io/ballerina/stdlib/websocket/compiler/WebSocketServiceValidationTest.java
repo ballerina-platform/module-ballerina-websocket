@@ -435,6 +435,17 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS);
     }
 
+    @Test
+    public void testEmptyReturnTypesInGetResource() {
+        Package currentPackage = loadPackage("sample_package_35");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
