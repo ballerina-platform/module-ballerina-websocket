@@ -139,14 +139,14 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             listenerConfiguration.setServerHeader(getServerName());
         }
 
-        if (sslConfig != null) {
-            return setSslConfig(sslConfig, listenerConfiguration);
-        }
-
         listenerConfiguration.setPipeliningEnabled(true); //Pipelining is enabled all the time
         Object webSocketCompressionEnabled = endpointConfig.get(WebSocketConstants.COMPRESSION_ENABLED_CONFIG);
         if (webSocketCompressionEnabled != null) {
             listenerConfiguration.setWebSocketCompressionEnabled((Boolean) webSocketCompressionEnabled);
+        }
+
+        if (sslConfig != null) {
+            return setSslConfig(sslConfig, listenerConfiguration);
         }
 
         return listenerConfiguration;
@@ -209,13 +209,13 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         if (key.containsKey(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_FILE_PATH)) {
             String keyStoreFile = key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_FILE_PATH).getValue();
             if (keyStoreFile.isBlank()) {
-                throw createWebsocketError("KeyStore file location must be provided for secure connection.",
+                throw createWebsocketError("KeyStore file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             String keyStorePassword = key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_PASSWORD)
                     .getValue();
             if (keyStorePassword.isBlank()) {
-                throw createWebsocketError("KeyStore password must be provided for secure connection.",
+                throw createWebsocketError("KeyStore password must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setKeyStoreFile(keyStoreFile);
@@ -227,11 +227,11 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                     key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_CERTKEY_KEY_PASSWORD) :
                     null;
             if (certFile.isBlank()) {
-                throw createWebsocketError("Certificate file location must be provided for secure connection.",
+                throw createWebsocketError("Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (keyFile.isBlank()) {
-                throw createWebsocketError("Private key file location must be provided for secure connection.",
+                throw createWebsocketError("Private key file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (sslConfiguration instanceof ListenerConfiguration) {
@@ -252,11 +252,11 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             String trustStorePassword = trustStore.getStringValue(HttpConstants.SECURESOCKET_CONFIG_TRUSTSTORE_PASSWORD)
                     .getValue();
             if (trustStoreFile.isBlank()) {
-                throw createWebsocketError("TrustStore file location must be provided for secure connection.",
+                throw createWebsocketError("TrustStore file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (trustStorePassword.isBlank()) {
-                throw createWebsocketError("TrustStore password must be provided for secure connection.",
+                throw createWebsocketError("TrustStore password must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setTrustStoreFile(trustStoreFile);
@@ -264,7 +264,7 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         } else {
             String certFile = ((BString) cert).getValue();
             if (certFile.isBlank()) {
-                throw createWebsocketError("Certificate file location must be provided for secure connection.",
+                throw createWebsocketError("Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (sslConfiguration instanceof ListenerConfiguration) {
