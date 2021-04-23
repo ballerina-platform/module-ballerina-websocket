@@ -65,9 +65,6 @@ dependencies {
     externalJars (group: 'commons-pool.wso2', name: 'commons-pool', version: "${wso2CommonsPoolVersion}") {
         transitive = false
     }
-    externalJars (group: 'org.wso2.orbit.org.yaml', name: 'snakeyaml', version: "${wso2SnakeYamlVersion}") {
-        transitive = false
-    }
     externalJars (group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "${bouncycastleVersion}") {
         transitive = false
     }
@@ -184,7 +181,6 @@ task updateTomlFile {
         def stdlibDependentTaskVersion = stripBallerinaExtensionVersion(project.stdlibTaskVersion)
         def stdlibDependentNettyVersion = project.nettyVersion
         def stdlibDependentWso2CommonsPoolVersion = project.wso2CommonsPoolVersion
-        def stdlibDependentWso2SnakeYamlVersion = project.wso2SnakeYamlVersion
         def stdlibDependentBouncycastleVersion = project.bouncycastleVersion
         def stdlibDependentNettyTcnativeVersion = project.nettyTcnativeVersion
         def stdlibDependentMimepullVersion = project.mimepullVersion
@@ -195,7 +191,6 @@ task updateTomlFile {
         newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)
         newConfig = newConfig.replace("@netty.version@", stdlibDependentNettyVersion)
         newConfig = newConfig.replace("@commmon.pool.version@", stdlibDependentWso2CommonsPoolVersion)
-        newConfig = newConfig.replace("@snakeyaml.version@", stdlibDependentWso2SnakeYamlVersion)
         newConfig = newConfig.replace("@bouncycastle.version@", stdlibDependentBouncycastleVersion)
         newConfig = newConfig.replace("@tcnative.version@", stdlibDependentNettyTcnativeVersion)
         newConfig = newConfig.replace("@mimepull.version@", stdlibDependentMimepullVersion)
