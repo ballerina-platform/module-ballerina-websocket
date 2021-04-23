@@ -19,10 +19,14 @@
 package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.symbols.ClassSymbol;
+import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.NewExpressionNode;
@@ -30,7 +34,6 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
@@ -38,9 +41,7 @@ import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 
 import java.util.List;
-import java.util.Optional;
 
-import static io.ballerina.stdlib.websocket.plugin.PluginConstants.PIPE;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.REMOTE_KEY_WORD;
 
 /**
@@ -144,24 +145,28 @@ public class WebSocketUpgradeServiceValidator {
 
     private void validateResourceReturnTypes(FunctionDefinitionNode resourceNode) {
         if (resourceNode != null) {
-            Optional<ReturnTypeDescriptorNode> returnTypesNode = resourceNode
-                    .functionSignature().returnTypeDesc();
-            if (resourceNode.functionSignature().returnTypeDesc().isEmpty()) {
+            FunctionTypeSymbol functionTypeSymbol = ((MethodSymbol) ctx.semanticModel().symbol(resourceNode).get())
+                    .typeDescriptor();
+            TypeSymbol returnTypeSymbol = functionTypeSymbol.returnTypeDescriptor().get();
+            if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
+                for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
+                    if (!((symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.getName().get()
+                            .equals(PluginConstants.SERVICE) && symbol.getModule().map(ModuleSymbol::id).get().orgName()
+                            .equals(PluginConstants.ORG_NAME) && WebSocketConstants.PACKAGE_WEBSOCKET
+                            .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix())) || (
+                            symbol.typeKind() == TypeDescKind.ERROR))) {
+                        Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE,
+                                resourceNode.location(), symbol.typeKind().getName(), resourceNode.functionName(),
+                                modulePrefix + PluginConstants.SERVICE + PluginConstants.PIPE + modulePrefix
+                                        + PluginConstants.UPGRADE_ERROR);
+                    }
+                }
+            } else if (returnTypeSymbol.typeKind() == TypeDescKind.NIL) {
                 Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE,
-                        resourceNode.location());
-            }
-            Node returnTypeDescriptor = returnTypesNode.get().type();
-            String returnTypeDescWithoutTrailingSpace = returnTypeDescriptor.toString().split(" ")[0];
-            if (!(returnTypeDescWithoutTrailingSpace.equals(
-                    modulePrefix + PluginConstants.SERVICE + PIPE + modulePrefix + PluginConstants.UPGRADE_ERROR))
-                    && !(returnTypeDescWithoutTrailingSpace.equals(
-                    modulePrefix + PluginConstants.UPGRADE_ERROR + PIPE + modulePrefix + PluginConstants.SERVICE))) {
-                Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE,
-                        resourceNode.location(), returnTypeDescriptor.toString(), resourceNode.functionName(),
+                        resourceNode.location(), TypeDescKind.NIL.getName(), resourceNode.functionName(),
                         modulePrefix + PluginConstants.SERVICE + PluginConstants.PIPE + modulePrefix
                                 + PluginConstants.UPGRADE_ERROR);
             }
-
         }
     }
 
