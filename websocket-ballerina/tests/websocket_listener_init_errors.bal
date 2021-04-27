@@ -153,3 +153,24 @@ public function testTrustedCertFile() returns Error? {
         test:assertFail("Expected an trusted cert file not found error");
     }
 }
+
+@test:Config {}
+public function testListenerPortNotDefined() returns Error? {
+    Listener|Error l17 = new(0);
+    if (l17 is Error) {
+        test:assertEquals(l17.message(), "Listener port is not defined");
+    } else {
+        test:assertFail("Expected an listener port is not defined error");
+    }
+}
+
+@test:Config {}
+public function testListenerIncorrectIdleTimeout() returns Error? {
+    Listener|Error l17 = new(9090, {timeout: -1});
+    if (l17 is Error) {
+        test:assertEquals(l17.message(),
+                    "Idle timeout cannot be negative. If you want to disable the timeout please use value 0");
+    } else {
+        test:assertFail("Expected an incorrect timeout defined error");
+    }
+}

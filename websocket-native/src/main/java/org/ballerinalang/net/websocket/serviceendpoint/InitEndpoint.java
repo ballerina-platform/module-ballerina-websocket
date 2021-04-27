@@ -25,7 +25,6 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.config.ConfigRegistry;
 import org.ballerinalang.net.http.BallerinaConnectorException;
 import org.ballerinalang.net.http.HttpConnectionManager;
 import org.ballerinalang.net.http.HttpConstants;
@@ -112,21 +111,16 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                 requestLimits.getIntValue(HttpConstants.MAX_ENTITY_BODY_SIZE),
                 listenerConfiguration.getMsgSizeValidationConfig());
 
-        if (host == null || host.trim().isEmpty()) {
-            listenerConfiguration.setHost(ConfigRegistry.getInstance()
-                    .getConfigOrDefault("b7a.websocket.host", WebSocketConstants.WEBSOCKET_DEFAULT_HOST));
-        } else {
-            listenerConfiguration.setHost(host);
-        }
+        listenerConfiguration.setHost(host);
 
         if (port == 0) {
-            throw new BallerinaConnectorException("Listener port is not defined!");
+            throw new BallerinaConnectorException("Listener port is not defined");
         }
         listenerConfiguration.setPort(Math.toIntExact(port));
 
         if (idleTimeout < 0) {
             throw new BallerinaConnectorException(
-                    "Idle timeout cannot be negative. If you want to disable the " + "timeout please use value 0");
+                    "Idle timeout cannot be negative. If you want to disable the timeout please use value 0");
         }
         listenerConfiguration.setSocketIdleTimeout(Math.toIntExact(idleTimeout));
 
@@ -269,8 +263,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             }
             if (sslConfiguration instanceof ListenerConfiguration) {
                 sslConfiguration.setServerTrustCertificates(certFile);
-            } else {
-                sslConfiguration.setClientTrustCertificates(certFile);
             }
         }
     }
@@ -322,11 +314,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
 
     private static void evaluateCommonFields(BMap<BString, Object> secureSocket, SslConfiguration sslConfiguration,
             List<Parameter> paramList) {
-        if (!(sslConfiguration instanceof ListenerConfiguration)) {
-            boolean hostNameVerificationEnabled = secureSocket
-                    .getBooleanValue(HttpConstants.SECURESOCKET_CONFIG_HOST_NAME_VERIFICATION_ENABLED);
-            sslConfiguration.setHostNameVerificationEnabled(hostNameVerificationEnabled);
-        }
         sslConfiguration.setSslSessionTimeOut(
                 (int) getLongValueOrDefault(secureSocket, HttpConstants.SECURESOCKET_CONFIG_SESSION_TIMEOUT));
         sslConfiguration.setSslHandshakeTimeOut(
