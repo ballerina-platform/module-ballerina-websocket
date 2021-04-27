@@ -446,6 +446,15 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE);
     }
 
+    @Test
+    public void testWebSocketListenerWithInlineConfigs() {
+        Package currentPackage = loadPackage("sample_package_36");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 0);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
