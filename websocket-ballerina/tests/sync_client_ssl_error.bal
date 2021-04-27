@@ -60,3 +60,12 @@ public function testSyncClientSslError() {
     }
     test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
 }
+
+@test:Config {}
+public function testSslWithJavaDefaults() {
+    Client|Error wsClient = new("wss://localhost:21058/sslTest");
+    if (wsClient is Error) {
+        sslErrString = wsClient.message();
+    }
+    test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
+}

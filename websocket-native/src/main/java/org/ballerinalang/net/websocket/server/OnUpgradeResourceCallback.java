@@ -27,7 +27,6 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
-import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.CUSTOM_HEADERS;
@@ -63,19 +62,6 @@ public class OnUpgradeResourceCallback implements Callback {
                     .handshake(wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000,
                             headers, wsService.getMaxFrameSize());
             future.setHandshakeListener(new UpgradeListener(wsService, connectionManager, result));
-        } else {
-            // If the acceptWebSocketUpgrade function has not been called inside the upgrade resource
-            if (!webSocketHandshaker.isCancelled()) {
-
-                WebSocketConnectionInfo connectionInfo =
-                        connectionManager.getConnectionInfo(webSocketHandshaker.getChannelId());
-                try {
-                    WebSocketResourceDispatcher.dispatchOnOpen(connectionInfo.getWebSocketConnection(),
-                            connectionInfo.getWebSocketEndpoint(), wsService);
-                } catch (IllegalAccessException e) {
-                    // Ignore as it is not possible have an Illegal access
-                }
-            }
         }
     }
 

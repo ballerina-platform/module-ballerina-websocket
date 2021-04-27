@@ -42,6 +42,7 @@ import static org.ballerinalang.net.websocket.actions.websocketconnector.WebSock
 import static org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector.fromText;
 import static org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector.getByteChunk;
 import static org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector.release;
+import static org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil.observeError;
 
 /**
  * Callback impl for web socket.
@@ -189,9 +190,7 @@ public class WebSocketResourceCallback implements Callback {
     public void notifyFailure(BError error) {
         error.printStackTrace();
         WebSocketUtil.closeDuringUnexpectedCondition(webSocketConnection);
-        //Observe error
-        WebSocketObservabilityUtil.observeError(connectionInfo,
-                WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION,
-                resource, error.getMessage());
+        observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION, resource,
+                error.getMessage());
     }
 }

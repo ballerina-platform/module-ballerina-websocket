@@ -18,7 +18,6 @@
 
 package org.ballerinalang.net.websocket.server;
 
-import io.ballerina.runtime.api.values.BMap;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpResourceArguments;
 import org.ballerinalang.net.http.HttpUtil;
@@ -53,12 +52,10 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
 
     private final WebSocketServicesRegistry servicesRegistry;
     private final WebSocketConnectionManager connectionManager;
-    private final BMap httpEndpointConfig;
 
-    public WebSocketServerListener(WebSocketServicesRegistry servicesRegistry, BMap httpEndpointConfig) {
+    public WebSocketServerListener(WebSocketServicesRegistry servicesRegistry) {
         this.servicesRegistry = servicesRegistry;
         this.connectionManager = new WebSocketConnectionManager();
-        this.httpEndpointConfig = httpEndpointConfig;
     }
 
     @Override
@@ -83,8 +80,7 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
         }
         setCarbonMessageProperties(pathParams, requestUri, validatedUri, webSocketHandshaker.getHttpCarbonRequest(),
                 matchingBasePath);
-            WebSocketResourceDispatcher.dispatchUpgrade(webSocketHandshaker, wsService, httpEndpointConfig,
-                    connectionManager);
+            WebSocketResourceDispatcher.dispatchUpgrade(webSocketHandshaker, wsService, connectionManager);
     }
 
     private URI createRequestUri(WebSocketHandshaker webSocketHandshaker) {
@@ -108,14 +104,12 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-        WebSocketResourceDispatcher.dispatchOnText(
-                getConnectionInfo(webSocketTextMessage), webSocketTextMessage, true);
+        WebSocketResourceDispatcher.dispatchOnText(getConnectionInfo(webSocketTextMessage), webSocketTextMessage);
     }
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-        WebSocketResourceDispatcher.dispatchOnBinary(
-                getConnectionInfo(webSocketBinaryMessage), webSocketBinaryMessage, true);
+        WebSocketResourceDispatcher.dispatchOnBinary(getConnectionInfo(webSocketBinaryMessage), webSocketBinaryMessage);
     }
 
     @Override
@@ -148,7 +142,7 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
 
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
-        WebSocketResourceDispatcher.dispatchOnIdleTimeout(getConnectionInfo(controlMessage), true);
+        WebSocketResourceDispatcher.dispatchOnIdleTimeout(getConnectionInfo(controlMessage));
     }
 
     private String getConnectionId(WebSocketMessage webSocketMessage) {

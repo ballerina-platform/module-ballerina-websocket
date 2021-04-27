@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.ballerina.runtime.api.constants.RuntimeConstants.BALLERINA_VERSION;
 import static org.ballerinalang.net.http.HttpConstants.ANN_CONFIG_ATTR_SSL_ENABLED_PROTOCOLS;
 import static org.ballerinalang.net.http.HttpConstants.LISTENER_CONFIGURATION;
 import static org.ballerinalang.net.http.HttpConstants.PKCS_STORE_TYPE;
@@ -128,9 +127,10 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
 
         if (endpointConfig.getType().getName().equalsIgnoreCase(LISTENER_CONFIGURATION)) {
             BString serverName = endpointConfig.getStringValue(SERVER_NAME);
-            listenerConfiguration.setServerHeader(serverName != null ? serverName.getValue() : getServerName());
+            listenerConfiguration
+                    .setServerHeader(serverName != null ? serverName.getValue() : WebSocketConstants.PACKAGE);
         } else {
-            listenerConfiguration.setServerHeader(getServerName());
+            listenerConfiguration.setServerHeader(WebSocketConstants.PACKAGE);
         }
 
         listenerConfiguration.setPipeliningEnabled(true); //Pipelining is enabled all the time
@@ -144,17 +144,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         }
 
         return listenerConfiguration;
-    }
-
-    private static String getServerName() {
-        String userAgent;
-        String version = System.getProperty(BALLERINA_VERSION);
-        if (version != null) {
-            userAgent = "ballerina/" + version;
-        } else {
-            userAgent = "ballerina";
-        }
-        return userAgent;
     }
 
     private static ListenerConfiguration setSslConfig(BMap<BString, Object> secureSocket,
