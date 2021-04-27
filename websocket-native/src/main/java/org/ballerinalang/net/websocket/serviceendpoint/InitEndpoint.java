@@ -129,8 +129,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             BString serverName = endpointConfig.getStringValue(SERVER_NAME);
             listenerConfiguration
                     .setServerHeader(serverName != null ? serverName.getValue() : WebSocketConstants.PACKAGE);
-        } else {
-            listenerConfiguration.setServerHeader(WebSocketConstants.PACKAGE);
         }
 
         listenerConfiguration.setPipeliningEnabled(true); //Pipelining is enabled all the time
