@@ -349,7 +349,7 @@ public class WebSocketUtil {
             Type param = (callbackService).getType().getMethods()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
-                throw WebSocketUtil.getWebSocketError("The callback service should be a WebSocket Client Service",
+                throw WebSocketUtil.getWebSocketError("The callback service should be a PingPongService",
                         null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
             }
             return new WebSocketService(callbackService, runtime);

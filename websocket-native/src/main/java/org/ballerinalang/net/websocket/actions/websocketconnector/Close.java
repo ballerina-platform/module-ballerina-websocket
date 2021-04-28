@@ -78,22 +78,17 @@ public class Close {
     }
 
     private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
-            String reason, WebSocketConnectionInfo connectionInfo,
-            CountDownLatch latch) throws IllegalAccessException {
+            String reason, WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
         WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
         ChannelFuture closeFuture;
-        if (statusCode < 0) {
-            closeFuture = webSocketConnection.initiateConnectionClosure();
-        } else {
-            closeFuture = webSocketConnection.initiateConnectionClosure(statusCode, reason);
-        }
+        closeFuture = webSocketConnection.initiateConnectionClosure(statusCode, reason);
         return closeFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
                 addError(cause.getMessage(), errors);
-                WebSocketObservabilityUtil.observeError(connectionInfo,
-                        WebSocketObservabilityConstants.ERROR_TYPE_CLOSE,
-                        cause.getMessage());
+                WebSocketObservabilityUtil
+                        .observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_CLOSE,
+                                cause.getMessage());
             }
             latch.countDown();
         });
