@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/test;
+import ballerina/lang.'string as strings;
 
 listener Listener l73 = new(21073);
 
@@ -40,6 +41,16 @@ public function testWsUpgradeCancelDueToPathError() returns Error? {
    Client|Error wsClient = new("ws://localhost:21073/onTextString/xyz");
    if (wsClient is Error) {
        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 400 Bad Request");
+   } else {
+       test:assertFail("Expected an error as the WebSocket handshake failure");
+   }
+}
+
+@test:Config {}
+public function testIncorrectPath() returns Error? {
+   Client|Error wsClient = new("ws://localhost:21073/xyz");
+   if (wsClient is Error) {
+       test:assertTrue(strings:includes(wsClient.message(), "InvalidHandshakeError: Invalid handshake response"));
    } else {
        test:assertFail("Expected an error as the WebSocket handshake failure");
    }

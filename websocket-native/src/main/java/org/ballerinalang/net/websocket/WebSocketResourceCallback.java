@@ -65,7 +65,7 @@ public class WebSocketResourceCallback implements Callback {
     public void notifySuccess(Object result) {
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
         if (result instanceof BArray && resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PING)) {
-            sendPing((BArray) result, promiseCombiner);
+            sendPong((BArray) result, promiseCombiner);
         } else if (result instanceof BString) {
             sendTextMessage((BString) result, promiseCombiner);
         } else if (result instanceof BArray) {
@@ -75,10 +75,10 @@ public class WebSocketResourceCallback implements Callback {
         }
     }
 
-    private void sendPing(BArray result, PromiseCombiner promiseCombiner) {
+    private void sendPong(BArray result, PromiseCombiner promiseCombiner) {
         try {
             ChannelFuture webSocketChannelFuture = connectionInfo.getWebSocketConnection()
-                    .ping(ByteBuffer.wrap(result.getBytes()));
+                    .pong(ByteBuffer.wrap(result.getBytes()));
             promiseCombiner.add(webSocketChannelFuture);
             promiseCombiner.finish(connectionInfo.getWebSocketConnection().getChannel().newPromise()
                     .addListener((ChannelFutureListener) future -> {
