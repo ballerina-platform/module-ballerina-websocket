@@ -88,7 +88,7 @@ public class WebSocketUpgradeServiceValidator {
                 ExpressionNode expressionNode = returnStatementNode.expression().get();
                 if (expressionNode instanceof NewExpressionNode) {
                     final TypeReferenceTypeSymbol definition = (TypeReferenceTypeSymbol) ctx.semanticModel()
-                            .symbol(expressionNode).get();
+                            .type(expressionNode).get();
                     ClassSymbol classSymbol = (ClassSymbol) definition.typeDescriptor();
                     final MethodSymbol[] methodSymbols = classSymbol.methods().values().toArray(new MethodSymbol[0]);
                     List<TypeSymbol> typeInclusions = classSymbol.typeInclusions();
