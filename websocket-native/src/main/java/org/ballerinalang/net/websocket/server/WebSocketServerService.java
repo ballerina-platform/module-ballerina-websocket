@@ -23,8 +23,6 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.websocket.ModuleUtils;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
@@ -62,15 +60,6 @@ public class WebSocketServerService extends WebSocketService {
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
         return (BMap<BString, Object>) (service.getType()).getAnnotation(StringUtils.fromString(
                 ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
-    }
-
-    public String getName() {
-        if (service != null) {
-            // With JBallerina this is the way to get the key
-            String name = HttpUtil.getServiceName(service);
-            return name.startsWith(HttpConstants.DOLLAR) ? "" : name;
-        }
-        return null;
     }
 
     public String[] getNegotiableSubProtocols() {
