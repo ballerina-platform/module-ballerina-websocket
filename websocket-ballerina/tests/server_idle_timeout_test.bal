@@ -18,6 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l69 = new(21069);
+listener Listener l70 = new(21070);
 
 string timeOutString = "";
 
@@ -25,24 +26,56 @@ string timeOutString = "";
    idleTimeout: 2
 }
 service /idleTimeoutError on l69 {
-   resource function get .() returns Service|UpgradeError {
-       return new WsService69();
-   }
+    resource function get .() returns Service|UpgradeError {
+        return new WsService69();
+    }
 }
 
 service class WsService69 {
-  *Service;
-  remote function onIdleTimeout(Caller caller) {
-      timeOutString = "timeOut occured";
-  }
+    *Service;
+    remote function onIdleTimeout(Caller caller) {
+        timeOutString = "timeOut occured";
+    }
 }
 
 // Tests idle time out remote function in server
 @test:Config {}
 public function testServerIdletimeout() returns Error? {
-   Client wsClient = check new("ws://localhost:21069/idleTimeoutError/");
-   runtime:sleep(4);
-   Error? res = wsClient->writeTextMessage("Hi");
-   test:assertEquals(timeOutString, "timeOut occured");
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    Client wsClient = check new("ws://localhost:21069/idleTimeoutError/");
+    runtime:sleep(4);
+    Error? res = wsClient->writeTextMessage("Hi");
+    test:assertEquals(timeOutString, "timeOut occured");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testDetachError() returns error? {
+    Service dummyService = service object {
+           isolated remote function onTextMessage(Caller caller)  {
+
+           }
+       };
+    check l70.gracefulStop();
+    error? detachedRes = l70.detach(dummyService);
+    if (detachedRes is error) {
+        test:assertEquals(detachedRes.message(), "Error: Cannot detach service. Service has not been registered");
+    } else {
+        test:assertFail("Expected a detaching error");
+    }
+    error? immStop = l70.immediateStop();
+    if (immStop is error) {
+        test:assertEquals(immStop.message(), "not implemented");
+    } else {
+        test:assertFail("Expected an error");
+    }
+}
+
+@test:Config {}
+public function testConnectionRefused() returns Error? {
+    Error|Client wsClient = new("ws://localhost:21071/idleTimeoutError/");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
+    } else {
+        test:assertFail("Expected a connection refused error");
+    }
 }
