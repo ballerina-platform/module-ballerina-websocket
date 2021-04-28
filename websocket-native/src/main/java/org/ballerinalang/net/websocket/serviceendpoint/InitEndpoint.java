@@ -215,12 +215,10 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                 throw createWebsocketError("Private key file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
-            if (sslConfiguration instanceof ListenerConfiguration) {
-                sslConfiguration.setServerCertificates(certFile);
-                sslConfiguration.setServerKeyFile(keyFile);
-                if (keyPassword != null && !keyPassword.getValue().isBlank()) {
-                    sslConfiguration.setServerKeyPassword(keyPassword.getValue());
-                }
+            sslConfiguration.setServerCertificates(certFile);
+            sslConfiguration.setServerKeyFile(keyFile);
+            if (keyPassword != null && !keyPassword.getValue().isBlank()) {
+                sslConfiguration.setServerKeyPassword(keyPassword.getValue());
             }
         }
     }
@@ -248,9 +246,7 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                 throw createWebsocketError("Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
-            if (sslConfiguration instanceof ListenerConfiguration) {
-                sslConfiguration.setServerTrustCertificates(certFile);
-            }
+            sslConfiguration.setServerTrustCertificates(certFile);
         }
     }
 
