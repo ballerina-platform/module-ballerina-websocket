@@ -72,4 +72,6 @@ public class Register extends AbstractWebsocketNativeFunction {
             return HttpConstants.DEFAULT_BASE_PATH;
         }
     }
+
+    private Register() {}
 }

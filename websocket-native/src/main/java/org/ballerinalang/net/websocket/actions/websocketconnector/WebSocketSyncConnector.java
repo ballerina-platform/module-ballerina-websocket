@@ -65,4 +65,6 @@ public class WebSocketSyncConnector {
         }
         return null;
     }
+
+    private WebSocketSyncConnector() {}
 }

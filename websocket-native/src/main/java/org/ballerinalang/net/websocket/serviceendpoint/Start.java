@@ -66,4 +66,6 @@ public class Start extends AbstractWebsocketNativeFunction {
         serviceEndpoint.addNativeData(HttpConstants.CONNECTOR_STARTED, true);
         return null;
     }
+
+    private Start() {}
 }

@@ -48,4 +48,6 @@ public class Detach extends AbstractWebsocketNativeFunction {
         }
         return null;
     }
+
+    private Detach() {}
 }

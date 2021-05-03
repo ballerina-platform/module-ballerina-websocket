@@ -315,4 +315,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
     private static long getLongValueOrDefault(BMap<BString, Object> map, BString key) {
         return map.containsKey(key) ? ((BDecimal) map.get(key)).intValue() : 0L;
     }
+
+    private InitEndpoint() {}
 }
