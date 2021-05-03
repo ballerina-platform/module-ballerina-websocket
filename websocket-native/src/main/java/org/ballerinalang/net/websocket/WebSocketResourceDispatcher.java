@@ -18,6 +18,7 @@
 
 package org.ballerinalang.net.websocket;
 
+import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
@@ -705,7 +706,7 @@ public class WebSocketResourceDispatcher {
             WebSocketObserverContext observerContext = new WebSocketObserverContext(connectionInfo);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             wsService.getRuntime().invokeMethodAsync(balservice, resource, null, metaData, callback,
-                    properties, bValues);
+                    properties, PredefinedTypes.TYPE_ANY, bValues);
         } else {
             wsService.getRuntime().invokeMethodAsync(balservice, resource, null, metaData, callback,
                     bValues);
