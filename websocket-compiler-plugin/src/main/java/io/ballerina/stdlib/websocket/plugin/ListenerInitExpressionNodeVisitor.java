@@ -25,7 +25,6 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListenerDeclarationNode;
@@ -80,19 +79,11 @@ public class ListenerInitExpressionNodeVisitor extends NodeVisitor {
             QualifiedNameReferenceNode nameRef = (QualifiedNameReferenceNode) node.typeDescriptor();
             Optional<Symbol> symbolOpt = ctx.semanticModel().symbol(nameRef);
             if (symbolOpt.isPresent() && symbolOpt.get() instanceof TypeReferenceTypeSymbol) {
-                TypeSymbol typeSymbol = ((TypeReferenceTypeSymbol) symbolOpt.get()).typeDescriptor();
-                if (typeSymbol.typeKind() == TypeDescKind.UNION) {
-                    Optional<TypeSymbol> refSymbolOpt = ((UnionTypeSymbol) typeSymbol).memberTypeDescriptors()
-                            .stream().filter(e -> e.typeKind() == TypeDescKind.TYPE_REFERENCE).findFirst();
-                    if (refSymbolOpt.isPresent()) {
-                        TypeReferenceTypeSymbol refSymbol = (TypeReferenceTypeSymbol) refSymbolOpt.get();
-                        TypeSymbol typeDescriptor = refSymbol.typeDescriptor();
-                        Optional<ModuleID> moduleId = typeDescriptor.getModule().map(ModuleSymbol::id);
-                        String identifier = typeDescriptor.getName().orElse("");
-                        if (moduleId.isPresent() && isWebSocketListener(moduleId.get(), identifier)) {
-                            explicitNewExpressionNodes.add(node);
-                        }
-                    }
+                TypeSymbol typeDescriptor = ((TypeReferenceTypeSymbol) symbolOpt.get()).typeDescriptor();
+                Optional<ModuleID> moduleId = typeDescriptor.getModule().map(ModuleSymbol::id);
+                String identifier = typeDescriptor.getName().orElse("");
+                if (moduleId.isPresent() && isWebSocketListener(moduleId.get(), identifier)) {
+                    explicitNewExpressionNodes.add(node);
                 }
             }
         }

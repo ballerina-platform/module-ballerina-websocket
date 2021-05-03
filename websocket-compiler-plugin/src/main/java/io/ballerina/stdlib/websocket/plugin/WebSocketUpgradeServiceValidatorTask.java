@@ -26,6 +26,7 @@ import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
@@ -105,10 +106,14 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             SeparatedNodeList<FunctionArgumentNode> functionArgs) {
         if (functionArgs.size() >= 2) {
             PositionalArgumentNode firstArg = (PositionalArgumentNode) functionArgs.get(0);
-            PositionalArgumentNode secondArg = (PositionalArgumentNode) functionArgs.get(1);
             SyntaxKind firstArgSyntaxKind = firstArg.expression().kind();
-            SyntaxKind secondArgSyntaxKind = secondArg.expression().kind();
-            if (!(firstArgSyntaxKind == SyntaxKind.NUMERIC_LITERAL && (
+            SyntaxKind secondArgSyntaxKind = null;
+            if (functionArgs.get(1) instanceof PositionalArgumentNode) {
+                secondArgSyntaxKind = ((PositionalArgumentNode) functionArgs.get(1)).expression().kind();
+            } else if (functionArgs.get(1) instanceof NamedArgumentNode) {
+                secondArgSyntaxKind = ((NamedArgumentNode) functionArgs.get(1)).expression().kind();
+            }
+            if (secondArgSyntaxKind != null && !(firstArgSyntaxKind == SyntaxKind.NUMERIC_LITERAL && (
                     secondArgSyntaxKind == SyntaxKind.SIMPLE_NAME_REFERENCE
                             || secondArgSyntaxKind == SyntaxKind.MAPPING_CONSTRUCTOR))) {
                 Utils.reportDiagnostics(context, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS,
