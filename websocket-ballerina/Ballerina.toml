@@ -110,3 +110,6 @@ path = "./lib/mimepull-@mimepull.version@.jar"
 groupId = "org.jvnet.mimepull"
 artifactId = "mimepull"
 version = "@mimepull.version@"
+
+[build-options]
+observabilityIncluded=true
