@@ -21,7 +21,6 @@ package org.ballerinalang.net.websocket.client.listener;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.message.HttpCarbonResponse;
-import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 
@@ -47,7 +46,6 @@ public class ClientHandshakeListener implements ExtendedHandshakeListener {
     public void onError(Throwable throwable, HttpCarbonResponse response) {
         handshakeListener.onError(throwable, response);
         WebSocketUtil.countDownForHandshake(getWebSocketClient());
-        WebSocketResourceDispatcher.dispatchOnError(getWebSocketConnectionInfo(), throwable, false);
     }
 
     @Override

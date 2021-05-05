@@ -48,7 +48,7 @@ service class WsServiceSync {
 @test:Config {}
 public function testSyncClient() returns Error? {
    Client wsClient = check new("ws://localhost:21000/onTextString", config = {
-                               subProtocols: ["xml"]
+                               subProtocols: ["xml"], maxFrameSize: 2147483650, readTimeout: 2147483650
                            });
    string? protocol = wsClient.getNegotiatedSubProtocol();
    if (protocol is string) {

@@ -220,4 +220,6 @@ public class WebSocketConnector {
         }
         return null;
     }
+
+    private WebSocketConnector() {}
 }
