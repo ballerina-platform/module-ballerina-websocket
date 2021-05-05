@@ -29,8 +29,6 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.websocket.WebSocketConstants;
-import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketServerService;
 import org.ballerinalang.net.websocket.server.WebSocketServicesRegistry;
 
@@ -56,13 +54,6 @@ public class Register extends AbstractWebsocketNativeFunction {
         try {
             if (resourceList.length == 1 && ((ResourceMethodType) resourceList[0]).getAccessor().equals(GET)) {
                 webSocketServicesRegistry.registerService(new WebSocketServerService(service, runtime, basePath));
-            } else if (resourceList.length > 1) {
-                return WebSocketUtil
-                        .createWebsocketError("Invalid websocket Service. There should be only one get resource",
-                                WebSocketConstants.ErrorCode.Error);
-            } else {
-                return WebSocketUtil.createWebsocketError("Invalid websocket Service.",
-                        WebSocketConstants.ErrorCode.Error);
             }
         } catch (BError ex) {
             return ex;
@@ -81,4 +72,6 @@ public class Register extends AbstractWebsocketNativeFunction {
             return HttpConstants.DEFAULT_BASE_PATH;
         }
     }
+
+    private Register() {}
 }
