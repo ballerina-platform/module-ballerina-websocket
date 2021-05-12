@@ -17,9 +17,6 @@
 import ballerina/jballerina.java;
 import ballerina/http;
 
-/////////////////////////////
-/// Websocket Listener Endpoint ///
-/////////////////////////////
 # This is used for creating WebSocket server endpoints. A WebSocket server endpoint is capable of responding to
 # remote callers. The `Listener` is responsible for initializing the endpoint using the provided configurations.
 public class Listener {

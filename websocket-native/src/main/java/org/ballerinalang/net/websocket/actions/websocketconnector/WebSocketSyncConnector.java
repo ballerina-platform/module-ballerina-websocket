@@ -22,8 +22,6 @@ import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.client.listener.SyncClientConnectorListener;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.ballerinalang.net.websocket.WebSocketUtil.findTimeoutInSeconds;
 
@@ -31,7 +29,6 @@ import static org.ballerinalang.net.websocket.WebSocketUtil.findTimeoutInSeconds
  * Utilities related to websocket synchronous client connector read actions.
  */
 public class WebSocketSyncConnector {
-    private static final Logger log = LoggerFactory.getLogger(WebSocketSyncConnector.class);
 
     public static Object externReadTextMessage(Environment env, BObject wsConnection) {
         final Future callback = env.markAsync();
@@ -68,4 +65,6 @@ public class WebSocketSyncConnector {
         }
         return null;
     }
+
+    private WebSocketSyncConnector() {}
 }

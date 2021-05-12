@@ -15,11 +15,9 @@
 // under the License.
 
 import ballerina/test;
-import ballerina/http;
-import ballerina/lang.'string as strings;
+import ballerina/io;
 
-string sslErrString = "";
-listener Listener l36 = new(21058, {
+listener Listener l67 = new(21067, {
                 secureSocket: {
                     key: {
                         certFile: "tests/certsAndKeys/public.crt",
@@ -28,13 +26,13 @@ listener Listener l36 = new(21058, {
                 }
             });
 
-service /sslTest on l36 {
-    resource function get .(http:Request req) returns Service {
-        return new SyncSslErrorService();
+service /sslTest on l67 {
+    resource function get .() returns Service {
+        return new SslService3();
     }
 }
 
-service class SyncSslErrorService {
+service class SslService3 {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
@@ -44,28 +42,18 @@ service class SyncSslErrorService {
     }
 }
 
-// Tests the Ssl error returned when creating the sync client
+// Tests the successful connection of sync client over mutual SSL with certs and keys
 @test:Config {}
-public function testSyncClientSslError() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
+public function testDisabledSsl() returns Error? {
+    Client|Error wsClient = new("wss://localhost:21067/sslTest", config = {
                        secureSocket: {
-                           cert: {
-                               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                               password: "ballerina"
-                           }
+                           enable: false
                        }
                    });
     if (wsClient is Error) {
-        sslErrString = wsClient.message();
+        io:println(wsClient.message());
+        test:assertFail("Expected a successful TLS connection");
+    } else {
+        test:assertEquals(wsClient.isSecure(), true);
     }
-    test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
-}
-
-@test:Config {}
-public function testSslWithJavaDefaults() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest");
-    if (wsClient is Error) {
-        sslErrString = wsClient.message();
-    }
-    test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
 }

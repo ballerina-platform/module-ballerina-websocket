@@ -16,25 +16,28 @@
 
 import ballerina/test;
 import ballerina/http;
-import ballerina/lang.'string as strings;
+import ballerina/io;
 
-string sslErrString = "";
-listener Listener l36 = new(21058, {
+listener Listener l66 = new(21066, {
                 secureSocket: {
                     key: {
                         certFile: "tests/certsAndKeys/public.crt",
                         keyFile: "tests/certsAndKeys/private.key"
+                    },
+                    mutualSsl: {
+                        verifyClient: http:REQUIRE,
+                        cert: "tests/certsAndKeys/public.crt"
                     }
                 }
             });
 
-service /sslTest on l36 {
-    resource function get .(http:Request req) returns Service {
-        return new SyncSslErrorService();
+service /sslTest on l66 {
+    resource function get .() returns Service {
+        return new SslService2();
     }
 }
 
-service class SyncSslErrorService {
+service class SslService2 {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
@@ -44,28 +47,22 @@ service class SyncSslErrorService {
     }
 }
 
-// Tests the Ssl error returned when creating the sync client
+// Tests the successful connection of sync client over mutual SSL with certs and keys
 @test:Config {}
-public function testSyncClientSslError() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
+public function testMutualSslWithCertsAndKeys() returns Error? {
+    Client|Error wsClient = new("wss://localhost:21066/sslTest", config = {
                        secureSocket: {
-                           cert: {
-                               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                               password: "ballerina"
+                           cert: "tests/certsAndKeys/public.crt",
+                           key: {
+                               keyFile: "tests/certsAndKeys/private.key",
+                               certFile: "tests/certsAndKeys/public.crt"
                            }
                        }
                    });
     if (wsClient is Error) {
-        sslErrString = wsClient.message();
+        io:println(wsClient.message());
+        test:assertFail("Expected a successful mTLS connection");
+    } else {
+        test:assertEquals(wsClient.isSecure(), true);
     }
-    test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
-}
-
-@test:Config {}
-public function testSslWithJavaDefaults() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest");
-    if (wsClient is Error) {
-        sslErrString = wsClient.message();
-    }
-    test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
 }

@@ -39,4 +39,6 @@ public class GracefulStop extends AbstractWebsocketNativeFunction {
         }
         return null;
     }
+
+    private GracefulStop() {}
 }

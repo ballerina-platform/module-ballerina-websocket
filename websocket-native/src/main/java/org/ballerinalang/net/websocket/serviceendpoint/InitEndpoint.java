@@ -25,7 +25,6 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.config.ConfigRegistry;
 import org.ballerinalang.net.http.BallerinaConnectorException;
 import org.ballerinalang.net.http.HttpConnectionManager;
 import org.ballerinalang.net.http.HttpConstants;
@@ -41,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.ballerina.runtime.api.constants.RuntimeConstants.BALLERINA_VERSION;
 import static org.ballerinalang.net.http.HttpConstants.ANN_CONFIG_ATTR_SSL_ENABLED_PROTOCOLS;
 import static org.ballerinalang.net.http.HttpConstants.LISTENER_CONFIGURATION;
 import static org.ballerinalang.net.http.HttpConstants.PKCS_STORE_TYPE;
@@ -112,21 +110,16 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                 requestLimits.getIntValue(HttpConstants.MAX_ENTITY_BODY_SIZE),
                 listenerConfiguration.getMsgSizeValidationConfig());
 
-        if (host == null || host.trim().isEmpty()) {
-            listenerConfiguration.setHost(ConfigRegistry.getInstance()
-                    .getConfigOrDefault("b7a.websocket.host", WebSocketConstants.WEBSOCKET_DEFAULT_HOST));
-        } else {
-            listenerConfiguration.setHost(host);
-        }
+        listenerConfiguration.setHost(host);
 
         if (port == 0) {
-            throw new BallerinaConnectorException("Listener port is not defined!");
+            throw new BallerinaConnectorException("Listener port is not defined");
         }
         listenerConfiguration.setPort(Math.toIntExact(port));
 
         if (idleTimeout < 0) {
             throw new BallerinaConnectorException(
-                    "Idle timeout cannot be negative. If you want to disable the " + "timeout please use value 0");
+                    "Idle timeout cannot be negative. If you want to disable the timeout please use value 0");
         }
         listenerConfiguration.setSocketIdleTimeout(Math.toIntExact(idleTimeout));
 
@@ -134,13 +127,8 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
 
         if (endpointConfig.getType().getName().equalsIgnoreCase(LISTENER_CONFIGURATION)) {
             BString serverName = endpointConfig.getStringValue(SERVER_NAME);
-            listenerConfiguration.setServerHeader(serverName != null ? serverName.getValue() : getServerName());
-        } else {
-            listenerConfiguration.setServerHeader(getServerName());
-        }
-
-        if (sslConfig != null) {
-            return setSslConfig(sslConfig, listenerConfiguration);
+            listenerConfiguration
+                    .setServerHeader(serverName != null ? serverName.getValue() : WebSocketConstants.PACKAGE);
         }
 
         listenerConfiguration.setPipeliningEnabled(true); //Pipelining is enabled all the time
@@ -149,18 +137,11 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             listenerConfiguration.setWebSocketCompressionEnabled((Boolean) webSocketCompressionEnabled);
         }
 
-        return listenerConfiguration;
-    }
-
-    private static String getServerName() {
-        String userAgent;
-        String version = System.getProperty(BALLERINA_VERSION);
-        if (version != null) {
-            userAgent = "ballerina/" + version;
-        } else {
-            userAgent = "ballerina";
+        if (sslConfig != null) {
+            return setSslConfig(sslConfig, listenerConfiguration);
         }
-        return userAgent;
+
+        return listenerConfiguration;
     }
 
     private static ListenerConfiguration setSslConfig(BMap<BString, Object> secureSocket,
@@ -209,13 +190,13 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         if (key.containsKey(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_FILE_PATH)) {
             String keyStoreFile = key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_FILE_PATH).getValue();
             if (keyStoreFile.isBlank()) {
-                throw createWebsocketError("KeyStore file location must be provided for secure connection.",
+                throw createWebsocketError("KeyStore file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             String keyStorePassword = key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_PASSWORD)
                     .getValue();
             if (keyStorePassword.isBlank()) {
-                throw createWebsocketError("KeyStore password must be provided for secure connection.",
+                throw createWebsocketError("KeyStore password must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setKeyStoreFile(keyStoreFile);
@@ -227,25 +208,17 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                     key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_CERTKEY_KEY_PASSWORD) :
                     null;
             if (certFile.isBlank()) {
-                throw createWebsocketError("Certificate file location must be provided for secure connection.",
+                throw createWebsocketError("Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (keyFile.isBlank()) {
-                throw createWebsocketError("Private key file location must be provided for secure connection.",
+                throw createWebsocketError("Private key file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
-            if (sslConfiguration instanceof ListenerConfiguration) {
-                sslConfiguration.setServerCertificates(certFile);
-                sslConfiguration.setServerKeyFile(keyFile);
-                if (keyPassword != null && !keyPassword.getValue().isBlank()) {
-                    sslConfiguration.setServerKeyPassword(keyPassword.getValue());
-                }
-            } else {
-                sslConfiguration.setClientCertificates(certFile);
-                sslConfiguration.setClientKeyFile(keyFile);
-                if (keyPassword != null && !keyPassword.getValue().isBlank()) {
-                    sslConfiguration.setClientKeyPassword(keyPassword.getValue());
-                }
+            sslConfiguration.setServerCertificates(certFile);
+            sslConfiguration.setServerKeyFile(keyFile);
+            if (keyPassword != null && !keyPassword.getValue().isBlank()) {
+                sslConfiguration.setServerKeyPassword(keyPassword.getValue());
             }
         }
     }
@@ -258,11 +231,11 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             String trustStorePassword = trustStore.getStringValue(HttpConstants.SECURESOCKET_CONFIG_TRUSTSTORE_PASSWORD)
                     .getValue();
             if (trustStoreFile.isBlank()) {
-                throw createWebsocketError("TrustStore file location must be provided for secure connection.",
+                throw createWebsocketError("TrustStore file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (trustStorePassword.isBlank()) {
-                throw createWebsocketError("TrustStore password must be provided for secure connection.",
+                throw createWebsocketError("TrustStore password must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setTrustStoreFile(trustStoreFile);
@@ -270,14 +243,10 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         } else {
             String certFile = ((BString) cert).getValue();
             if (certFile.isBlank()) {
-                throw createWebsocketError("Certificate file location must be provided for secure connection.",
+                throw createWebsocketError("Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
-            if (sslConfiguration instanceof ListenerConfiguration) {
-                sslConfiguration.setServerTrustCertificates(certFile);
-            } else {
-                sslConfiguration.setClientTrustCertificates(certFile);
-            }
+            sslConfiguration.setServerTrustCertificates(certFile);
         }
     }
 
@@ -328,11 +297,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
 
     private static void evaluateCommonFields(BMap<BString, Object> secureSocket, SslConfiguration sslConfiguration,
             List<Parameter> paramList) {
-        if (!(sslConfiguration instanceof ListenerConfiguration)) {
-            boolean hostNameVerificationEnabled = secureSocket
-                    .getBooleanValue(HttpConstants.SECURESOCKET_CONFIG_HOST_NAME_VERIFICATION_ENABLED);
-            sslConfiguration.setHostNameVerificationEnabled(hostNameVerificationEnabled);
-        }
         sslConfiguration.setSslSessionTimeOut(
                 (int) getLongValueOrDefault(secureSocket, HttpConstants.SECURESOCKET_CONFIG_SESSION_TIMEOUT));
         sslConfiguration.setSslHandshakeTimeOut(
@@ -351,4 +315,6 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
     private static long getLongValueOrDefault(BMap<BString, Object> map, BString key) {
         return map.containsKey(key) ? ((BDecimal) map.get(key)).intValue() : 0L;
     }
+
+    private InitEndpoint() {}
 }
