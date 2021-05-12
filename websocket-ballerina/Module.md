@@ -7,8 +7,6 @@ This module facilitates two types of network entry points as ‘Client’ and �
 On the server-side, an initial WebSocket service is there to handle upgrade requests. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 The returning `websocket:Service` has a fixed set of remote methods.
 
-**WebSocket upgrade**: During a WebSocket upgrade, the initial message received is an HTTP request. 
-
 ```ballerina
 service /ws on new websocket:Listener(21003) {
     resource function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
