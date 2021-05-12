@@ -30,11 +30,11 @@ public client class Caller {
         // package private function to prevent object creation
     }
 
-    # Pushes text to the connection. If an error occurs while sending the text message to the connection, that message
+    # Pushes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
     # + data - Data to be sent.
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? {
         return self.conn.writeTextMessage(data);
     }
@@ -43,7 +43,7 @@ public client class Caller {
     # that message will be lost.
     #
     # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeBinaryMessage(byte[] data) returns Error? {
         return self.conn.writeBinaryMessage(data);
     }
@@ -51,7 +51,7 @@ public client class Caller {
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
     # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function ping(byte[] data) returns Error? {
         return self.conn.ping(data);
     }
@@ -60,7 +60,7 @@ public client class Caller {
     # frame will be lost.
     #
     # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function pong(byte[] data) returns Error? {
         return self.conn.pong(data);
     }
@@ -74,7 +74,7 @@ public client class Caller {
     #                   is not received from the remote endpoint. If the value < 0 (e.g., -1), then the connection waits
     #                   until a close frame is received. If WebSocket frame is received from the remote endpoint
     #                   within the waiting period, the connection is terminated immediately.
-    # + return - An `error` if an error occurs when sending
+    # + return - A `websocket:Error` if an error occurs when sending
     remote isolated function close(int? statusCode = 1000, string? reason = (),
         decimal timeout = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeout);

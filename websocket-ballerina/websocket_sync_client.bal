@@ -54,11 +54,11 @@ public client class Client {
         return externSyncWSInitEndpoint(self);
     }
 
-    # Writes text to the connection. If an error occurs while sending the text message to the connection, that message
+    # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
     # + data - Data to be sent.
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? {
         return self.conn.writeTextMessage(data);
     }
@@ -67,7 +67,7 @@ public client class Client {
     # that message will be lost.
     #
     # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeBinaryMessage(byte[] data) returns Error? {
         return self.conn.writeBinaryMessage(data);
     }
@@ -75,7 +75,7 @@ public client class Client {
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
     # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function ping(byte[] data) returns Error? {
         return self.conn.ping(data);
     }
@@ -84,7 +84,7 @@ public client class Client {
     # frame will be lost.
     #
     # + data - Binary data to be sent
-    # + return  - An `error` if an error occurs when sending
+    # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function pong(byte[] data) returns Error? {
         return self.conn.pong(data);
     }
@@ -98,7 +98,7 @@ public client class Client {
     #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
     #                   waits until a close frame is received. If the WebSocket frame is received from the remote
     #                   endpoint within the waiting period, the connection is terminated immediately.
-    # + return - An `error` if an error occurs while closing the WebSocket connection
+    # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
         return self.conn.close(statusCode, reason, timeout);
     }
@@ -162,16 +162,16 @@ public client class Client {
         return self.response;
     }
 
-    # Reads the texts in a synchronous manner
+    # Reads text messages in a synchronous manner
     #
-    # + return  - The text data sent by the server or an `error` if an error occurs when sending
+    # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
     remote isolated function readTextMessage() returns string|Error {
         return self.conn.readTextMessage();
     }
 
-    # Reads the binary data in a synchronous manner
+    # Reads binary data in a synchronous manner
     #
-    # + return  - The binary data sent by the server or an `error` if an error occurs when sending
+    # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
     remote isolated function readBinaryMessage() returns byte[]|Error {
         return self.conn.readBinaryMessage();
     }
@@ -200,18 +200,18 @@ public type ClientConfiguration record {|
 #
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
-# + readTimeout - Read timeout (in seconds) of the client. This is applicable only for the Sync client
+# + readTimeout - Read timeout (in seconds) of the client.
 # + secureSocket - SSL/TLS-related options
-# + maxFrameSize - The maximum payload size of a WebSocket frame in bytes
+# + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
 # + webSocketCompressionEnabled - Enable support for compression in the WebSocket
 # + handShakeTimeout - Time (in seconds) that a connection waits to get the response of
-#                               the webSocket handshake. If the timeout exceeds, then the connection is terminated with
-#                               an error.If the value < 0, then the value sets to the default value(300).
+#                               the WebSocket handshake. If the timeout exceeds, then the connection is terminated with
+#                               an error. If the value < 0, then the value sets to the default value(300).
 # + cookies - An Array of `http:Cookie`
 # + auth - Configurations related to client authentication
 # + pingPongHandler - A service to handle ping/pong frames.
-#                     Resources in this service gets called on the receipt of ping, pong from the server
+#                     Resources in this service gets called on the receipt of ping, pong frames from the server
 public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};

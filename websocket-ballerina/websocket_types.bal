@@ -14,14 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# The Websocket service type
+# The WebSocket service type
 public type Service service object {
 };
 
-# The Websocket upgrade service type
-public type UpgradeService service object {
-};
-
-# The Websocket Sync client service type
+# The WebSocket service type to handle ping/pong frames
 public type PingPongService service object {
 };

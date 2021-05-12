@@ -9,7 +9,7 @@ Ballerina Websocket Library
 
 The Websocket library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina</a> language.
 
-It provides an implementation for connecting and interacting with WebSocket endpoints over the network.
+This provides an implementation for connecting and interacting with WebSocket endpoints over the network.
 
 For more information go to [The Websocket Module](https://ballerina.io/learn/api-docs/ballerina/websocket/index.html).
 

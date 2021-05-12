@@ -20,7 +20,7 @@ import ballerina/http;
 /////////////////////////////
 /// Websocket Listener Endpoint ///
 /////////////////////////////
-# This is used for creating Websocket server endpoints. An Websocket server endpoint is capable of responding to
+# This is used for creating WebSocket server endpoints. A WebSocket server endpoint is capable of responding to
 # remote callers. The `Listener` is responsible for initializing the endpoint using the provided configurations.
 public class Listener {
 
@@ -71,8 +71,8 @@ public class Listener {
 
     # Gets invoked during module initialization to initialize the listener.
     #
-    # + port - Listening port of the websocket service listener
-    # + config - Configurations for the websocket service listener
+    # + port - Listening port of the WebSocket service listener
+    # + config - Configurations for the WebSocket service listener
     public isolated function init(int|http:Listener 'listener, *ListenerConfiguration config) returns Error? {
         self.instanceId = uuid();
         self.config = config;
