@@ -6,7 +6,7 @@ This module facilitates two types of network entry points as ‘Client’ and �
 
 #### Client
 
-The `websocket:Client` reads text and binary messages synchronously. 
+The `websocket:Client` can be used to read/write text/binary messages synchronously. 
 
 A simple Client code to handle text messages as follows.
 ```ballerina
@@ -44,15 +44,9 @@ service class clientPingPongCallbackService {
 }
 ```
 
-##### Remote methods associated with `websocket:PingPongService` which can be registered at the initialization of the client
+#### Listener
 
-**onPing**: The received `ping` messages are dispatched to this remote method.
-
-**onPong**: The received `pong` messages are dispatched to this remote method.
-
-#### Server
-
-On the server-side, an initial WebSocket service is there to handle upgrade requests. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
+On the listener-side, an initial WebSocket upgrade service can be attached to the `websocket:Listener` to handle upgrade requests. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 The returning `websocket:Service` has a fixed set of remote methods.
 
 ```ballerina
@@ -111,7 +105,7 @@ remote function onClose(websocket:Caller caller, int statusCode, string reason) 
 
 #### WebSocket Compression
 
-Per message compression extensions are supported and by default enabled for both WebSocket client and the server. Compression can be enabled or disabled by setting the `webSocketCompressionEnabled` to `true` or `false` in `ClientConfiguration` and `ListenerConfiguration`. Once the compression is successfully negotiated, receiving compressed messages will be automatically decompressed when reading.
+Per message compression extensions are supported by Ballerina WebSocket module and by default enabled for both WebSocket client and the server. Compression can be enabled or disabled by setting the `webSocketCompressionEnabled` to `true` or `false` in `ClientConfiguration` and `ListenerConfiguration`. Once the compression is successfully negotiated, receiving compressed messages will be automatically decompressed when reading.
 
 #### Origin Considerations
 
@@ -123,7 +117,7 @@ import ballerina/websocket;
 service /basic/ws on new websocket:Listener(9090) {
    resource isolated function get .(http:Request httpRequest) returns websocket:Service|websocket:UpgradeError {
        string|error header = httpRequest.getHeader("Origin");
-       if (header is string) {
+       if header is string {
            // Implement validateOrigin function to validate the origin header.
 	       boolean validated = validateOrigin(header);
            if validated {

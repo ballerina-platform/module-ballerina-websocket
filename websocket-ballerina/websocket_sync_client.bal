@@ -178,20 +178,7 @@ public client class Client {
 }
 
 # Configurations for the WebSocket client.
-# Following fields are inherited from the other configuration records in addition to the Client specific
-# configs.
-#
-# |                                                                              |
-# |:---------------------------------------------------------------------------- |
-# | callbackService - Copied from CommonClientConfiguration             |
-# | subProtocols - Copied from CommonClientConfiguration                |
-# | customHeaders - Copied from CommonClientConfiguration               |
-# | idleTimeout - Copied from CommonClientConfiguration                 |
-# | secureSocket - Copied from CommonClientConfiguration                |
-# | maxFrameSize - Copied from CommonClientConfiguration                |
-# | webSocketCompressionEnabled - Copied from CommonClientConfiguration |
-# | handShakeTimeout - Copied from CommonClientConfiguration            |
-# | cookies - Copied from CommonClientConfiguration                     |
+# Following fields are inherited from the other configuration records in addition to the Client specific configs.                    |
 public type ClientConfiguration record {|
     *CommonClientConfiguration;
 |};
