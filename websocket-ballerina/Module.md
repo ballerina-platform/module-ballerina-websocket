@@ -1,8 +1,56 @@
-## Module Overview
+## Overview
 
 This module provides an implementation for connecting and interacting with WebSocket endpoints. 
 
-This module facilitates two types of network entry points as ‘Client’ and ‘Listener’. The `websocket:Client` reads text and binary messages synchronously. A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive `ping/pong` control frames.
+This module facilitates two types of network entry points as ‘Client’ and ‘Listener’. 
+
+#### Client
+
+The `websocket:Client` reads text and binary messages synchronously. 
+
+A simple Client code to handle text messages as follows.
+```ballerina
+import ballerina/websocket;
+
+public function main() returns error? {
+   websocket:Client wsClient = check new("ws://echo.websocket.org");
+
+   check wsClient->writeTextMessage("Text message");
+
+   string textResp = check wsClient->readTextMessage();
+}
+```
+Similar to above, this module has `writeBinaryMessage` and `readBinaryMessage` functions to handle binary messages.
+A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive `ping/pong` control frames.
+```ballerina
+import ballerina/io;
+import ballerina/websocket;
+
+public function main() returns error? {
+   websocket:Client wsClient = check new("ws://echo.websocket.org", pingPongHandler = new clientPingPongCallbackService());
+   check wsClient->writeTextMessage("Text message");
+}
+
+service class clientPingPongCallbackService {
+    *websocket:PingPongService;
+    remote isolated function onPing(websocket:Caller caller, byte[] localData) returns byte[] {
+        io:println("Ping message received");
+        return localData;
+    }
+
+    remote isolated function onPong(websocket:Caller caller, byte[] localData) {
+        io:println("Pong message received");
+    }
+}
+```
+
+##### Remote methods associated with `websocket:PingPongService` which can be registered at the initialization of the client
+
+**onPing**: The received `ping` messages are dispatched to this remote method.
+
+**onPong**: The received `pong` messages are dispatched to this remote method.
+
+#### Server
 
 On the server-side, an initial WebSocket service is there to handle upgrade requests. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 The returning `websocket:Service` has a fixed set of remote methods.
@@ -21,7 +69,7 @@ service class WsService {
 }              
 ```
 
-### Remote methods associated with `websocket:Service`
+##### Remote methods associated with `websocket:Service`
 
 **onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
@@ -37,8 +85,58 @@ service class WsService {
 
 **onError**: This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
 
-### Remote methods associated with `websocket:PingPongService` which can be registered at the initialization of the client
+#### Control Messages
 
-**onPing**: The received `ping` messages are dispatched to this remote method.
+WebSocket contains three types control messages: `close`, `ping`, and `pong`. A WebSocket server or a client can send a `ping` message, and the opposite side should respond with a corresponding `pong` message by returning the same payload sent with the `ping` message. These ping/pong sequences are used as a heartbeat mechanism to check if the connection is healthy. 
 
-**onPong**: The received `pong` messages are dispatched to this remote method.
+The user does not need to explicitly control these messages as they are handled automatically by the services and clients. But if required, we can override the default implementations of the ping/pong messages by registering a `websocket:PingPongService` in the client side as given in the above Client code sample and by including `onPing` and `onPong` remote functions in the `websocket:Service` in server side.
+
+```ballerina
+remote function onPing(websocket:Caller caller, byte[] data) returns error? {
+    io:println(string `Ping received with data: ${data.toBase64()}`);
+    check caller->pong(data);
+}
+ 
+remote function onPong(websocket:Caller caller, byte[] data) {
+    io:println(string `Pong received with data: ${data.toBase64()}`);
+}
+```
+
+A WebSocket server or a Client can close the WebSocket connection by calling the `close` function. In the event of a connection closure, the service will be notified by invoking the `onClose` remote function. And in the client side you will get a connection closure error if you try to read/write messages. 
+```ballerina
+remote function onClose(websocket:Caller caller, int statusCode, string reason) {
+    io:println(string `Client closed connection with ${statusCode} because of ${reason}`);
+}
+```
+
+#### WebSocket Compression
+
+Per message compression extensions are supported and by default enabled for both WebSocket client and the server. Compression can be enabled or disabled by setting the `webSocketCompressionEnabled` to `true` or `false` in `ClientConfiguration` and `ListenerConfiguration`. Once the compression is successfully negotiated, receiving compressed messages will be automatically decompressed when reading.
+
+#### Origin Considerations
+
+The `Origin` header can be used to differentiate between WebSocket connections from different hosts, or between those made from a browser and some other kind of network client. It is recommended to validate this `Origin` header before accepting the WebSocket upgrade.
+```ballerina
+import ballerina/http;
+import ballerina/websocket;
+
+service /basic/ws on new websocket:Listener(9090) {
+   resource isolated function get .(http:Request httpRequest) returns websocket:Service|websocket:UpgradeError {
+       string|error header = httpRequest.getHeader("Origin");
+       if (header is string) {
+           // Implement validateOrigin function to validate the origin header.
+	       boolean validated = validateOrigin(header);
+           if validated {
+              return new WsService();
+           }
+       }
+       return error("Invalid upgrade request");
+   }
+}
+service class WsService {
+    *websocket:Service;
+    remote function onTextMessage(websocket:Caller caller, string text) {
+        
+    }
+}
+```

@@ -4,8 +4,6 @@ The WebSocket library is one of the standard library packages of the<a target="_
 
 This package provides support for WebSocket protocol. WebSocket is a protocol which provides bidirectional, full-duplex communication channels over a single TCP connection. 
 
-For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
-
 ### Report Issues
 
 To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina [Standard Library parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
