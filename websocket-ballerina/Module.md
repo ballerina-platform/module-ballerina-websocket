@@ -140,3 +140,33 @@ service class WsService {
     }
 }
 ```
+
+#### Using the TLS protocol to secure WebSocket communication
+
+It is strongly recommended to use `wss://` protocol to protect against man-in-the-middle attacks. The Ballerina WebSocket module allows the use of TLS in communication to do this. This expects a secure socket to be set in the connection configuration as shown below.
+
+##### Configuring TLS in server side
+
+```ballerina
+listener websocket:Listener wssListener = new (9090, {
+    secureSocket: {
+        key: {
+            certFile: "../resource/path/to/public.crt",
+            keyFile: "../resource/path/to/private.key"
+        }
+    }
+});
+service /basic/ws on wssListener {
+    
+}
+```
+
+##### Configuring TLS in client side
+
+```ballerina
+    websocket:Client wssClient = new ("wss://echo.websocket.org", {
+        secureSocket: {
+            cert: "../resource/path/to/public.crt"
+        }
+    });
+```
