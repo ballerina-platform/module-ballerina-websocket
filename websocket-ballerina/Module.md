@@ -158,9 +158,9 @@ service /basic/ws on wssListener {
 ##### Configuring TLS in client side
 
 ```ballerina
-    websocket:Client wssClient = new ("wss://echo.websocket.org", {
-        secureSocket: {
-            cert: "../resource/path/to/public.crt"
-        }
-    });
+websocket:Client wssClient = new ("wss://echo.websocket.org", {
+    secureSocket: {
+        cert: "../resource/path/to/public.crt"
+    }
+});
 ```
