@@ -123,6 +123,7 @@ apply plugin: 'io.ballerina.plugin'
 ballerina{
     module = packageName
     langVersion = ballerinaLangVersion
+    testCoverageParam = "--code-coverage --jacoco-xml --includes=org.ballerinalang.net.websocket.*:ballerina.websocket.*"
 }
 
 task updateTomlVersions {
