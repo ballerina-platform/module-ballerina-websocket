@@ -33,11 +33,10 @@ description = 'Ballerina - websocket Ballerina Generator'
 
 def packageName = "websocket"
 def packageOrg = "ballerina"
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def ballerinaCompilerPluginFile = new File("$project.projectDir/CompilerPlugin.toml")
-def artifactCodeCoverageReport = file("$project.projectDir/target/cache/tests_cache/coverage/ballerina.exec")
-def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def originalConfig = ballerinaConfigFile.text
 def originalCompilerPlugin = ballerinaCompilerPluginFile.text
 def originalDependencyConfig = ballerinaDependencyFile.text
@@ -188,7 +187,6 @@ publishing {
     publications {
         maven(MavenPublication) {
             artifact source: createArtifactZip, extension: 'zip'
-            artifact source: artifactCodeCoverageReport, classifier: 'jacoco'
         }
     }
     repositories {
@@ -206,6 +204,9 @@ publishing {
 updateTomlFiles.dependsOn copyStdlibs
 
 build.dependsOn ":${packageName}-native:build"
+build.dependsOn ":${packageName}-compiler-plugin:build"
 test.dependsOn ":${packageName}-native:build"
+test.dependsOn ":${packageName}-compiler-plugin:build"
+
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
