@@ -31,6 +31,40 @@ buildscript {
 
 description = 'Ballerina - websocket Ballerina Generator'
 
+def packageName = "websocket"
+def packageOrg = "ballerina"
+def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
+def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
+def ballerinaCompilerPluginFile = new File("$project.projectDir/CompilerPlugin.toml")
+def artifactCodeCoverageReport = file("$project.projectDir/target/cache/tests_cache/coverage/ballerina.exec")
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def originalConfig = ballerinaConfigFile.text
+def originalCompilerPlugin = ballerinaCompilerPluginFile.text
+def originalDependencyConfig = ballerinaDependencyFile.text
+
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-')
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", "")
+    }
+}
+
+apply plugin: 'io.ballerina.plugin'
+
+ballerina {
+    packageOrganization = packageOrg
+    module = packageName
+    langVersion = ballerinaLangVersion
+    testCoverageParam = "--code-coverage --jacoco-xml --includes=org.ballerinalang.net.websocket.*:ballerina.websocket.*"
+}
+
 configurations {
     externalJars
 }
@@ -90,40 +124,7 @@ dependencies {
     }
 }
 
-def packageName = "websocket"
-def packageOrg = "ballerina"
-def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
-def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
-def ballerinaCompilerPluginFile = new File("$project.projectDir/CompilerPlugin.toml")
-def artifactCodeCoverageReport = file("$project.projectDir/target/cache/tests_cache/coverage/ballerina.exec")
-def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
-def originalConfig = ballerinaConfigFile.text
-def originalCompilerPlugin = ballerinaCompilerPluginFile.text
-def originalDependencyConfig = ballerinaDependencyFile.text
-
-def stripBallerinaExtensionVersion(String extVersion) {
-    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
-        def splitVersion = extVersion.split('-')
-        if (splitVersion.length > 3) {
-            def strippedValues = splitVersion[0..-4]
-            return strippedValues.join('-')
-        } else {
-            return extVersion
-        }
-    } else {
-        return extVersion.replace("${project.ext.snapshotVersion}", "")
-    }
-}
-
-apply plugin: 'io.ballerina.plugin'
-
-ballerina {
-    module = packageName
-    langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --jacoco-xml --includes=org.ballerinalang.net.websocket.*:ballerina.websocket.*"
-}
-
-task updateTomlVersions {
+task updateTomlFiles {
     doLast {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
         def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
@@ -175,7 +176,7 @@ task updateTomlVersions {
     }
 }
 
-task revertTomlFile {
+task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
         ballerinaDependencyFile.text = originalDependencyConfig
@@ -202,7 +203,7 @@ publishing {
     }
 }
 
-updateTomlVersions.dependsOn copyStdlibs
+updateTomlFiles.dependsOn copyStdlibs
 
 build.dependsOn ":${packageName}-native:build"
 test.dependsOn ":${packageName}-native:build"
