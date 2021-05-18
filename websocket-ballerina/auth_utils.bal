@@ -82,7 +82,7 @@ isolated function setAuthHeader(ClientConfiguration clientConfig, string authSch
 isolated function prepareClientAuthError(string message, error? err = ()) returns AuthError {
     log:printError(message, 'error = err);
     if (err is error) {
-        return error AuthError(message, err);
+        return error AuthError(message + " " + err.message(), err);
     }
     return error AuthError(message);
 }
