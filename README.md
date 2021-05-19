@@ -7,11 +7,11 @@ Ballerina Websocket Library
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
   [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-websocket/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-websocket)
 
-The Websocket library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina</a> language.
+The `websocket` library is one of the standard library modules of the<a target="_blank" href="https://ballerina.io/"> Ballerina</a> language.
 
-It provides an implementation for connecting and interacting with WebSocket endpoints over the network.
+This provides an implementation for connecting and interacting with WebSocket endpoints over the network.
 
-For more information go to [The Websocket Module](https://ballerina.io/learn/api-docs/ballerina/websocket/index.html).
+For more information, go to the [`websocket` module](https://ballerina.io/learn/api-docs/ballerina/websocket/index.html).
 
 For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 
