@@ -52,7 +52,7 @@ public class Listener {
     #
     # + websocketService - The service that needs to be attached
     # + name - Name of the service
-    # + return - An `error` an error occurred during the service attachment process or else nil
+    # + return - An `error` if an error occurred during the service attachment process or else `()`
     public isolated function attach(Service websocketService, string[]|string? name = ()) returns error? {
         return self.register(websocketService, name);
     }
@@ -66,7 +66,7 @@ public class Listener {
         return self.detachS(websocketService);
     }
 
-    # Gets invoked during module initialization to initialize the listener.
+    # Gets invoked during the module initialization to initialize the listener.
     #
     # + port - Listening port of the WebSocket service listener
     # + config - Configurations for the WebSocket service listener
@@ -89,7 +89,7 @@ public class Listener {
     #
     # + websocketService - The service that needs to be attached
     # + name - Name of the service
-    # + return - An `error` if an error occurred during the service attachment process or else nil
+    # + return - An `error` if an error occurred during the service attachment process or else `()`
     isolated function register(Service websocketService, string[]|string? name) returns error? {
         return externRegister(self, websocketService, name);
     }
@@ -108,10 +108,10 @@ public class Listener {
         return externGracefulStop(self);
     }
 
-    # Disengage an attached service from the listener.
+    # Disengages an attached service from the listener.
     #
     # + websocketService - The service that needs to be detached
-    # + return - An `error` if an error occurred during the service detachment process or else nil
+    # + return - An `error` if an error occurred during the service detachment process or else `()`
     isolated function detachS(Service websocketService) returns error? {
         return externDetach(self, websocketService);
     }
