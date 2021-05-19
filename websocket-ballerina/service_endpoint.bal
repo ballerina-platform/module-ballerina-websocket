@@ -57,7 +57,7 @@ public class Listener {
         return self.register(websocketService, name);
     }
 
-    # Detaches a Http or WebSocket service from the listener. Note that detaching a WebSocket service would not affect
+    # Detaches a WebSocket service from the listener. Note that detaching a WebSocket service would not affect
     # The functionality of the existing connections.
     #
     # + websocketService - The service to be detached
