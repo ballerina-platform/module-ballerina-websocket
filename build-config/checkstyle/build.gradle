@@ -17,6 +17,7 @@
 
 plugins {
     id "de.undercouch.download"
+    id "java"
 }
 
 task downloadMultipleFiles(type: Download) {
