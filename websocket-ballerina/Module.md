@@ -2,13 +2,13 @@
 
 This module provides an implementation for connecting and interacting with WebSocket endpoints. 
 
-This module facilitates two types of network entry points as ‘Client’ and ‘Listener’. 
+This module facilitates two types of network entry points as the ‘Client’ and ‘Listener’. 
 
 #### Client
 
 The `websocket:Client` can be used to read/write text/binary messages synchronously. 
 
-A simple Client code to handle text messages as follows.
+A simple client code to handle text messages as follows.
 ```ballerina
 import ballerina/websocket;
 
@@ -20,8 +20,8 @@ public function main() returns error? {
    string textResp = check wsClient->readTextMessage();
 }
 ```
-Similar to the above, this module has `writeBinaryMessage` and `readBinaryMessage` functions to handle binary messages.
-A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive `ping/pong` control frames.
+Similar to the above, this module has the `writeBinaryMessage` and `readBinaryMessage` functions to handle binary messages.
+A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive the `ping/pong` control frames.
 ```ballerina
 import ballerina/io;
 import ballerina/websocket;
@@ -75,15 +75,15 @@ service class WsService {
 
 **onIdleTimeout**: This remote method is dispatched when the idle timeout is reached. The `idleTimeout` has to be configured either in the WebSocket service or the client configuration.
 
-**onClose**: This remote method is dispatched when a close frame with a statusCode and a reason is received.
+**onClose**: This remote method is dispatched when a close frame with a `statusCode` and a reason is received.
 
 **onError**: This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
 
 #### Control Messages
 
-WebSocket contains three types of control messages: `close`, `ping`, and `pong`. A WebSocket server or a client can send a `ping` message, and the opposite side should respond with a corresponding `pong` message by returning the same payload sent with the `ping` message. These ping/pong sequences are used as a heartbeat mechanism to check if the connection is healthy. 
+A WebSocket contains three types of control messages: `close`, `ping`, and `pong`. A WebSocket server or a client can send a `ping` message and the opposite side should respond with a corresponding `pong` message by returning the same payload sent with the `ping` message. These ping/pong sequences are used as a heartbeat mechanism to check if the connection is healthy. 
 
-The user does not need to explicitly control these messages as they are handled automatically by the services and clients. But if required, we can override the default implementations of the ping/pong messages by registering a `websocket:PingPongService` in the client side as given in the above Client code sample and by including `onPing` and `onPong` remote functions in the `websocket:Service` in server side.
+You do not need to explicitly control these messages as they are handled automatically by the services and clients. However, if required, you can override the default implementations of the ping/pong messages by registering a `websocket:PingPongService` in the client side as given in the above client code sample and by including the `onPing` and `onPong` remote functions in the `websocket:Service` in the server side.
 
 ```ballerina
 remote function onPing(websocket:Caller caller, byte[] data) returns error? {
@@ -96,7 +96,9 @@ remote function onPong(websocket:Caller caller, byte[] data) {
 }
 ```
 
-A WebSocket server or a Client can close the WebSocket connection by calling the `close` function. In the event of a connection closure, the service will be notified by invoking the `onClose` remote function. And in the client side, you will get a connection closure error if you try to read/write messages.```ballerina
+A WebSocket server or a client can close the WebSocket connection by calling the `close` function. In the event of a connection closure, the service will be notified by invoking the `onClose` remote function. Also, on the client side, you will get a connection closure error if you try to read/write messages.
+
+```ballerina
 remote function onClose(websocket:Caller caller, int statusCode, string reason) {
     io:println(string `Client closed connection with ${statusCode} because of ${reason}`);
 }
@@ -104,11 +106,11 @@ remote function onClose(websocket:Caller caller, int statusCode, string reason) 
 
 #### WebSocket Compression
 
-Per message compression extensions are supported by Ballerina WebSocket module and by default enabled for both WebSocket client and the server. Compression can be enabled or disabled by setting the `webSocketCompressionEnabled` to `true` or `false` in `ClientConfiguration` and `ListenerConfiguration`. Once the compression is successfully negotiated, receiving compressed messages will be automatically decompressed when reading.
+Per message compression extensions are supported by the Ballerina `websocket` module and this is enabled by default for both the WebSocket client and the server. Compression can be enabled or disabled by setting the `webSocketCompressionEnabled` to `true` or `false` in the `ClientConfiguration` and `ListenerConfiguration`. Once the compression is successfully negotiated, receiving compressed messages will be automatically decompressed when reading.
 
 #### Origin Considerations
 
-The `Origin` header can be used to differentiate between WebSocket connections from different hosts, or between those made from a browser and some other kind of network client. It is recommended to validate this `Origin` header before accepting the WebSocket upgrade.
+The `Origin` header can be used to differentiate between WebSocket connections from different hosts or between those made from a browser and some other kind of network client. It is recommended to validate this `Origin` header before accepting the WebSocket upgrade.
 ```ballerina
 import ballerina/http;
 import ballerina/websocket;
@@ -136,7 +138,7 @@ service class WsService {
 
 #### Using the TLS protocol to secure WebSocket communication
 
-It is strongly recommended to use `wss://` protocol to protect against man-in-the-middle attacks. The Ballerina WebSocket module allows the use of TLS in communication to do this. This expects a secure socket to be set in the connection configuration as shown below.
+It is strongly recommended to use the `wss://` protocol to protect against man-in-the-middle attacks. The Ballerina `websocket` module allows the use of TLS in communication to do this. This expects a secure socket to be set in the connection configuration as shown below.
 
 ##### Configuring TLS in server side
 

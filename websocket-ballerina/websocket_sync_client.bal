@@ -81,7 +81,7 @@ public client class Client {
     }
 
     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
-    # frame will be lost.
+    # the frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
@@ -178,7 +178,7 @@ public client class Client {
 }
 
 # Configurations for the WebSocket client.
-# Following fields are inherited from the other configuration records in addition to the Client specific configs.                    |
+# The following fields are inherited from the other configuration records in addition to the client-specific configs.                    |
 public type ClientConfiguration record {|
     *CommonClientConfiguration;
 |};
@@ -187,18 +187,18 @@ public type ClientConfiguration record {|
 #
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
-# + readTimeout - Read timeout (in seconds) of the client.
+# + readTimeout - Read timeout (in seconds) of the client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
-#                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used.
+#                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used
 # + webSocketCompressionEnabled - Enable support for compression in the WebSocket
 # + handShakeTimeout - Time (in seconds) that a connection waits to get the response of
 #                               the WebSocket handshake. If the timeout exceeds, then the connection is terminated with
-#                               an error. If the value < 0, then the value sets to the default value(300).
+#                               an error. If the value < 0, then the value sets to the default value(300)
 # + cookies - An Array of `http:Cookie`
 # + auth - Configurations related to client authentication
-# + pingPongHandler - A service to handle ping/pong frames.
-#                     Resources in this service gets called on the receipt of ping, pong frames from the server
+# + pingPongHandler - A service to handle the ping/pong frames.
+#                     Resources in this service gets called on the receipt of ping/pong frames from the server
 public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
