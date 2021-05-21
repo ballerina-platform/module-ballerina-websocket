@@ -81,12 +81,12 @@ public function testIsOpenCloseCalled() returns error? {
     test:assertEquals(pathParam, "xyz");
     test:assertEquals(queryParam, "value1");
 
-    var resp = wsClient.getHttpResponse();
-    if (resp is http:Response) {
-       test:assertEquals(resp.getHeader("X-some-header"), "some-header-value");
-    } else {
-       test:assertFail("Couldn't find the expected values");
-    }
+    // var resp = wsClient.getHttpResponse();
+    // if (resp is http:Response) {
+    //    test:assertEquals(resp.getHeader("X-some-header"), "some-header-value");
+    // } else {
+    //    test:assertFail("Couldn't find the expected values");
+    // }
 
     Client wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
     check wsClient2->writeTextMessage("Hi");

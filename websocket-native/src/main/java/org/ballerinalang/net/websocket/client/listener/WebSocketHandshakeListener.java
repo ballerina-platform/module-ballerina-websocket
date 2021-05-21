@@ -103,6 +103,7 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
         webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
         webSocketConnector.addNativeData(WebSocketConstants.CLIENT_LISTENER,
                 webSocketClient.getNativeData(WebSocketConstants.CLIENT_LISTENER));
+        webSocketClient.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
         webSocketClient.set(WebSocketConstants.CLIENT_CONNECTOR_FIELD, webSocketConnector);
     }
 

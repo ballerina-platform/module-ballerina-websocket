@@ -28,7 +28,7 @@ service /oauthService on l55 {
             oauthHeader = header;
             return new WsService55();
         } else {
-            authHeader = "Header not found";
+            oauthHeader = "Header not found";
             return error UpgradeError("Authentication failed");
         }
     }

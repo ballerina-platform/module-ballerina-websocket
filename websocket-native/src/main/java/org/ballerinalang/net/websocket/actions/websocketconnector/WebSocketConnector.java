@@ -43,7 +43,7 @@ import java.nio.ByteBuffer;
 public class WebSocketConnector {
     private static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 
-    public static Object externWriteTextMessage(Environment env, BObject wsConnection, BString text) {
+    public static Object writeTextMessage(Environment env, BObject wsConnection, BString text) {
         Future balFuture = env.markAsync();
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection

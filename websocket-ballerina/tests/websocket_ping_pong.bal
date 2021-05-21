@@ -48,7 +48,7 @@ service class ServerPingPongService {
    }
 }
 
-service class pingPongCallbackService {
+service readonly class pingPongCallbackService {
    *PingPongService;
    remote function onPing(Caller wsEp, byte[] localData) {
        expectedPongData1 = <@untainted>localData;
