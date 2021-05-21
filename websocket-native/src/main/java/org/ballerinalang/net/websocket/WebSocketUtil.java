@@ -100,6 +100,15 @@ public class WebSocketUtil {
         return webSocketCaller;
     }
 
+    public static void populateClientWebSocketEndpoint(WebSocketConnection webSocketConnection,
+            BObject webSocketClient) {
+        webSocketClient.addNativeData(WebSocketConstants.CONNECTION_ID_FIELD, webSocketConnection.getChannelId());
+        webSocketClient.addNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL,
+                webSocketConnection.getNegotiatedSubProtocol());
+        webSocketClient.addNativeData(WebSocketConstants.IS_SECURE, webSocketConnection.isSecure());
+        webSocketClient.set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, webSocketConnection.isOpen());
+    }
+
     public static void populateWebSocketEndpoint(WebSocketConnection webSocketConnection, BObject webSocketClient) {
         webSocketClient.set(WebSocketConstants.LISTENER_ID_FIELD,
                 StringUtils.fromString(webSocketConnection.getChannelId()));

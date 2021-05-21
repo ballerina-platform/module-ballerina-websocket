@@ -56,9 +56,8 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse carbonResponse) {
-        BObject webSocketConnector;
-        webSocketClient.set(WebSocketConstants.CLIENT_RESPONSE_FIELD, HttpUtil.createResponseStruct(carbonResponse));
-        WebSocketUtil.populateWebSocketEndpoint(webSocketConnection, webSocketClient);
+        webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(carbonResponse));
+        WebSocketUtil.populateClientWebSocketEndpoint(webSocketConnection, webSocketClient);
         // Calls the `countDown()` function to initialize the count down latch of the connection.
         WebSocketUtil.countDownForHandshake(webSocketClient);
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
@@ -70,7 +69,7 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
     @Override
     public void onError(Throwable t, HttpCarbonResponse response) {
         if (response != null) {
-            webSocketClient.set(WebSocketConstants.CLIENT_RESPONSE_FIELD, HttpUtil.createResponseStruct(response));
+            webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(response));
         }
         webSocketClient.addNativeData(CLIENT_CONNECTION_ERROR, t);
         setWebSocketOpenConnectionInfo(null, webSocketClient, wsService);

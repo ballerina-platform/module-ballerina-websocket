@@ -88,15 +88,19 @@ public class WebSocketConstants {
 
     // WebSocketListener field names
     public static final BString LISTENER_ID_FIELD = StringUtils.fromString("id");
+    public static final String CONNECTION_ID_FIELD = "id";
     public static final BString LISTENER_NEGOTIATED_SUBPROTOCOLS_FIELD = StringUtils.fromString(
             "negotiatedSubProtocol");
+    public static final String NEGOTIATED_SUBPROTOCOL = "negotiatedSubProtocol";
     public static final BString INITIALIZED_BY_SERVICE = StringUtils.fromString("initializedByService");
     public static final BString LISTENER_IS_SECURE_FIELD = StringUtils.fromString("secure");
+    public static final String IS_SECURE = "secure";
     public static final BString LISTENER_IS_OPEN_FIELD = StringUtils.fromString("open");
     public static final BString LISTENER_CONNECTOR_FIELD = StringUtils.fromString("conn");
 
     // WebSocketClient struct field names
     public static final BString CLIENT_RESPONSE_FIELD = StringUtils.fromString("response");
+    public static final String HTTP_RESPONSE = "response";
     public static final BString CLIENT_CONNECTOR_FIELD = StringUtils.fromString("conn");
 
     // WebSocketConnector

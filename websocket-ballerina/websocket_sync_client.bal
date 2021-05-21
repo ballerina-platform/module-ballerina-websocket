@@ -22,12 +22,8 @@ import ballerina/http;
 # Represents a WebSocket synchronous client endpoint.
 public isolated client class Client {
 
-    private string id = "";
-    private string? negotiatedSubProtocol = ();
-    private boolean secure = false;
     private boolean open = false;
-    private http:Response? response = ();
-    private map<string|int> attributes = {};
+    private final map<string|int> attributes = {};
 
     private string url = "";
     private ClientConfiguration & readonly config;
@@ -145,29 +141,24 @@ public isolated client class Client {
     # Gives the connection id associated with this connection.
     #
     # + return - The unique ID associated with the connection
-    public isolated function getConnectionId() returns string {
-        lock {
-            return self.id;
-        }
-    }
+    public isolated function getConnectionId() returns string = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
 
     # Gives the subprotocol if any that is negotiated with the client.
     #
     # + return - The subprotocol if any negotiated with the client or `nil`
     public isolated function getNegotiatedSubProtocol() returns string? {
-        lock {
-            return self.negotiatedSubProtocol;
-        }
+        return self.externGetNegotiatedSubProtocol();
     }
 
     # Gives the secured status of the connection.
     #
     # + return - `true` if the connection is secure
-    public isolated function isSecure() returns boolean {
-        lock {
-            return self.secure;
-        }
-    }
+    public isolated function isSecure() returns boolean = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
+
 
     # Gives the open or closed status of the connection.
     #
@@ -178,14 +169,12 @@ public isolated client class Client {
         }
     }
 
-    // # Gives the HTTP response if any received for the client handshake request.
-    // #
-    // # + return - The HTTP response received from the client handshake request
-    // // public isolated function getHttpResponse() returns http:Response? {
-    // //     lock {
-    // //         return self.response;
-    // //     }
-    // // }
+    # Gives the HTTP response if any received for the client handshake request.
+    #
+    # + return - The HTTP response received from the client handshake request
+    public isolated function getHttpResponse() returns http:Response? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
 
     # Reads text messages in a synchronous manner
     #
@@ -209,6 +198,11 @@ public isolated client class Client {
     isolated function externSyncWSInitEndpoint() returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
         name: "initEndpoint"
+    } external;
+
+    isolated function externGetNegotiatedSubProtocol() returns string? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "getNegotiatedSubProtocol"
     } external;
 }
 
