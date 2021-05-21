@@ -61,7 +61,7 @@ ballerina {
     packageOrganization = packageOrg
     module = packageName
     langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --jacoco-xml --includes=org.ballerinalang.net.websocket.*:ballerina.websocket.*"
+    testCoverageParam = "--code-coverage --coverage-format=xml --includes=org.ballerinalang.net.websocket.*:ballerina.websocket.*"
 }
 
 configurations {
