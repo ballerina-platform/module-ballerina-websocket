@@ -62,7 +62,6 @@ import javax.net.ssl.SSLException;
 import static org.ballerinalang.net.websocket.WebSocketConstants.INITIALIZED_BY_SERVICE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
-import static org.ballerinalang.net.websocket.WebSocketConstants.WEBSOCKET_ASYNC_CLIENT;
 
 /**
  * Utility class for WebSocket.
@@ -264,12 +263,9 @@ public class WebSocketUtil {
      */
     public static void establishWebSocketConnection(WebSocketClientConnector clientConnector,
             BObject webSocketClient, WebSocketService wsService) {
-        // Async client has to start reading the frames once connected. Hence if the client is Async
-        // we set the readyOnConnect to true.
-        boolean readyOnConnect = webSocketClient.getType().getName().equals(WEBSOCKET_ASYNC_CLIENT);
         ClientHandshakeFuture handshakeFuture = clientConnector.connect();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch, readyOnConnect);
+        setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch);
         // Sets the countDown latch for every handshake
         waitForHandshake(webSocketClient, countDownLatch, wsService);
     }
@@ -282,13 +278,12 @@ public class WebSocketUtil {
      * @param wsService - the WebSocket service
      */
     private static void setListenersToHandshakeFuture(ClientHandshakeFuture handshakeFuture,
-            BObject webSocketClient, WebSocketService wsService, CountDownLatch countDownLatch,
-            boolean readyOnConnect) {
+            BObject webSocketClient, WebSocketService wsService, CountDownLatch countDownLatch) {
         ExtendedConnectorListener connectorListener = (ExtendedConnectorListener) webSocketClient
                 .getNativeData(WebSocketConstants.CLIENT_LISTENER);
         handshakeFuture.setWebSocketConnectorListener(connectorListener);
         ExtendedHandshakeListener webSocketHandshakeListener = new WebSocketHandshakeListener(webSocketClient,
-                wsService, connectorListener, countDownLatch, readyOnConnect);
+                wsService, connectorListener, countDownLatch);
         handshakeFuture.setClientHandshakeListener(new ClientHandshakeListener(webSocketHandshakeListener));
     }
 

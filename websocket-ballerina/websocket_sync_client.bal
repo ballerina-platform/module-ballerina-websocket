@@ -29,7 +29,6 @@ public isolated client class Client {
     private http:Response? response = ();
     private map<string|int> attributes = {};
 
-    private WebSocketConnector conn = new;
     private string url = "";
     private ClientConfiguration & readonly config;
     private PingPongService? pingPongService = ();
@@ -50,9 +49,10 @@ public isolated client class Client {
         return self.initEndpoint();
     }
 
-    public isolated function initEndpoint() returns Error? {
-        return externSyncWSInitEndpoint(self);
-    }
+    public isolated function initEndpoint() returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "initEndpoint"
+    } external;
 
     # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
@@ -205,6 +205,11 @@ public isolated client class Client {
                          returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
     } external;
+
+    isolated function externSyncWSInitEndpoint() returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "initEndpoint"
+    } external;
 }
 
 # Configurations for the WebSocket client.
@@ -282,8 +287,3 @@ public type ClientSecureSocket record {|
 const EQUALS = "=";
 const SPACE = " ";
 const SEMICOLON = ";";
-
-isolated function externSyncWSInitEndpoint(Client wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
-    name: "initEndpoint"
-} external;
