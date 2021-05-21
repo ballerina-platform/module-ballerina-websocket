@@ -126,10 +126,6 @@ public class SyncInitEndpoint {
         return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL));
     }
 
-    public static Object getIsOpen(Environment env, BObject wsSyncClient) {
-        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL));
-    }
-
     public static Object getHttpResponse(Environment env, BObject wsSyncClient) {
         return (wsSyncClient.getNativeData(WebSocketConstants.HTTP_RESPONSE));
     }

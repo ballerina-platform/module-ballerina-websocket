@@ -25,8 +25,7 @@ isolated class WebSocketConnector {
     #
     # + data - Data to be sent.
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeTextMessage(string data) returns Error? =
-    @java:Method {
+    public isolated function writeTextMessage(string data) returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
@@ -35,8 +34,7 @@ isolated class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function writeBinaryMessage(byte[] data) returns Error? =
-    @java:Method {
+    public isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
@@ -44,8 +42,7 @@ isolated class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function ping(byte[] data) returns Error? =
-    @java:Method {
+    public isolated function ping(byte[] data) returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
@@ -54,16 +51,14 @@ isolated class WebSocketConnector {
     #
     # + data - Binary data to be sent
     # + return  - An `error` if an error occurs when sending
-    public isolated function pong(byte[] data) returns Error? =
-    @java:Method {
+    public isolated function pong(byte[] data) returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
     # Reads text data from the websocket connection.
     #
     # + return  - The text message or an `error` if an error occurs when sending
-    public isolated function readTextMessage() returns string|Error =
-    @java:Method {
+    public isolated function readTextMessage() returns string|Error = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
@@ -85,23 +80,21 @@ isolated class WebSocketConnector {
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
     public isolated function close(int? statusCode = 1000, string? reason = (), decimal timeoutInSecs = 60) returns Error? {
-        lock {
-            if (statusCode is int) {
-                if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
-                    statusCode <= 2999 || statusCode > 4999) {
-                    string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
-                    return error ConnectionClosureError(errorMessage);
-                }
-                return self.externClose(statusCode, reason is () ? "" : reason, timeoutInSecs);
-            } else {
-                return self.externClose(-1, "", timeoutInSecs);
+        int code;
+        if (statusCode is int) {
+            if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
+                statusCode <= 2999 || statusCode > 4999) {
+                string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
+                return error ConnectionClosureError(errorMessage);
             }
+            code = statusCode;
+        } else {
+            code = -1;
         }
+        return self.externClose(code, reason is () ? "" : reason, timeoutInSecs);
     }
 
-    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
-                         returns Error? =
-    @java:Method {
+    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs) returns Error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
     } external;
 }

@@ -96,16 +96,18 @@ public isolated client class Client {
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
+        int code;
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {
                 string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
                 return error ConnectionClosureError(errorMessage);
             }
-            return self.externClose(statusCode, reason is () ? "" : reason, timeout);
+            code = statusCode;
         } else {
-            return self.externClose(-1, "", timeout);
+            code = -1;
         }
+        return self.externClose(code, reason is () ? "" : reason, timeout);
     }
 
     # Sets a connection-related attribute.
