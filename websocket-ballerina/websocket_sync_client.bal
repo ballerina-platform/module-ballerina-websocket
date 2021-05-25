@@ -286,9 +286,9 @@ public isolated function addCookies(ClientConfiguration config) {
        });
        foreach var cookie in sortedCookies {
            cookieHeader = cookieHeader + cookie.name + EQUALS + cookie.value + SEMICOLON + SPACE;
-           time:Utc lastAccessedTime = time:utcNow();
-           //TODO:L1 Fix this after HTTP fixes.
-           //cookie.setLastAccessedTime(lastAccessedTime);
+       }
+       lock {
+           updateLastAccessedTime(cookiesToAdd);
        }
        if (cookieHeader != "") {
            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
@@ -297,6 +297,40 @@ public isolated function addCookies(ClientConfiguration config) {
            config["customHeaders"] = headers;
        }
    }
+}
+
+isolated function updateLastAccessedTime(http:Cookie[] cookiesToAdd) {
+    http:Cookie[] tempCookies = [];
+    int endValue = cookiesToAdd.length();
+    foreach var i in 0 ..< endValue {
+        http:Cookie cookie = cookiesToAdd.pop();
+        time:Utc lastAccessedTime = time:utcNow();
+        tempCookies.push(getClone(cookie, cookie.createdTime, lastAccessedTime));
+    }
+
+    foreach var i in 0 ..< endValue {
+        cookiesToAdd.push(tempCookies.pop());
+    }
+}
+
+isolated function getClone(http:Cookie cookie, time:Utc createdTime, time:Utc lastAccessedTime) returns http:Cookie {
+    http:CookieOptions options = {};
+    if cookie.domain is string {
+        options.domain = <string> cookie.domain;
+    }
+    if cookie.path is string {
+        options.path = <string> cookie.path;
+    }
+    if cookie.expires is string {
+        options.expires = <string> cookie.expires;
+    }
+    options.maxAge = cookie.maxAge;
+    options.httpOnly = cookie.httpOnly;
+    options.secure = cookie.secure;
+    options.hostOnly = cookie.hostOnly;
+    options.createdTime = createdTime;
+    options.lastAccessedTime = lastAccessedTime;
+    return new http:Cookie(cookie.name, cookie.value, options);
 }
 
 const EQUALS = "=";
