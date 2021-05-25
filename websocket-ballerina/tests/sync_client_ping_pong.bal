@@ -52,7 +52,7 @@ service class WsServiceSyncPingPong {
     }
 }
 
-service readonly class clientPingPongCallbackService {
+service isolated class clientPingPongCallbackService {
     *PingPongService;
     remote isolated function onPing(Caller caller, byte[] localData) returns byte[] {
         io:println("On sync client ping");

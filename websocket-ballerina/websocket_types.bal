@@ -19,5 +19,5 @@ public type Service service object {
 };
 
 # The WebSocket service type to handle ping/pong frames
-public type PingPongService readonly & service object {
+public type PingPongService isolated service object {
 };

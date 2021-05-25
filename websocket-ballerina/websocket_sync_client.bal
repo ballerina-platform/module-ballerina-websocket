@@ -27,7 +27,7 @@ public isolated client class Client {
 
     private string url = "";
     private ClientConfiguration & readonly config;
-    private PingPongService? pingPongService = ();
+    private final PingPongService? pingPongService;
 
     # Initializes the synchronous client when called.
     #
@@ -37,10 +37,21 @@ public isolated client class Client {
         self.url = url;
         addCookies(config);
         check initClientAuth(config);
-        self.config = config.cloneReadOnly();
+        ClientInferredConfig inferredConfig = {
+            subProtocols: config.subProtocols,
+            customHeaders: config.customHeaders,
+            readTimeout: config.readTimeout,
+            secureSocket: config.secureSocket,
+            maxFrameSize: config.maxFrameSize,
+            webSocketCompressionEnabled: config.webSocketCompressionEnabled,
+            handShakeTimeout: config.handShakeTimeout
+        };
+        self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
         if (pingPongHandler is PingPongService) {
             self.pingPongService = pingPongHandler;
+        } else {
+            self.pingPongService = ();
         }
         return self.initEndpoint();
     }
@@ -234,7 +245,7 @@ public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     decimal readTimeout = -1;
-    ClientSecureSocket secureSocket?;
+    ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     decimal handShakeTimeout = 300;
@@ -246,6 +257,16 @@ public type CommonClientConfiguration record {|
 # Configures the SSL/TLS options to be used for WebSocket client.
 public type ClientSecureSocket record {|
     *http:ClientSecureSocket;
+|};
+
+type ClientInferredConfig record {|
+    string[] subProtocols;
+    map<string> customHeaders;
+    decimal readTimeout;
+    ClientSecureSocket? secureSocket;
+    int maxFrameSize;
+    boolean webSocketCompressionEnabled;
+    decimal handShakeTimeout;
 |};
 
 # Adds cookies to the custom header.
