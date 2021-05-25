@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//import ballerina/lang.array;
+import ballerina/lang.array;
 import ballerina/jballerina.java;
 //import ballerina/time;
 import ballerina/http;
@@ -35,7 +35,7 @@ public isolated client class Client {
     # + config - The configurations to be used when initializing the client
     public isolated function init(string url, *ClientConfiguration config) returns Error? {
         self.url = url;
-        //addCookies(config);
+        addCookies(config);
         check initClientAuth(config);
         self.config = config.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
@@ -238,7 +238,7 @@ public type CommonClientConfiguration record {|
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     decimal handShakeTimeout = 300;
-    //http:Cookie[] cookies?;
+    http:Cookie[] cookies?;
     ClientAuthConfig auth?;
     PingPongService pingPongHandler?;
 |};
@@ -248,37 +248,38 @@ public type ClientSecureSocket record {|
     *http:ClientSecureSocket;
 |};
 
-// # Adds cookies to the custom header.
-// #
-// # + config - Represents the cookies to be added
-// public isolated function addCookies(ClientConfiguration config) {
-//    string cookieHeader = "";
-//    var cookiesToAdd = config["cookies"];
-//    if (cookiesToAdd is http:Cookie[]) {
-//        http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
-//            var cookiePath = c.path;
-//            int l = 0;
-//            if (cookiePath is string) {
-//                l = cookiePath.length();
-//            }
-//           return l;
-//        });
-//        foreach var cookie in sortedCookies {
-//            var cookieName = cookie.name;
-//            var cookieValue = cookie.value;
-//            if (cookieName is string && cookieValue is string) {
-//                cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
-//            }
-//            cookie.lastAccessedTime = time:utcNow();
-//        }
-//        if (cookieHeader != "") {
-//            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
-//            map<string> headers = config["customHeaders"];
-//            headers["Cookie"] = cookieHeader;
-//            config["customHeaders"] = headers;
-//        }
-//    }
-// }
+# Adds cookies to the custom header.
+#
+# + config - Represents the cookies to be added
+public isolated function addCookies(ClientConfiguration config) {
+   string cookieHeader = "";
+   var cookiesToAdd = config["cookies"];
+   if (cookiesToAdd is http:Cookie[]) {
+       http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
+           var cookiePath = c.path;
+           int l = 0;
+           if (cookiePath is string) {
+               l = cookiePath.length();
+           }
+          return l;
+       });
+       foreach var cookie in sortedCookies {
+           var cookieName = cookie.name;
+           var cookieValue = cookie.value;
+           if (cookieName is string && cookieValue is string) {
+               cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
+           }
+           //TODO:L1 Fix this when HTTP fixes.
+           //cookie.lastAccessedTime = time:utcNow();
+       }
+       if (cookieHeader != "") {
+           cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
+           map<string> headers = config["customHeaders"];
+           headers["Cookie"] = cookieHeader;
+           config["customHeaders"] = headers;
+       }
+   }
+}
 
 const EQUALS = "=";
 const SPACE = " ";
