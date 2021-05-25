@@ -33,7 +33,7 @@ service class TestService {
    }
 }
 
-service class PongService {
+service isolated class PongService {
    *Service;
    remote function onPong(Caller wsEp, byte[] data) {
        expectedAutoPongData = <@untainted>data;

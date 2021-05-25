@@ -20,19 +20,14 @@ import ballerina/time;
 import ballerina/http;
 
 # Represents a WebSocket synchronous client endpoint.
-public client class Client {
+public isolated client class Client {
 
-    private string id = "";
-    private string? negotiatedSubProtocol = ();
-    private boolean secure = false;
     private boolean open = false;
-    private http:Response? response = ();
-    private map<any> attributes = {};
+    private final map<string|int> attributes = {};
 
-    private WebSocketConnector conn = new;
     private string url = "";
-    private ClientConfiguration config = {};
-    private PingPongService? pingPongService = ();
+    private ClientConfiguration & readonly config;
+    private final PingPongService? pingPongService;
 
     # Initializes the synchronous client when called.
     #
@@ -42,52 +37,64 @@ public client class Client {
         self.url = url;
         addCookies(config);
         check initClientAuth(config);
-        self.config = config;
+        ClientInferredConfig inferredConfig = {
+            subProtocols: config.subProtocols,
+            customHeaders: config.customHeaders,
+            readTimeout: config.readTimeout,
+            secureSocket: config.secureSocket,
+            maxFrameSize: config.maxFrameSize,
+            webSocketCompressionEnabled: config.webSocketCompressionEnabled,
+            handShakeTimeout: config.handShakeTimeout
+        };
+        self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
         if (pingPongHandler is PingPongService) {
             self.pingPongService = pingPongHandler;
+        } else {
+            self.pingPongService = ();
         }
         return self.initEndpoint();
     }
 
-    public isolated function initEndpoint() returns Error? {
-        return externSyncWSInitEndpoint(self);
-    }
+    public isolated function initEndpoint() returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "initEndpoint"
+    } external;
 
     # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
     # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(string data) returns Error? {
-        return self.conn.writeTextMessage(data);
-    }
+    remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
-        return self.conn.writeBinaryMessage(data);
-    }
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function ping(byte[] data) returns Error? {
-        return self.conn.ping(data);
-    }
+    remote isolated function ping(byte[] data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
     # the frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function pong(byte[] data) returns Error? {
-        return self.conn.pong(data);
-    }
+    remote isolated function pong(byte[] data) returns Error? = @java:Method {
+         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Closes the connection.
     #
@@ -100,81 +107,116 @@ public client class Client {
     #                   endpoint within the waiting period, the connection is terminated immediately.
     # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
-        return self.conn.close(statusCode, reason, timeout);
+        int code;
+        if (statusCode is int) {
+            if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
+                statusCode <= 2999 || statusCode > 4999) {
+                string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
+                return error ConnectionClosureError(errorMessage);
+            }
+            code = statusCode;
+        } else {
+            code = -1;
+        }
+        return self.externClose(code, reason is () ? "" : reason, timeout);
     }
 
     # Sets a connection-related attribute.
     #
     # + key - The key, which identifies the attribute
     # + value - The value of the attribute
-    public isolated function setAttribute(string key, any value) {
-        self.attributes[key] = value;
+    public isolated function setAttribute(string key, string|int value) {
+        lock {
+            self.attributes[key] = value;
+        }
     }
 
     # Gets connection-related attributes if any.
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
-    public isolated function getAttribute(string key) returns any {
-        return self.attributes[key];
+    public isolated function getAttribute(string key) returns string|int? {
+        lock {
+            return self.attributes[key];
+        }
     }
 
     # Removes connection related attribute if any.
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
-    public isolated function removeAttribute(string key) returns any {
-        return self.attributes.remove(key);
+    public isolated function removeAttribute(string key) returns string|int? {
+        lock {
+            return self.attributes.remove(key);
+        }
     }
 
     # Gives the connection id associated with this connection.
     #
     # + return - The unique ID associated with the connection
-    public isolated function getConnectionId() returns string {
-        return self.id;
-    }
+    public isolated function getConnectionId() returns string = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
 
     # Gives the subprotocol if any that is negotiated with the client.
     #
     # + return - The subprotocol if any negotiated with the client or `nil`
     public isolated function getNegotiatedSubProtocol() returns string? {
-        return self.negotiatedSubProtocol;
+        return self.externGetNegotiatedSubProtocol();
     }
 
     # Gives the secured status of the connection.
     #
     # + return - `true` if the connection is secure
-    public isolated function isSecure() returns boolean {
-        return self.secure;
-    }
+    public isolated function isSecure() returns boolean = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
+
 
     # Gives the open or closed status of the connection.
     #
     # + return - `true` if the connection is open
     public isolated function isOpen() returns boolean {
-        return self.open;
+        lock {
+            return self.open;
+        }
     }
 
     # Gives the HTTP response if any received for the client handshake request.
     #
     # + return - The HTTP response received from the client handshake request
-    public isolated function getHttpResponse() returns http:Response? {
-        return self.response;
-    }
+    public isolated function getHttpResponse() returns http:Response? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
 
     # Reads text messages in a synchronous manner
     #
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
-    remote isolated function readTextMessage() returns string|Error {
-        return self.conn.readTextMessage();
-    }
+    remote isolated function readTextMessage() returns string|Error = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
+    } external;
 
     # Reads binary data in a synchronous manner
     #
     # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
-    remote isolated function readBinaryMessage() returns byte[]|Error {
-        return self.conn.readBinaryMessage();
-    }
+    remote isolated function readBinaryMessage() returns byte[]|Error = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
+    } external;
+
+    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
+                         returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
+    } external;
+
+    isolated function externSyncWSInitEndpoint() returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "initEndpoint"
+    } external;
+
+    isolated function externGetNegotiatedSubProtocol() returns string? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "getNegotiatedSubProtocol"
+    } external;
 }
 
 # Configurations for the WebSocket client.
@@ -203,7 +245,7 @@ public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     decimal readTimeout = -1;
-    ClientSecureSocket secureSocket?;
+    ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
     decimal handShakeTimeout = 300;
@@ -215,6 +257,16 @@ public type CommonClientConfiguration record {|
 # Configures the SSL/TLS options to be used for WebSocket client.
 public type ClientSecureSocket record {|
     *http:ClientSecureSocket;
+|};
+
+type ClientInferredConfig record {|
+    string[] subProtocols;
+    map<string> customHeaders;
+    decimal readTimeout;
+    ClientSecureSocket? secureSocket;
+    int maxFrameSize;
+    boolean webSocketCompressionEnabled;
+    decimal handShakeTimeout;
 |};
 
 # Adds cookies to the custom header.
@@ -233,12 +285,10 @@ public isolated function addCookies(ClientConfiguration config) {
           return l;
        });
        foreach var cookie in sortedCookies {
-           var cookieName = cookie.name;
-           var cookieValue = cookie.value;
-           if (cookieName is string && cookieValue is string) {
-               cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
-           }
-           cookie.lastAccessedTime = time:utcNow();
+           cookieHeader = cookieHeader + cookie.name + EQUALS + cookie.value + SEMICOLON + SPACE;
+           time:Utc lastAccessedTime = time:utcNow();
+           //TODO:L1 Fix this after HTTP fixes.
+           //cookie.setLastAccessedTime(lastAccessedTime);
        }
        if (cookieHeader != "") {
            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
@@ -252,8 +302,3 @@ public isolated function addCookies(ClientConfiguration config) {
 const EQUALS = "=";
 const SPACE = " ";
 const SEMICOLON = ";";
-
-isolated function externSyncWSInitEndpoint(Client wsClient) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
-    name: "initEndpoint"
-} external;

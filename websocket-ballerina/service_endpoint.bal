@@ -29,16 +29,18 @@ public class Listener {
     # Starts the registered service programmatically.
     #
     # + return - An `error` if an error occurred during the listener starting process
-    public isolated function 'start() returns error? {
-        return self.startEndpoint();
-    }
+    isolated function 'start() returns error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.serviceendpoint.Start",
+         name: "start"
+    } external;
 
     # Stops the service listener gracefully. Already-accepted requests will be served before connection closure.
     #
     # + return - An `error` if an error occurred during the listener stopping process
-    public isolated function gracefulStop() returns error? {
-        return self.gracefulStopS();
-    }
+    public isolated function gracefulStop() returns error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.serviceendpoint.GracefulStop",
+        name: "gracefulStop"
+    } external;
 
     # Stops the service listener immediately. It is not implemented yet.
     #
@@ -53,18 +55,21 @@ public class Listener {
     # + websocketService - The service that needs to be attached
     # + name - Name of the service
     # + return - An `error` if an error occurred during the service attachment process or else `()`
-    public isolated function attach(Service websocketService, string[]|string? name = ()) returns error? {
-        return self.register(websocketService, name);
-    }
+    public isolated function attach(Service websocketService, string[]|string? name = ()) returns error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.serviceendpoint.Register",
+        name: "register"
+    } external;
+
 
     # Detaches a WebSocket service from the listener. Note that detaching a WebSocket service would not affect
     # The functionality of the existing connections.
     #
     # + websocketService - The service to be detached
     # + return - An `error` if one occurred during detaching of a service or else `()`
-    public isolated function detach(Service websocketService) returns error? {
-        return self.detachS(websocketService);
-    }
+    public isolated function detach(Service websocketService) returns error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.serviceendpoint.Detach",
+        name: "detach"
+    } external;
 
     # Gets invoked during the module initialization to initialize the listener.
     #
@@ -78,69 +83,14 @@ public class Listener {
         } else {
            self.port = 'listener;
         }
-        return self.initEndpoint();
+        return self.externInitEndpoint();
     }
 
-    public isolated function initEndpoint() returns Error? {
-        return externInitEndpoint(self);
-    }
-
-    # Gets invoked when attaching a service to the endpoint.
-    #
-    # + websocketService - The service that needs to be attached
-    # + name - Name of the service
-    # + return - An `error` if an error occurred during the service attachment process or else `()`
-    isolated function register(Service websocketService, string[]|string? name) returns error? {
-        return externRegister(self, websocketService, name);
-    }
-
-    # Starts the registered service.
-    #
-    # + return - An `error` if an error occurred during the listener start process
-    isolated function startEndpoint() returns error? {
-        return externStart(self);
-    }
-
-    # Stops the service listener gracefully.
-    #
-    # + return - An `error` if an error occurred during the listener stop process
-    isolated function gracefulStopS() returns error? {
-        return externGracefulStop(self);
-    }
-
-    # Disengages an attached service from the listener.
-    #
-    # + websocketService - The service that needs to be detached
-    # + return - An `error` if an error occurred during the service detachment process or else `()`
-    isolated function detachS(Service websocketService) returns error? {
-        return externDetach(self, websocketService);
-    }
+    isolated function externInitEndpoint() returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.serviceendpoint.InitEndpoint",
+        name: "initEndpoint"
+    } external;
 }
-
-isolated function externInitEndpoint(Listener listenerObj) returns Error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.serviceendpoint.InitEndpoint",
-    name: "initEndpoint"
-} external;
-
-isolated function externRegister(Listener listenerObj, Service websocketService, string[]|string? name) returns error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.serviceendpoint.Register",
-    name: "register"
-} external;
-
-isolated function externStart(Listener listenerObj) returns error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.serviceendpoint.Start",
-    name: "start"
-} external;
-
-isolated function externGracefulStop(Listener listenerObj) returns error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.serviceendpoint.GracefulStop",
-    name: "gracefulStop"
-} external;
-
-isolated function externDetach(Listener listenerObj, Service websocketService) returns error? = @java:Method {
-    'class: "org.ballerinalang.net.websocket.serviceendpoint.Detach",
-    name: "detach"
-} external;
 
 # Provides a set of configurations for HTTP service endpoints.
 #

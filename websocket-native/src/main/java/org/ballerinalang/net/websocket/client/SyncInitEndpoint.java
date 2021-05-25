@@ -19,6 +19,7 @@
 package org.ballerinalang.net.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -111,6 +112,22 @@ public class SyncInitEndpoint {
         }
         clientConnectorConfig.setWebSocketCompressionEnabled(
                 clientEndpointConfig.getBooleanValue(WebSocketConstants.COMPRESSION_ENABLED_CONFIG));
+    }
+
+    public static BString getConnectionId(Environment env, BObject wsSyncClient) {
+        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.CONNECTION_ID_FIELD));
+    }
+
+    public static Boolean isSecure(Environment env, BObject wsSyncClient) {
+        return (Boolean) wsSyncClient.getNativeData(WebSocketConstants.IS_SECURE);
+    }
+
+    public static Object getNegotiatedSubProtocol(Environment env, BObject wsSyncClient) {
+        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL));
+    }
+
+    public static Object getHttpResponse(Environment env, BObject wsSyncClient) {
+        return (wsSyncClient.getNativeData(WebSocketConstants.HTTP_RESPONSE));
     }
 
     private SyncInitEndpoint() {

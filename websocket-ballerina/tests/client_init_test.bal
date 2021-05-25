@@ -16,7 +16,7 @@
 
 import ballerina/test;
 
-service class ClientPingPongCallBackService {
+service isolated class ClientPingPongCallBackService {
     *PingPongService;
     remote isolated function onPing(Client caller, byte[] localData) {
     }

@@ -30,7 +30,7 @@ import static org.ballerinalang.net.websocket.WebSocketUtil.findTimeoutInSeconds
  */
 public class WebSocketSyncConnector {
 
-    public static Object externReadTextMessage(Environment env, BObject wsConnection) {
+    public static Object readTextMessage(Environment env, BObject wsConnection) {
         final Future callback = env.markAsync();
         try {
             readContentFromConnection(wsConnection, callback);
@@ -55,7 +55,7 @@ public class WebSocketSyncConnector {
         connectionInfo.getWebSocketConnection().readNextFrame();
     }
 
-    public static Object externReadBinaryMessage(Environment env, BObject wsConnection) {
+    public static Object readBinaryMessage(Environment env, BObject wsConnection) {
         final Future callback = env.markAsync();
         try {
             readContentFromConnection(wsConnection, callback);
