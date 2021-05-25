@@ -16,7 +16,7 @@
 
 import ballerina/lang.array;
 import ballerina/jballerina.java;
-//import ballerina/time;
+import ballerina/time;
 import ballerina/http;
 
 # Represents a WebSocket synchronous client endpoint.
@@ -264,13 +264,10 @@ public isolated function addCookies(ClientConfiguration config) {
           return l;
        });
        foreach var cookie in sortedCookies {
-           var cookieName = cookie.name;
-           var cookieValue = cookie.value;
-           if (cookieName is string && cookieValue is string) {
-               cookieHeader = cookieHeader + cookieName + EQUALS + cookieValue + SEMICOLON + SPACE;
-           }
-           //TODO:L1 Fix this when HTTP fixes.
-           //cookie.lastAccessedTime = time:utcNow();
+           cookieHeader = cookieHeader + cookie.name + EQUALS + cookie.value + SEMICOLON + SPACE;
+           time:Utc lastAccessedTime = time:utcNow();
+           //TODO:L1 Fix this after HTTP fixes.
+           //cookie.setLastAccessedTime(lastAccessedTime);
        }
        if (cookieHeader != "") {
            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
