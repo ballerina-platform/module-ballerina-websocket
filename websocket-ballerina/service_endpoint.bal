@@ -29,7 +29,7 @@ public class Listener {
     # Starts the registered service programmatically.
     #
     # + return - An `error` if an error occurred during the listener starting process
-    isolated function 'start() returns error? = @java:Method {
+    public isolated function 'start() returns error? = @java:Method {
         'class: "org.ballerinalang.net.websocket.serviceendpoint.Start",
          name: "start"
     } external;
