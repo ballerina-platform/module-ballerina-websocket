@@ -55,20 +55,6 @@ isolated class WebSocketConnector {
         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
-    # Reads text data from the websocket connection.
-    #
-    # + return  - The text message or an `error` if an error occurs when sending
-    public isolated function readTextMessage() returns string|Error = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
-    } external;
-
-    # Reads binary data from the websocket connection.
-    #
-    # + return  - The binary message or an `error` if an error occurs when sending
-    public isolated function readBinaryMessage() returns byte[]|Error = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
-    } external;
-
     # Closes the connection.
     #
     # + statusCode - Status code for closing the connection
@@ -80,7 +66,7 @@ isolated class WebSocketConnector {
     #                   within the waiting period, the connection is terminated immediately.
     # + return - An `error` if an error occurs when sending
     public isolated function close(int? statusCode = 1000, string? reason = (), decimal timeoutInSecs = 60) returns Error? {
-        int code;
+        int code = 1000;
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
                 statusCode <= 2999 || statusCode > 4999) {
@@ -88,8 +74,6 @@ isolated class WebSocketConnector {
                 return error ConnectionClosureError(errorMessage);
             }
             code = statusCode;
-        } else {
-            code = -1;
         }
         return self.externClose(code, reason is () ? "" : reason, timeoutInSecs);
     }
