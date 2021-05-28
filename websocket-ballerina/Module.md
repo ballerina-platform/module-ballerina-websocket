@@ -1,6 +1,6 @@
 ## Overview
 
-This module provides an implementation for connecting and interacting with WebSocket endpoints. 
+This module provides APIs for connecting and interacting with WebSocket endpoints. 
 
 This module facilitates two types of network entry points as the ‘Client’ and ‘Listener’. 
 
