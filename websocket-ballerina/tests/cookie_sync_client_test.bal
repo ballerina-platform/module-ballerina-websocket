@@ -44,7 +44,7 @@ service class WsService46 {
   }
 }
 
-http:Cookie cookie = new ("username", "name");
+http:Cookie cookie = new ("username", "name", path = "/", domain = "localhost:21316", expires = "2040-06-26 05:46:22");
 http:Cookie[] httpCookies = [cookie];
 
 ClientConfiguration clientConf = {
