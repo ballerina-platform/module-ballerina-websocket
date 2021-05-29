@@ -10,7 +10,7 @@ service /basic/ws on new websocket:Listener(9090) {
    }
 }
 
-service class WsService {
+service isolated class WsService {
     *websocket:Service;
     remote function onOpen(websocket:Caller caller) {
     }

@@ -8,7 +8,7 @@ service /basic/ws on hl {
    }
 }
 
-service class WsService {
+service isolated class WsService {
     remote function onError(websocket:Caller caller) returns websocket:Error? {
     }
 
