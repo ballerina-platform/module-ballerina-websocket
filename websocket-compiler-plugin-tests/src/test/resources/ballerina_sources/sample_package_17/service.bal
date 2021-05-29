@@ -8,7 +8,7 @@ service /basic/ws on hl {
    }
 }
 
-service class WsService {
+service isolated class WsService {
     *ws:Service;
     remote function onOpen(ws:Caller caller) returns ws:Error? {
     }

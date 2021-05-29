@@ -17,7 +17,7 @@ service /basic/ws on socketListener {
    }
 }
 
-service class WsService {
+service isolated class WsService {
     *websocket:Service;
     remote function onOpen(websocket:Caller caller) {
     }

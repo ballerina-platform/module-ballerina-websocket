@@ -28,7 +28,7 @@ service /basic/ws on new websocket:Listener(9090, conf) {
        io:println("Invoked the function");
    }
 }
-service class WsService {
+service isolated class WsService {
     *websocket:Service;
     remote function onOpen(websocket:Caller caller) {
     }

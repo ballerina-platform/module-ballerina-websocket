@@ -8,7 +8,7 @@ service /basic/ws on hl {
    }
 }
 
-service class WsService {
+service isolated class WsService {
     *websocket:Service;
 
     remote function onBinaryMessage(websocket:Caller caller) returns byte[]? {

@@ -8,7 +8,7 @@ service /basic/ws on hl {
    }
 }
 
-service class WsService {
+service isolated class WsService {
     remote function onOpen(websocket:Caller caller) returns int {
         return 5;
     }
