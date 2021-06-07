@@ -276,7 +276,7 @@ public class WebSocketUtil {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch);
         // Sets the countDown latch for every handshake
-        waitForHandshake(webSocketClient, countDownLatch, wsService);
+        waitForHandshake(webSocketClient, countDownLatch);
     }
 
     /**
@@ -296,8 +296,7 @@ public class WebSocketUtil {
         handshakeFuture.setClientHandshakeListener(new ClientHandshakeListener(webSocketHandshakeListener));
     }
 
-    private static void waitForHandshake(BObject webSocketClient, CountDownLatch countDownLatch,
-            WebSocketService wsService) {
+    public static void waitForHandshake(BObject webSocketClient, CountDownLatch countDownLatch) {
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
         long timeout = WebSocketUtil.findTimeoutInSeconds((BMap<BString, Object>) webSocketClient.getMapValue(
                 CLIENT_ENDPOINT_CONFIG), HANDSHAKE_TIME_OUT, 300);

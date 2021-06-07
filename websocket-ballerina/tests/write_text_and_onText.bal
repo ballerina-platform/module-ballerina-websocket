@@ -44,6 +44,7 @@ service class WsService1 {
 @test:Config {}
 public function testString() returns Error? {
    Client wsClient = check new("ws://localhost:21003/onTextString/");
+   io:println("----Client created-----");
    check wsClient->writeTextMessage("Hi");
    data = check wsClient->readTextMessage();
    runtime:sleep(0.5);

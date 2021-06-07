@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketCloseMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketConnectorListener;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketControlMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;

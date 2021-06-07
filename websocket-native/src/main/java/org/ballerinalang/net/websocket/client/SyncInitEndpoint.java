@@ -26,12 +26,14 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.HttpWsConnectorFactory;
+import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnector;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnectorConfig;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.client.listener.SyncClientConnectorListener;
+import org.ballerinalang.net.websocket.client.listener.WebSocketHandshakeListener;
 
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
@@ -67,15 +69,20 @@ public class SyncInitEndpoint {
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
             wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
                     clientConnectorConfig.getMaxFrameSize());
+            SyncClientConnectorListener syncClientConnectorListener = null;
             if (wsSyncClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
-                SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
+                syncClientConnectorListener = new SyncClientConnectorListener();
                 wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
             }
             CountDownLatch countDownLatch = new CountDownLatch(1);
             wsSyncClient.addNativeData(WebSocketConstants.COUNT_DOWN_LATCH, countDownLatch);
-            WebSocketUtil.establishWebSocketConnection(clientConnector, wsSyncClient, wsService);
+            ClientHandshakeFuture handshakeFuture = clientConnector.connect();
+            handshakeFuture.setWebSocketConnectorListener(syncClientConnectorListener);
+            handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(wsSyncClient, wsService,
+                    syncClientConnectorListener, countDownLatch));
+//            WebSocketUtil.establishWebSocketConnection(clientConnector, wsSyncClient, wsService);
             // Sets the count down latch for the initial connection.
-            WebSocketUtil.waitForHandshake(countDownLatch);
+            WebSocketUtil.waitForHandshake(wsSyncClient, countDownLatch);
             if (wsSyncClient.getNativeData(CLIENT_CONNECTION_ERROR) != null) {
                 return createErrorByType((Throwable) wsSyncClient.getNativeData(CLIENT_CONNECTION_ERROR));
             }

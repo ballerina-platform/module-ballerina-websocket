@@ -56,10 +56,11 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse carbonResponse) {
+        System.out.println("--------------On handhshake success-----------");
         webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(carbonResponse));
         WebSocketUtil.populateClientWebSocketEndpoint(webSocketConnection, webSocketClient);
         // Calls the `countDown()` function to initialize the count down latch of the connection.
-        WebSocketUtil.countDownForHandshake(webSocketClient);
+//        WebSocketUtil.countDownForHandshake(webSocketClient);
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
         countDownLatch.countDown();
@@ -68,11 +69,13 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
 
     @Override
     public void onError(Throwable t, HttpCarbonResponse response) {
+        System.out.println("--------------On handhshake error-----------");
         if (response != null) {
             webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(response));
         }
         webSocketClient.addNativeData(CLIENT_CONNECTION_ERROR, t);
         setWebSocketOpenConnectionInfo(null, webSocketClient, wsService);
+//        WebSocketUtil.countDownForHandshake(webSocketClient);
         countDownLatch.countDown();
     }
 

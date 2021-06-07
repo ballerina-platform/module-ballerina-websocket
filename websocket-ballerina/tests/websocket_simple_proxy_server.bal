@@ -28,25 +28,32 @@ service / on l22 {
 
 service class ProxyService {
   *Service;
+  Client? wsClientEp = ();
   remote function onOpen(Caller wsEp) returns Error? {
-       Client wsClientEp = check new ("ws://localhost:21019/websocket");
+       self.wsClientEp = check new ("ws://localhost:21019/websocket");
    }
 
-   remote function onTextMessage(Caller wsEp, string text) {
-       var returnVal = wsEp->writeTextMessage(text);
-       if (returnVal is Error) {
-           panic <error>returnVal;
+   remote function onTextMessage(Caller wsEp, string text) returns Error? {
+       io:println("On 21018 text =======");
+       Client? proxyClient = self.wsClientEp;
+       if (proxyClient is Client) {
+            check proxyClient->writeTextMessage(text);
+            string proxyData = check proxyClient->readTextMessage();
+            check wsEp->writeTextMessage(proxyData);
        }
    }
 
-   remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->writeBinaryMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
+   remote function onBinaryMessage(Caller wsEp, byte[] data) returns Error? {
+       Client? proxyClient = self.wsClientEp;
+       if (proxyClient is Client) {
+           check proxyClient->writeBinaryMessage(data);
+           byte[] proxyData = check proxyClient->readBinaryMessage();
+           check wsEp->writeBinaryMessage(proxyData);
        }
    }
 
    remote function onClose(Caller wsEp, int statusCode, string reason) returns Error? {
+       io:println("On close =======");
        check wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
    }
 }
@@ -65,6 +72,7 @@ service class ProxyService2 {
    }
 
    remote function onTextMessage(Caller caller, string text) {
+       io:println("On 21019 text writing =======");
        var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
@@ -83,6 +91,7 @@ service class ProxyService2 {
 @test:Config {}
 public function testSendText() returns Error? {
    Client wsClient = check new ("ws://localhost:21018");
+   runtime:sleep(1);
    check wsClient->writeTextMessage("Hi kalai");
    runtime:sleep(0.5);
    string proxyData = check wsClient->readTextMessage();
@@ -95,6 +104,7 @@ public function testSendText() returns Error? {
 public function testSendBinary() returns Error? {
    Client wsClient = check new ("ws://localhost:21018");
    byte[] binaryData = [5, 24, 56, 243];
+   runtime:sleep(1);
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    byte[] expectedBinData = check wsClient->readBinaryMessage();

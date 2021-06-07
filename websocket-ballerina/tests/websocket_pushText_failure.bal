@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
+import ballerina/io;
 
 string errorMsg2 = "";
 listener Listener l20 = new(21008);
@@ -28,6 +29,7 @@ service /pushTextFailureService on l20 {
 service class PushTextFailureService {
    *Service;
    remote function onOpen(Caller caller) {
+       io:println("----------------- On open --------------");
        Error? err1 = caller->close(timeout = 0);
        var err = caller->writeTextMessage("hey");
        if (err is Error) {
