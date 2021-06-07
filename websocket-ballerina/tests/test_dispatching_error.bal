@@ -55,13 +55,13 @@ public function testDispatchingErrorOnTextMessage() returns Error? {
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
-// // Tests dispatching error onBinaryMessage
-// @test:Config {}
-// public function testDispatchingErrorOnBinaryMessage() returns Error? {
-//     Client wsClient = check new ("ws://localhost:21072/onDispatchError/");
-//     byte[] data = [5, 24, 56, 45];
-//     check wsClient->writeBinaryMessage(data);
-//     runtime:sleep(2);
-//     test:assertEquals(dispatchedBinaryData, [5, 24, 56]);
-//     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
-// }
+// Tests dispatching error onBinaryMessage
+@test:Config {}
+public function testDispatchingErrorOnBinaryMessage() returns Error? {
+    Client wsClient = check new ("ws://localhost:21072/onDispatchError/");
+    byte[] data = [5, 24, 56, 45];
+    check wsClient->writeBinaryMessage(data);
+    runtime:sleep(2);
+    test:assertEquals(dispatchedBinaryData, [5, 24, 56]);
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
