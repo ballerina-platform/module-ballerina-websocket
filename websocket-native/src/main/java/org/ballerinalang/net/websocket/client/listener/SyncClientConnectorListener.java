@@ -37,10 +37,10 @@ import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import java.io.IOException;
 
 /**
- * SyncClientConnectorListener implements {@link ExtendedConnectorListener} interface directly.
+ * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.
  *
  */
-public class SyncClientConnectorListener implements ExtendedConnectorListener {
+public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;

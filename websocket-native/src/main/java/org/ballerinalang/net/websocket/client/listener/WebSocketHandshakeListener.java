@@ -20,6 +20,7 @@ package org.ballerinalang.net.websocket.client.listener;
 
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpUtil;
+import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeListener;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.message.HttpCarbonResponse;
 import org.ballerinalang.net.websocket.WebSocketConstants;
@@ -33,20 +34,20 @@ import java.util.concurrent.CountDownLatch;
 import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
 
 /**
- * The `WebSocketHandshakeListener` implements the `{@link ExtendedHandshakeListener}` interface directly.
+ * The `WebSocketHandshakeListener` implements the `{@link ClientHandshakeListener}` interface directly.
  *
  * @since 1.2.0
  */
-public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
+public class WebSocketHandshakeListener implements ClientHandshakeListener {
 
     private final WebSocketService wsService;
-    private final ExtendedConnectorListener connectorListener;
+    private final SyncClientConnectorListener connectorListener;
     private final BObject webSocketClient;
     private CountDownLatch countDownLatch;
     private WebSocketConnectionInfo connectionInfo;
 
     public WebSocketHandshakeListener(BObject webSocketClient, WebSocketService wsService,
-            ExtendedConnectorListener connectorListener,
+            SyncClientConnectorListener connectorListener,
             CountDownLatch countDownLatch) {
         this.webSocketClient = webSocketClient;
         this.wsService = wsService;
@@ -79,15 +80,15 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
         countDownLatch.countDown();
     }
 
-    @Override
-    public BObject getWebSocketClient() {
-        return webSocketClient;
-    }
-
-    @Override
-    public WebSocketConnectionInfo getWebSocketConnectionInfo() {
-        return connectionInfo;
-    }
+//    @Override
+//    public BObject getWebSocketClient() {
+//        return webSocketClient;
+//    }
+//
+//    @Override
+//    public WebSocketConnectionInfo getWebSocketConnectionInfo() {
+//        return connectionInfo;
+//    }
 
     private void setWebSocketOpenConnectionInfo(WebSocketConnection webSocketConnection,
             BObject webSocketClient, WebSocketService wsService) {
