@@ -48,8 +48,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
@@ -63,8 +61,6 @@ import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
 public class WebSocketUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketUtil.class);
-    private static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
-    private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeout");
     private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_WEBSOCKET +
             WebSocketConstants.SEPARATOR + WebSocketConstants.FAILOVER_WEBSOCKET_CLIENT;
     public static final String ERROR_MESSAGE = "Error occurred: ";
@@ -257,81 +253,12 @@ public class WebSocketUtil {
         return ErrorCreator.createError(packageName, errorIdName, StringUtils.fromString(message), null, null);
     }
 
-//    /**
-//     * Establishes connection with the endpoint.
-//     *
-//     * @param clientConnector -  the webSocket client connector
-//     * @param webSocketClient - the WebSocket client
-//     * @param wsService - the WebSocket service
-//     */
-//    public static void establishWebSocketConnection(WebSocketClientConnector clientConnector,
-//            BObject webSocketClient, WebSocketService wsService) {
-//        ClientHandshakeFuture handshakeFuture = clientConnector.connect();
-//        CountDownLatch countDownLatch = new CountDownLatch(1);
-//        setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch);
-//        // Sets the countDown latch for every handshake
-//        waitForHandshake(webSocketClient, countDownLatch);
-//    }
-
-//    /**
-//     * Sets listeners to the handshake future.
-//     *
-//     * @param handshakeFuture - the handshake future
-//     * @param webSocketClient - the WebSocket client
-//     * @param wsService - the WebSocket service
-//     */
-//    private static void setListenersToHandshakeFuture(ClientHandshakeFuture handshakeFuture,
-//            BObject webSocketClient, WebSocketService wsService, CountDownLatch countDownLatch) {
-//        ExtendedConnectorListener connectorListener = (ExtendedConnectorListener) webSocketClient
-//                .getNativeData(WebSocketConstants.CLIENT_LISTENER);
-//        handshakeFuture.setWebSocketConnectorListener(connectorListener);
-//        ExtendedHandshakeListener webSocketHandshakeListener = new WebSocketHandshakeListener(webSocketClient,
-//                wsService, connectorListener, countDownLatch);
-//        handshakeFuture.setClientHandshakeListener(new ClientHandshakeListener(webSocketHandshakeListener));
-//    }
-
-    public static void waitForHandshake(BObject webSocketClient, CountDownLatch countDownLatch) {
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        long timeout = WebSocketUtil.findTimeoutInSeconds((BMap<BString, Object>) webSocketClient.getMapValue(
-                CLIENT_ENDPOINT_CONFIG), HANDSHAKE_TIME_OUT, 300);
-        try {
-            if (!countDownLatch.await(timeout, TimeUnit.SECONDS)) {
-                countDownLatch.countDown();
-                throw getWebSocketError("Waiting for WebSocket handshake has not been successful", null,
-                        WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode(), WebSocketUtil
-                                .createErrorCause("Connection timeout",
-                                        WebSocketConstants.ErrorCode.HandshakeTimedOut.errorCode(),
-                                        ModuleUtils.getWebsocketModule()));
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw WebSocketUtil.getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.Error.errorCode(), null);
-        }
-    }
-
     public static Map<String, String> getCustomHeaders(BMap<BString, Object> headers) {
         Map<String, String> customHeaders = new HashMap<>();
         headers.entrySet().forEach(
                 entry -> customHeaders.put(entry.getKey().getValue(), headers.get(entry.getKey()).toString())
         );
         return customHeaders;
-    }
-
-    /**
-     * Waits until call the countDown().
-     *
-     * @param countDownLatch - a countdown latch
-     */
-    public static void waitForHandshake(CountDownLatch countDownLatch) {
-        try {
-            // Waits to call countDown()
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.Error.errorCode(), null);
-        }
     }
 
     /**
@@ -352,18 +279,6 @@ public class WebSocketUtil {
             return new WebSocketService(callbackService, runtime);
         } else {
             return new WebSocketService(runtime);
-        }
-    }
-
-    /**
-     * Counts the initialized `countDownLatch`.
-     *
-     * @param webSocketClient - the WebSocket client
-     */
-    public static void countDownForHandshake(BObject webSocketClient) {
-        if (webSocketClient.getNativeData(WebSocketConstants.COUNT_DOWN_LATCH) != null) {
-            ((CountDownLatch) webSocketClient.getNativeData(WebSocketConstants.COUNT_DOWN_LATCH)).countDown();
-            webSocketClient.addNativeData(WebSocketConstants.COUNT_DOWN_LATCH, null);
         }
     }
 

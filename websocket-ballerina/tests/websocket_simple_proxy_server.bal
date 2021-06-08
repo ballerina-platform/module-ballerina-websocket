@@ -34,7 +34,6 @@ service class ProxyService {
    }
 
    remote function onTextMessage(Caller wsEp, string text) returns Error? {
-       io:println("On 21018 text =======");
        Client? proxyClient = self.wsClientEp;
        if (proxyClient is Client) {
             check proxyClient->writeTextMessage(text);
@@ -53,7 +52,6 @@ service class ProxyService {
    }
 
    remote function onClose(Caller wsEp, int statusCode, string reason) returns Error? {
-       io:println("On close =======");
        check wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
    }
 }
@@ -72,7 +70,6 @@ service class ProxyService2 {
    }
 
    remote function onTextMessage(Caller caller, string text) {
-       io:println("On 21019 text writing =======");
        var err = caller->writeTextMessage(text);
        if (err is Error) {
            io:println("Error occurred when sending text message: ", err);
