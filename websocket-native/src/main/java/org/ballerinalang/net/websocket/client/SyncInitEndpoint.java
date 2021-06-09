@@ -69,11 +69,8 @@ public class SyncInitEndpoint {
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
             wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
                     clientConnectorConfig.getMaxFrameSize());
-            SyncClientConnectorListener syncClientConnectorListener = null;
-            if (wsSyncClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
-                syncClientConnectorListener = new SyncClientConnectorListener();
-                wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
-            }
+            SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
+            wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
             ClientHandshakeFuture handshakeFuture = clientConnector.connect();
             handshakeFuture.setWebSocketConnectorListener(syncClientConnectorListener);
             handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(wsSyncClient, wsService,

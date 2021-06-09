@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/io;
 
-listener Listener l72 = new (21072);
+listener Listener l72 = new(21072);
 string dispatchedTextData = "not received";
 byte[] dispatchedBinaryData = [5, 24, 56];
 
