@@ -14,41 +14,43 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
-string authHeader = "";
 listener Listener l49 = new(21318);
+string basicAuthSecuredServiceResponse = "";
 
-service /basicAuthSyncService on l49 {
-    resource function get .(http:Request req) returns Service|UpgradeError {
-        string|error header = req.getHeader("Authorization");
-        if (header is string) {
-            authHeader = header;
-            return new WsService49();
-        } else {
-            authHeader = "Header not found";
-            return error UpgradeError("Authentication failed");
+@ServiceConfig {
+    auth: [
+        {
+            fileUserStoreConfig: {},
+            scopes: ["write", "update"]
         }
+    ]
+}
+service /basicAuthSyncService on l49 {
+    resource function get .() returns Service {
+        return new WsService49();
     }
 }
 
 service class WsService49 {
     *Service;
-    remote function onTextMessage(Caller caller, string data) returns Error? {
+    remote function onTextMessage(string data) returns Error? {
+        basicAuthSecuredServiceResponse = data;
     }
 }
 
 @test:Config {}
 public function testSyncBasicAuth() returns Error? {
-    Client wsClient = check new("ws://localhost:21318/basicAuthSyncService/", config = {
-            auth: {
-                username: "alice2",
-                password: "1234"
-            }
-        });
+    Client wsClient = check new("ws://localhost:21318/basicAuthSyncService/", {
+        auth: {
+            username: "alice",
+            password: "xxx"
+        }
+    });
+    check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(authHeader, "Basic YWxpY2UyOjEyMzQ=");
+    test:assertEquals(basicAuthSecuredServiceResponse, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

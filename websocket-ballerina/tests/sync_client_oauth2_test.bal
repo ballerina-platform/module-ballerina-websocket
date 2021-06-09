@@ -19,95 +19,122 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l55 = new(21325);
-string oauthHeader = "";
+string oauth2SecuredServiceResponse = "";
 
-service /oauthService on l55 {
-    resource function get .(http:Request req) returns Service|UpgradeError {
-        string|error header = req.getHeader("Authorization");
-        if (header is string) {
-            oauthHeader = header;
-            return new WsService55();
-        } else {
-            oauthHeader = "Header not found";
-            return error UpgradeError("Authentication failed");
+@ServiceConfig {
+    auth: [
+        {
+            oauth2IntrospectionConfig: {
+                url: "https://localhost:9445/oauth2/introspect",
+                tokenTypeHint: "access_token",
+                scopeKey: "scp",
+                clientConfig: {
+                    secureSocket: {
+                       cert: {
+                           path: TRUSTSTORE_PATH,
+                           password: "ballerina"
+                       }
+                    }
+                }
+            },
+            scopes: ["write", "update"]
         }
+    ]
+}
+service /oauthService on l55 {
+    resource function get .(http:Request req) returns Service {
+        return new WsService55();
     }
 }
 
 service class WsService55 {
     *Service;
-    remote function onTextMessage(Caller caller, string data) returns Error? {
+    remote function onTextMessage(string data) returns Error? {
+        oauth2SecuredServiceResponse = data;
     }
 }
 
-OAuth2ClientCredentialsGrantConfig config1 = {
-    tokenUrl: "https://localhost:9401/oauth2/token",
-    clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
-    clientSecret: "9205371918321623741",
-    scopes: ["token-scope1", "token-scope2"],
-    clientConfig: {
-        secureSocket: {
-           cert: {
-               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-               password: "ballerina"
-           }
-        }
-    }
-};
-
-OAuth2PasswordGrantConfig config2 = {
-    tokenUrl: "https://localhost:9401/oauth2/token",
-    username: "johndoe",
-    password: "A3ddj3w",
-    clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
-    clientSecret: "9205371918321623741",
-    scopes: ["token-scope1", "token-scope2"],
-    clientConfig: {
-        secureSocket: {
-           cert: {
-               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-               password: "ballerina"
-           }
-        }
-    }
-};
-
-OAuth2RefreshTokenGrantConfig config3 = {
-    refreshUrl: "https://localhost:9401/oauth2/token/refresh",
-    refreshToken: "XlfBs91yquexJqDaKEMzVg==",
-    clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
-    clientSecret: "9205371918321623741",
-    scopes: ["token-scope1", "token-scope2"],
-    clientConfig: {
-        secureSocket: {
-           cert: {
-               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-               password: "ballerina"
-           }
-        }
-    }
-};
-
-@test:Config {}
+@test:Config {
+    before: clear
+}
 public function testOAuth2ClientCredentialsGrant() returns Error? {
-    Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config1});
+    Client wsClient = check new("ws://localhost:21325/oauthService/", {
+        auth: {
+            tokenUrl: "https://localhost:9445/oauth2/token",
+            clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
+            clientSecret: "9205371918321623741",
+            scopes: ["write", "update"],
+            clientConfig: {
+                secureSocket: {
+                   cert: {
+                       path: TRUSTSTORE_PATH,
+                       password: "ballerina"
+                   }
+                }
+            }
+        }
+    });
+    check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
+    test:assertEquals(oauth2SecuredServiceResponse, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
-@test:Config {}
+@test:Config {
+    before: clear
+}
 public function testOAuth2PasswordGrant() returns Error? {
-    Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config2});
+    Client wsClient = check new("ws://localhost:21325/oauthService/", {
+        auth: {
+            tokenUrl: "https://localhost:9445/oauth2/token",
+            username: "johndoe",
+            password: "A3ddj3w",
+            clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
+            clientSecret: "9205371918321623741",
+            scopes: ["write", "update"],
+            clientConfig: {
+                secureSocket: {
+                   cert: {
+                       path: TRUSTSTORE_PATH,
+                       password: "ballerina"
+                   }
+                }
+            }
+        }
+    });
+    check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
+    test:assertEquals(oauth2SecuredServiceResponse, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
-@test:Config {}
+@test:Config {
+    before: clear
+}
 public function testOAuth2RefreshTokenGrant() returns Error? {
-    Client wsClient = check new("ws://localhost:21325/oauthService/", config = {auth: config3});
+    Client wsClient = check new("ws://localhost:21325/oauthService/", {
+        auth: {
+            refreshUrl: "https://localhost:9445/oauth2/token",
+            refreshToken: "XlfBs91yquexJqDaKEMzVg==",
+            clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
+            clientSecret: "9205371918321623741",
+            scopes: ["write", "update"],
+            clientConfig: {
+                secureSocket: {
+                   cert: {
+                       path: TRUSTSTORE_PATH,
+                       password: "ballerina"
+                   }
+                }
+            }
+        }
+    });
+    check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(oauthHeader, "Bearer 2YotnFZFEjr1zCsicMWpAA");
+    test:assertEquals(oauth2SecuredServiceResponse, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+function clear() {
+    oauth2SecuredServiceResponse = "";
 }

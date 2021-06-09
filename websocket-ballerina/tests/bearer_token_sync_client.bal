@@ -14,39 +14,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l54 = new(21324);
+string bearerTokenAuthSecuredServiceResponse = "";
 
 service /bearerTokenSyncService on l54 {
-    resource function get .(http:Request req) returns Service|UpgradeError {
-        string|error header = req.getHeader("Authorization");
-        if (header is string) {
-            authHeader = header;
-            return new WsService54();
-        } else {
-            authHeader = "Header not found";
-            return error UpgradeError("Authentication failed");
-        }
+    resource function get .() returns Service {
+        return new WsService54();
     }
 }
 
 service class WsService54 {
     *Service;
-    remote function onTextMessage(Caller caller, string data) returns Error? {
+    remote function onTextMessage(string data) returns Error? {
+        bearerTokenAuthSecuredServiceResponse = data;
     }
 }
 
 @test:Config {}
 public function testSyncBearerToken() returns Error? {
-    Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", config = {
-            auth: {
-              token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn"
-            }
-        });
+    Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", {
+        auth: {
+          token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn"
+        }
+    });
+    check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(authHeader, "Bearer JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn");
+    test:assertEquals(bearerTokenAuthSecuredServiceResponse, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }

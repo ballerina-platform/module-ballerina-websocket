@@ -14,73 +14,70 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
-import ballerina/jwt;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l51 = new(21320);
-string strSyncData = "";
+string jwtAuthSecuredServiceResponse = "";
 
-http:JwtValidatorConfig jwtConfig = {
-        issuer: "ballerina",
-        audience: ["ballerina", "ballerina.org", "ballerina.io"],
-        signatureConfig: {
-            trustStoreConfig: {
-                trustStore: {
-                    path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                    password: "ballerina"
+@ServiceConfig {
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: "ballerina",
+                audience: ["ballerina", "ballerina.org", "ballerina.io"],
+                signatureConfig: {
+                    trustStoreConfig: {
+                        trustStore: {
+                            path: KEYSTORE_PATH,
+                            password: "ballerina"
+                        },
+                        certAlias: "ballerina"
+                    }
                 },
-                certAlias: "ballerina"
-            }
-        },
-        scopeKey: "scp"
-    };
-
-http:ListenerJwtAuthHandler handler = new(jwtConfig);
-
-service /jwtSyncAuthService on l51 {
-    resource function get .(http:Request req) returns Service|UpgradeError {
-        jwt:Payload|http:Unauthorized authn1 = handler.authenticate(req);
-        if (authn1 is jwt:Payload) {
-            return new WsService51();
-        } else {
-            return error UpgradeError("Authentication failed");
+                scopeKey: "scp"
+            },
+            scopes: ["write", "update"]
         }
+    ]
+}
+service /jwtSyncAuthService on l51 {
+    resource function get .() returns Service {
+        return new WsService51();
     }
 }
 
 service class WsService51 {
     *Service;
-    remote function onTextMessage(Caller caller, string data) returns Error? {
-        strSyncData = data;
+    remote function onTextMessage(string data) returns Error? {
+        jwtAuthSecuredServiceResponse = data;
     }
 }
 
 @test:Config {}
 public function testSyncJwtAuth() returns Error? {
-    Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", config = {
-            auth: {
-                    username: "wso2",
-                    issuer: "ballerina",
-                    audience: ["ballerina", "ballerina.org", "ballerina.io"],
-                    keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
-                    customClaims: { "scp": "hello" },
-                    expTime: 3600,
-                    signatureConfig: {
-                        config: {
-                            keyAlias: "ballerina",
-                            keyPassword: "ballerina",
-                            keyStore: {
-                                path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                                password: "ballerina"
-                            }
-                        }
+    Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", {
+        auth: {
+            username: "wso2",
+            issuer: "ballerina",
+            audience: ["ballerina", "ballerina.org", "ballerina.io"],
+            keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
+            customClaims: { "scp": "write" },
+            expTime: 3600,
+            signatureConfig: {
+                config: {
+                    keyAlias: "ballerina",
+                    keyPassword: "ballerina",
+                    keyStore: {
+                        path: KEYSTORE_PATH,
+                        password: "ballerina"
                     }
                 }
-            });
-    check wsClient->writeTextMessage("Authentication successful");
+            }
+        }
+    });
+    check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(strSyncData, "Authentication successful");
+    test:assertEquals(jwtAuthSecuredServiceResponse, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
