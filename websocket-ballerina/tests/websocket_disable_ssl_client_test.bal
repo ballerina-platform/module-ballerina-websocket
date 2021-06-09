@@ -18,13 +18,13 @@ import ballerina/test;
 import ballerina/io;
 
 listener Listener l67 = new(21067, {
-                secureSocket: {
-                    key: {
-                        certFile: "tests/certsAndKeys/public.crt",
-                        keyFile: "tests/certsAndKeys/private.key"
-                    }
-                }
-            });
+    secureSocket: {
+        key: {
+            certFile: "tests/certsAndKeys/public.crt",
+            keyFile: "tests/certsAndKeys/private.key"
+        }
+    }
+});
 
 service /sslTest on l67 {
     resource function get .() returns Service {
@@ -45,11 +45,11 @@ service class SslService3 {
 // Tests the successful connection of sync client over mutual SSL with certs and keys
 @test:Config {}
 public function testDisabledSsl() returns Error? {
-    Client|Error wsClient = new("wss://localhost:21067/sslTest", config = {
-                       secureSocket: {
-                           enable: false
-                       }
-                   });
+    Client|Error wsClient = new("wss://localhost:21067/sslTest", {
+        secureSocket: {
+            enable: false
+        }
+    });
     if (wsClient is Error) {
         io:println(wsClient.message());
         test:assertFail("Expected a successful TLS connection");

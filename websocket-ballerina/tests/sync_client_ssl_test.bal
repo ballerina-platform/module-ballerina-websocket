@@ -21,13 +21,13 @@ import ballerina/io;
 
 string sslString = "";
 listener Listener l37 = new(21059, {
-                secureSocket: {
-                    key: {
-                        path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                        password: "ballerina"
-                    }
-                }
-            });
+    secureSocket: {
+        key: {
+            path: KEYSTORE_PATH,
+            password: "ballerina"
+        }
+    }
+});
 
 service /sslTest on l37 {
     resource function get .(http:Request req) returns Service {
@@ -48,14 +48,14 @@ service class SyncSslService {
 // Tests the successful connection of sync client over SSL
 @test:Config {}
 public function testSyncClientSsl() returns Error? {
-    Client wsClient = check new("wss://localhost:21059/sslTest", config = {
-                       secureSocket: {
-                           cert: {
-                               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                               password: "ballerina"
-                           }
-                       }
-                   });
+    Client wsClient = check new("wss://localhost:21059/sslTest", {
+        secureSocket: {
+            cert: {
+                path: TRUSTSTORE_PATH,
+                password: "ballerina"
+            }
+        }
+    });
     wsClient.setAttribute("test", "testSyncClientSsl");
     @strand {
         thread:"any"

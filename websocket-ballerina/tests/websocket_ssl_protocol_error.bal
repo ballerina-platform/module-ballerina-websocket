@@ -20,17 +20,18 @@ import ballerina/io;
 import ballerina/lang.'string as strings;
 
 listener Listener l68 = new(21068, {
-                secureSocket: {
-                    key: {
-                        path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                        password: "ballerina"
-                    },
-                    protocol: {
-                        name: http:TLS,
-                        versions: ["TLSv1.2"]
-                    }
-                }, host: "localhost"
-            });
+    secureSocket: {
+        key: {
+            path: KEYSTORE_PATH,
+            password: "ballerina"
+        },
+        protocol: {
+            name: http:TLS,
+            versions: ["TLSv1.2"]
+        }
+    },
+    host: "localhost"
+});
 
 service /sslTest on l68 {
     resource function get .() returns Service {
@@ -51,18 +52,18 @@ service class SslService4 {
 // Tests the successful connection of sync client over mutual SSL with certs and keys
 @test:Config {}
 public function testSslProtocolError() returns Error? {
-    Client|Error wsClient = new("wss://localhost:21068/sslTest", config = {
-                       secureSocket: {
-                           cert: {
-                               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                               password: "ballerina"
-                           },
-                           protocol: {
-                               name: http:TLS,
-                               versions: ["TLSv1.3"]
-                           }
-                       }
-                   });
+    Client|Error wsClient = new("wss://localhost:21068/sslTest", {
+        secureSocket: {
+            cert: {
+                path: TRUSTSTORE_PATH,
+                password: "ballerina"
+            },
+            protocol: {
+                name: http:TLS,
+                versions: ["TLSv1.3"]
+            }
+        }
+    });
     if (wsClient is Error) {
         io:println(wsClient.message());
         test:assertTrue(strings:includes(wsClient.message(), "Received fatal alert"));
