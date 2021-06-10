@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l49 = new(21318);
-string basicAuthSecuredServiceResponse = "";
+string wsService49Data = "";
 
 @ServiceConfig {
     auth: [
@@ -28,7 +28,7 @@ string basicAuthSecuredServiceResponse = "";
         }
     ]
 }
-service /basicAuthSyncService on l49 {
+service /basicAuth on l49 {
     resource function get .() returns Service {
         return new WsService49();
     }
@@ -36,14 +36,14 @@ service /basicAuthSyncService on l49 {
 
 service class WsService49 {
     *Service;
-    remote function onTextMessage(string data) returns Error? {
-        basicAuthSecuredServiceResponse = data;
+    remote function onTextMessage(string data) {
+        wsService49Data = data;
     }
 }
 
 @test:Config {}
-public function testSyncBasicAuth() returns Error? {
-    Client wsClient = check new("ws://localhost:21318/basicAuthSyncService/", {
+public function testBasicAuthServiceAuthSuccess() returns Error? {
+    Client wsClient = check new("ws://localhost:21318/basicAuth/", {
         auth: {
             username: "alice",
             password: "xxx"
@@ -51,6 +51,38 @@ public function testSyncBasicAuth() returns Error? {
     });
     check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(basicAuthSecuredServiceResponse, "Hello, World!");
+    test:assertEquals(wsService49Data, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testBasicAuthServiceAuthzFailure() {
+    Client|Error wsClient = new("ws://localhost:21318/basicAuth/", {
+        auth: {
+            username: "bob",
+            password: "yyy"
+        }
+    });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 403 Forbidden");
+    } else {
+        test:assertFail(msg = "Test Failed!");
+        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    }
+}
+
+@test:Config {}
+public function testBasicAuthServiceAuthnFailure() {
+    Client|Error wsClient = new("ws://localhost:21318/basicAuth/", {
+        auth: {
+            username: "peter",
+            password: "123"
+        }
+    });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 401 Unauthorized");
+    } else {
+        test:assertFail(msg = "Test Failed!");
+        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    }
 }

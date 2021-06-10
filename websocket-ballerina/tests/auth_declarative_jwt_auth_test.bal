@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l51 = new(21320);
-string jwtAuthSecuredServiceResponse = "";
+string wsService51Data = "";
 
 @ServiceConfig {
     auth: [
@@ -41,7 +41,7 @@ string jwtAuthSecuredServiceResponse = "";
         }
     ]
 }
-service /jwtSyncAuthService on l51 {
+service /jwtAuth on l51 {
     resource function get .() returns Service {
         return new WsService51();
     }
@@ -49,14 +49,14 @@ service /jwtSyncAuthService on l51 {
 
 service class WsService51 {
     *Service;
-    remote function onTextMessage(string data) returns Error? {
-        jwtAuthSecuredServiceResponse = data;
+    remote function onTextMessage(string data) {
+        wsService51Data = data;
     }
 }
 
 @test:Config {}
-public function testSyncJwtAuth() returns Error? {
-    Client wsClient = check new("ws://localhost:21320/jwtSyncAuthService/", {
+public function testJwtAuthServiceAuthSuccess() returns Error? {
+    Client wsClient = check new("ws://localhost:21320/jwtAuth/", {
         auth: {
             username: "wso2",
             issuer: "ballerina",
@@ -78,6 +78,66 @@ public function testSyncJwtAuth() returns Error? {
     });
     check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(jwtAuthSecuredServiceResponse, "Hello, World!");
+    test:assertEquals(wsService51Data, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testJwtAuthServiceAuthzFailure() {
+    Client|Error wsClient = new("ws://localhost:21320/jwtAuth/", {
+        auth: {
+            username: "wso2",
+            issuer: "ballerina",
+            audience: ["ballerina", "ballerina.org", "ballerina.io"],
+            keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
+            customClaims: { "scp": "read" },
+            expTime: 3600,
+            signatureConfig: {
+                config: {
+                    keyAlias: "ballerina",
+                    keyPassword: "ballerina",
+                    keyStore: {
+                        path: KEYSTORE_PATH,
+                        password: "ballerina"
+                    }
+                }
+            }
+        }
+    });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 403 Forbidden");
+    } else {
+        test:assertFail(msg = "Test Failed!");
+        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    }
+}
+
+@test:Config {}
+public function testJwtAuthServiceAuthnFailure() {
+    Client|Error wsClient = new("ws://localhost:21320/jwtAuth/", {
+        auth: {
+            username: "wso2",
+            issuer: "wso2",
+            audience: ["ballerina", "ballerina.org", "ballerina.io"],
+            keyId: "5a0b754-895f-4279-8843-b745e11a57e9",
+            customClaims: { "scp": "write" },
+            expTime: 3600,
+            signatureConfig: {
+                config: {
+                    keyAlias: "ballerina",
+                    keyPassword: "ballerina",
+                    keyStore: {
+                        path: KEYSTORE_PATH,
+                        password: "ballerina"
+                    }
+                }
+            }
+        }
+    });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 401 Unauthorized");
+    } else {
+        test:assertFail(msg = "Test Failed!");
+        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    }
 }

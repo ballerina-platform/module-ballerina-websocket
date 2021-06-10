@@ -14,12 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/http;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l55 = new(21325);
-string oauth2SecuredServiceResponse = "";
+string wsService55Data = "";
 
 @ServiceConfig {
     auth: [
@@ -42,22 +41,22 @@ string oauth2SecuredServiceResponse = "";
     ]
 }
 service /oauthService on l55 {
-    resource function get .(http:Request req) returns Service {
+    resource function get .() returns Service {
         return new WsService55();
     }
 }
 
 service class WsService55 {
     *Service;
-    remote function onTextMessage(string data) returns Error? {
-        oauth2SecuredServiceResponse = data;
+    remote function onTextMessage(string data) {
+        wsService55Data = data;
     }
 }
 
 @test:Config {
     before: clear
 }
-public function testOAuth2ClientCredentialsGrant() returns Error? {
+public function testOAuth2ClientCredentialsGrantAuthSuccess() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", {
         auth: {
             tokenUrl: "https://localhost:9445/oauth2/token",
@@ -76,14 +75,14 @@ public function testOAuth2ClientCredentialsGrant() returns Error? {
     });
     check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(oauth2SecuredServiceResponse, "Hello, World!");
+    test:assertEquals(wsService55Data, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {
     before: clear
 }
-public function testOAuth2PasswordGrant() returns Error? {
+public function testOAuth2PasswordGrantAuthSuccess() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", {
         auth: {
             tokenUrl: "https://localhost:9445/oauth2/token",
@@ -104,14 +103,14 @@ public function testOAuth2PasswordGrant() returns Error? {
     });
     check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(oauth2SecuredServiceResponse, "Hello, World!");
+    test:assertEquals(wsService55Data, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {
     before: clear
 }
-public function testOAuth2RefreshTokenGrant() returns Error? {
+public function testOAuth2RefreshTokenGrantAuthSuccess() returns Error? {
     Client wsClient = check new("ws://localhost:21325/oauthService/", {
         auth: {
             refreshUrl: "https://localhost:9445/oauth2/token",
@@ -131,10 +130,10 @@ public function testOAuth2RefreshTokenGrant() returns Error? {
     });
     check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(oauth2SecuredServiceResponse, "Hello, World!");
+    test:assertEquals(wsService55Data, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 function clear() {
-    oauth2SecuredServiceResponse = "";
+    wsService55Data = "";
 }

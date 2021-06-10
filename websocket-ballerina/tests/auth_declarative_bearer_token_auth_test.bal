@@ -18,9 +18,29 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 listener Listener l54 = new(21324);
-string bearerTokenAuthSecuredServiceResponse = "";
+string wsService54Data = "";
 
-service /bearerTokenSyncService on l54 {
+@ServiceConfig {
+    auth: [
+        {
+            oauth2IntrospectionConfig: {
+                url: "https://localhost:9445/oauth2/introspect",
+                tokenTypeHint: "access_token",
+                scopeKey: "scp",
+                clientConfig: {
+                    secureSocket: {
+                       cert: {
+                           path: TRUSTSTORE_PATH,
+                           password: "ballerina"
+                       }
+                    }
+                }
+            },
+            scopes: ["write", "update"]
+        }
+    ]
+}
+service /bearerTokenAuth on l54 {
     resource function get .() returns Service {
         return new WsService54();
     }
@@ -28,20 +48,50 @@ service /bearerTokenSyncService on l54 {
 
 service class WsService54 {
     *Service;
-    remote function onTextMessage(string data) returns Error? {
-        bearerTokenAuthSecuredServiceResponse = data;
+    remote function onTextMessage(string data) {
+        wsService54Data = data;
     }
 }
 
 @test:Config {}
-public function testSyncBearerToken() returns Error? {
-    Client wsClient = check new("ws://localhost:21324/bearerTokenSyncService/", {
+public function testBearerTokenAuthServiceAuthSuccess() returns Error? {
+    Client wsClient = check new("ws://localhost:21324/bearerTokenAuth/", {
         auth: {
-          token: "JlbmMiOiJBMTI4Q0JDLUhTMjU2Inikn"
+            token: ACCESS_TOKEN_1
         }
     });
     check wsClient->writeTextMessage("Hello, World!");
     runtime:sleep(0.5);
-    test:assertEquals(bearerTokenAuthSecuredServiceResponse, "Hello, World!");
+    test:assertEquals(wsService54Data, "Hello, World!");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testBearerTokenAuthServiceAuthzFailure() {
+    Client|Error wsClient = new("ws://localhost:21324/bearerTokenAuth/", {
+        auth: {
+            token: ACCESS_TOKEN_2
+        }
+    });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 403 Forbidden");
+    } else {
+        test:assertFail(msg = "Test Failed!");
+        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    }
+}
+
+@test:Config {}
+public function testBearerTokenAuthServiceAuthnFailure() {
+    Client|Error wsClient = new("ws://localhost:21324/bearerTokenAuth/", {
+        auth: {
+            token: ACCESS_TOKEN_3
+        }
+    });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 401 Unauthorized");
+    } else {
+        test:assertFail(msg = "Test Failed!");
+        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    }
 }
