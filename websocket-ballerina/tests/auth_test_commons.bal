@@ -20,8 +20,8 @@ import ballerina/http;
 import ballerina/regex;
 //import ballerina/test;
 
-const string KEYSTORE_PATH = "tests/certsandkeys/ballerinaKeystore.p12";
-const string TRUSTSTORE_PATH = "tests/certsandkeys/ballerinaTruststore.p12";
+const string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
+const string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 
 //{
 //  "alg": "RS256",
