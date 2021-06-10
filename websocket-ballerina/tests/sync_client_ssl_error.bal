@@ -20,13 +20,13 @@ import ballerina/lang.'string as strings;
 
 string sslErrString = "";
 listener Listener l36 = new(21058, {
-                secureSocket: {
-                    key: {
-                        certFile: "tests/certsAndKeys/public.crt",
-                        keyFile: "tests/certsAndKeys/private.key"
-                    }
-                }
-            });
+    secureSocket: {
+        key: {
+            certFile: "tests/certsAndKeys/public.crt",
+            keyFile: "tests/certsAndKeys/private.key"
+        }
+    }
+});
 
 service /sslTest on l36 {
     resource function get .(http:Request req) returns Service {
@@ -47,14 +47,14 @@ service class SyncSslErrorService {
 // Tests the Ssl error returned when creating the sync client
 @test:Config {}
 public function testSyncClientSslError() {
-    Client|Error wsClient = new("wss://localhost:21058/sslTest", config = {
-                       secureSocket: {
-                           cert: {
-                               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                               password: "ballerina"
-                           }
-                       }
-                   });
+    Client|Error wsClient = new("wss://localhost:21058/sslTest", {
+        secureSocket: {
+            cert: {
+                path: TRUSTSTORE_PATH,
+                password: "ballerina"
+            }
+        }
+    });
     if (wsClient is Error) {
         sslErrString = wsClient.message();
     }
