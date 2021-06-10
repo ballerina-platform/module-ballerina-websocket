@@ -20,14 +20,15 @@ import ballerina/test;
 
 final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
+
 listener Listener l24 = new(21027, {
-                      secureSocket: {
-                          key: {
-                              path: KEYSTORE_PATH,
-                              password: "ballerina"
-                          }
-                      }
-                  });
+    secureSocket: {
+        key: {
+            path: KEYSTORE_PATH,
+            password: "ballerina"
+        }
+    }
+});
 service /sslEcho on l24 {
    resource isolated function get .() returns Service|UpgradeError {
        return new SslProxy();
@@ -36,14 +37,14 @@ service /sslEcho on l24 {
 service class SslProxy {
    *Service;
    remote function onOpen(Caller wsEp) returns Error? {
-       Client wsClientEp = check new ("wss://localhost:21028/websocket", config = {
-               secureSocket: {
-                   cert: {
-                       path: TRUSTSTORE_PATH,
-                       password: "ballerina"
-                   }
+       Client wsClientEp = check new ("wss://localhost:21028/websocket", {
+           secureSocket: {
+               cert: {
+                   path: TRUSTSTORE_PATH,
+                   password: "ballerina"
                }
-           });
+           }
+       });
    }
 
    remote function onTextMessage(Caller wsEp, string text) {
@@ -65,13 +66,13 @@ service class SslProxy {
 }
 
 listener Listener l27 = new(21028, {
-                              secureSocket: {
-                                  key: {
-                                      path: KEYSTORE_PATH,
-                                      password: "ballerina"
-                                  }
-                              }
-                          });
+    secureSocket: {
+        key: {
+            path: KEYSTORE_PATH,
+            password: "ballerina"
+        }
+    }
+});
 service /websocket on l27 {
    resource isolated function get .() returns Service|UpgradeError {
        return new SslProxyServer();
@@ -102,14 +103,14 @@ service class SslProxyServer {
 // Tests sending and receiving of text frames in WebSockets over SSL.
 @test:Config {}
 public function testSslProxySendText() returns Error? {
-   Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
-           secureSocket: {
-               cert: {
-                   path: TRUSTSTORE_PATH,
-                   password: "ballerina"
-               }
+   Client wsClient = check new ("wss://localhost:21027/sslEcho", {
+       secureSocket: {
+           cert: {
+               path: TRUSTSTORE_PATH,
+               password: "ballerina"
            }
-       });
+       }
+   });
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    string sslProxyData = check wsClient->readTextMessage();
@@ -120,14 +121,14 @@ public function testSslProxySendText() returns Error? {
 // Tests sending and receiving of binary frames in WebSocket over SSL.
 @test:Config {}
 public function testSslProxySendBinary() returns Error? {
-   Client wsClient = check new ("wss://localhost:21027/sslEcho", config = {
-           secureSocket: {
-               cert: {
-                   path: TRUSTSTORE_PATH,
-                   password: "ballerina"
-               }
+   Client wsClient = check new ("wss://localhost:21027/sslEcho", {
+       secureSocket: {
+           cert: {
+               path: TRUSTSTORE_PATH,
+               password: "ballerina"
            }
-       });
+       }
+   });
    byte[] binaryData = [5, 24, 56];
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);

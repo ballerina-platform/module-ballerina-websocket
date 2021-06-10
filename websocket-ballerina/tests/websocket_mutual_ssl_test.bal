@@ -18,27 +18,27 @@ import ballerina/test;
 import ballerina/http;
 
 listener Listener l65 = new(21065, {
-                secureSocket: {
-                    key: {
-                        path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                        password: "ballerina"
-                    },
-                    mutualSsl: {
-                        verifyClient: http:REQUIRE,
-                        cert: {
-                            path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                            password: "ballerina"
-                        }
-                    },
-                    protocol: {
-                        name: http:TLS,
-                        versions: ["TLSv1.2","TLSv1.1"]
-                    },
-                    ciphers:["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"],
-                    handshakeTimeout: 20,
-                    sessionTimeout: 200
-                }
-            });
+    secureSocket: {
+        key: {
+            path: KEYSTORE_PATH,
+            password: "ballerina"
+        },
+        mutualSsl: {
+            verifyClient: http:REQUIRE,
+            cert: {
+                path: TRUSTSTORE_PATH,
+                password: "ballerina"
+            }
+        },
+        protocol: {
+            name: http:TLS,
+            versions: ["TLSv1.2","TLSv1.1"]
+        },
+        ciphers:["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"],
+        handshakeTimeout: 20,
+        sessionTimeout: 200
+    }
+});
 
 service /sslTest on l65 {
     resource function get .(http:Request req) returns Service {
@@ -59,25 +59,25 @@ service class SslService {
 // Tests the successful connection of sync client over mutual SSL
 @test:Config {}
 public function testMutualSslWithKeyStores() returns Error? {
-    Client|Error wsClient = new("wss://localhost:21065/sslTest", config = {
-                       secureSocket: {
-                           key:{
-                               path: "tests/certsAndKeys/ballerinaKeystore.p12",
-                               password: "ballerina"
-                           },
-                           cert: {
-                               path: "tests/certsAndKeys/ballerinaTruststore.p12",
-                               password: "ballerina"
-                           },
-                           protocol:{
-                               name: http:TLS,
-                               versions: ["TLSv1.2", "TLSv1.1"]
-                           },
-                           ciphers: ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"],
-                           handshakeTimeout: 20,
-                           sessionTimeout: 200
-                       }
-                   });
+    Client|Error wsClient = new("wss://localhost:21065/sslTest", {
+        secureSocket: {
+            key:{
+                path: KEYSTORE_PATH,
+                password: "ballerina"
+            },
+            cert: {
+                path: TRUSTSTORE_PATH,
+                password: "ballerina"
+            },
+            protocol:{
+                name: http:TLS,
+                versions: ["TLSv1.2", "TLSv1.1"]
+            },
+            ciphers: ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"],
+            handshakeTimeout: 20,
+            sessionTimeout: 200
+        }
+    });
     if (wsClient is Error) {
         test:assertFail("Expected a successful mTLS connection");
     } else {
