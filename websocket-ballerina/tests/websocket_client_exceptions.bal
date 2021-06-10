@@ -85,15 +85,6 @@ public function testConnectionError() returns Error? {
    }
 }
 
-// // SSL/TLS error
-// @test:Config {}
-// public function testSslError() returns Error? {
-//    AsyncClient wsClient = check new ("wss://localhost:21030/websocket", new errorResourceService(), config);
-//    runtime:sleep(0.5);
-//    test:assertEquals(errMessage, "GenericError: SSL/TLS Error");
-//    error? err = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
-// }
-
 // The frame exceeds the max frame length
 @test:Config {}
 public function testLongFrameError() returns Error? {

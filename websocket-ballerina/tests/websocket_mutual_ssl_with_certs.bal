@@ -19,17 +19,17 @@ import ballerina/http;
 import ballerina/io;
 
 listener Listener l66 = new(21066, {
-                secureSocket: {
-                    key: {
-                        certFile: "tests/certsAndKeys/public.crt",
-                        keyFile: "tests/certsAndKeys/private.key"
-                    },
-                    mutualSsl: {
-                        verifyClient: http:REQUIRE,
-                        cert: "tests/certsAndKeys/public.crt"
-                    }
-                }
-            });
+    secureSocket: {
+        key: {
+            certFile: "tests/certsAndKeys/public.crt",
+            keyFile: "tests/certsAndKeys/private.key"
+        },
+        mutualSsl: {
+            verifyClient: http:REQUIRE,
+            cert: "tests/certsAndKeys/public.crt"
+        }
+    }
+});
 
 service /sslTest on l66 {
     resource function get .() returns Service {
@@ -50,15 +50,15 @@ service class SslService2 {
 // Tests the successful connection of sync client over mutual SSL with certs and keys
 @test:Config {}
 public function testMutualSslWithCertsAndKeys() returns Error? {
-    Client|Error wsClient = new("wss://localhost:21066/sslTest", config = {
-                       secureSocket: {
-                           cert: "tests/certsAndKeys/public.crt",
-                           key: {
-                               keyFile: "tests/certsAndKeys/private.key",
-                               certFile: "tests/certsAndKeys/public.crt"
-                           }
-                       }
-                   });
+    Client|Error wsClient = new("wss://localhost:21066/sslTest", {
+        secureSocket: {
+            cert: "tests/certsAndKeys/public.crt",
+            key: {
+                keyFile: "tests/certsAndKeys/private.key",
+                certFile: "tests/certsAndKeys/public.crt"
+            }
+        }
+    });
     if (wsClient is Error) {
         io:println(wsClient.message());
         test:assertFail("Expected a successful mTLS connection");

@@ -53,31 +53,3 @@ public function testClientSuccessWithoutService() returns Error? {
    test:assertTrue(isClientConnectionOpen);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
-
-// Tests the client initialization with a WebSocketClientService but without any resources.
-// @test:Config {}
-// public function testClientSuccessWithWebSocketClientService() returns Error? {
-//    isClientConnectionOpen = false;
-//    AsyncClient wsClient = check new("ws://localhost:21021/client/service/bbe", new ClientService200());
-//    check wsClient->writeTextMessage("Client worked");
-//    runtime:sleep(0.5);
-//    test:assertTrue(isClientConnectionOpen);
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-// }
-
-// Tests the client initialization failure when used with a WebSocketService.
-// TODO: Commenting out the test as it is not possible to shut down the dynamic listener
-// as the client creation returns an error.
-// @test:Config {}
-// public function testClientFailureWithWebSocketService() {
-//    isClientConnectionOpen = false;
-//    AsyncClient|error wsClientEp = new ("ws://localhost:21021/client/service/bbe", new callback200());
-//    runtime:sleep(0.5);
-//    if (wsClientEp is error) {
-//        test:assertEquals(wsClientEp.message(),
-//            "GenericError: The callback service should be a WebSocket Client Service");
-//    } else {
-//        test:assertFail("Mismatched output");
-//    }
-//    error? result = wsClientEp->close(statusCode = 1000, timeoutInSeconds = 0);
-// }

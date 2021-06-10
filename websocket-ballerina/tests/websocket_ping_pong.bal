@@ -69,14 +69,3 @@ public function testPingToBallerinaServer() returns Error? {
    test:assertEquals(expectedPongData, pongData);
    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
-
-// // Tests pong to Ballerina WebSocket server
-// @test:Config {}
-// public function testPingFromRemoteServerToBallerinaClient() returns Error? {
-//    Client wsClient = check new ("ws://localhost:21014/pingpong/ws", new pingPongCallbackService());
-//    byte[] pongData = [5, 24, 34];
-//    check wsClient->pong(pongData);
-//    runtime:sleep(0.5);
-//    test:assertEquals(expectedPongData1, pongData);
-//    error? result = wsClient->close(statusCode = 1000, timeoutInSeconds = 0);
-// }
