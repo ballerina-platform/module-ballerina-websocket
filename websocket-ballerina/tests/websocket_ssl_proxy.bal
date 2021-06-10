@@ -38,7 +38,7 @@ service class SslProxy {
    *Service;
    Client? wsClientEp = ();
    remote function onOpen(Caller wsEp) returns Error? {
-       self.Client wsClientEp = check new ("wss://localhost:21028/websocket", {
+       self.wsClientEp = check new ("wss://localhost:21028/websocket", {
            secureSocket: {
                cert: {
                    path: TRUSTSTORE_PATH,
