@@ -47,5 +47,11 @@ public type ReadTimedOutError distinct Error;
 # Defines the Auth error types that returned from the client
 public type AuthError distinct Error;
 
+# Defines the authentication error type that returned from the listener
+public type AuthnError distinct Error;
+
+# Defines the authorization error type that returned from the listener
+public type AuthzError distinct Error;
+
 # Raised when the SSL handshake fails
 public type SslError distinct Error;

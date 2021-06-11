@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
+import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.CUSTOM_HEADERS;
@@ -49,6 +50,14 @@ public class OnUpgradeResourceCallback implements Callback {
     @Override
     public void notifySuccess(Object result) {
         if (result instanceof BError) {
+            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(401, ((BError) result).getErrorMessage().toString());
+                return;
+            }
+            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(403, ((BError) result).getErrorMessage().toString());
+                return;
+            }
             webSocketHandshaker.cancelHandshake(400, ((BError) result).getErrorMessage().toString());
             return;
         }
@@ -67,6 +76,16 @@ public class OnUpgradeResourceCallback implements Callback {
 
     @Override
     public void notifyFailure(BError error) {
+        // These checks are added to release the failure path since there is an authn/authz failure and responded
+        // with 401/403 internally.
+        if (error.getMessage().equals("401 received by auth desugar.")) {
+            webSocketHandshaker.cancelHandshake(401, error.getMessage());
+            return;
+        }
+        if (error.getMessage().equals("403 received by auth desugar.")) {
+            webSocketHandshaker.cancelHandshake(403, error.getMessage());
+            return;
+        }
         error.printStackTrace();
         WebSocketConnectionInfo connectionInfo =
                 connectionManager.getConnectionInfo(webSocketHandshaker.getChannelId());

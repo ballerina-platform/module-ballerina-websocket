@@ -147,6 +147,8 @@ public class WebSocketConstants {
         HandshakeTimedOut("HandshakeTimedOut"),
         ReadTimedOutError("ReadTimedOutError"),
         SslError("SslError"),
+        AuthzError("AuthzError"),
+        AuthnError("AuthnError"),
         Error("Error");
 
         private String errorCode;

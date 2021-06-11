@@ -66,3 +66,71 @@ public type OAuth2RefreshTokenGrantConfig record {|
 
 # Represents OAuth2 grant configurations for OAuth2 authentication.
 public type OAuth2GrantConfig OAuth2ClientCredentialsGrantConfig|OAuth2PasswordGrantConfig|OAuth2RefreshTokenGrantConfig;
+
+# Represents file user store configurations for Basic Auth authentication.
+public type FileUserStoreConfig record {|
+    *auth:FileUserStoreConfig;
+|};
+
+# Represents LDAP user store configurations for Basic Auth authentication.
+public type LdapUserStoreConfig record {|
+    *auth:LdapUserStoreConfig;
+|};
+
+# Represents JWT validator configurations for JWT authentication.
+#
+# + scopeKey - The key used to fetch the scopes
+public type JwtValidatorConfig record {|
+    *jwt:ValidatorConfig;
+    string scopeKey = "scope";
+|};
+
+# Represents OAuth2 introspection server configurations for OAuth2 authentication.
+#
+# + scopeKey - The key used to fetch the scopes
+public type OAuth2IntrospectionConfig record {|
+    *oauth2:IntrospectionConfig;
+    string scopeKey = "scope";
+|};
+
+# Represents the auth annotation for file user store configurations with scopes.
+#
+# + fileUserStoreConfig - File user store configurations for Basic Auth authentication
+# + scopes - Scopes allowed for authorization
+public type FileUserStoreConfigWithScopes record {|
+   FileUserStoreConfig fileUserStoreConfig;
+   string|string[] scopes?;
+|};
+
+# Represents the auth annotation for LDAP user store configurations with scopes.
+#
+# + ldapUserStoreConfig - LDAP user store configurations for Basic Auth authentication
+# + scopes - Scopes allowed for authorization
+public type LdapUserStoreConfigWithScopes record {|
+   LdapUserStoreConfig ldapUserStoreConfig;
+   string|string[] scopes?;
+|};
+
+# Represents the auth annotation for JWT validator configurations with scopes.
+#
+# + jwtValidatorConfig - JWT validator configurations for JWT authentication
+# + scopes - Scopes allowed for authorization
+public type JwtValidatorConfigWithScopes record {|
+   JwtValidatorConfig jwtValidatorConfig;
+   string|string[] scopes?;
+|};
+
+# Represents the auth annotation for OAuth2 introspection server configurations with scopes.
+#
+# + oauth2IntrospectionConfig - OAuth2 introspection server configurations for OAuth2 authentication
+# + scopes - Scopes allowed for authorization
+public type OAuth2IntrospectionConfigWithScopes record {|
+   OAuth2IntrospectionConfig oauth2IntrospectionConfig;
+   string|string[] scopes?;
+|};
+
+# Defines the authentication configurations for the WebSocket listener.
+public type ListenerAuthConfig FileUserStoreConfigWithScopes|
+                               LdapUserStoreConfigWithScopes|
+                               JwtValidatorConfigWithScopes|
+                               OAuth2IntrospectionConfigWithScopes;

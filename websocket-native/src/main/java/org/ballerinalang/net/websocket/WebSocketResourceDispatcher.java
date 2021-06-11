@@ -150,9 +150,13 @@ public class WebSocketResourceDispatcher {
                     break;
             }
         }
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(HttpConstants.INBOUND_MESSAGE, httpCarbonMessage);
         wsService.getRuntime().invokeMethodAsync(wsService.getBalService(), resourceFunction.getName(), null,
-                ModuleUtils.getOnUpgradeMetaData(),
-                new OnUpgradeResourceCallback(webSocketHandshaker, wsService, connectionManager), bValues);
+                                                 ModuleUtils.getOnUpgradeMetaData(),
+                                                 new OnUpgradeResourceCallback(webSocketHandshaker, wsService,
+                                                                               connectionManager),
+                                                 properties, PredefinedTypes.TYPE_ANY, bValues);
     }
 
     private static String sanitizeSubPath(String subPath) {
