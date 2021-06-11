@@ -33,6 +33,7 @@ ext.stdlibJwtVersion = project.stdlibJwtVersion
 ext.stdlibOAuth2Version = project.stdlibOAuth2Version
 ext.stdlibCacheVersion = project.stdlibCacheVersion
 ext.stdlibTimeVersion = project.stdlibTimeVersion
+ext.stdlibUrlVersion = project.stdlibUrlVersion
 ext.stdlibCryptoVersion = project.stdlibCryptoVersion
 ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibOsVersion = project.stdlibOsVersion
@@ -225,6 +226,7 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
+        ballerinaStdLibs "org.ballerinalang:url-ballerina:${stdlibUrlVersion}"
     }
 }
 

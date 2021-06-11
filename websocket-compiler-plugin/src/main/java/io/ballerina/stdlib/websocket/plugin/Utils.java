@@ -26,6 +26,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
@@ -105,11 +106,11 @@ public class Utils {
             FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
-                if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
+                if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE
+                        && symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
                         symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
-                            resourceNode.location(), symbol.signature(),
-                            functionName);
+                            resourceNode.location(), symbol.signature(), functionName);
                 }
             }
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !(returnTypeSymbol.typeKind()
@@ -151,7 +152,9 @@ public class Utils {
             FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
-                if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL)) {
+                if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL)
+                        && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.signature()
+                        .endsWith(SyntaxKind.COLON_TOKEN.stringValue() + ERROR))) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES,
                             resourceNode.location(), functionName,
                             WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL);
