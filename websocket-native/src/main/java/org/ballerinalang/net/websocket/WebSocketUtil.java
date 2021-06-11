@@ -404,7 +404,7 @@ public class WebSocketUtil {
         HttpCarbonMessage inboundMessage = (HttpCarbonMessage) env.getStrandLocal(HttpConstants.INBOUND_MESSAGE);
         String authorizationHeader = inboundMessage.getHeader(HttpHeaderNames.AUTHORIZATION.toString());
         if (authorizationHeader == null) {
-            return HttpUtil.createHttpError("Http header does not exist", HEADER_NOT_FOUND_ERROR);
+            return HttpUtil.createHttpError("HTTP header does not exist", HEADER_NOT_FOUND_ERROR);
         }
         return StringUtils.fromString(authorizationHeader);
     }
