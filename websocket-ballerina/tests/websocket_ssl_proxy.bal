@@ -18,9 +18,6 @@ import ballerina/io;
 import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
-final string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
-final string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
-
 listener Listener l24 = new(21027, {
     secureSocket: {
         key: {

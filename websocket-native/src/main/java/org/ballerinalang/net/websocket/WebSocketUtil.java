@@ -18,6 +18,7 @@
 
 package org.ballerinalang.net.websocket;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
@@ -33,10 +34,20 @@ import io.ballerina.runtime.api.values.BString;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CodecException;
 import io.netty.handler.codec.TooLongFrameException;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
+import org.ballerinalang.net.http.HttpConstants;
+import org.ballerinalang.net.http.HttpUtil;
+import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeFuture;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnector;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
+import org.ballerinalang.net.transport.message.HttpCarbonMessage;
+import org.ballerinalang.net.websocket.client.listener.ClientHandshakeListener;
+import org.ballerinalang.net.websocket.client.listener.ExtendedConnectorListener;
+import org.ballerinalang.net.websocket.client.listener.ExtendedHandshakeListener;
+import org.ballerinalang.net.websocket.client.listener.WebSocketHandshakeListener;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionManager;
@@ -48,9 +59,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
+import static org.ballerinalang.net.http.HttpErrorType.HEADER_NOT_FOUND_ERROR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.INITIALIZED_BY_SERVICE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
@@ -300,6 +314,15 @@ public class WebSocketUtil {
         return ErrorCreator
                 .createError(ModuleUtils.getWebsocketModule(), errorType.errorCode(), StringUtils.fromString(message),
                         null, null);
+    }
+
+    public static Object getAuthorizationHeader(Environment env) {
+        HttpCarbonMessage inboundMessage = (HttpCarbonMessage) env.getStrandLocal(HttpConstants.INBOUND_MESSAGE);
+        String authorizationHeader = inboundMessage.getHeader(HttpHeaderNames.AUTHORIZATION.toString());
+        if (authorizationHeader == null) {
+            return HttpUtil.createHttpError("HTTP header does not exist", HEADER_NOT_FOUND_ERROR);
+        }
+        return StringUtils.fromString(authorizationHeader);
     }
 
     private WebSocketUtil() {
