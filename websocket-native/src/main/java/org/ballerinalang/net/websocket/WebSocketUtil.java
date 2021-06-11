@@ -40,14 +40,8 @@ import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import org.ballerinalang.net.http.HttpConstants;
 import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeFuture;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnector;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.message.HttpCarbonMessage;
-import org.ballerinalang.net.websocket.client.listener.ClientHandshakeListener;
-import org.ballerinalang.net.websocket.client.listener.ExtendedConnectorListener;
-import org.ballerinalang.net.websocket.client.listener.ExtendedHandshakeListener;
-import org.ballerinalang.net.websocket.client.listener.WebSocketHandshakeListener;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionManager;
@@ -59,8 +53,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
