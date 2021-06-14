@@ -64,7 +64,9 @@ public class WebSocketResourceCallback implements Callback {
     @Override
     public void notifySuccess(Object result) {
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
-        if (result instanceof BArray && resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PING)) {
+        if (result instanceof BError) {
+            ((BError) result).printStackTrace();
+        } else if (result instanceof BArray && resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PING)) {
             sendPong((BArray) result, promiseCombiner);
         } else if (result instanceof BString) {
             sendTextMessage((BString) result, promiseCombiner);

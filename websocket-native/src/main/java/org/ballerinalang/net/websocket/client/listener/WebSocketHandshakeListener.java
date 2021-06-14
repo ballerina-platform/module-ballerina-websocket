@@ -18,8 +18,10 @@
 
 package org.ballerinalang.net.websocket.client.listener;
 
+import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.net.http.HttpUtil;
+import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeListener;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.message.HttpCarbonResponse;
 import org.ballerinalang.net.websocket.WebSocketConstants;
@@ -28,41 +30,34 @@ import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 
-import java.util.concurrent.CountDownLatch;
-
-import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
-
 /**
- * The `WebSocketHandshakeListener` implements the `{@link ExtendedHandshakeListener}` interface directly.
+ * The `WebSocketHandshakeListener` implements the `{@link ClientHandshakeListener}` interface directly.
  *
  * @since 1.2.0
  */
-public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
+public class WebSocketHandshakeListener implements ClientHandshakeListener {
 
     private final WebSocketService wsService;
-    private final ExtendedConnectorListener connectorListener;
+    private final SyncClientConnectorListener connectorListener;
     private final BObject webSocketClient;
-    private CountDownLatch countDownLatch;
     private WebSocketConnectionInfo connectionInfo;
+    private Future balFuture;
 
     public WebSocketHandshakeListener(BObject webSocketClient, WebSocketService wsService,
-            ExtendedConnectorListener connectorListener,
-            CountDownLatch countDownLatch) {
+            SyncClientConnectorListener connectorListener, Future future) {
         this.webSocketClient = webSocketClient;
         this.wsService = wsService;
         this.connectorListener = connectorListener;
-        this.countDownLatch = countDownLatch;
+        this.balFuture = future;
     }
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse carbonResponse) {
         webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(carbonResponse));
         WebSocketUtil.populateClientWebSocketEndpoint(webSocketConnection, webSocketClient);
-        // Calls the `countDown()` function to initialize the count down latch of the connection.
-        WebSocketUtil.countDownForHandshake(webSocketClient);
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
-        countDownLatch.countDown();
+        balFuture.complete(null);
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
     }
 
@@ -71,19 +66,8 @@ public class WebSocketHandshakeListener implements ExtendedHandshakeListener {
         if (response != null) {
             webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(response));
         }
-        webSocketClient.addNativeData(CLIENT_CONNECTION_ERROR, t);
         setWebSocketOpenConnectionInfo(null, webSocketClient, wsService);
-        countDownLatch.countDown();
-    }
-
-    @Override
-    public BObject getWebSocketClient() {
-        return webSocketClient;
-    }
-
-    @Override
-    public WebSocketConnectionInfo getWebSocketConnectionInfo() {
-        return connectionInfo;
+        balFuture.complete(WebSocketUtil.createErrorByType(t));
     }
 
     private void setWebSocketOpenConnectionInfo(WebSocketConnection webSocketConnection,

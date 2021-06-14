@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketCloseMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
+import org.ballerinalang.net.transport.contract.websocket.WebSocketConnectorListener;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketControlMessage;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
@@ -36,10 +37,10 @@ import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import java.io.IOException;
 
 /**
- * SyncClientConnectorListener implements {@link ExtendedConnectorListener} interface directly.
+ * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.
  *
  */
-public class SyncClientConnectorListener implements ExtendedConnectorListener {
+public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;

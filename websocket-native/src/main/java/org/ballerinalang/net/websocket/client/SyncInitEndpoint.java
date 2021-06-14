@@ -19,6 +19,7 @@
 package org.ballerinalang.net.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -26,19 +27,18 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.HttpWsConnectorFactory;
+import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnector;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnectorConfig;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
 import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.client.listener.SyncClientConnectorListener;
+import org.ballerinalang.net.websocket.client.listener.WebSocketHandshakeListener;
 
 import java.net.URI;
-import java.util.concurrent.CountDownLatch;
 
-import static org.ballerinalang.net.websocket.WebSocketConstants.CLIENT_CONNECTION_ERROR;
 import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT_SERVICE_CONFIG;
-import static org.ballerinalang.net.websocket.WebSocketUtil.createErrorByType;
 import static org.ballerinalang.net.websocket.WebSocketUtil.findMaxFrameSize;
 
 /**
@@ -47,6 +47,7 @@ import static org.ballerinalang.net.websocket.WebSocketUtil.findMaxFrameSize;
  */
 public class SyncInitEndpoint {
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
+        final Future balFuture = env.markAsync();
         try {
             @SuppressWarnings(WebSocketConstants.UNCHECKED) BMap<BString, Object> clientEndpointConfig = wsSyncClient
                     .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
@@ -58,8 +59,9 @@ public class SyncInitEndpoint {
             WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
             String scheme = URI.create(remoteUrl).getScheme();
             if (scheme == null) {
-                return WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
-                        null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
+                balFuture.complete(WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
+                        null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                return null;
             }
             populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
             WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
@@ -67,24 +69,19 @@ public class SyncInitEndpoint {
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
             wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
                     clientConnectorConfig.getMaxFrameSize());
-            if (wsSyncClient.getNativeData(WebSocketConstants.CLIENT_LISTENER) == null) {
-                SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
-                wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
-            }
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            wsSyncClient.addNativeData(WebSocketConstants.COUNT_DOWN_LATCH, countDownLatch);
-            WebSocketUtil.establishWebSocketConnection(clientConnector, wsSyncClient, wsService);
-            // Sets the count down latch for the initial connection.
-            WebSocketUtil.waitForHandshake(countDownLatch);
-            if (wsSyncClient.getNativeData(CLIENT_CONNECTION_ERROR) != null) {
-                return createErrorByType((Throwable) wsSyncClient.getNativeData(CLIENT_CONNECTION_ERROR));
-            }
+            SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
+            wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
+            ClientHandshakeFuture handshakeFuture = clientConnector.connect();
+            handshakeFuture.setWebSocketConnectorListener(syncClientConnectorListener);
+            handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(wsSyncClient, wsService,
+                    syncClientConnectorListener, balFuture));
         } catch (Exception e) {
             if (e instanceof BError) {
-                return e;
+                balFuture.complete(e);
+            } else {
+                balFuture.complete(WebSocketUtil
+                        .getWebSocketError(e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
             }
-            return WebSocketUtil.getWebSocketError(e.getMessage(),
-                    null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
         return null;
     }

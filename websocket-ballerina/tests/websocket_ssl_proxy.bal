@@ -33,8 +33,9 @@ service /sslEcho on l24 {
 }
 service class SslProxy {
    *Service;
+   Client? wsClientEp = ();
    remote function onOpen(Caller wsEp) returns Error? {
-       Client wsClientEp = check new ("wss://localhost:21028/websocket", {
+       self.wsClientEp = check new ("wss://localhost:21028/websocket", {
            secureSocket: {
                cert: {
                    path: TRUSTSTORE_PATH,
@@ -44,17 +45,21 @@ service class SslProxy {
        });
    }
 
-   remote function onTextMessage(Caller wsEp, string text) {
-       var returnVal = wsEp->writeTextMessage(text);
-       if (returnVal is Error) {
-           panic <error>returnVal;
+   remote function onTextMessage(Caller wsEp, string text) returns Error? {
+       Client? proxyClient = self.wsClientEp;
+       if (proxyClient is Client) {
+           check proxyClient->writeTextMessage(text);
+           string proxyData = check proxyClient->readTextMessage();
+           check wsEp->writeTextMessage(proxyData);
        }
    }
 
-   remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       var returnVal = wsEp->writeBinaryMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
+   remote function onBinaryMessage(Caller wsEp, byte[] data) returns Error? {
+       Client? proxyClient = self.wsClientEp;
+       if (proxyClient is Client) {
+           check proxyClient->writeBinaryMessage(data);
+           byte[] proxyData = check proxyClient->readBinaryMessage();
+           check wsEp->writeBinaryMessage(proxyData);
        }
    }
 
@@ -108,6 +113,7 @@ public function testSslProxySendText() returns Error? {
            }
        }
    });
+   runtime:sleep(1);
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
    string sslProxyData = check wsClient->readTextMessage();
@@ -127,6 +133,7 @@ public function testSslProxySendBinary() returns Error? {
        }
    });
    byte[] binaryData = [5, 24, 56];
+   runtime:sleep(1);
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
    byte[] sslProxyBinData = check wsClient->readBinaryMessage();
