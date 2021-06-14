@@ -21,7 +21,6 @@ module io.ballerina.stdlib.websocket {
     requires io.ballerina.tools.api;
     requires io.ballerina.lang;
     requires io.ballerina.lang.value;
-    requires io.ballerina.logging;
     requires io.ballerina.config;
     requires io.ballerina.stdlib.mime;
     requires io.ballerina.stdlib.io;
@@ -31,5 +30,13 @@ module io.ballerina.stdlib.websocket {
     requires java.management;
     requires org.slf4j;
     requires io.ballerina.stdlib.http;
+    requires io.netty.handler;
+    requires io.netty.codec.http;
+    requires io.netty.transport;
+    requires io.netty.codec;
+    requires io.netty.common;
+    requires io.netty.buffer;
+    requires org.apache.commons.lang3;
     exports org.ballerinalang.net.websocket.server;
+    exports org.ballerinalang.net.websocket;
 }

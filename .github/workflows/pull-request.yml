@@ -1,6 +1,12 @@
 name: PR build
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+      - "automated/dependency_version_update"
+      - "automated/dependency_version_update_tmp"
 
 jobs:
   ubuntu-build:
@@ -18,6 +24,22 @@ jobs:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build
+      - name: Archive Error Log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: Ballerina Internal Log
+          path: websocket-ballerina/ballerina-internal.log
+          if-no-files-found: ignore
+      - name: Archive Code Coverage JSON
+        uses: actions/upload-artifact@v2
+        with:
+          name: Code Coverage JSON
+          path: websocket-ballerina/target/report/test_results.json
+          if-no-files-found: ignore
+      - name: Generate Codecov Report
+        if:  github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v1
 
   windows-build:
 
@@ -33,4 +55,5 @@ jobs:
         env:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
+          JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
         run: ./gradlew.bat build

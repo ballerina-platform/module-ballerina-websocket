@@ -35,8 +35,8 @@ public class AbstractWebsocketNativeFunction {
     }
 
     static boolean isConnectorStarted(BObject serviceEndpoint) {
-        return serviceEndpoint.getNativeData(CONNECTOR_STARTED) != null && (Boolean) serviceEndpoint
-                .getNativeData(CONNECTOR_STARTED);
+        return serviceEndpoint != null && serviceEndpoint.getNativeData(CONNECTOR_STARTED) != null
+                && (Boolean) serviceEndpoint.getNativeData(CONNECTOR_STARTED);
     }
 
     protected static ServerConnector getServerConnector(BObject serviceEndpoint) {

@@ -18,6 +18,7 @@
 
 package org.ballerinalang.net.websocket;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
@@ -25,6 +26,7 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -32,38 +34,29 @@ import io.ballerina.runtime.api.values.BString;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CodecException;
 import io.netty.handler.codec.TooLongFrameException;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpErrorType;
 import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.HttpWsConnectorFactory;
 import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeFuture;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnector;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnectorConfig;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
-import org.ballerinalang.net.websocket.client.FailoverContext;
-import org.ballerinalang.net.websocket.client.RetryContext;
+import org.ballerinalang.net.transport.message.HttpCarbonMessage;
 import org.ballerinalang.net.websocket.client.listener.ClientHandshakeListener;
 import org.ballerinalang.net.websocket.client.listener.ExtendedConnectorListener;
 import org.ballerinalang.net.websocket.client.listener.ExtendedHandshakeListener;
-import org.ballerinalang.net.websocket.client.listener.FailoverHandshakeListener;
-import org.ballerinalang.net.websocket.client.listener.RetryHandshakeListener;
 import org.ballerinalang.net.websocket.client.listener.WebSocketHandshakeListener;
 import org.ballerinalang.net.websocket.observability.WebSocketObservabilityUtil;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionInfo;
 import org.ballerinalang.net.websocket.server.WebSocketConnectionManager;
 import org.ballerinalang.net.websocket.server.WebSocketServerService;
-import org.ballerinalang.stdlib.io.utils.IOConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -71,7 +64,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
-import static org.ballerinalang.net.websocket.WebSocketConstants.PROTOCOL_WEBSOCKET_PKG_ID;
+import static org.ballerinalang.net.http.HttpErrorType.HEADER_NOT_FOUND_ERROR;
+import static org.ballerinalang.net.websocket.WebSocketConstants.INITIALIZED_BY_SERVICE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE;
+import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT;
 
 /**
  * Utility class for WebSocket.
@@ -80,22 +76,24 @@ public class WebSocketUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketUtil.class);
     private static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
-    private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeoutInSeconds");
-    private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_HTTP +
+    private static final BString HANDSHAKE_TIME_OUT = StringUtils.fromString("handShakeTimeout");
+    private static final String WEBSOCKET_FAILOVER_CLIENT_NAME = WebSocketConstants.PACKAGE_WEBSOCKET +
             WebSocketConstants.SEPARATOR + WebSocketConstants.FAILOVER_WEBSOCKET_CLIENT;
     public static final String ERROR_MESSAGE = "Error occurred: ";
-    public static final String LOG_MESSAGE = "{} {}";
 
     public static BObject createAndPopulateWebSocketCaller(WebSocketConnection webSocketConnection,
             WebSocketServerService wsService,
             WebSocketConnectionManager connectionManager) {
         BObject webSocketCaller = ValueCreator
-                .createObjectValue(PROTOCOL_WEBSOCKET_PKG_ID, WebSocketConstants.WEBSOCKET_CALLER);
+                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CALLER,
+                        StringUtils.fromString(""), null, null);
         BObject webSocketConnector = ValueCreator
-                .createObjectValue(PROTOCOL_WEBSOCKET_PKG_ID, WebSocketConstants.WEBSOCKET_CONNECTOR);
+                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CONNECTOR);
+        webSocketCaller.addNativeData(NATIVE_DATA_MAX_FRAME_SIZE, wsService.getMaxFrameSize());
 
         webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
         populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
+        webSocketCaller.set(INITIALIZED_BY_SERVICE, true);
         WebSocketConnectionInfo connectionInfo =
                 new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller);
         connectionManager.addConnection(webSocketConnection.getChannelId(), connectionInfo);
@@ -106,6 +104,15 @@ public class WebSocketUtil {
                 connectionManager.getConnectionInfo(webSocketConnection.getChannelId()));
 
         return webSocketCaller;
+    }
+
+    public static void populateClientWebSocketEndpoint(WebSocketConnection webSocketConnection,
+            BObject webSocketClient) {
+        webSocketClient.addNativeData(WebSocketConstants.CONNECTION_ID_FIELD, webSocketConnection.getChannelId());
+        webSocketClient.addNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL,
+                webSocketConnection.getNegotiatedSubProtocol());
+        webSocketClient.addNativeData(WebSocketConstants.IS_SECURE, webSocketConnection.isSecure());
+        webSocketClient.set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, webSocketConnection.isOpen());
     }
 
     public static void populateWebSocketEndpoint(WebSocketConnection webSocketConnection, BObject webSocketClient) {
@@ -133,26 +140,26 @@ public class WebSocketUtil {
         });
     }
 
-    public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo,
-            Future balFuture, Throwable error) {
-        if (hasSupportForResiliency(connectionInfo)) {
-            ErrorCreator.createError(error).printStackTrace();
-            balFuture.complete(null);
-        } else {
-            balFuture.complete(WebSocketUtil.createErrorByType(error));
-        }
+    public static void handlePingWebSocketCallback(Future balFuture,
+            ChannelFuture webSocketChannelFuture, Logger log,
+            WebSocketConnectionInfo connectionInfo) {
+        webSocketChannelFuture.addListener(future -> {
+            Throwable cause = future.cause();
+            if (!future.isSuccess() && cause != null) {
+                log.error(ERROR_MESSAGE, cause);
+                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause);
+            } else {
+                balFuture.complete(null);
+                if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
+                    connectionInfo.getWebSocketConnection().readNextFrame();
+                }
+            }
+        });
     }
 
-    private static boolean hasSupportForResiliency(WebSocketConnectionInfo connectionInfo) {
-        return ((connectionInfo.getWebSocketEndpoint().getType().getName().equalsIgnoreCase(WebSocketConstants.
-                WEBSOCKET_CLIENT) && WebSocketUtil.hasRetryContext(connectionInfo.getWebSocketEndpoint())) ||
-                connectionInfo.getWebSocketEndpoint().getType().getName().equalsIgnoreCase(WebSocketConstants.
-                        FAILOVER_WEBSOCKET_CLIENT));
-    }
-
-    public static void readFirstFrame(WebSocketConnection webSocketConnection, BObject wsConnector) {
-        webSocketConnection.readNextFrame();
-        wsConnector.set(WebSocketConstants.CONNECTOR_IS_READY_FIELD, true);
+    public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo, Future balFuture,
+            Throwable error) {
+        balFuture.complete(WebSocketUtil.createErrorByType(error));
     }
 
     /**
@@ -185,12 +192,12 @@ public class WebSocketUtil {
     }
 
     public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key, int defaultValue) {
-        long timeout = config.getIntValue(key);
-        if (timeout < 0) {
-            return defaultValue;
-        }
         try {
-            return Math.toIntExact(timeout);
+            int timeout = (int) ((BDecimal) config.get(key)).floatValue();
+            if (timeout < 0) {
+                return defaultValue;
+            }
+            return timeout;
         } catch (ArithmeticException e) {
             logger.warn("The value set for {} needs to be less than {} .The {} value is set to {} ", key,
                     Integer.MAX_VALUE, key, Integer.MAX_VALUE);
@@ -219,116 +226,47 @@ public class WebSocketUtil {
         if (throwable instanceof WebSocketException) {
             return ((WebSocketException) throwable).getWsError();
         }
-        String errorCode = WebSocketConstants.ErrorCode.WsGenericError.errorCode();
+        String errorCode = WebSocketConstants.ErrorCode.Error.errorCode();
         BError cause = null;
         String message = getErrorMessage(throwable);
         if (throwable instanceof CorruptedWebSocketFrameException) {
             WebSocketCloseStatus status = ((CorruptedWebSocketFrameException) throwable).closeStatus();
             if (status == WebSocketCloseStatus.MESSAGE_TOO_BIG) {
-                errorCode = WebSocketConstants.ErrorCode.WsPayloadTooBigError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.PayloadTooLargeError.errorCode();
             } else {
-                errorCode = WebSocketConstants.ErrorCode.WsProtocolError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
             }
         } else if (throwable instanceof SSLException) {
-            cause = createErrorCause(throwable.getMessage(), HttpErrorType.SSL_ERROR.getReason(),
-                    PROTOCOL_WEBSOCKET_PKG_ID);
-            message = "SSL/TLS Error";
+            cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.SslError.errorCode(),
+                    ModuleUtils.getWebsocketModule());
         } else if (throwable instanceof IllegalStateException) {
-            if (throwable.getMessage().contains("frame continuation")) {
-                errorCode = WebSocketConstants.ErrorCode.WsInvalidContinuationFrameError.errorCode();
-            } else if (throwable.getMessage().toLowerCase(Locale.ENGLISH).contains("close frame")) {
-                errorCode = WebSocketConstants.ErrorCode.WsConnectionClosureError.errorCode();
+            if (throwable.getMessage().toLowerCase(Locale.ENGLISH).contains("close frame")) {
+                errorCode = WebSocketConstants.ErrorCode.ConnectionClosureError.errorCode();
             }
         } else if (throwable instanceof IllegalAccessException &&
-                throwable.getMessage().equals(WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE)) {
-            errorCode = WebSocketConstants.ErrorCode.WsConnectionError.errorCode();
+                throwable.getMessage().equals(WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE)) {
+            errorCode = WebSocketConstants.ErrorCode.ConnectionError.errorCode();
             if (throwable.getMessage() == null) {
-                message = WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE;
+                message = WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE;
             }
         } else if (throwable instanceof TooLongFrameException) {
-            errorCode = WebSocketConstants.ErrorCode.WsPayloadTooBigError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.PayloadTooLargeError.errorCode();
         } else if (throwable instanceof CodecException) {
-            errorCode = WebSocketConstants.ErrorCode.WsProtocolError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
         } else if (throwable instanceof WebSocketHandshakeException) {
-            errorCode = WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode();
         } else if (throwable instanceof IOException) {
-            errorCode = WebSocketConstants.ErrorCode.WsConnectionError.errorCode();
-            cause = createErrorCause(throwable.getMessage(), IOConstants.ErrorCode.GenericError.errorCode(),
-                    IOConstants.IO_PACKAGE_ID);
+            errorCode = WebSocketConstants.ErrorCode.ConnectionError.errorCode();
+            String errMessage = throwable.getMessage() != null ? throwable.getMessage() : "Connection Error";
+            cause = createErrorCause(errMessage, WebSocketConstants.ErrorCode.Error.
+                    errorCode(), ModuleUtils.getWebsocketModule());
             message = "IO Error";
         }
         return getWebSocketError(message, null, errorCode, cause);
     }
 
     private static BError createErrorCause(String message, String errorIdName, Module packageName) {
-        return ErrorCreator.createDistinctError(errorIdName, packageName, StringUtils.fromString(message));
-    }
-
-    /**
-     * Reconnect when the WebSocket connection is lost.
-     *
-     * @param webSocketClient - webSocket client
-     * @param wsService - webSocket service
-     * @return If attempts reconnection, then return true
-     */
-    public static boolean reconnect(BObject webSocketClient, WebSocketService wsService) {
-        RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
-                RETRY_CONTEXT.getValue());
-        int maxAttempts = retryConnectorConfig.getMaxAttempts();
-        int noOfReconnectAttempts = retryConnectorConfig.getReconnectAttempts();
-        if (noOfReconnectAttempts < maxAttempts || maxAttempts == 0) {
-            retryConnectorConfig.setReconnectAttempts(noOfReconnectAttempts + 1);
-            if (logger.isDebugEnabled()) {
-                Date date = new Date();
-                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                String time = formatter.format(date.getTime());
-                logger.debug(LOG_MESSAGE, time, "reconnecting...");
-            }
-            createDelay(calculateWaitingTime(retryConnectorConfig.getInterval(), retryConnectorConfig.getMaxInterval(),
-                    retryConnectorConfig.getBackOfFactor(), noOfReconnectAttempts));
-            establishWebSocketConnection((WebSocketClientConnector) webSocketClient.getNativeData(WebSocketConstants.
-                    CLIENT_CONNECTOR), webSocketClient, wsService);
-            return true;
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug(LOG_MESSAGE, "Maximum retry attempts but couldn't connect to the server: ",
-                    webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
-        }
-        return false;
-    }
-
-    /**
-     * Failover when webSocket connection lost.
-     *
-     * @param webSocketClient - webSocket client
-     * @param wsService - webSocket service
-     * @return if attempts failover, return true
-     */
-    public static boolean failover(BObject webSocketClient, WebSocketService wsService) {
-        FailoverContext failoverContext = (FailoverContext) webSocketClient.
-                getNativeData(WebSocketConstants.FAILOVER_CONTEXT);
-        int currentIndex = failoverContext.getCurrentIndex();
-        List targets = failoverContext.getTargetUrls();
-        // Sets next url index
-        currentIndex++;
-        // Checks current url index equals to target size or not. if equal, set the currentIndex = 0
-        if (currentIndex == targets.size()) {
-            currentIndex = 0;
-        }
-        // Checks the current url index equals with previous connected url index or not
-        // If it isn't equal, call the initialiseWebSocketConnection()
-        // if it equals, return false
-        if (currentIndex != failoverContext.getInitialIndex()) {
-            failoverContext.setCurrentIndex(currentIndex);
-            createDelay(failoverContext.getFailoverInterval());
-            establishWebSocketConnection(createWebSocketClientConnector(targets.get(currentIndex).toString(),
-                    webSocketClient), webSocketClient, wsService);
-            return true;
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug(LOG_MESSAGE, "Couldn't connect to one of the server in the targets: ", targets);
-        }
-        return false;
+        return ErrorCreator.createError(packageName, errorIdName, StringUtils.fromString(message), null, null);
     }
 
     /**
@@ -340,11 +278,9 @@ public class WebSocketUtil {
      */
     public static void establishWebSocketConnection(WebSocketClientConnector clientConnector,
             BObject webSocketClient, WebSocketService wsService) {
-        boolean readyOnConnect = webSocketClient.getMapValue(CLIENT_ENDPOINT_CONFIG).getBooleanValue(
-                WebSocketConstants.CLIENT_READY_ON_CONNECT);
         ClientHandshakeFuture handshakeFuture = clientConnector.connect();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch, readyOnConnect);
+        setListenersToHandshakeFuture(handshakeFuture, webSocketClient, wsService, countDownLatch);
         // Sets the countDown latch for every handshake
         waitForHandshake(webSocketClient, countDownLatch, wsService);
     }
@@ -357,45 +293,13 @@ public class WebSocketUtil {
      * @param wsService - the WebSocket service
      */
     private static void setListenersToHandshakeFuture(ClientHandshakeFuture handshakeFuture,
-            BObject webSocketClient, WebSocketService wsService,
-            CountDownLatch countDownLatch, boolean readyOnConnect) {
-        ExtendedConnectorListener connectorListener = (ExtendedConnectorListener) webSocketClient.getNativeData(
-                WebSocketConstants.CLIENT_LISTENER);
+            BObject webSocketClient, WebSocketService wsService, CountDownLatch countDownLatch) {
+        ExtendedConnectorListener connectorListener = (ExtendedConnectorListener) webSocketClient
+                .getNativeData(WebSocketConstants.CLIENT_LISTENER);
         handshakeFuture.setWebSocketConnectorListener(connectorListener);
         ExtendedHandshakeListener webSocketHandshakeListener = new WebSocketHandshakeListener(webSocketClient,
-                wsService, connectorListener, countDownLatch, readyOnConnect);
-        if (WebSocketUtil.hasRetryContext(webSocketClient)) {
-            handshakeFuture.setClientHandshakeListener(new RetryHandshakeListener(webSocketHandshakeListener,
-                    (RetryContext) webSocketClient.getNativeData(WebSocketConstants.RETRY_CONTEXT.getValue()),
-                    wsService));
-        } else if (isFailoverClient(webSocketClient)) {
-            handshakeFuture.setClientHandshakeListener(new FailoverHandshakeListener(webSocketHandshakeListener,
-                    wsService));
-        } else {
-            handshakeFuture.setClientHandshakeListener(new ClientHandshakeListener(webSocketHandshakeListener));
-        }
-    }
-
-    /**
-     * Checks whether the client's config has the retryConfig property.
-     *
-     * @param webSocketClient - the WebSocket client
-     * @return If the client's config has the retry config, then return true
-     */
-    public static boolean hasRetryContext(BObject webSocketClient) {
-        return webSocketClient.getMapValue(CLIENT_ENDPOINT_CONFIG).
-                getMapValue(WebSocketConstants.RETRY_CONTEXT) != null;
-    }
-
-    /**
-     * Checks whether the client is a failover client or not.
-     *
-     * @param webSocketClient - the WebSocket client
-     * @return If the failover client, then return true
-     */
-    public static boolean isFailoverClient(BObject webSocketClient) {
-        return webSocketClient.getType().getName().equalsIgnoreCase(WebSocketConstants.
-                FAILOVER_WEBSOCKET_CLIENT);
+                wsService, connectorListener, countDownLatch);
+        handshakeFuture.setClientHandshakeListener(new ClientHandshakeListener(webSocketHandshakeListener));
     }
 
     private static void waitForHandshake(BObject webSocketClient, CountDownLatch countDownLatch,
@@ -406,104 +310,20 @@ public class WebSocketUtil {
         try {
             if (!countDownLatch.await(timeout, TimeUnit.SECONDS)) {
                 countDownLatch.countDown();
-                if (hasRetryContext(webSocketClient)) {
-                    WebSocketUtil.reconnect(webSocketClient, wsService);
-                } else if (isFailoverClient(webSocketClient)) {
-                    WebSocketUtil.failover(webSocketClient, wsService);
-                } else {
-                    throw getWebSocketError("Waiting for WebSocket handshake has not been successful", null,
-                            WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), WebSocketUtil
-                                    .createErrorCause("Connection timeout",
-                                            IOConstants.ErrorCode.ConnectionTimedOut.errorCode(),
-                                            IOConstants.IO_PACKAGE_ID));
-                }
+                throw getWebSocketError("Waiting for WebSocket handshake has not been successful", null,
+                        WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode(), WebSocketUtil
+                                .createErrorCause("Connection timeout",
+                                        WebSocketConstants.ErrorCode.HandshakeTimedOut.errorCode(),
+                                        ModuleUtils.getWebsocketModule()));
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw WebSocketUtil.getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
     }
 
-    /**
-     * Sets the time to wait before attempting to reconnect.
-     *
-     * @param interval - interval to wait before trying to reconnect
-     */
-    private static void createDelay(int interval) {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        try {
-            if (!countDownLatch.await(interval, TimeUnit.MILLISECONDS)) {
-                countDownLatch.countDown();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw WebSocketUtil.getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
-        }
-    }
-
-    /**
-     * Calculate the waiting time.
-     *
-     * @param interval- interval to wait before trying to reconnect
-     * @param maxInterval - maximum interval to wait before trying to reconnect
-     * @param backOfFactor - the rate of increase of the reconnect delay
-     * @param reconnectAttempts - the number of reconnecting attempts
-     * @return The time to wait before attempting to reconnect
-     */
-    private static int calculateWaitingTime(int interval, int maxInterval, double backOfFactor,
-            int reconnectAttempts) {
-        interval = (int) (interval * Math.pow(backOfFactor, reconnectAttempts));
-        if (interval > maxInterval) {
-            interval = maxInterval;
-        }
-        return interval;
-    }
-
-    public static int getIntValue(BMap<BString, Object> configs, BString key, int defaultValue) {
-        int value = Math.toIntExact(configs.getIntValue(key));
-        if (value < 0) {
-            logger.warn("The value set for `{}` needs to be great than than -1. The `{}` value is set to {}", key, key,
-                    defaultValue);
-            value = defaultValue;
-        }
-        return value;
-    }
-
-    public static void populateClientConnectorConfig(BMap<BString, Object> clientEndpointConfig,
-            WebSocketClientConnectorConfig clientConnectorConfig,
-            String scheme) {
-        clientConnectorConfig.setAutoRead(false); // Frames are read sequentially in ballerina
-        clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        BMap<BString, Object> headerValues = (BMap<BString, Object>) clientEndpointConfig.getMapValue(
-                WebSocketConstants.CLIENT_CUSTOM_HEADERS_CONFIG);
-        if (headerValues != null) {
-            clientConnectorConfig.addHeaders(getCustomHeaders(headerValues));
-        }
-
-        long idleTimeoutInSeconds = findTimeoutInSeconds(clientEndpointConfig,
-                WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
-        if (idleTimeoutInSeconds > 0) {
-            clientConnectorConfig.setIdleTimeoutInMillis((int) (idleTimeoutInSeconds * 1000));
-        }
-
-        clientConnectorConfig.setMaxFrameSize(findMaxFrameSize(clientEndpointConfig));
-
-        BMap<BString, Object> secureSocket =
-                (BMap<BString, Object>) clientEndpointConfig.getMapValue(
-                        HttpConstants.ENDPOINT_CONFIG_SECURE_SOCKET);
-        if (secureSocket != null) {
-            HttpUtil.populateSSLConfiguration(clientConnectorConfig, secureSocket);
-        } else if (scheme.equals(WebSocketConstants.WSS_SCHEME)) {
-            clientConnectorConfig.useJavaDefaults();
-        }
-        clientConnectorConfig.setWebSocketCompressionEnabled(
-                clientEndpointConfig.getBooleanValue(WebSocketConstants.COMPRESSION_ENABLED_CONFIG));
-    }
-
-    private static Map<String, String> getCustomHeaders(BMap<BString, Object> headers) {
+    public static Map<String, String> getCustomHeaders(BMap<BString, Object> headers) {
         Map<String, String> customHeaders = new HashMap<>();
         headers.entrySet().forEach(
                 entry -> customHeaders.put(entry.getKey().getValue(), headers.get(entry.getKey()).toString())
@@ -523,42 +343,26 @@ public class WebSocketUtil {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw getWebSocketError(ERROR_MESSAGE + e.getMessage(), null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
-    }
-
-    private static WebSocketClientConnector createWebSocketClientConnector(String remoteUrl,
-            BObject webSocketClient) {
-        @SuppressWarnings(WebSocketConstants.UNCHECKED)
-        BMap<BString, Object> clientEndpointConfig =  webSocketClient.getMapValue(
-                HttpConstants.CLIENT_ENDPOINT_CONFIG);
-        WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
-        populateClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, remoteUrl);
-        // Gets the connector factory from the native data
-        HttpWsConnectorFactory connectorFactory = ((HttpWsConnectorFactory) webSocketClient.
-                getNativeData(WebSocketConstants.CONNECTOR_FACTORY));
-        // Creates the client connector
-        return connectorFactory.createWsClientConnector(clientConnectorConfig);
     }
 
     /**
      * Validate and create the webSocket service.
      *
-     * @param clientEndpointConfig - a client endpoint config
+     * @param callbackService - a client endpoint config
      * @param runtime - ballerina runtime
      * @return webSocketService
      */
-    public static WebSocketService validateAndCreateWebSocketService(Runtime runtime,
-            BMap<BString, Object> clientEndpointConfig) {
-        Object clientService = clientEndpointConfig.get(WebSocketConstants.CLIENT_SERVICE_CONFIG);
-        if (clientService != null) {
-            Type param = ((BObject) clientService).getType().getAttachedFunctions()[0].getParameterTypes()[0];
+    public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
+        if (callbackService != null) {
+            Type param = (callbackService).getType().getMethods()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
-                throw WebSocketUtil.getWebSocketError("The callback service should be a WebSocket Client Service",
-                        null, WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                throw WebSocketUtil.getWebSocketError("The callback service should be a PingPongService",
+                        null, WebSocketConstants.ErrorCode.Error.errorCode(), null);
             }
-            return new WebSocketService((BObject) clientService, runtime);
+            return new WebSocketService(callbackService, runtime);
         } else {
             return new WebSocketService(runtime);
         }
@@ -579,7 +383,7 @@ public class WebSocketUtil {
     public static BError getWebSocketError(String msg, Throwable throwable, String errorCode,
             BError cause) {
         WebSocketException exception;
-        String message = errorCode.substring(2) + ": " + msg;
+        String message = errorCode + ": " + msg;
         if (throwable != null) {
             exception = new WebSocketException(throwable, errorCode);
         } else if (cause != null) {
@@ -590,14 +394,19 @@ public class WebSocketUtil {
         return exception.getWsError();
     }
 
-    public static void setNotifyFailure(String msg, Future balFuture) {
-        balFuture.complete(getWebSocketError(msg, null,
-                WebSocketConstants.ErrorCode.WsInvalidHandshakeError.errorCode(), null));
+    public static BError createWebsocketError(String message, WebSocketConstants.ErrorCode errorType) {
+        return ErrorCreator
+                .createError(ModuleUtils.getWebsocketModule(), errorType.errorCode(), StringUtils.fromString(message),
+                        null, null);
     }
 
-    public static BError createWebsocketError(String message, HttpErrorType errorType) {
-        return ErrorCreator.createDistinctError(errorType.getErrorName(), PROTOCOL_WEBSOCKET_PKG_ID,
-                StringUtils.fromString(message));
+    public static Object getAuthorizationHeader(Environment env) {
+        HttpCarbonMessage inboundMessage = (HttpCarbonMessage) env.getStrandLocal(HttpConstants.INBOUND_MESSAGE);
+        String authorizationHeader = inboundMessage.getHeader(HttpHeaderNames.AUTHORIZATION.toString());
+        if (authorizationHeader == null) {
+            return HttpUtil.createHttpError("HTTP header does not exist", HEADER_NOT_FOUND_ERROR);
+        }
+        return StringUtils.fromString(authorizationHeader);
     }
 
     private WebSocketUtil() {

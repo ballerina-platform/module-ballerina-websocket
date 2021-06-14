@@ -20,11 +20,17 @@ package org.ballerinalang.net.websocket.server;
 
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
-import org.ballerinalang.net.websocket.WebSocketResourceDispatcher;
+import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketUtil;
+
+import static org.ballerinalang.net.websocket.WebSocketConstants.CUSTOM_HEADERS;
 
 /**
  * The onUpgrade resource callback.
@@ -43,32 +49,43 @@ public class OnUpgradeResourceCallback implements Callback {
 
     @Override
     public void notifySuccess(Object result) {
-        if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
-            ServerHandshakeFuture future = webSocketHandshaker.handshake(
-                    wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000, null,
-                    wsService.getMaxFrameSize());
-            wsService.setDispatchingService(result);
-            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager));
-        } else {
-            // If the acceptWebSocketUpgrade function has not been called inside the upgrade resource
-            if (!webSocketHandshaker.isCancelled()) {
-
-                WebSocketConnectionInfo connectionInfo =
-                        connectionManager.getConnectionInfo(webSocketHandshaker.getChannelId());
-                WebSocketConnection webSocketConnection = null;
-                try {
-                    webSocketConnection = connectionInfo.getWebSocketConnection();
-                } catch (IllegalAccessException e) {
-                    // Ignore as it is not possible have an Illegal access
-                }
-                WebSocketResourceDispatcher.dispatchOnOpen(webSocketConnection, connectionInfo.getWebSocketEndpoint(),
-                        wsService);
+        if (result instanceof BError) {
+            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(401, ((BError) result).getErrorMessage().toString());
+                return;
             }
+            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(403, ((BError) result).getErrorMessage().toString());
+                return;
+            }
+            webSocketHandshaker.cancelHandshake(400, ((BError) result).getErrorMessage().toString());
+            return;
+        }
+        if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
+            HttpHeaders headers = null;
+            if (((BObject) result).getType().getFields().get(CUSTOM_HEADERS.toString()) != null) {
+                BMap<BString, BString> headersMap = (BMap) ((BObject) result).get(CUSTOM_HEADERS);
+                headers = populateAndGetHttpHeaders(headersMap);
+            }
+            ServerHandshakeFuture future = webSocketHandshaker
+                    .handshake(wsService.getNegotiableSubProtocols(), wsService.getIdleTimeoutInSeconds() * 1000,
+                            headers, wsService.getMaxFrameSize());
+            future.setHandshakeListener(new UpgradeListener(wsService, connectionManager, result));
         }
     }
 
     @Override
     public void notifyFailure(BError error) {
+        // These checks are added to release the failure path since there is an authn/authz failure and responded
+        // with 401/403 internally.
+        if (error.getMessage().equals("401 received by auth desugar.")) {
+            webSocketHandshaker.cancelHandshake(401, error.getMessage());
+            return;
+        }
+        if (error.getMessage().equals("403 received by auth desugar.")) {
+            webSocketHandshaker.cancelHandshake(403, error.getMessage());
+            return;
+        }
         error.printStackTrace();
         WebSocketConnectionInfo connectionInfo =
                 connectionManager.getConnectionInfo(webSocketHandshaker.getChannelId());
@@ -79,5 +96,14 @@ public class OnUpgradeResourceCallback implements Callback {
                 // Ignore as it is not possible have an Illegal access
             }
         }
+    }
+
+    private static DefaultHttpHeaders populateAndGetHttpHeaders(BMap<BString, BString> headers) {
+        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
+        BString[] keys = headers.getKeys();
+        for (BString key : keys) {
+            httpHeaders.add(key.toString(), headers.get(key).getValue());
+        }
+        return httpHeaders;
     }
 }

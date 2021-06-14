@@ -18,16 +18,17 @@
 
 package org.ballerinalang.net.websocket.serviceendpoint;
 
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BObject;
-import org.ballerinalang.net.http.HttpConnectorPortBindingListener;
 import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpErrorType;
-import org.ballerinalang.net.http.HttpUtil;
 import org.ballerinalang.net.transport.contract.ServerConnector;
 import org.ballerinalang.net.transport.contract.ServerConnectorFuture;
+import org.ballerinalang.net.websocket.WebSocketConnectorPortBindingListener;
+import org.ballerinalang.net.websocket.WebSocketConstants;
+import org.ballerinalang.net.websocket.WebSocketUtil;
 import org.ballerinalang.net.websocket.server.WebSocketServerListener;
 
-import static org.ballerinalang.net.http.HttpConstants.SERVICE_ENDPOINT_CONFIG;
+import static org.ballerinalang.net.websocket.WebSocketConstants.HTTP_LISTENER;
 
 /**
  * Start the Websocket listener instance.
@@ -35,35 +36,36 @@ import static org.ballerinalang.net.http.HttpConstants.SERVICE_ENDPOINT_CONFIG;
  */
 public class Start extends AbstractWebsocketNativeFunction {
     public static Object start(BObject listener) {
-        if (!isConnectorStarted(listener)) {
+        BObject httpListener = (BObject) listener.get(StringUtils.fromString(HTTP_LISTENER));
+        if (!isConnectorStarted(listener) && !isConnectorStarted(httpListener)) {
             return startServerConnector(listener);
         }
+        ServerConnectorFuture serverConnectorFuture = (ServerConnectorFuture) ((BObject) listener
+                .get(StringUtils.fromString(HTTP_LISTENER))).getNativeData(HttpConstants.SERVER_CONNECTOR_FUTURE);
+        WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(listener));
+        serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         return null;
     }
 
     private static Object startServerConnector(BObject serviceEndpoint) {
         ServerConnector serverConnector = getServerConnector(serviceEndpoint);
         ServerConnectorFuture serverConnectorFuture = serverConnector.start();
-        //        BallerinaHTTPConnectorListener httpListener =
-        //                new BallerinaHTTPConnectorListener(getHttpServicesRegistry(serviceEndpoint),
-        //                        serviceEndpoint.getMapValue(SERVICE_ENDPOINT_CONFIG));
-        WebSocketServerListener wsListener =
-                new WebSocketServerListener(getWebSocketServicesRegistry(serviceEndpoint),
-                        serviceEndpoint.getMapValue(SERVICE_ENDPOINT_CONFIG));
-        HttpConnectorPortBindingListener portBindingListener = new HttpConnectorPortBindingListener();
-        //        serverConnectorFuture.setHttpConnectorListener(httpListener);
+        WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(serviceEndpoint));
+        WebSocketConnectorPortBindingListener portBindingListener = new WebSocketConnectorPortBindingListener();
         serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         serverConnectorFuture.setPortBindingEventListener(portBindingListener);
 
         try {
             serverConnectorFuture.sync();
         } catch (Exception ex) {
-            throw HttpUtil.createHttpError("failed to start server connector '"
-                    + serverConnector.getConnectorID()
-                    + "': " + ex.getMessage(), HttpErrorType.LISTENER_STARTUP_FAILURE);
+            throw WebSocketUtil.createWebsocketError(
+                    "failed to start server connector '" + serverConnector.getConnectorID() + "': " + ex.getMessage(),
+                    WebSocketConstants.ErrorCode.Error);
         }
 
         serviceEndpoint.addNativeData(HttpConstants.CONNECTOR_STARTED, true);
         return null;
     }
+
+    private Start() {}
 }

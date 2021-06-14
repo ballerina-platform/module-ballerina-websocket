@@ -23,6 +23,9 @@ import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.ballerinalang.net.websocket.WebSocketConstants;
 import org.ballerinalang.net.websocket.WebSocketService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 /**
  * This class has WebSocket connection info for both the client and the server. Includes details
  * needed to dispatch a resource after a successful handshake.
@@ -33,6 +36,7 @@ public class WebSocketConnectionInfo {
     private final BObject webSocketEndpoint;
     private final WebSocketConnection webSocketConnection;
     private StringAggregator stringAggregator = null;
+    private ByteArrAggregator byteArrAggregator = null;
 
     /**
      * @param webSocketService    can be the WebSocketServerService or WebSocketService
@@ -58,7 +62,7 @@ public class WebSocketConnectionInfo {
         if (webSocketConnection != null) {
             return webSocketConnection;
         } else {
-            throw new IllegalAccessException(WebSocketConstants.THE_WEBSOCKET_CONNECTION_HAS_NOT_BEEN_MADE);
+            throw new IllegalAccessException(WebSocketConstants.WEBSOCKET_CONNECTION_FAILURE);
         }
     }
 
@@ -69,8 +73,15 @@ public class WebSocketConnectionInfo {
         return stringAggregator;
     }
 
+    public ByteArrAggregator createIfNullAndGetByteArrAggregator() {
+        if (byteArrAggregator == null) {
+            byteArrAggregator = new ByteArrAggregator();
+        }
+        return byteArrAggregator;
+    }
+
     /**
-     * A string aggregator to handle string aggregation for data binding during onText resource dispatching. The
+     * A string aggregator to handle string aggregation for data binding during onTextMessage resource dispatching. The
      * aggregation is done in the ConnectionInfo class because the strings specific to a particular connection needs to
      * be aggregated.
      */
@@ -79,18 +90,43 @@ public class WebSocketConnectionInfo {
 
         }
 
-        private String aggregateString = "";
+        private StringBuilder aggregateStrBuilder = new StringBuilder();
 
         public String getAggregateString() {
-            return aggregateString;
+            return aggregateStrBuilder.toString();
         }
 
         public void appendAggregateString(String aggregateString) {
-            this.aggregateString += aggregateString;
+            aggregateStrBuilder.append(aggregateString);
         }
 
         public void resetAggregateString() {
-            this.aggregateString = "";
+            aggregateStrBuilder = new StringBuilder();
+        }
+    }
+
+    /**
+     * A byte array aggregator to handle byte array aggregation until the final frame is received. The aggregation
+     * is done in the ConnectionInfo class because the byte arrays specific to a particular connection needs to
+     * be aggregated.
+     */
+    public static class ByteArrAggregator {
+        private ByteArrAggregator() {
+
+        }
+
+        private ByteArrayOutputStream aggregateArr = new ByteArrayOutputStream();
+
+        public byte[] getAggregateByteArr() {
+            return aggregateArr.toByteArray();
+        }
+
+        public void appendAggregateArr(byte[] aggregateByteArr) throws IOException {
+            this.aggregateArr.write(aggregateByteArr);
+        }
+
+        public void resetAggregateByteArr() {
+            this.aggregateArr = new ByteArrayOutputStream();
         }
     }
 }

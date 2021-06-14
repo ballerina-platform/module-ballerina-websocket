@@ -20,18 +20,18 @@
 
 # Configurations for a WebSocket service.
 #
-# + path - Path of the WebSocket service
 # + subProtocols - Negotiable sub protocol by the service
-# + idleTimeoutInSeconds - Idle timeout for the client connection. Upon timeout, `onIdleTimeout` resource (if defined)
-#                          in the server service will be triggered. Note that this overrides the `timeoutInMillis` config
-#                          in the `http:Listener`.
+# + idleTimeout - Idle timeout for the client connection. Upon timeout, `onIdleTimeout` resource (if defined)
+#                          in the server service will be triggered. Note that this overrides the `timeout` config
+#                          in the `websocket:Listener` which is applicable only for the initial HTTP upgrade request.
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
-#                  If this is not set or is negative or zero, the default frame size will be used.
+#                  If this is not set or is negative or zero, the default frame size which is 65536 will be used.
+# + auth - Listener authenticaton configurations
 public type WSServiceConfig record {|
-    string path = "";
     string[] subProtocols = [];
-    int idleTimeoutInSeconds = 0;
-    int maxFrameSize = 0;
+    decimal idleTimeout = 0;
+    int maxFrameSize = 65536;
+    ListenerAuthConfig[] auth?;
 |};
 
 # The annotation which is used to configure a WebSocket service.

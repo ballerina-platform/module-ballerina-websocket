@@ -1,153 +1,103 @@
-//// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-////
-//// WSO2 Inc. licenses this file to you under the Apache License,
-//// Version 2.0 (the "License"); you may not use this file except
-//// in compliance with the License.
-//// You may obtain a copy of the License at
-////
-//// http://www.apache.org/licenses/LICENSE-2.0
-////
-//// Unless required by applicable law or agreed to in writing,
-//// software distributed under the License is distributed on an
-//// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-//// KIND, either express or implied.  See the License for the
-//// specific language governing permissions and limitations
-//// under the License.
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
-//import ballerina/log;
-//import ballerina/runtime;
-//import ballerina/test;
-////import ballerina/websocket;
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
 //
-//string proxyData = "";
+// http://www.apache.org/licenses/LICENSE-2.0
 //
-//@WebSocketServiceConfig {
-//}
-//service on new Listener(21018) {
-//
-//    resource function onOpen(WebSocketCaller wsEp) {
-//        WebSocketClient wsClientEp = new ("ws://localhost:21019/websocket", {
-//                callbackService:
-//                    clientCallbackService9,
-//                readyOnConnect: false
-//            });
-//        var returnVal = wsClientEp->ready();
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onText(WebSocketCaller wsEp, string text) {
-//        var returnVal = wsEp->pushText(text);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onBinary(WebSocketCaller wsEp, byte[] data) {
-//        var returnVal = wsEp->pushBinary(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onClose(WebSocketCaller wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//}
-//
-//@WebSocketServiceConfig {
-//    path: "/websocket"
-//}
-//service proxyServer on new Listener(21019) {
-//
-//    resource function onOpen(WebSocketCaller caller) {
-//        log:print("The Connection ID: " + caller.getConnectionId());
-//    }
-//
-//    resource function onText(WebSocketCaller caller, string text, boolean finalFrame) {
-//        var err = caller->pushText(text, finalFrame);
-//        if (err is WebSocketError) {
-//            log:printError("Error occurred when sending text message", err = err);
-//        }
-//    }
-//
-//    resource function onBinary(WebSocketCaller caller, byte[] data) {
-//        var returnVal = caller->pushBinary(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//}
-//
-//service clientCallbackService9 = @WebSocketServiceConfig {} service {
-//    resource function onText(WebSocketClient wsEp, string text) {
-//        //http:WebSocketCaller serviceEp = getAssociatedListener(wsEp);
-//        var returnVal = wsEp->pushText(text);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onBinary(WebSocketClient wsEp, byte[] data) {
-//        var returnVal = wsEp->pushBinary(data);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//
-//    resource function onClose(WebSocketClient wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//};
-//
-//service proxyCallbackService = @WebSocketServiceConfig {} service {
-//    resource function onText(WebSocketClient wsEp, string text) {
-//        proxyData = <@untainted>text;
-//    }
-//
-//    resource function onBinary(WebSocketClient wsEp, byte[] data) {
-//        expectedBinaryData = <@untainted>data;
-//    }
-//
-//    resource function onClose(WebSocketClient wsEp, int statusCode, string reason) {
-//        var returnVal = wsEp->close(statusCode = statusCode, reason = reason, timeoutInSeconds = 0);
-//        if (returnVal is WebSocketError) {
-//            panic <error>returnVal;
-//        }
-//    }
-//};
-//
-//// Tests sending and receiving of text frames in WebSockets.
-//@test:Config {}
-//public function testSendText() {
-//    WebSocketClient wsClient = new ("ws://localhost:21018", {callbackService: proxyCallbackService});
-//    checkpanic wsClient->pushText("Hi kalai");
-//    runtime:sleep(500);
-//    test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-//    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", err = result);
-//    //}
-//}
-//
-//// Tests sending and receiving of binary frames in WebSocket.
-//@test:Config {}
-//public function testSendBinary() {
-//    WebSocketClient wsClient = new ("ws://localhost:21018", {callbackService: proxyCallbackService});
-//    byte[] binaryData = [5, 24, 56, 243];
-//    checkpanic wsClient->pushBinary(binaryData);
-//    runtime:sleep(500);
-//    test:assertEquals(expectedBinaryData, binaryData, msg = "Data mismatched");
-//    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeoutInSeconds = 0);
-//    //if (result is WebSocketError) {
-//    //   log:printError("Error occurred when closing connection", err = result);
-//    //}
-//}
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import ballerina/io;
+import ballerina/lang.runtime as runtime;
+import ballerina/test;
+
+listener Listener l22 = new(21018);
+
+service / on l22 {
+   resource isolated function get .() returns Service|UpgradeError {
+       return new ProxyService();
+   }
+}
+
+service class ProxyService {
+  *Service;
+  remote function onOpen(Caller wsEp) returns Error? {
+       Client wsClientEp = check new ("ws://localhost:21019/websocket");
+   }
+
+   remote function onTextMessage(Caller wsEp, string text) {
+       var returnVal = wsEp->writeTextMessage(text);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onBinaryMessage(Caller wsEp, byte[] data) {
+       var returnVal = wsEp->writeBinaryMessage(data);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+
+   remote function onClose(Caller wsEp, int statusCode, string reason) returns Error? {
+       check wsEp->close(statusCode = statusCode, reason = reason, timeout = 0);
+   }
+}
+
+listener Listener l26 = new(21019);
+service /websocket on l26 {
+   resource isolated function get .() returns Service|UpgradeError {
+       return new ProxyService2();
+   }
+}
+
+service class ProxyService2 {
+   *Service;
+   remote function onOpen(Caller caller) {
+       io:println("The Connection ID simple proxy server test: " + caller.getConnectionId());
+   }
+
+   remote function onTextMessage(Caller caller, string text) {
+       var err = caller->writeTextMessage(text);
+       if (err is Error) {
+           io:println("Error occurred when sending text message: ", err);
+       }
+   }
+
+   remote function onBinaryMessage(Caller caller, byte[] data) {
+       var returnVal = caller->writeBinaryMessage(data);
+       if (returnVal is Error) {
+           panic <error>returnVal;
+       }
+   }
+}
+
+// Tests sending and receiving of text frames in WebSockets.
+@test:Config {}
+public function testSendText() returns Error? {
+   Client wsClient = check new ("ws://localhost:21018");
+   check wsClient->writeTextMessage("Hi kalai");
+   runtime:sleep(0.5);
+   string proxyData = check wsClient->readTextMessage();
+   test:assertEquals(proxyData, "Hi kalai", msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+// Tests sending and receiving of binary frames in WebSocket.
+@test:Config {}
+public function testSendBinary() returns Error? {
+   Client wsClient = check new ("ws://localhost:21018");
+   byte[] binaryData = [5, 24, 56, 243];
+   check wsClient->writeBinaryMessage(binaryData);
+   runtime:sleep(0.5);
+   byte[] expectedBinData = check wsClient->readBinaryMessage();
+   test:assertEquals(expectedBinData, binaryData, msg = "Data mismatched");
+   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}

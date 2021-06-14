@@ -18,6 +18,7 @@ package org.ballerinalang.net.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -43,7 +44,7 @@ public class Close {
     private static final Logger log = LoggerFactory.getLogger(Close.class);
 
     public static Object externClose(Environment env, BObject wsConnection, long statusCode, BString reason,
-            long timeoutInSecs) {
+            BDecimal timeoutInSecs) {
         Future balFuture = env.markAsync();
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
@@ -54,7 +55,7 @@ public class Close {
             List<BError> errors = new ArrayList<>(1);
             ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                     connectionInfo, countDownLatch);
-            waitForTimeout(errors, (int) timeoutInSecs, countDownLatch, connectionInfo);
+            waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
             closeFuture.channel().close().addListener(future -> {
                 WebSocketUtil.setListenerOpenField(connectionInfo);
                 if (errors.isEmpty()) {
@@ -77,22 +78,17 @@ public class Close {
     }
 
     private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
-            String reason, WebSocketConnectionInfo connectionInfo,
-            CountDownLatch latch) throws IllegalAccessException {
+            String reason, WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
         WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
         ChannelFuture closeFuture;
-        if (statusCode < 0) {
-            closeFuture = webSocketConnection.initiateConnectionClosure();
-        } else {
-            closeFuture = webSocketConnection.initiateConnectionClosure(statusCode, reason);
-        }
+        closeFuture = webSocketConnection.initiateConnectionClosure(statusCode, reason);
         return closeFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
                 addError(cause.getMessage(), errors);
-                WebSocketObservabilityUtil.observeError(connectionInfo,
-                        WebSocketObservabilityConstants.ERROR_TYPE_CLOSE,
-                        cause.getMessage());
+                WebSocketObservabilityUtil
+                        .observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_CLOSE,
+                                cause.getMessage());
             }
             latch.countDown();
         });
@@ -125,7 +121,7 @@ public class Close {
 
     private static void addError(String errMsg, List<BError> errors) {
         errors.add(WebSocketUtil.getWebSocketError(
-                errMsg, null, WebSocketConstants.ErrorCode.WsConnectionClosureError.errorCode(), null));
+                errMsg, null, WebSocketConstants.ErrorCode.ConnectionClosureError.errorCode(), null));
     }
 
     private Close() {

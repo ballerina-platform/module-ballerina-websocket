@@ -41,7 +41,7 @@ public class WebSocketDataElement implements DataElement<WebSocketServerService,
     public void setData(WebSocketServerService webSocketService) {
         if (isFirstTraverse && webSocketService == null) {
             throw WebSocketUtil.getWebSocketError("Service has not been registered", null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
         if (isFirstTraverse) {
             isFirstTraverse = false;
@@ -51,7 +51,7 @@ public class WebSocketDataElement implements DataElement<WebSocketServerService,
             this.webSocketService = null;
         } else {
             throw WebSocketUtil.getWebSocketError("Two services have the same addressable URI", null,
-                    WebSocketConstants.ErrorCode.WsGenericError.errorCode(), null);
+                    WebSocketConstants.ErrorCode.Error.errorCode(), null);
         }
     }
 

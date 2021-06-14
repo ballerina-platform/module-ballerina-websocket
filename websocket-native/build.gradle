@@ -18,7 +18,7 @@
 plugins {
     id 'java'
     id 'checkstyle'
-//    id 'com.github.spotbugs'
+    id 'com.github.spotbugs'
 }
 
 description = 'Ballerina - Websocket Java Utils'
@@ -32,7 +32,6 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'ballerina-core', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'ballerina-config', version: "${ballerinaLangVersion}"
-    compile group: 'org.ballerinalang', name: 'ballerina-logging', version: "${ballerinaLangVersion}"
     compile group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
 
     compile group: 'org.ballerinalang', name: 'io-native', version: "${stdlibIoVersion}"
@@ -49,7 +48,6 @@ dependencies {
     compile group: 'io.netty', name: 'netty-tcnative-boringssl-static', version:"${nettyTcnativeVersion}"
 
     compile group: 'org.wso2.eclipse.osgi', name: 'org.eclipse.osgi', version:"${wso2EclipseOsgiVersion}"
-    compile group: 'org.wso2.orbit.org.yaml', name: 'snakeyaml', version:"${wso2SnakeYamlVersion}"
     compile group: 'commons-pool.wso2', name: 'commons-pool', version:"${wso2CommonsPoolVersion}"
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "${bouncycastleVersion}"
     compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "${bouncycastleVersion}"
@@ -82,23 +80,23 @@ tasks.withType(Checkstyle) {
 
 checkstyleMain.dependsOn(":build-config:checkstyle:downloadMultipleFiles")
 
-//spotbugsMain {
-//    effort "max"
-//    reportLevel "low"
-//    reportsDir = file("$project.buildDir/reports/spotbugs")
-//    reports {
-//        html.enabled true
-//        text.enabled = true
-//    }
-//    def excludeFile = file('spotbugs-exclude.xml')
-//    if(excludeFile.exists()) {
-//        excludeFilter = excludeFile
-//    }
-//}
+spotbugsMain {
+    effort "max"
+    reportLevel "low"
+    reportsDir = file("$project.buildDir/reports/spotbugs")
+    reports {
+        html.enabled true
+        text.enabled = true
+    }
+    def excludeFile = file('spotbugs-exclude.xml')
+    if(excludeFile.exists()) {
+        excludeFilter = excludeFile
+    }
+}
 
-//spotbugsTest {
-//    enabled = false
-//}
+spotbugsTest {
+    enabled = false
+}
 
 
 compileJava {
