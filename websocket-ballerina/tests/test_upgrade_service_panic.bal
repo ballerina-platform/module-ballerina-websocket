@@ -42,7 +42,7 @@ public function testPanicErrorFromUpgradeService() returns Error? {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: "
                                + "500 Internal Server Error");
     } else {
-        test:assertFail("Should return a InvalidHandshakeError");
+        test:assertFail("Should return an InvalidHandshakeError");
         error? result = wsClient->close(1001, "Close the connection", timeout = 0);
     }
 }

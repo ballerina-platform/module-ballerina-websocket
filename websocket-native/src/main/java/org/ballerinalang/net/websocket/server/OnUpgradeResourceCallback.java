@@ -73,7 +73,8 @@ public class OnUpgradeResourceCallback implements Callback {
         }
     }
 
-    @Override public void notifyFailure(BError error) {
+    @Override
+    public void notifyFailure(BError error) {
         // These checks are added to release the failure path since there is an authn/authz failure and responded
         // with 401/403 internally.
         if (error.getMessage().equals("401 received by auth desugar.")) {
