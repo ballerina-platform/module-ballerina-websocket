@@ -2,9 +2,9 @@
 
 This module provides APIs for connecting and interacting with WebSocket endpoints. 
 
-This module facilitates two types of network entry points as the ‘Client’ and ‘Listener’. 
+This module facilitates two types of network entry points as the `Client` and `Listener`. 
 
-#### Client
+### Client
 
 The `websocket:Client` can be used to read/write text/binary messages synchronously. 
 
@@ -44,7 +44,7 @@ service class clientPingPongCallbackService {
 }
 ```
 
-#### Listener
+### Listener
 
 On the listener-side, an initial WebSocket upgrade service can be attached to the `websocket:Listener` to handle upgrade requests. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 The returning `websocket:Service` has a fixed set of remote methods.
@@ -63,7 +63,7 @@ service class WsService {
 }              
 ```
 
-##### Remote methods associated with `websocket:Service`
+#### Remote methods associated with `websocket:Service`
 
 **onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
@@ -79,7 +79,7 @@ service class WsService {
 
 **onError**: This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
 
-#### Control Messages
+### Control Messages
 
 A WebSocket contains three types of control messages: `close`, `ping`, and `pong`. A WebSocket server or a client can send a `ping` message and the opposite side should respond with a corresponding `pong` message by returning the same payload sent with the `ping` message. These ping/pong sequences are used as a heartbeat mechanism to check if the connection is healthy. 
 
@@ -104,11 +104,11 @@ remote function onClose(websocket:Caller caller, int statusCode, string reason) 
 }
 ```
 
-#### WebSocket Compression
+### WebSocket Compression
 
 Per message compression extensions are supported by the Ballerina `websocket` module and this is enabled by default for both the WebSocket client and the server. Compression can be enabled or disabled by setting the `webSocketCompressionEnabled` to `true` or `false` in the `ClientConfiguration` and `ListenerConfiguration`. Once the compression is successfully negotiated, receiving compressed messages will be automatically decompressed when reading.
 
-#### Origin Considerations
+### Origin Considerations
 
 The `Origin` header can be used to differentiate between WebSocket connections from different hosts or between those made from a browser and some other kind of network client. It is recommended to validate this `Origin` header before accepting the WebSocket upgrade.
 ```ballerina
@@ -136,11 +136,11 @@ service class WsService {
 }
 ```
 
-#### Using the TLS protocol to secure WebSocket communication
+### Using the TLS protocol to secure WebSocket communication
 
 It is strongly recommended to use the `wss://` protocol to protect against man-in-the-middle attacks. The Ballerina `websocket` module allows the use of TLS in communication to do this. This expects a secure socket to be set in the connection configuration as shown below.
 
-##### Configuring TLS in server side
+#### Configuring TLS in server side
 
 ```ballerina
 listener websocket:Listener wssListener = new (9090, {
@@ -156,7 +156,7 @@ service /basic/ws on wssListener {
 }
 ```
 
-##### Configuring TLS in client side
+#### Configuring TLS in client side
 
 ```ballerina
 websocket:Client wssClient = new ("wss://echo.websocket.org", {
