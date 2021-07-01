@@ -14,17 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/jballerina.java;
+
 # Represents a WebSocket caller.
-public client class Caller {
+public isolated client class Caller {
 
-    private string id = "";
-    private string? negotiatedSubProtocol = ();
-    private boolean secure = false;
     private boolean open = false;
-    private map<any> attributes = {};
+    private final map<string|int> attributes = {};
     private boolean initializedByService = false;
-
-    private WebSocketConnector conn = new;
 
     isolated function init() {
         // package private function to prevent object creation
@@ -35,35 +32,35 @@ public client class Caller {
     #
     # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(string data) returns Error? {
-        return self.conn.writeTextMessage(data);
-    }
+    remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeBinaryMessage(byte[] data) returns Error? {
-        return self.conn.writeBinaryMessage(data);
-    }
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function ping(byte[] data) returns Error? {
-        return self.conn.ping(data);
-    }
+    remote isolated function ping(byte[] data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
     # the frame will be lost.
     #
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function pong(byte[] data) returns Error? {
-        return self.conn.pong(data);
-    }
+    remote isolated function pong(byte[] data) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Closes the connection.
     #
@@ -77,58 +74,80 @@ public client class Caller {
     # + return - A `websocket:Error` if an error occurs when sending
     remote isolated function close(int? statusCode = 1000, string? reason = (),
         decimal timeout = 60) returns Error? {
-        return self.conn.close(statusCode, reason, timeout);
+        int code = 1000;
+        if (statusCode is int) {
+            if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
+                statusCode <= 2999 || statusCode > 4999) {
+                string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
+                return error ConnectionClosureError(errorMessage);
+            }
+            code = statusCode;
+        }
+        return self.externClose(code, reason is () ? "" : reason, timeout);
     }
+
+    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs) returns Error? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
+    } external;
 
     # Sets a connection related attribute.
     #
     # + key - The key, which identifies the attribute
     # + value - The value of the attribute
-    public isolated function setAttribute(string key, any value) {
-        self.attributes[key] = value;
+    public isolated function setAttribute(string key, string|int value) {
+        lock {
+            self.attributes[key] = value;
+        }
     }
 
     # Gets connection related attribute if any.
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
-    public isolated function getAttribute(string key) returns any {
-        return self.attributes[key];
+    public isolated function getAttribute(string key) returns string|int? {
+        lock {
+            return self.attributes[key];
+        }
     }
 
     # Removes connection related attribute if any.
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
-    public isolated function removeAttribute(string key) returns any {
-        return self.attributes.remove(key);
+    public isolated function removeAttribute(string key) returns string|int? {
+        lock {
+            return self.attributes.remove(key);
+        }
     }
 
     # Gives the connection id associated with this connection.
     #
     # + return - The unique ID associated with the connection
-    public isolated function getConnectionId() returns string {
-        return self.id;
-    }
+    public isolated function getConnectionId() returns string = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
 
     # Gives the subprotocol if any that is negotiated with the client.
     #
     # + return - The subprotocol if any negotiated with the client or `nil`
-    public isolated function getNegotiatedSubProtocol() returns string? {
-        return self.negotiatedSubProtocol;
-    }
+    public isolated function getNegotiatedSubProtocol() returns string? = @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        name: "getNegotiatedSubProtocol"
+    } external;
 
     # Gives the secured status of the connection.
     #
     # + return - `true` if the connection is secure
-    public isolated function isSecure() returns boolean {
-        return self.secure;
-    }
+    public isolated function isSecure() returns boolean= @java:Method {
+        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+    } external;
 
     # Gives the open or closed status of the connection.
     #
     # + return - `true` if the connection is open
     public isolated function isOpen() returns boolean {
-        return self.open;
+        lock {
+            return self.open;
+        }
     }
 }
