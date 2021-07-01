@@ -305,6 +305,18 @@ public class WebSocketUtil {
         return StringUtils.fromString(authorizationHeader);
     }
 
+    public static BString getConnectionId(Environment env, BObject wsSyncClient) {
+        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.CONNECTION_ID_FIELD));
+    }
+
+    public static Boolean isSecure(Environment env, BObject wsSyncClient) {
+        return (Boolean) wsSyncClient.getNativeData(WebSocketConstants.IS_SECURE);
+    }
+
+    public static Object getNegotiatedSubProtocol(Environment env, BObject wsSyncClient) {
+        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL));
+    }
+
     private WebSocketUtil() {
     }
 }

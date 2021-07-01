@@ -153,7 +153,7 @@ public isolated client class Client {
     #
     # + return - The unique ID associated with the connection
     public isolated function getConnectionId() returns string = @java:Method {
-        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+        'class: "org.ballerinalang.net.websocket.WebSocketUtil"
     } external;
 
     # Gives the subprotocol if any that is negotiated with the client.
@@ -167,7 +167,7 @@ public isolated client class Client {
     #
     # + return - `true` if the connection is secure
     public isolated function isSecure() returns boolean = @java:Method {
-        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+        'class: "org.ballerinalang.net.websocket.WebSocketUtil"
     } external;
 
 
@@ -212,7 +212,7 @@ public isolated client class Client {
     } external;
 
     isolated function externGetNegotiatedSubProtocol() returns string? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        'class: "org.ballerinalang.net.websocket.WebSocketUtil",
         name: "getNegotiatedSubProtocol"
     } external;
 }
