@@ -40,6 +40,7 @@ import java.net.URI;
 
 import static org.ballerinalang.net.websocket.WebSocketConstants.SYNC_CLIENT_SERVICE_CONFIG;
 import static org.ballerinalang.net.websocket.WebSocketUtil.findMaxFrameSize;
+import static org.ballerinalang.net.websocket.WebSocketUtil.findTimeoutInSeconds;
 
 /**
  * Initialize the WebSocket Synchronous Client.
@@ -92,6 +93,9 @@ public class SyncInitEndpoint {
         clientConnectorConfig.setAutoRead(false); // Frames should be read only when client starts reading
         clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
+        long handshakeTimeoutInSeconds = findTimeoutInSeconds(clientEndpointConfig,
+                WebSocketConstants.CLIENT_HANDSHAKE_TIMEOUT, 300);
+        clientConnectorConfig.setIdleTimeoutInMillis(Math.toIntExact(handshakeTimeoutInSeconds) * 1000);
         BMap<BString, Object> headerValues = (BMap<BString, Object>) clientEndpointConfig
                 .getMapValue(WebSocketConstants.CUSTOM_HEADERS);
         if (headerValues != null) {

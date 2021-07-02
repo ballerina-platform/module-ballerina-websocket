@@ -80,6 +80,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
+    public static final BString CLIENT_HANDSHAKE_TIMEOUT = StringUtils.fromString("handShakeTimeout");
 
     public static final String PACKAGE = "ballerina";
     public static final String PROTOCOL_WEBSOCKET = "websocket";
