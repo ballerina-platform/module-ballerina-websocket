@@ -57,6 +57,7 @@ public class WebSocketHandshakeListener implements ClientHandshakeListener {
         WebSocketUtil.populateClientWebSocketEndpoint(webSocketConnection, webSocketClient);
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
+        webSocketConnection.removeReadIdleStateHandler();
         balFuture.complete(null);
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
     }
