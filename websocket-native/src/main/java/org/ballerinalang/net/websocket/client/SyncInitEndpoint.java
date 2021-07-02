@@ -94,7 +94,7 @@ public class SyncInitEndpoint {
         clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
         long handshakeTimeoutInSeconds = findTimeoutInSeconds(clientEndpointConfig,
-                WebSocketConstants.ANNOTATION_ATTR_CLIENT_HANDSHAKE_TIMEOUT, 300);
+                WebSocketConstants.CLIENT_HANDSHAKE_TIMEOUT, 300);
         clientConnectorConfig.setIdleTimeoutInMillis(Math.toIntExact(handshakeTimeoutInSeconds) * 1000);
         BMap<BString, Object> headerValues = (BMap<BString, Object>) clientEndpointConfig
                 .getMapValue(WebSocketConstants.CUSTOM_HEADERS);
