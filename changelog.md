@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - [Implement declarative auth design for upgrade service](https://github.com/ballerina-platform/ballerina-standard-library/issues/1405)
+- [Make WebSocket caller isolated](https://github.com/ballerina-platform/ballerina-standard-library/issues/1589)
 
 ### Fixed
 - [Remove the countdown latches in the implementation](https://github.com/ballerina-platform/ballerina-standard-library/issues/1385)
