@@ -15,12 +15,13 @@
 // under the License.
 
 import ballerina/jballerina.java;
+import ballerina/lang.value;
 
 # Represents a WebSocket caller.
 public isolated client class Caller {
 
     private boolean open = false;
-    private final map<string|int> attributes = {};
+    private map<value:Cloneable> attributes = {};
     private boolean initializedByService = false;
 
     isolated function init() {
@@ -94,9 +95,9 @@ public isolated client class Caller {
     #
     # + key - The key, which identifies the attribute
     # + value - The value of the attribute
-    public isolated function setAttribute(string key, string|int value) {
+    public isolated function setAttribute(string key, value:Cloneable value) {
         lock {
-            self.attributes[key] = value;
+            self.attributes[key] = value.clone();
         }
     }
 
@@ -104,9 +105,9 @@ public isolated client class Caller {
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
-    public isolated function getAttribute(string key) returns string|int? {
+    public isolated function getAttribute(string key) returns value:Cloneable? {
         lock {
-            return self.attributes[key];
+            return self.attributes[key].clone();
         }
     }
 
@@ -114,9 +115,9 @@ public isolated client class Caller {
     #
     # + key - The key to identify the attribute
     # + return - The attribute related to the given key or `nil`
-    public isolated function removeAttribute(string key) returns string|int? {
+    public isolated function removeAttribute(string key) returns value:Cloneable? {
         lock {
-            return self.attributes.remove(key);
+            return self.attributes.remove(key).clone();
         }
     }
 
