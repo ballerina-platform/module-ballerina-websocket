@@ -54,7 +54,7 @@ public class WebSocketHandshakeListener implements ClientHandshakeListener {
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse carbonResponse) {
         webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(carbonResponse));
-        WebSocketUtil.populateClientWebSocketEndpoint(webSocketConnection, webSocketClient);
+        WebSocketUtil.populatWebSocketEndpoint(webSocketConnection, webSocketClient);
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
         webSocketConnection.removeReadIdleStateHandler();

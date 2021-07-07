@@ -77,17 +77,14 @@ public class WebSocketUtil {
         BObject webSocketCaller = ValueCreator
                 .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CALLER,
                         StringUtils.fromString(""), null, null);
-        BObject webSocketConnector = ValueCreator
-                .createObjectValue(ModuleUtils.getWebsocketModule(), WebSocketConstants.WEBSOCKET_CONNECTOR);
         webSocketCaller.addNativeData(NATIVE_DATA_MAX_FRAME_SIZE, wsService.getMaxFrameSize());
 
-        webSocketCaller.set(WebSocketConstants.LISTENER_CONNECTOR_FIELD, webSocketConnector);
-        populateWebSocketEndpoint(webSocketConnection, webSocketCaller);
+        populatWebSocketEndpoint(webSocketConnection, webSocketCaller);
         webSocketCaller.set(INITIALIZED_BY_SERVICE, true);
         WebSocketConnectionInfo connectionInfo =
                 new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketCaller);
         connectionManager.addConnection(webSocketConnection.getChannelId(), connectionInfo);
-        webSocketConnector.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO,
+        webSocketCaller.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO,
                 connectionInfo);
         //Observe new connection
         WebSocketObservabilityUtil.observeConnection(
@@ -96,21 +93,12 @@ public class WebSocketUtil {
         return webSocketCaller;
     }
 
-    public static void populateClientWebSocketEndpoint(WebSocketConnection webSocketConnection,
+    public static void populatWebSocketEndpoint(WebSocketConnection webSocketConnection,
             BObject webSocketClient) {
         webSocketClient.addNativeData(WebSocketConstants.CONNECTION_ID_FIELD, webSocketConnection.getChannelId());
         webSocketClient.addNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL,
                 webSocketConnection.getNegotiatedSubProtocol());
         webSocketClient.addNativeData(WebSocketConstants.IS_SECURE, webSocketConnection.isSecure());
-        webSocketClient.set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, webSocketConnection.isOpen());
-    }
-
-    public static void populateWebSocketEndpoint(WebSocketConnection webSocketConnection, BObject webSocketClient) {
-        webSocketClient.set(WebSocketConstants.LISTENER_ID_FIELD,
-                StringUtils.fromString(webSocketConnection.getChannelId()));
-        webSocketClient.set(WebSocketConstants.LISTENER_NEGOTIATED_SUBPROTOCOLS_FIELD,
-                StringUtils.fromString(webSocketConnection.getNegotiatedSubProtocol()));
-        webSocketClient.set(WebSocketConstants.LISTENER_IS_SECURE_FIELD, webSocketConnection.isSecure());
         webSocketClient.set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, webSocketConnection.isOpen());
     }
 
@@ -315,6 +303,18 @@ public class WebSocketUtil {
             return HttpUtil.createHttpError("HTTP header does not exist", HEADER_NOT_FOUND_ERROR);
         }
         return StringUtils.fromString(authorizationHeader);
+    }
+
+    public static BString getConnectionId(Environment env, BObject wsSyncClient) {
+        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.CONNECTION_ID_FIELD));
+    }
+
+    public static Boolean isSecure(Environment env, BObject wsSyncClient) {
+        return (Boolean) wsSyncClient.getNativeData(WebSocketConstants.IS_SECURE);
+    }
+
+    public static Object getNegotiatedSubProtocol(Environment env, BObject wsSyncClient) {
+        return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL));
     }
 
     private WebSocketUtil() {
