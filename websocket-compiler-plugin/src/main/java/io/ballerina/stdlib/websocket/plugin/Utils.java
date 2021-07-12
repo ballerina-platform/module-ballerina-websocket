@@ -32,7 +32,7 @@ import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import org.ballerinalang.net.websocket.WebSocketConstants;
+import io.ballerina.stdlib.websocket.WebSocketConstants;
 
 import java.util.List;
 

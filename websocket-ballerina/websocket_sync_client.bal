@@ -57,7 +57,7 @@ public isolated client class Client {
     }
 
     public isolated function initEndpoint() returns Error? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        'class: "SyncInitEndpoint",
         name: "initEndpoint"
     } external;
 
@@ -67,7 +67,7 @@ public isolated client class Client {
     # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+        'class: "WebSocketConnector"
     } external;
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -76,7 +76,7 @@ public isolated client class Client {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+        'class: "WebSocketConnector"
     } external;
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
@@ -84,7 +84,7 @@ public isolated client class Client {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function ping(byte[] data) returns Error? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+        'class: "WebSocketConnector"
     } external;
 
     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
@@ -93,7 +93,7 @@ public isolated client class Client {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function pong(byte[] data) returns Error? = @java:Method {
-         'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketConnector"
+         'class: "WebSocketConnector"
     } external;
 
     # Closes the connection.
@@ -153,7 +153,7 @@ public isolated client class Client {
     #
     # + return - The unique ID associated with the connection
     public isolated function getConnectionId() returns string = @java:Method {
-        'class: "org.ballerinalang.net.websocket.WebSocketUtil"
+        'class: "WebSocketUtil"
     } external;
 
     # Gives the subprotocol if any that is negotiated with the client.
@@ -167,7 +167,7 @@ public isolated client class Client {
     #
     # + return - `true` if the connection is secure
     public isolated function isSecure() returns boolean = @java:Method {
-        'class: "org.ballerinalang.net.websocket.WebSocketUtil"
+        'class: "WebSocketUtil"
     } external;
 
 
@@ -184,35 +184,35 @@ public isolated client class Client {
     #
     # + return - The HTTP response received from the client handshake request
     public isolated function getHttpResponse() returns http:Response? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint"
+        'class: "SyncInitEndpoint"
     } external;
 
     # Reads text messages in a synchronous manner
     #
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
     remote isolated function readTextMessage() returns string|Error = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
+        'class: "WebSocketSyncConnector"
     } external;
 
     # Reads binary data in a synchronous manner
     #
     # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
     remote isolated function readBinaryMessage() returns byte[]|Error = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.WebSocketSyncConnector"
+        'class: "WebSocketSyncConnector"
     } external;
 
     isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
                          returns Error? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.actions.websocketconnector.Close"
+        'class: "Close"
     } external;
 
     isolated function externSyncWSInitEndpoint() returns Error? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.client.SyncInitEndpoint",
+        'class: "SyncInitEndpoint",
         name: "initEndpoint"
     } external;
 
     isolated function externGetNegotiatedSubProtocol() returns string? = @java:Method {
-        'class: "org.ballerinalang.net.websocket.WebSocketUtil",
+        'class: "WebSocketUtil",
         name: "getNegotiatedSubProtocol"
     } external;
 }

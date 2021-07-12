@@ -32,7 +32,7 @@ import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.TypeDescriptorNode;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import org.ballerinalang.net.websocket.WebSocketConstants;
+import io.ballerina.stdlib.websocket.WebSocketConstants;
 
 import java.util.ArrayList;
 import java.util.List;

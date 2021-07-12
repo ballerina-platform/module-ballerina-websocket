@@ -38,7 +38,7 @@ import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import org.ballerinalang.net.websocket.WebSocketConstants;
+import io.ballerina.stdlib.websocket.WebSocketConstants;
 
 import java.util.List;
 

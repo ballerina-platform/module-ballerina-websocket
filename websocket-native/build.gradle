@@ -78,7 +78,7 @@ tasks.withType(Checkstyle) {
     exclude excludePattern
 }
 
-checkstyleMain.dependsOn(":build-config:checkstyle:downloadMultipleFiles")
+checkstyleMain.dependsOn(":build-config:checkstyle:downloadCheckstyleRuleFiles")
 
 spotbugsMain {
     effort "max"

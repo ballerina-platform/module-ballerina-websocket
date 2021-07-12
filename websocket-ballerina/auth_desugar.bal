@@ -115,5 +115,5 @@ isolated function notifyFailure(int responseCode) {
 }
 
 isolated function getAuthorizationHeader() returns string|http:HeaderNotFoundError = @java:Method {
-    'class: "org.ballerinalang.net.websocket.WebSocketUtil"
+    'class: "WebSocketUtil"
 } external;
