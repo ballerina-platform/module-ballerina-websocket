@@ -30,7 +30,7 @@ public class Listener {
     #
     # + return - An `error` if an error occurred during the listener starting process
     public isolated function 'start() returns error? = @java:Method {
-        'class: "Start",
+        'class: "io.ballerina.stdlib.websocket.Start",
          name: "start"
     } external;
 
@@ -38,7 +38,7 @@ public class Listener {
     #
     # + return - An `error` if an error occurred during the listener stopping process
     public isolated function gracefulStop() returns error? = @java:Method {
-        'class: "GracefulStop",
+        'class: "io.ballerina.stdlib.websocket.GracefulStop",
         name: "gracefulStop"
     } external;
 
@@ -56,7 +56,7 @@ public class Listener {
     # + name - Name of the service
     # + return - An `error` if an error occurred during the service attachment process or else `()`
     public isolated function attach(Service websocketService, string[]|string? name = ()) returns error? = @java:Method {
-        'class: "Register",
+        'class: "io.ballerina.stdlib.websocket.Register",
         name: "register"
     } external;
 
@@ -67,7 +67,7 @@ public class Listener {
     # + websocketService - The service to be detached
     # + return - An `error` if one occurred during detaching of a service or else `()`
     public isolated function detach(Service websocketService) returns error? = @java:Method {
-        'class: "Detach",
+        'class: "io.ballerina.stdlib.websocket.Detach",
         name: "detach"
     } external;
 
@@ -87,7 +87,7 @@ public class Listener {
     }
 
     isolated function externInitEndpoint() returns Error? = @java:Method {
-        'class: "InitEndpoint",
+        'class: "io.ballerina.stdlib.websocket.InitEndpoint",
         name: "initEndpoint"
     } external;
 }

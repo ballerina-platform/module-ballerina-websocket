@@ -21,5 +21,5 @@ function init() {
 }
 
 function setModule() = @java:Method {
-    'class: "ModuleUtils"
+    'class: "io.ballerina.stdlib.websocket.ModuleUtils"
 } external;

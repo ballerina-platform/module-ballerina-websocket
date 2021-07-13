@@ -4,7 +4,7 @@ name = "websocket"
 version = "@toml.version@"
 
 [[platform.java11.dependency]]
-path = "../websocket-native/build/libs/websocket-native-@project.version@.jar"
+path = "../native/build/libs/websocket-native-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "websocket"
 version = "@project.version@"

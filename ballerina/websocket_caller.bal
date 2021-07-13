@@ -34,7 +34,7 @@ public isolated client class Caller {
     # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
-        'class: "WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
     } external;
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -43,7 +43,7 @@ public isolated client class Caller {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
-        'class: "WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
     } external;
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
@@ -51,7 +51,7 @@ public isolated client class Caller {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function ping(byte[] data) returns Error? = @java:Method {
-        'class: "WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
     } external;
 
     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
@@ -60,7 +60,7 @@ public isolated client class Caller {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function pong(byte[] data) returns Error? = @java:Method {
-        'class: "WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
     } external;
 
     # Closes the connection.
@@ -88,7 +88,7 @@ public isolated client class Caller {
     }
 
     isolated function externClose(int statusCode, string reason, decimal timeoutInSecs) returns Error? = @java:Method {
-        'class: "Close"
+        'class: "io.ballerina.stdlib.websocket.Close"
     } external;
 
     # Sets a connection related attribute.
@@ -125,14 +125,14 @@ public isolated client class Caller {
     #
     # + return - The unique ID associated with the connection
     public isolated function getConnectionId() returns string = @java:Method {
-        'class: "WebSocketUtil"
+        'class: "io.ballerina.stdlib.websocket.WebSocketUtil"
     } external;
 
     # Gives the subprotocol if any that is negotiated with the client.
     #
     # + return - The subprotocol if any negotiated with the client or `nil`
     public isolated function getNegotiatedSubProtocol() returns string? = @java:Method {
-        'class: "WebSocketUtil",
+        'class: "io.ballerina.stdlib.websocket.WebSocketUtil",
         name: "getNegotiatedSubProtocol"
     } external;
 
@@ -140,7 +140,7 @@ public isolated client class Caller {
     #
     # + return - `true` if the connection is secure
     public isolated function isSecure() returns boolean= @java:Method {
-        'class: "WebSocketUtil"
+        'class: "io.ballerina.stdlib.websocket.WebSocketUtil"
     } external;
 
     # Gives the open or closed status of the connection.
