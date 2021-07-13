@@ -29,12 +29,13 @@ import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstan
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 import io.netty.channel.ChannelFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@code Get} is the GET action implementation of the HTTP Connector.

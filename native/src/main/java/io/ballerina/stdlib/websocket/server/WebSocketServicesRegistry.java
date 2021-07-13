@@ -29,6 +29,8 @@ import io.ballerina.stdlib.http.uri.URITemplateException;
 import io.ballerina.stdlib.http.uri.parser.Literal;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -38,9 +40,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Store all the WebSocket serviceEndpointsTemplate here.

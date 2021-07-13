@@ -52,6 +52,13 @@ import io.ballerina.stdlib.websocket.server.WebSocketConnectionManager;
 import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
@@ -67,13 +74,6 @@ import static io.ballerina.stdlib.websocket.observability.WebSocketObservability
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil.observeError;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * {@code WebSocketDispatcher} This is the web socket request dispatcher implementation which finds best matching
  * resource for incoming web socket request.

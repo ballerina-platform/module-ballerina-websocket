@@ -31,9 +31,10 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
-import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
 
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromByteArray;
