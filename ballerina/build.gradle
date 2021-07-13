@@ -61,7 +61,7 @@ ballerina {
     packageOrganization = packageOrg
     module = packageName
     langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --coverage-format=xml --includes=org.ballerinalang.net.websocket.*:ballerina.websocket.*"
+    testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.stdlib.websocket.*:ballerina.websocket.*"
 }
 
 configurations {
@@ -69,10 +69,10 @@ configurations {
 }
 
 dependencies {
-    externalJars(group: 'org.ballerinalang', name: 'mime-native', version: "${stdlibMimeVersion}") {
+    externalJars(group: 'io.ballerina.stdlib', name: 'mime-native', version: "${stdlibMimeVersion}") {
         transitive = false
     }
-    externalJars(group: 'org.ballerinalang', name: 'http-native', version: "${stdlibHttpVersion}")
+    externalJars(group: 'io.ballerina.stdlib', name: 'http-native', version: "${stdlibHttpVersion}")
     externalJars(group: 'io.netty', name: 'netty-common', version: "${nettyVersion}") {
         transitive = false
     }

@@ -21,7 +21,6 @@ include ':websocket-compiler-plugin-test'
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':websocket-native').projectDir = file('native')
 project(':websocket-ballerina').projectDir = file('ballerina')
-project(':websocket-test-utils').projectDir = file('test-utils')
 project(':websocket-compiler-plugin').projectDir = file('compiler-plugin')
 project(':websocket-compiler-plugin-test').projectDir = file('compiler-plugin-test')
 

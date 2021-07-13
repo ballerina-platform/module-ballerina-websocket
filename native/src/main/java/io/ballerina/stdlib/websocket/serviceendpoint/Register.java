@@ -27,9 +27,9 @@ import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.api.HttpConstants;
+import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.ballerina.stdlib.websocket.server.WebSocketServicesRegistry;
 
@@ -50,7 +50,8 @@ public class Register extends AbstractWebsocketNativeFunction {
         resource.getAccessor();
 
         try {
-            if (resourceList.length == 1 && ((ResourceMethodType) resourceList[0]).getAccessor().equals(WebSocketConstants.GET)) {
+            if (resourceList.length == 1 && ((ResourceMethodType) resourceList[0]).getAccessor()
+                    .equals(WebSocketConstants.GET)) {
                 webSocketServicesRegistry.registerService(new WebSocketServerService(service, runtime, basePath));
             }
         } catch (BError ex) {

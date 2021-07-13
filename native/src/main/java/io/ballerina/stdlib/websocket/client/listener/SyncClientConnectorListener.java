@@ -21,18 +21,18 @@ import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorListener;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketTextMessage;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketCloseMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnectorListener;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketControlMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
 
 import java.io.IOException;
 

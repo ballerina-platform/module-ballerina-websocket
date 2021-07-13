@@ -21,20 +21,19 @@ import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
+import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
+import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
-import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
-import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
-import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
 
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromByteArray;
@@ -86,8 +85,8 @@ public class WebSocketResourceCallback implements Callback {
                         if (future.isSuccess()) {
                             webSocketConnection.readNextFrame();
                         } else {
-                            dispatchOnError(connectionInfo, future.cause(),
-                                    connectionInfo.getWebSocketEndpoint().get(WebSocketConstants.INITIALIZED_BY_SERVICE).equals(true));
+                            dispatchOnError(connectionInfo, future.cause(), connectionInfo.getWebSocketEndpoint()
+                                    .get(WebSocketConstants.INITIALIZED_BY_SERVICE).equals(true));
                         }
                     }));
         } catch (Exception e) {

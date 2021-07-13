@@ -57,7 +57,7 @@ public isolated client class Client {
     }
 
     public isolated function initEndpoint() returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.SyncInitEndpoint",
+        'class: "io.ballerina.stdlib.websocket.client.SyncInitEndpoint",
         name: "initEndpoint"
     } external;
 
@@ -67,7 +67,7 @@ public isolated client class Client {
     # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -76,7 +76,7 @@ public isolated client class Client {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
@@ -84,7 +84,7 @@ public isolated client class Client {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function ping(byte[] data) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
     # Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
@@ -93,7 +93,7 @@ public isolated client class Client {
     # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function pong(byte[] data) returns Error? = @java:Method {
-         'class: "io.ballerina.stdlib.websocket.WebSocketConnector"
+         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
 
     # Closes the connection.
@@ -184,30 +184,30 @@ public isolated client class Client {
     #
     # + return - The HTTP response received from the client handshake request
     public isolated function getHttpResponse() returns http:Response? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.SyncInitEndpoint"
+        'class: "io.ballerina.stdlib.websocket.client.SyncInitEndpoint"
     } external;
 
     # Reads text messages in a synchronous manner
     #
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
     remote isolated function readTextMessage() returns string|Error = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.WebSocketSyncConnector"
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
     # Reads binary data in a synchronous manner
     #
     # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
     remote isolated function readBinaryMessage() returns byte[]|Error = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.WebSocketSyncConnector"
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
     isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
                          returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.Close"
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"
     } external;
 
     isolated function externSyncWSInitEndpoint() returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.SyncInitEndpoint",
+        'class: "io.ballerina.stdlib.websocket.client.SyncInitEndpoint",
         name: "initEndpoint"
     } external;
 

@@ -18,7 +18,7 @@
 
 package io.ballerina.stdlib.websocket.server;
 
-import org.ballerinalang.net.uri.parser.DataElementFactory;
+import io.ballerina.stdlib.http.uri.parser.DataElementFactory;
 
 /**
  * Data Element Factory to create WebSocket Data Elements.

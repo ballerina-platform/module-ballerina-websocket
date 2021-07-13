@@ -19,9 +19,9 @@
 package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

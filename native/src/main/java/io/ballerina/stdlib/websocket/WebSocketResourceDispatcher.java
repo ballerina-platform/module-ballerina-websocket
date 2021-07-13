@@ -33,32 +33,25 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BValue;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
-import io.netty.channel.ChannelFuture;
-import io.netty.handler.codec.CorruptedFrameException;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.http.ValueCreatorUtils;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketCloseMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketControlMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketControlSignal;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
-import org.ballerinalang.net.transport.message.HttpCarbonRequest;
+import io.ballerina.stdlib.http.api.HttpConstants;
+import io.ballerina.stdlib.http.api.HttpUtil;
+import io.ballerina.stdlib.http.api.ValueCreatorUtils;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlSignal;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketTextMessage;
+import io.ballerina.stdlib.http.transport.message.HttpCarbonRequest;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObserverContext;
 import io.ballerina.stdlib.websocket.server.OnUpgradeResourceCallback;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionManager;
 import io.ballerina.stdlib.websocket.server.WebSocketServerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import io.netty.channel.ChannelFuture;
+import io.netty.handler.codec.CorruptedFrameException;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
@@ -74,6 +67,13 @@ import static io.ballerina.stdlib.websocket.observability.WebSocketObservability
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil.observeError;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * {@code WebSocketDispatcher} This is the web socket request dispatcher implementation which finds best matching
  * resource for incoming web socket request.
@@ -156,7 +156,8 @@ public class WebSocketResourceDispatcher {
         if (!subPath.startsWith(WebSocketConstants.BACK_SLASH)) {
             subPath = HttpConstants.DEFAULT_BASE_PATH + subPath;
         }
-        subPath = subPath.endsWith(WebSocketConstants.BACK_SLASH) ? subPath.substring(0, subPath.length() - 1) : subPath;
+        subPath = subPath.endsWith(WebSocketConstants.BACK_SLASH) ?
+                subPath.substring(0, subPath.length() - 1) : subPath;
         return subPath;
     }
 
@@ -191,10 +192,12 @@ public class WebSocketResourceDispatcher {
         WebSocketConnectionInfo connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection,
                 webSocketEndpoint);
         try {
-            executeResource(wsService, balService, new WebSocketResourceCallback(connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_OPEN),
+            executeResource(wsService, balService, new WebSocketResourceCallback(connectionInfo,
+                            WebSocketConstants.RESOURCE_NAME_ON_OPEN),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_OPEN, ModuleUtils.getOnOpenMetaData());
         } catch (IllegalAccessException e) {
-            observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION, WebSocketConstants.RESOURCE_NAME_ON_OPEN, e.getMessage());
+            observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION,
+                    WebSocketConstants.RESOURCE_NAME_ON_OPEN, e.getMessage());
         }
     }
 
@@ -244,8 +247,9 @@ public class WebSocketResourceDispatcher {
                     }
                 }
                 executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE), bValues,
-                        connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE, ModuleUtils.getOnTextMetaData());
+                        new WebSocketResourceCallback(connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE),
+                        bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE,
+                        ModuleUtils.getOnTextMetaData());
                 stringAggregator.resetAggregateString();
             } else {
                 stringAggregator.appendAggregateString(textMessage.getText());
@@ -286,8 +290,8 @@ public class WebSocketResourceDispatcher {
             if (finalFragment) {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
                 createBvaluesForBarray(wsEndpoint, paramDetails, bValues, byteAggregator.getAggregateByteArr());
-                executeResource(wsService, balservice, new WebSocketResourceCallback(
-                                connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE), bValues, connectionInfo,
+                executeResource(wsService, balservice, new WebSocketResourceCallback(connectionInfo,
+                        WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE), bValues, connectionInfo,
                         WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE, ModuleUtils.getOnBinaryMetaData());
                 byteAggregator.resetAggregateByteArr();
             } else {
@@ -474,8 +478,8 @@ public class WebSocketResourceDispatcher {
                     error.printStackTrace();
                     finishConnectionClosureIfOpen(webSocketConnection, closeCode, connectionInfo);
                     //Observe error
-                    observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION, WebSocketConstants.RESOURCE_NAME_ON_CLOSE,
-                            error.getMessage());
+                    observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION,
+                            WebSocketConstants.RESOURCE_NAME_ON_CLOSE, error.getMessage());
                 }
             };
             executeResource(wsService, balservice, onCloseCallback, bValues, connectionInfo,
@@ -566,8 +570,8 @@ public class WebSocketResourceDispatcher {
                         error.getMessage());
             }
         };
-        executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_ERROR,
-                ModuleUtils.getOnErrorMetaData());
+        executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo,
+                WebSocketConstants.RESOURCE_NAME_ON_ERROR, ModuleUtils.getOnErrorMetaData());
     }
 
     private static boolean isUnexpectedError(Throwable throwable) {

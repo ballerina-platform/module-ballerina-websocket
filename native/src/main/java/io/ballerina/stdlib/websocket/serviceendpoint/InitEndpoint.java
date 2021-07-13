@@ -25,29 +25,29 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.api.BallerinaConnectorException;
+import io.ballerina.stdlib.http.api.HttpConnectionManager;
+import io.ballerina.stdlib.http.api.HttpConstants;
+import io.ballerina.stdlib.http.api.HttpUtil;
+import io.ballerina.stdlib.http.transport.contract.ServerConnector;
+import io.ballerina.stdlib.http.transport.contract.config.ListenerConfiguration;
+import io.ballerina.stdlib.http.transport.contract.config.Parameter;
+import io.ballerina.stdlib.http.transport.contract.config.SslConfiguration;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import org.ballerinalang.net.http.BallerinaConnectorException;
-import org.ballerinalang.net.http.HttpConnectionManager;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.ServerConnector;
-import org.ballerinalang.net.transport.contract.config.ListenerConfiguration;
-import org.ballerinalang.net.transport.contract.config.Parameter;
-import org.ballerinalang.net.transport.contract.config.SslConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.ballerinalang.net.http.HttpConstants.ANN_CONFIG_ATTR_SSL_ENABLED_PROTOCOLS;
-import static org.ballerinalang.net.http.HttpConstants.LISTENER_CONFIGURATION;
-import static org.ballerinalang.net.http.HttpConstants.PKCS_STORE_TYPE;
-import static org.ballerinalang.net.http.HttpConstants.PROTOCOL_HTTPS;
-import static org.ballerinalang.net.http.HttpConstants.SERVER_NAME;
-import static org.ballerinalang.net.http.HttpUtil.setInboundMgsSizeValidationConfig;
-import static org.ballerinalang.net.transport.contract.Constants.HTTP_1_1_VERSION;
+import static io.ballerina.stdlib.http.api.HttpConstants.ANN_CONFIG_ATTR_SSL_ENABLED_PROTOCOLS;
+import static io.ballerina.stdlib.http.api.HttpConstants.LISTENER_CONFIGURATION;
+import static io.ballerina.stdlib.http.api.HttpConstants.PKCS_STORE_TYPE;
+import static io.ballerina.stdlib.http.api.HttpConstants.PROTOCOL_HTTPS;
+import static io.ballerina.stdlib.http.api.HttpConstants.SERVER_NAME;
+import static io.ballerina.stdlib.http.api.HttpUtil.setInboundMgsSizeValidationConfig;
+import static io.ballerina.stdlib.http.transport.contract.Constants.HTTP_1_1_VERSION;
 
 /**
  * Initialize the Websocket listener.
@@ -60,7 +60,8 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             if (serviceEndpoint.get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER)) != null) {
                 // Get the server connector started by the HTTP module
                 httpServerConnector = (ServerConnector) ((BObject) serviceEndpoint
-                        .get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER))).getNativeData(WebSocketConstants.HTTP_SERVER_CONNECTOR);
+                        .get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER)))
+                        .getNativeData(WebSocketConstants.HTTP_SERVER_CONNECTOR);
             } else {
                 // Creating server connector
                 BMap serviceEndpointConfig = serviceEndpoint.getMapValue(WebSocketConstants.SERVICE_ENDPOINT_CONFIG);
@@ -90,7 +91,8 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
     private static ListenerConfiguration getListenerConfig(long port, BMap endpointConfig) {
         String host = endpointConfig.getStringValue(HttpConstants.ENDPOINT_CONFIG_HOST).getValue();
         BMap<BString, Object> sslConfig = endpointConfig.getMapValue(HttpConstants.ENDPOINT_CONFIG_SECURESOCKET);
-        long idleTimeout = ((long) ((BDecimal) endpointConfig.get(WebSocketConstants.ANNOTATION_ATTR_TIMEOUT)).floatValue()) * 1000;
+        long idleTimeout = ((long) ((BDecimal) endpointConfig.get(WebSocketConstants.ANNOTATION_ATTR_TIMEOUT))
+                .floatValue()) * 1000;
 
         ListenerConfiguration listenerConfiguration = new ListenerConfiguration();
         BMap<BString, Object> http1Settings = (BMap<BString, Object>) endpointConfig.get(HttpConstants.HTTP1_SETTINGS);
@@ -185,7 +187,8 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         if (key.containsKey(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_FILE_PATH)) {
             String keyStoreFile = key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_FILE_PATH).getValue();
             if (keyStoreFile.isBlank()) {
-                throw WebSocketUtil.createWebsocketError("KeyStore file location must be provided for secure connection",
+                throw WebSocketUtil.createWebsocketError(
+                        "KeyStore file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             String keyStorePassword = key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_KEYSTORE_PASSWORD)
@@ -203,11 +206,13 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
                     key.getStringValue(HttpConstants.SECURESOCKET_CONFIG_CERTKEY_KEY_PASSWORD) :
                     null;
             if (certFile.isBlank()) {
-                throw WebSocketUtil.createWebsocketError("Certificate file location must be provided for secure connection",
+                throw WebSocketUtil.createWebsocketError(
+                        "Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (keyFile.isBlank()) {
-                throw WebSocketUtil.createWebsocketError("Private key file location must be provided for secure connection",
+                throw WebSocketUtil.createWebsocketError(
+                        "Private key file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setServerCertificates(certFile);
@@ -226,11 +231,13 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
             String trustStorePassword = trustStore.getStringValue(HttpConstants.SECURESOCKET_CONFIG_TRUSTSTORE_PASSWORD)
                     .getValue();
             if (trustStoreFile.isBlank()) {
-                throw WebSocketUtil.createWebsocketError("TrustStore file location must be provided for secure connection",
+                throw WebSocketUtil.createWebsocketError(
+                        "TrustStore file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             if (trustStorePassword.isBlank()) {
-                throw WebSocketUtil.createWebsocketError("TrustStore password must be provided for secure connection",
+                throw WebSocketUtil.createWebsocketError(
+                        "TrustStore password must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setTrustStoreFile(trustStoreFile);
@@ -238,7 +245,8 @@ public class InitEndpoint extends AbstractWebsocketNativeFunction {
         } else {
             String certFile = ((BString) cert).getValue();
             if (certFile.isBlank()) {
-                throw WebSocketUtil.createWebsocketError("Certificate file location must be provided for secure connection",
+                throw WebSocketUtil.createWebsocketError(
+                        "Certificate file location must be provided for secure connection",
                         WebSocketConstants.ErrorCode.SslError);
             }
             sslConfiguration.setServerTrustCertificates(certFile);

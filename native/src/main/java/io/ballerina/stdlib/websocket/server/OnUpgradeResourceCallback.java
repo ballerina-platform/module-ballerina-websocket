@@ -23,11 +23,11 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.transport.contract.websocket.ServerHandshakeFuture;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
-import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeFuture;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
 
 /**
  * The onUpgrade resource callback.

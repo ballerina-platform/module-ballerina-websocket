@@ -19,11 +19,11 @@
 package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.transport.contract.websocket.ServerHandshakeListener;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import org.ballerinalang.net.transport.contract.websocket.ServerHandshakeListener;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

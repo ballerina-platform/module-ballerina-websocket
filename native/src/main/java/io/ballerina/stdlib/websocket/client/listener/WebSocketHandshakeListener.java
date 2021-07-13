@@ -20,15 +20,15 @@ package io.ballerina.stdlib.websocket.client.listener;
 
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.api.HttpUtil;
+import io.ballerina.stdlib.http.transport.contract.websocket.ClientHandshakeListener;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.http.transport.message.HttpCarbonResponse;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeListener;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
-import org.ballerinalang.net.transport.message.HttpCarbonResponse;
 
 /**
  * The `WebSocketHandshakeListener` implements the `{@link ClientHandshakeListener}` interface directly.

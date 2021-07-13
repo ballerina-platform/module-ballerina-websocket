@@ -18,11 +18,11 @@
 
 package io.ballerina.stdlib.websocket.server;
 
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketMessage;
+import io.ballerina.stdlib.http.uri.parser.DataElement;
+import io.ballerina.stdlib.http.uri.parser.DataReturnAgent;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketMessage;
-import org.ballerinalang.net.uri.parser.DataElement;
-import org.ballerinalang.net.uri.parser.DataReturnAgent;
 
 /**
  * Data element for WebSocket URI template.

@@ -18,30 +18,29 @@
 
 package io.ballerina.stdlib.websocket.server;
 
+import io.ballerina.stdlib.http.api.HttpConstants;
+import io.ballerina.stdlib.http.api.HttpResourceArguments;
+import io.ballerina.stdlib.http.api.HttpUtil;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorListener;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketMessage;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketTextMessage;
+import io.ballerina.stdlib.http.transport.message.HttpCarbonMessage;
+import io.ballerina.stdlib.http.uri.URIUtil;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpResourceArguments;
-import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketBinaryMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketCloseMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnection;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketConnectorListener;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketControlMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketMessage;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketTextMessage;
-import org.ballerinalang.net.transport.message.HttpCarbonMessage;
-import org.ballerinalang.net.uri.URIUtil;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.ballerinalang.net.http.HttpDispatcher.getValidatedURI;
+import static io.ballerina.stdlib.http.api.HttpDispatcher.getValidatedURI;
 
 /**
  * Ballerina Connector listener for WebSocket.

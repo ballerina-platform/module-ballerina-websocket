@@ -20,17 +20,15 @@ package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.api.HttpConstants;
+import io.ballerina.stdlib.http.api.HttpResourceArguments;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketMessage;
+import io.ballerina.stdlib.http.uri.URITemplate;
+import io.ballerina.stdlib.http.uri.URITemplateException;
+import io.ballerina.stdlib.http.uri.parser.Literal;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.http.HttpResourceArguments;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketHandshaker;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketMessage;
-import org.ballerinalang.net.uri.URITemplate;
-import org.ballerinalang.net.uri.URITemplateException;
-import org.ballerinalang.net.uri.parser.Literal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -40,6 +38,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Store all the WebSocket serviceEndpointsTemplate here.

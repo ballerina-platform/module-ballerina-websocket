@@ -20,12 +20,12 @@ package io.ballerina.stdlib.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.api.HttpConstants;
+import io.ballerina.stdlib.http.transport.contract.ServerConnector;
+import io.ballerina.stdlib.http.transport.contract.ServerConnectorFuture;
 import io.ballerina.stdlib.websocket.WebSocketConnectorPortBindingListener;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import org.ballerinalang.net.http.HttpConstants;
-import org.ballerinalang.net.transport.contract.ServerConnector;
-import org.ballerinalang.net.transport.contract.ServerConnectorFuture;
 import io.ballerina.stdlib.websocket.server.WebSocketServerListener;
 
 /**
@@ -39,7 +39,8 @@ public class Start extends AbstractWebsocketNativeFunction {
             return startServerConnector(listener);
         }
         ServerConnectorFuture serverConnectorFuture = (ServerConnectorFuture) ((BObject) listener
-                .get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER))).getNativeData(HttpConstants.SERVER_CONNECTOR_FUTURE);
+                .get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER)))
+                .getNativeData(HttpConstants.SERVER_CONNECTOR_FUTURE);
         WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(listener));
         serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         return null;

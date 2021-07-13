@@ -19,9 +19,9 @@
 package io.ballerina.stdlib.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.api.HttpConstants;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import org.ballerinalang.net.http.HttpConstants;
 
 /**
  * Stop the listener immediately and close the connection.

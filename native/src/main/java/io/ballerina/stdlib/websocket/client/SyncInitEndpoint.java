@@ -24,16 +24,16 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.api.HttpUtil;
+import io.ballerina.stdlib.http.transport.contract.HttpWsConnectorFactory;
+import io.ballerina.stdlib.http.transport.contract.websocket.ClientHandshakeFuture;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConnector;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConnectorConfig;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 import io.ballerina.stdlib.websocket.client.listener.WebSocketHandshakeListener;
-import org.ballerinalang.net.http.HttpUtil;
-import org.ballerinalang.net.transport.contract.HttpWsConnectorFactory;
-import org.ballerinalang.net.transport.contract.websocket.ClientHandshakeFuture;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnector;
-import org.ballerinalang.net.transport.contract.websocket.WebSocketClientConnectorConfig;
 
 import java.net.URI;
 

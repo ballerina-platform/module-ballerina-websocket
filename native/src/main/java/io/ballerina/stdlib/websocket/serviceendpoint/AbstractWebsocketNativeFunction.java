@@ -19,8 +19,8 @@
 package io.ballerina.stdlib.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.http.transport.contract.ServerConnector;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
-import org.ballerinalang.net.transport.contract.ServerConnector;
 import io.ballerina.stdlib.websocket.server.WebSocketServicesRegistry;
 
 /**
