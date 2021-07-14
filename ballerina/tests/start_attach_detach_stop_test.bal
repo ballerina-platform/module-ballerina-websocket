@@ -17,7 +17,7 @@
 import ballerina/io;
 import ballerina/test;
 
-listener Listener lis = new(21076);
+listener Listener lis = new(21077);
 
 Service dummyService = service object {
     resource function get .() returns Service|UpgradeError {
@@ -36,12 +36,12 @@ service class WsService70 {
 public function testAttachDetachGracefulStop() returns error? {
     check lis.attach(dummyService);
     check lis.'start();
-    Client cl = check new("ws://localhost:21076");
+    Client cl = check new("ws://localhost:21077");
     check cl->writeTextMessage("Testing 123");
     check lis.detach(dummyService);
     check lis.gracefulStop();
 
-    Client|Error cl2 = new("ws://localhost:21076");
+    Client|Error cl2 = new("ws://localhost:21077");
     if cl2 is Error {
         test:assertEquals(cl2.message(), "ConnectionError: IO Error");
     } else {
