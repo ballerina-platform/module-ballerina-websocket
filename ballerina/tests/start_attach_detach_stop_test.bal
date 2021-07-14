@@ -36,14 +36,14 @@ service class WsService70 {
 public function testAttachDetachGracefulStop() returns error? {
     check lis.attach(dummyService);
     check lis.'start();
-    Client cl = check new("ws://localhost:21077");
-    check cl->writeTextMessage("Testing 123");
+    Client client1 = check new("ws://localhost:21077");
+    check client1->writeTextMessage("Testing 123");
     check lis.detach(dummyService);
     check lis.gracefulStop();
 
-    Client|Error cl2 = new("ws://localhost:21077");
-    if cl2 is Error {
-        test:assertEquals(cl2.message(), "ConnectionError: IO Error");
+    Client|Error client2 = new("ws://localhost:21077");
+    if client2 is Error {
+        test:assertEquals(client2.message(), "ConnectionError: IO Error");
     } else {
         test:assertFail("Expecting a connection error");
     }
