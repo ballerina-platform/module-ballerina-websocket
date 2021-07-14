@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 - [Remove the countdown latches in the implementation](https://github.com/ballerina-platform/ballerina-standard-library/issues/1385)
 - [Fix the issue of not sending the handshake cancel response when panicked from the upgrade service](https://github.com/ballerina-platform/ballerina-standard-library/issues/1439)
+- [Fix the client handshake timeout not working](https://github.com/ballerina-platform/ballerina-standard-library/issues/1478)
 
 ## [1.2.0-beta.1] - 2021-05-06
 

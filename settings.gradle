@@ -12,8 +12,17 @@ plugins {
 }
 
 rootProject.name = 'websocket'
-include(':build-config:checkstyle')
-include ':websocket-native', ':websocket-ballerina', ':websocket-compiler-plugin', ':websocket-compiler-plugin-tests'
+include ':checkstyle'
+include ':websocket-native'
+include ':websocket-ballerina'
+include ':websocket-compiler-plugin'
+include ':websocket-compiler-plugin-test'
+
+project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
+project(':websocket-native').projectDir = file('native')
+project(':websocket-ballerina').projectDir = file('ballerina')
+project(':websocket-compiler-plugin').projectDir = file('compiler-plugin')
+project(':websocket-compiler-plugin-test').projectDir = file('compiler-plugin-test')
 
 gradleEnterprise {
     buildScan {
