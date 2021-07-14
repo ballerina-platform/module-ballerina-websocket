@@ -28,21 +28,23 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketServerListener;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.HTTP_LISTENER;
+
 /**
  * Start the Websocket listener instance.
  *
  */
 public class Start extends AbstractWebsocketNativeFunction {
     public static Object start(BObject listener) {
-        BObject httpListener = (BObject) listener.get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER));
+        BObject httpListener = (BObject) listener.get(StringUtils.fromString(HTTP_LISTENER));
         if (!isConnectorStarted(listener) && !isConnectorStarted(httpListener)) {
             return startServerConnector(listener);
+        } else if (httpListener != null) {
+            ServerConnectorFuture serverConnectorFuture = (ServerConnectorFuture) ((BObject) listener
+                    .get(StringUtils.fromString(HTTP_LISTENER))).getNativeData(HttpConstants.SERVER_CONNECTOR_FUTURE);
+            WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(listener));
+            serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         }
-        ServerConnectorFuture serverConnectorFuture = (ServerConnectorFuture) ((BObject) listener
-                .get(StringUtils.fromString(WebSocketConstants.HTTP_LISTENER)))
-                .getNativeData(HttpConstants.SERVER_CONNECTOR_FUTURE);
-        WebSocketServerListener wsListener = new WebSocketServerListener(getWebSocketServicesRegistry(listener));
-        serverConnectorFuture.setWebSocketConnectorListener(wsListener);
         return null;
     }
 
