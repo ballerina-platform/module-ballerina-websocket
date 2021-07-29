@@ -2,10 +2,10 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/websocket;
 
-string NAME = "name";
+final string NAME = "name";
 string nameValue = "";
 
-map<websocket:Caller> connectionsMap = {};
+isolated map<websocket:Caller> connectionsMap = {};
 
 service /chat on new websocket:Listener(9090) {
     resource function get [string name](http:Request req) returns websocket:Service|websocket:UpgradeError {
@@ -14,14 +14,16 @@ service /chat on new websocket:Listener(9090) {
             return service object websocket:Service {
                 remote function onOpen(websocket:Caller caller) {
                     string welcomeMsg = "Hi " + nameValue + "! You have successfully connected to the chat";
-                    var err = caller->writeTextMessage(welcomeMsg);
+                    websocket:Error? err = caller->writeTextMessage(welcomeMsg);
                     if (err is websocket:Error) {
                         io:println("Error sending message:" + err.message());
                     }
                     string msg = nameValue + " connected to chat";
                     broadcast(msg);
                     caller.setAttribute(NAME, nameValue);
-                    connectionsMap[caller.getConnectionId()] = caller;
+                    lock {
+                        connectionsMap[caller.getConnectionId()] = caller;
+                    }
                 }
                 remote function onTextMessage(websocket:Caller caller, string text) {
                     string msg = getAttributeStr(caller, NAME) + ": " + text;
@@ -34,7 +36,9 @@ service /chat on new websocket:Listener(9090) {
                     }
                 }
                 remote function onClose(websocket:Caller caller, int statusCode, string reason) {
-                    _ = connectionsMap.remove(caller.getConnectionId());
+                    lock {
+                        _ = connectionsMap.remove(caller.getConnectionId());
+                    }
                     string msg = getAttributeStr(caller, NAME) + " left the chat";
                     broadcast(msg);
                 }
@@ -48,18 +52,23 @@ service /chat on new websocket:Listener(9090) {
 
 // Function to perform the broadcasting of text messages.
 function broadcast(string text) {
-    foreach var con in connectionsMap {
-        var err = con->writeTextMessage(text);
-        if (err is websocket:Error) {
-            io:println("Error sending message to the :" + getAttributeStr(con, NAME) +
-                        ". Reason: " + err.message());
+    lock {
+        foreach var con in connectionsMap {
+            var err = con->writeTextMessage(text);
+            if (err is websocket:Error) {
+                io:println("Error sending message to the :" + getAttributeStr(con, NAME) +
+                            ". Reason: " + err.message());
+            }
         }
     }
 }
 
-function getAttributeStr(websocket:Caller ep, string key) returns (string) {
+isolated function getAttributeStr(websocket:Caller ep, string key) returns (string) {
     var name = ep.getAttribute(key);
-    return name.toString();
+    if name is string {
+        return name;
+    }
+    return "";
 }
 
 
