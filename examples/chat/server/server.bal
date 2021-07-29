@@ -67,5 +67,3 @@ isolated function getAttributeStr(websocket:Caller ep, string key) returns (stri
     }
     return "";
 }
-
-
