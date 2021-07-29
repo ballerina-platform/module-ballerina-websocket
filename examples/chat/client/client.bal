@@ -3,7 +3,6 @@ import ballerina/websocket;
 
 public function main() returns error? {
    string username = io:readln("Enter username: ");
-   string age = io:readln("Enter age: ");
    string url = string `ws://localhost:9090/chat/${username}`;
    websocket:Client wsClient = check new(url);
    @strand {

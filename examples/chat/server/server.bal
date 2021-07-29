@@ -4,8 +4,7 @@ import ballerina/websocket;
 
 final string NAME = "name";
 string nameValue = "";
-
-isolated map<websocket:Caller> connectionsMap = {};
+map<websocket:Caller> connectionsMap = {};
 
 service /chat on new websocket:Listener(9090) {
     resource function get [string name](http:Request req) returns websocket:Service|websocket:UpgradeError {
@@ -21,9 +20,7 @@ service /chat on new websocket:Listener(9090) {
                     string msg = nameValue + " connected to chat";
                     broadcast(msg);
                     caller.setAttribute(NAME, nameValue);
-                    lock {
-                        connectionsMap[caller.getConnectionId()] = caller;
-                    }
+                    connectionsMap[caller.getConnectionId()] = caller;
                 }
                 remote function onTextMessage(websocket:Caller caller, string text) {
                     string msg = getAttributeStr(caller, NAME) + ": " + text;
