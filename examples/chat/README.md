@@ -12,7 +12,11 @@ The WebSocket Server is in charge of registering users to the chat application a
 ### 2. Users - WebSocket Clients
 Clients can register for the chat applicaton by sending requests to the WebSocket server. When the application starts it will request for a username. Once a non-empty username is entered, the user will get registered.
 
-After getting registered, the users can send messages to the chat group by typing messages on the console and pressing `Enter`. Then the server will broadcast those messages to the other registered users.
+After getting registered, the users can send messages to the chat group by typing messages on the console and pressing `Enter`. Then the server will broadcast messages by looping over the registered clients.
+If a user wants to exit from the chat, he/she can type in `exit` and `Enter`, so the connection will get closed, and the client gets unregistered from the chat.
+
+Client will have one Ballerina strand writing the messages to the WebSocket connection and one for reading. 
+
 ## Run the Example
 
 First, clone this repository, and then run the following commands to run this example in your local machine.

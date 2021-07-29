@@ -8,7 +8,7 @@ public function main() returns error? {
    @strand {
        thread:"any"
    }
-   worker w2 returns error? {
+   worker writeWorker returns error? {
        while true {
            string msg = io:readln("");
            if (msg == "exit") {
@@ -16,13 +16,13 @@ public function main() returns error? {
            } else {
                check wsClient->writeTextMessage(msg);
            }
-       }       
-   }   
+       }
+   }
 
    @strand {
        thread:"any"
    }
-   worker w1 returns error? {
+   worker readWorker returns error? {
        while true {
            string textResp = check wsClient->readTextMessage();
            io:println(textResp);
