@@ -10,17 +10,17 @@ service /chat on new websocket:Listener(9090) {
     resource function get [string name](http:Request req) returns websocket:Service|websocket:UpgradeError {
         nameValue = name;
         if (nameValue != "") {
+            // Server can accept a WebSocket connection by returning a `websocket:Service`.
             return service object websocket:Service {
-                remote function onOpen(websocket:Caller caller) {
+                remote function onOpen(websocket:Caller caller) returns websocket:Error? {
                     string welcomeMsg = "Hi " + nameValue + "! You have successfully connected to the chat";
-                    websocket:Error? err = caller->writeTextMessage(welcomeMsg);
-                    if (err is websocket:Error) {
-                        io:println("Error sending message:" + err.message());
-                    }
+                    websocket:Error? err = check caller->writeTextMessage(welcomeMsg);
                     string msg = nameValue + " connected to chat";
                     broadcast(msg);
                     caller.setAttribute(NAME, nameValue);
-                    connectionsMap[caller.getConnectionId()] = caller;
+                    lock {
+                        connectionsMap[caller.getConnectionId()] = caller;
+                    }
                 }
                 remote function onTextMessage(websocket:Caller caller, string text) {
                     string msg = getAttributeStr(caller, NAME) + ": " + text;
@@ -41,6 +41,7 @@ service /chat on new websocket:Listener(9090) {
                 }
             };
         } else {
+            // Server can cancel the WebSocket upgrade by
             websocket:UpgradeError err = error("Username must be a non-empty value");
             return err;
         }
@@ -49,13 +50,11 @@ service /chat on new websocket:Listener(9090) {
 
 // Function to perform the broadcasting of text messages.
 function broadcast(string text) {
-    lock {
-        foreach var con in connectionsMap {
-            var err = con->writeTextMessage(text);
-            if (err is websocket:Error) {
-                io:println("Error sending message to the :" + getAttributeStr(con, NAME) +
-                            ". Reason: " + err.message());
-            }
+    foreach var con in connectionsMap {
+        websocket:Error? err = con->writeTextMessage(text);
+        if err is websocket:Error {
+            io:println("Error sending message to the :" + getAttributeStr(con, NAME) +
+                        ". Reason: " + err.message());
         }
     }
 }
