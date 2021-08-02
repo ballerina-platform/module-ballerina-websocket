@@ -29,7 +29,7 @@ $ bal run
 
 In another terminal, run the client as follows.
 ```sh
-// Run the route guide client
+// Run the WebSocket client
 $ cd examples/chat/client
 $ bal run
 ```
