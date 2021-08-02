@@ -50,7 +50,7 @@ service /chat on new websocket:Listener(9090) {
 
 // Function to perform the broadcasting of text messages.
 function broadcast(string text) {
-    foreach var con in connectionsMap {
+    foreach websocket:Caller con in connectionsMap {
         websocket:Error? err = con->writeTextMessage(text);
         if err is websocket:Error {
             io:println("Error sending message to the :" + getAttributeStr(con, NAME) +
