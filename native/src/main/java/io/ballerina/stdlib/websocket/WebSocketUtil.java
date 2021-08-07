@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLException;
 
@@ -104,30 +105,36 @@ public class WebSocketUtil {
 
     public static void handleWebSocketCallback(Future balFuture,
             ChannelFuture webSocketChannelFuture, Logger log,
-            WebSocketConnectionInfo connectionInfo) {
+                WebSocketConnectionInfo connectionInfo, AtomicBoolean completed) {
         webSocketChannelFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
                 log.error(ERROR_MESSAGE, cause);
-                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause);
+                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause, completed);
             } else {
                 // This is needed because since the same strand is used in all actions if an action is called before
                 // this one it will cause this action to return the return value of the previous action.
-                balFuture.complete(null);
+                if (!completed.get()) {
+                    balFuture.complete(null);
+                    completed.set(true);
+                }
             }
         });
     }
 
     public static void handlePingWebSocketCallback(Future balFuture,
-            ChannelFuture webSocketChannelFuture, Logger log,
-            WebSocketConnectionInfo connectionInfo) {
+                        ChannelFuture webSocketChannelFuture, Logger log,
+                        WebSocketConnectionInfo connectionInfo, AtomicBoolean pingCallbackCompleted) {
         webSocketChannelFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
                 log.error(ERROR_MESSAGE, cause);
-                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause);
+                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause, pingCallbackCompleted);
             } else {
-                balFuture.complete(null);
+                if (!pingCallbackCompleted.get()) {
+                    balFuture.complete(null);
+                    pingCallbackCompleted.set(true);
+                }
                 if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
                     connectionInfo.getWebSocketConnection().readNextFrame();
                 }
@@ -136,8 +143,9 @@ public class WebSocketUtil {
     }
 
     public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo, Future balFuture,
-            Throwable error) {
+            Throwable error, AtomicBoolean completed) {
         balFuture.complete(WebSocketUtil.createErrorByType(error));
+        completed.set(true);
     }
 
     /**

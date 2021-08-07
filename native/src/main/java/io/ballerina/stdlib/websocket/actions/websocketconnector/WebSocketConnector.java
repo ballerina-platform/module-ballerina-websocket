@@ -20,6 +20,7 @@ import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketWriteTimeOutListener;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
@@ -36,6 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.ballerina.stdlib.websocket.WebSocketConstants.SYNC_CLIENT;
 
 /**
  * Utilities related to websocket connector actions.
@@ -45,6 +49,7 @@ public class WebSocketConnector {
 
     public static Object writeTextMessage(Environment env, BObject wsConnection, BString text) {
         Future balFuture = env.markAsync();
+        AtomicBoolean textCallbackCompleted = new AtomicBoolean(false);
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
@@ -53,6 +58,7 @@ public class WebSocketConnector {
         ByteBuf byteBuf = null;
         ByteBuf lastSlice = null;
         try {
+            setWriteTimeoutHandler(wsConnection, balFuture, textCallbackCompleted, connectionInfo);
             byteBuf = fromText(text.getValue());
             int noBytes = byteBuf.readableBytes();
             int index = 0;
@@ -76,12 +82,17 @@ public class WebSocketConnector {
             promiseCombiner.add(future);
             promiseCombiner.finish(connectionInfo.getWebSocketConnection().getChannel().newPromise()
                     .addListener((ChannelFutureListener) channelFuture -> {
+                        removeWriteTimeoutHandler(wsConnection, connectionInfo);
                         if (channelFuture.isSuccess()) {
-                            WebSocketUtil.handleWebSocketCallback(balFuture, channelFuture, log, connectionInfo);
+                            WebSocketUtil.handleWebSocketCallback(balFuture, channelFuture, log, connectionInfo,
+                                    textCallbackCompleted);
                             WebSocketObservabilityUtil
                                     .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, connectionInfo);
                         } else {
-                            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause());
+                            if (!textCallbackCompleted.get()) {
+                                WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause(),
+                                        textCallbackCompleted);
+                            }
                         }
                     }));
         } catch (IllegalAccessException | IllegalStateException e) {
@@ -89,12 +100,33 @@ public class WebSocketConnector {
             WebSocketObservabilityUtil.observeError(WebSocketObservabilityUtil.getConnectionInfo(wsConnection),
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, e.getMessage());
-            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
+            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e, textCallbackCompleted);
         } finally {
             release(byteBuf);
             release(lastSlice);
         }
         return null;
+    }
+
+    private static void setWriteTimeoutHandler(BObject wsConnection, Future balFuture, 
+                                               AtomicBoolean textCallbackCompleted, 
+                                               WebSocketConnectionInfo connectionInfo) throws IllegalAccessException {
+        if (wsConnection.getType().getName().equals(SYNC_CLIENT)) {
+            long writeTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(
+                    connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
+                    WebSocketConstants.CLIENT_WRITE_TIMEOUT, 0);
+            if (writeTimeoutInSeconds > 0) {
+                WebSocketWriteTimeOutListener writeTimeOutListener = new WriteTimeOutListener(balFuture,
+                        textCallbackCompleted);
+                connectionInfo.getWebSocketConnection().addWriteIdleStateHandler(writeTimeOutListener,
+                        writeTimeoutInSeconds);
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+
+                }
+            }
+        }
     }
 
     public static void release(ByteBuf byteBuf) {
@@ -117,6 +149,7 @@ public class WebSocketConnector {
 
     public static Object writeBinaryMessage(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
+        AtomicBoolean binaryCallbackCompleted = new AtomicBoolean(false);
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
@@ -125,6 +158,7 @@ public class WebSocketConnector {
         ByteBuf byteBuf = null;
         ByteBuf lastSlice = null;
         try {
+            setWriteTimeoutHandler(wsConnection, balFuture, binaryCallbackCompleted, connectionInfo);
             byteBuf = fromByteArray(ByteBuffer.wrap(binaryData.getBytes()));
             int noBytes = byteBuf.readableBytes();
             int index = 0;
@@ -150,12 +184,15 @@ public class WebSocketConnector {
             promiseCombiner.add(webSocketChannelFuture);
             promiseCombiner.finish(connectionInfo.getWebSocketConnection().getChannel().newPromise()
                     .addListener((ChannelFutureListener) future -> {
+                        removeWriteTimeoutHandler(wsConnection, connectionInfo);
                         if (future.isSuccess()) {
-                            WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
+                            WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo,
+                                    binaryCallbackCompleted);
                             WebSocketObservabilityUtil
                                     .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, connectionInfo);
                         } else {
-                            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause());
+                            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause(),
+                                    binaryCallbackCompleted);
                         }
                     }));
         } catch (IllegalAccessException | IllegalStateException e) {
@@ -163,12 +200,19 @@ public class WebSocketConnector {
             WebSocketObservabilityUtil.observeError(WebSocketObservabilityUtil.getConnectionInfo(wsConnection),
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, e.getMessage());
-            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
+            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e, binaryCallbackCompleted);
         } finally {
             release(byteBuf);
             release(lastSlice);
         }
         return null;
+    }
+
+    private static void removeWriteTimeoutHandler(BObject wsConnection, WebSocketConnectionInfo connectionInfo)
+            throws IllegalAccessException {
+        if (wsConnection.getType().getName().equals(SYNC_CLIENT)) {
+            connectionInfo.getWebSocketConnection().removeWriteIdleStateHandler();
+        }
     }
 
     public static byte[] getByteChunk(int size, ByteBuf slice) {
@@ -179,13 +223,14 @@ public class WebSocketConnector {
 
     public static Object ping(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
+        AtomicBoolean pingCallbackCompleted = new AtomicBoolean(false);
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.RESOURCE_NAME_PING);
         try {
             ChannelFuture future = connectionInfo.getWebSocketConnection().ping(ByteBuffer.wrap(binaryData.getBytes()));
-            WebSocketUtil.handlePingWebSocketCallback(balFuture, future, log, connectionInfo);
+            WebSocketUtil.handlePingWebSocketCallback(balFuture, future, log, connectionInfo, pingCallbackCompleted);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_PING,
                     connectionInfo);
         } catch (Exception e) {
@@ -194,20 +239,21 @@ public class WebSocketConnector {
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_PING,
                     e.getMessage());
-            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
+            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e, pingCallbackCompleted);
         }
         return null;
     }
 
     public static Object pong(Environment env, BObject wsConnection, BArray binaryData) {
         Future balFuture = env.markAsync();
+        AtomicBoolean pongCallbackCompleted = new AtomicBoolean(false);
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                 WebSocketConstants.RESOURCE_NAME_PONG);
         try {
             ChannelFuture future = connectionInfo.getWebSocketConnection().pong(ByteBuffer.wrap(binaryData.getBytes()));
-            WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo);
+            WebSocketUtil.handleWebSocketCallback(balFuture, future, log, connectionInfo, pongCallbackCompleted);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_PONG,
                     connectionInfo);
         } catch (Exception e) {
@@ -216,7 +262,7 @@ public class WebSocketConnector {
                     WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
                     WebSocketObservabilityConstants.MESSAGE_TYPE_PONG,
                     e.getMessage());
-            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e);
+            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, e, pongCallbackCompleted);
         }
         return null;
     }
