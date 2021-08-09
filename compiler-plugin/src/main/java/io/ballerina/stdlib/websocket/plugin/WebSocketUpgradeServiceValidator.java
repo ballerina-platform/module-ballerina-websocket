@@ -19,7 +19,6 @@
 package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.symbols.ClassSymbol;
-import io.ballerina.compiler.api.symbols.ErrorTypeSymbol;
 import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
@@ -156,7 +155,8 @@ public class WebSocketUpgradeServiceValidator {
                             .equals(PluginConstants.ORG_NAME) && WebSocketConstants.PACKAGE_WEBSOCKET
                             .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix())) || (
                             symbol.typeKind() == TypeDescKind.TYPE_REFERENCE &&
-                                    ((TypeReferenceTypeSymbol) symbol).typeDescriptor() instanceof ErrorTypeSymbol))) {
+                                    ((TypeReferenceTypeSymbol) symbol).typeDescriptor().typeKind()
+                                            == TypeDescKind.ERROR))) {
                         Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE,
                                 resourceNode.location(), symbol.typeKind().getName(), resourceNode.functionName(),
                                 modulePrefix + PluginConstants.SERVICE + PluginConstants.PIPE + modulePrefix
