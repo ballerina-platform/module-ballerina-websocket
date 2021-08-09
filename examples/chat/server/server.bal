@@ -3,7 +3,7 @@ import ballerina/io;
 import ballerina/websocket;
 
 final string NAME = "name";
-string nameValue = "";
+string? nameValue = ();
 map<websocket:Caller> connectionsMap = {};
 
 service /chat on new websocket:Listener(9090) {
@@ -13,13 +13,16 @@ service /chat on new websocket:Listener(9090) {
             // Server can accept a WebSocket connection by returning a `websocket:Service`.
             return service object websocket:Service {
                 remote function onOpen(websocket:Caller caller) returns websocket:Error? {
-                    string welcomeMsg = "Hi " + nameValue + "! You have successfully connected to the chat";
-                    websocket:Error? err = check caller->writeTextMessage(welcomeMsg);
-                    string msg = nameValue + " connected to chat";
-                    broadcast(msg);
-                    caller.setAttribute(NAME, nameValue);
-                    lock {
-                        connectionsMap[caller.getConnectionId()] = caller;
+                    string? userName = nameValue;
+                    if (userName is string) {
+                        string welcomeMsg = "Hi " + userName + "! You have successfully connected to the chat";
+                        websocket:Error? err = check caller->writeTextMessage(welcomeMsg);
+                        string msg = userName + " connected to chat";
+                        broadcast(msg);
+                        caller.setAttribute(NAME, nameValue);
+                        lock {
+                            connectionsMap[caller.getConnectionId()] = caller;
+                        }
                     }
                 }
                 remote function onTextMessage(websocket:Caller caller, string text) {
