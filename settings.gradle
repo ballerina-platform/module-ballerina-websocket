@@ -22,7 +22,7 @@ project(':checkstyle').projectDir = file("build-config${File.separator}checkstyl
 project(':websocket-native').projectDir = file('native')
 project(':websocket-ballerina').projectDir = file('ballerina')
 project(':websocket-compiler-plugin').projectDir = file('compiler-plugin')
-project(':websocket-compiler-plugin-test').projectDir = file('compiler-plugin-test')
+project(':websocket-compiler-plugin-test').projectDir = file('compiler-plugin-tests')
 
 gradleEnterprise {
     buildScan {
