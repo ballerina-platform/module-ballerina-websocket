@@ -37,7 +37,7 @@ public class WriteTimeOutListener implements WebSocketWriteTimeOutListener {
         this.completed = completed;
     }
 
-    public void notifyTimeOut(Throwable error) {
+    public void onTimeout(Throwable error) {
         if (!completed.get()) {
             balFuture.complete(WebSocketUtil.createErrorByType(error));
             completed.set(true);
