@@ -30,17 +30,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WriteTimeOutListener implements WebSocketWriteTimeOutListener {
 
     private Future balFuture;
-    private AtomicBoolean completed;
+    private AtomicBoolean futureCompleted;
 
-    public WriteTimeOutListener(Future balFuture, AtomicBoolean completed) {
+    public WriteTimeOutListener(Future balFuture, AtomicBoolean futureCompleted) {
         this.balFuture = balFuture;
-        this.completed = completed;
+        this.futureCompleted = futureCompleted;
     }
 
     public void onTimeout(Throwable error) {
-        if (!completed.get()) {
+        if (!futureCompleted.get()) {
             balFuture.complete(WebSocketUtil.createErrorByType(error));
-            completed.set(true);
+            futureCompleted.set(true);
         }
     }
 }
