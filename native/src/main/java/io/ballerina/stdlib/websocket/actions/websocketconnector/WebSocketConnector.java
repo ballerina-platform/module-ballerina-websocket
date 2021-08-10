@@ -120,11 +120,6 @@ public class WebSocketConnector {
                         textCallbackCompleted);
                 connectionInfo.getWebSocketConnection().addWriteIdleStateHandler(writeTimeOutListener,
                         writeTimeoutInSeconds);
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-
-                }
             }
         }
     }

@@ -105,18 +105,18 @@ public class WebSocketUtil {
 
     public static void handleWebSocketCallback(Future balFuture,
             ChannelFuture webSocketChannelFuture, Logger log,
-                WebSocketConnectionInfo connectionInfo, AtomicBoolean completed) {
+                WebSocketConnectionInfo connectionInfo, AtomicBoolean futureCompleted) {
         webSocketChannelFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
                 log.error(ERROR_MESSAGE, cause);
-                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause, completed);
+                setCallbackFunctionBehaviour(connectionInfo, balFuture, cause, futureCompleted);
             } else {
                 // This is needed because since the same strand is used in all actions if an action is called before
                 // this one it will cause this action to return the return value of the previous action.
-                if (!completed.get()) {
+                if (!futureCompleted.get()) {
                     balFuture.complete(null);
-                    completed.set(true);
+                    futureCompleted.set(true);
                 }
             }
         });
@@ -143,9 +143,11 @@ public class WebSocketUtil {
     }
 
     public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo, Future balFuture,
-            Throwable error, AtomicBoolean completed) {
-        balFuture.complete(WebSocketUtil.createErrorByType(error));
-        completed.set(true);
+            Throwable error, AtomicBoolean futureCompleted) {
+        if (!futureCompleted.get()) {
+            balFuture.complete(WebSocketUtil.createErrorByType(error));
+            futureCompleted.set(true);
+        }
     }
 
     /**
