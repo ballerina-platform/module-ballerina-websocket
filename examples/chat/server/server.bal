@@ -1,4 +1,3 @@
-import ballerina/http;
 import ballerina/io;
 import ballerina/websocket;
 
@@ -7,7 +6,7 @@ string? nameValue = ();
 map<websocket:Caller> connectionsMap = {};
 
 service /chat on new websocket:Listener(9090) {
-    resource function get [string name](http:Request req) returns websocket:Service|websocket:UpgradeError {
+    resource function get [string name]() returns websocket:Service|websocket:UpgradeError {
         nameValue = name;
         if (nameValue != "") {
             // Server can accept a WebSocket connection by returning a `websocket:Service`.
