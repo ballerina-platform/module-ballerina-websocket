@@ -43,7 +43,6 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import java.util.List;
 
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.REMOTE_KEY_WORD;
-import static io.ballerina.stdlib.websocket.plugin.Utils.ERROR;
 
 /**
  * Class to validate WebSocket services.
@@ -155,8 +154,9 @@ public class WebSocketUpgradeServiceValidator {
                             .equals(PluginConstants.SERVICE) && symbol.getModule().map(ModuleSymbol::id).get().orgName()
                             .equals(PluginConstants.ORG_NAME) && WebSocketConstants.PACKAGE_WEBSOCKET
                             .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix())) || (
-                            symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.signature()
-                                    .contains(ERROR)))) {
+                            symbol.typeKind() == TypeDescKind.TYPE_REFERENCE &&
+                                    ((TypeReferenceTypeSymbol) symbol).typeDescriptor().typeKind()
+                                            == TypeDescKind.ERROR))) {
                         Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE,
                                 resourceNode.location(), symbol.typeKind().getName(), resourceNode.functionName(),
                                 modulePrefix + PluginConstants.SERVICE + PluginConstants.PIPE + modulePrefix
