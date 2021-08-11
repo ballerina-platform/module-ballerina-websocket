@@ -23,10 +23,10 @@ map<websocket:Caller> connectionsMap = {};
 service /chat on new websocket:Listener(9090) {
     resource function get [string username]() returns websocket:Service|websocket:UpgradeError {
         if (username != "") {
-            // Server can accept a WebSocket connection by returning a `websocket:Service`.
+            // The server can accept a WebSocket connection by returning a `websocket:Service`.
             return new ChatServer(username);
         } else {
-            // Server can cancel the WebSocket upgrade by returning an error.
+            // The server can cancel the WebSocket upgrade by returning an error.
             websocket:UpgradeError err = error("Username must be a non-empty value");
             return err;
         }
