@@ -42,52 +42,48 @@ service class ChatServer {
         self.username = username;
     }
 
-    remote function onOpen(websocket:Caller caller) returns websocket:Error? {
+    remote function onOpen(websocket:Caller caller) returns error? {
         string welcomeMsg = "Hi " + self.username + "! You have successfully connected to the chat";
         websocket:Error? err = check caller->writeTextMessage(welcomeMsg);
         string msg = self.username + " connected to chat";
-        broadcast(msg);
+        check broadcast(msg);
         caller.setAttribute(USERNAME, self.username);
         lock {
             connectionsMap[caller.getConnectionId()] = caller;
         }
     }
 
-    remote function onTextMessage(websocket:Caller caller, string text) {
-        string msg = getAttributeStr(caller, USERNAME) + ": " + text;
+    remote function onTextMessage(websocket:Caller caller, string text) returns error? {
+        string msg = check getUsername(caller, USERNAME) + ": " + text;
         io:println(msg);
         @strand {
             thread:"any"
         }
         worker broadcast returns error? {
-            broadcast(msg);
+            check broadcast(msg);
         }
     }
 
-    remote function onClose(websocket:Caller caller, int statusCode, string reason) {
+    remote function onClose(websocket:Caller caller, int statusCode, string reason) returns error? {
         lock {
             _ = connectionsMap.remove(caller.getConnectionId());
         }
-        string msg = getAttributeStr(caller, USERNAME) + " left the chat";
-        broadcast(msg);
+        string msg = check getUsername(caller, USERNAME) + " left the chat";
+        check broadcast(msg);
     }
 }
 
 // Function to perform the broadcasting of text messages.
-function broadcast(string text) {
+function broadcast(string text) returns error? {
     foreach websocket:Caller con in connectionsMap {
         websocket:Error? err = con->writeTextMessage(text);
         if err is websocket:Error {
-            io:println("Error sending message to the :" + getAttributeStr(con, USERNAME) +
+            io:println("Error sending message to the :" + check getUsername(con, USERNAME) +
                         ". Reason: " + err.message());
         }
     }
 }
 
-function getAttributeStr(websocket:Caller ep, string key) returns string {
-    var name = ep.getAttribute(key);
-    if name is string {
-        return name;
-    }
-    return "";
+function getUsername(websocket:Caller ep, string key) returns string|error {
+    return <string> check ep.getAttribute(key);
 }
