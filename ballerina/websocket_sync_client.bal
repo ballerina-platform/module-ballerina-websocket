@@ -41,6 +41,7 @@ public isolated client class Client {
             subProtocols: config.subProtocols,
             customHeaders: config.customHeaders,
             readTimeout: config.readTimeout,
+            writeTimeout: config.writeTimeout,
             secureSocket: config.secureSocket,
             maxFrameSize: config.maxFrameSize,
             webSocketCompressionEnabled: config.webSocketCompressionEnabled,
@@ -228,6 +229,7 @@ public type ClientConfiguration record {|
 # + subProtocols - Negotiable sub protocols of the client
 # + customHeaders - Custom headers, which should be sent to the server
 # + readTimeout - Read timeout (in seconds) of the client
+# + writeTimeout - Write timeout (in seconds) of the client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
 #                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used
@@ -243,6 +245,7 @@ public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
     decimal readTimeout = -1;
+    decimal writeTimeout = -1;
     ClientSecureSocket? secureSocket = ();
     int maxFrameSize = 65536;
     boolean webSocketCompressionEnabled = true;
@@ -261,6 +264,7 @@ type ClientInferredConfig record {|
     string[] subProtocols;
     map<string> customHeaders;
     decimal readTimeout;
+    decimal writeTimeout;
     ClientSecureSocket? secureSocket;
     int maxFrameSize;
     boolean webSocketCompressionEnabled;
