@@ -37,6 +37,7 @@ service class ChatServer {
     *websocket:Service;
 
     string username;
+
     public function init(string username) {
         self.username = username;
     }
