@@ -19,6 +19,10 @@ import ballerina/websocket;
 
 public function main() returns error? {
    string username = io:readln("Enter username: ");
+   if (username == "") {
+       io:println("Username cannot be empty");
+       return;
+   }
    string url = string `ws://localhost:9090/chat/${username}`;
    websocket:Client wsClient = check new(url);
    @strand {
@@ -29,6 +33,7 @@ public function main() returns error? {
            string msg = io:readln("");
            if (msg == "exit") {
                check wsClient->close();
+               return;
            } else {
                check wsClient->writeTextMessage(msg);
            }

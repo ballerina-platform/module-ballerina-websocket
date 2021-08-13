@@ -17,19 +17,13 @@
 import ballerina/io;
 import ballerina/websocket;
 
-final string USERNAME = "username";
+const string USERNAME = "username";
 map<websocket:Caller> connectionsMap = {};
 
 service /chat on new websocket:Listener(9090) {
     resource function get [string username]() returns websocket:Service|websocket:UpgradeError {
-        if (username != "") {
-            // The server can accept a WebSocket connection by returning a `websocket:Service`.
-            return new ChatServer(username);
-        } else {
-            // The server can cancel the WebSocket upgrade by returning an error.
-            websocket:UpgradeError err = error("Username must be a non-empty value");
-            return err;
-        }
+        // The server can accept a WebSocket connection by returning a `websocket:Service`.
+        return new ChatServer(username);
     }
 }
 
