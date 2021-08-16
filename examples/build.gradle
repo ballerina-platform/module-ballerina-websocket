@@ -25,7 +25,7 @@ description = 'Ballerina - WebSocket Examples'
 def ballerinaModulePath = "${project.rootDir}/ballerina/"
 def ballerinaDistPath = "${ballerinaModulePath}/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
 def ballerinaDist = "${buildDir}/target/ballerina-distribution"
-def examples = ["chat/client", "chat/server"]
+def examples = ["chat-application/client", "chat-application/server"]
 
 dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"

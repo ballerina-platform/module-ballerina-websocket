@@ -23,13 +23,13 @@ First, clone this repository, and then run the following commands to run this ex
 
 ```sh
 // Run the WebSocket server
-$ cd examples/chat/server
+$ cd examples/chat-application/server
 $ bal run
 ```
 
 In another terminal, run the client as follows.
 ```sh
 // Run the WebSocket client
-$ cd examples/chat/client
+$ cd examples/chat-application/client
 $ bal run
 ```
