@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - [Introduce write time out for WebSocket client](https://github.com/ballerina-platform/ballerina-standard-library/issues/1609)
+- [Add OAuth2 JWT bearer grant type support](https://github.com/ballerina-platform/ballerina-standard-library/issues/1788)
 
 ## [1.2.0-beta.2] - 2021-07-07
 
