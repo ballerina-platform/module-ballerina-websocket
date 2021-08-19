@@ -20,6 +20,7 @@ package io.ballerina.stdlib.websocket.client.listener;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
@@ -33,8 +34,9 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.
@@ -44,6 +46,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;
+    private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
 
     public void setConnectionInfo(WebSocketConnectionInfo connectionInfo) {
         this.connectionInfo = connectionInfo;
@@ -105,9 +108,22 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
         try {
             int closeCode = webSocketCloseMessage.getCloseCode();
-            String closeReason = webSocketCloseMessage.getCloseReason().equals("") ?
+            String closeReason = webSocketCloseMessage.getCloseReason() == null ||
+                    webSocketCloseMessage.getCloseReason().equals("") ?
                     "Connection closed: Status code: " + closeCode :
                     webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
+            if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
+                if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
+                        WebSocketUtil.reconnect(connectionInfo, callback)) {
+                    return;
+                } else {
+                    if (closeCode != WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE) {
+                        logger.debug(WebSocketConstants.LOG_MESSAGE, "Reconnect attempt not made because of " +
+                                "close initiated by the server: ", connectionInfo.getWebSocketEndpoint()
+                                .getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
+                    }
+                }
+            }
             callback.complete(WebSocketUtil
                     .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
 
@@ -123,6 +139,11 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
         try {
+            BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
+            if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
+                    WebSocketUtil.reconnect(connectionInfo, callback)) {
+                return;
+            }
             if (callback != null) {
                 callback.complete(WebSocketUtil
                         .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.Error));

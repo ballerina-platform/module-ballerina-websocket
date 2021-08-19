@@ -45,7 +45,8 @@ public isolated client class Client {
             secureSocket: config.secureSocket,
             maxFrameSize: config.maxFrameSize,
             webSocketCompressionEnabled: config.webSocketCompressionEnabled,
-            handShakeTimeout: config.handShakeTimeout
+            handShakeTimeout: config.handShakeTimeout,
+            retryConfig: config.retryConfig
         };
         self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
@@ -241,6 +242,7 @@ public type ClientConfiguration record {|
 # + auth - Configurations related to client authentication
 # + pingPongHandler - A service to handle the ping/pong frames.
 #                     Resources in this service gets called on the receipt of ping/pong frames from the server
+# + retryConfig - Retry related configurations.
 public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
@@ -253,11 +255,26 @@ public type CommonClientConfiguration record {|
     http:Cookie[] cookies?;
     ClientAuthConfig auth?;
     PingPongService pingPongHandler?;
+    WebSocketRetryConfig? retryConfig = ();
 |};
 
 # Configures the SSL/TLS options to be used for WebSocket client.
 public type ClientSecureSocket record {|
     *http:ClientSecureSocket;
+|};
+
+# Retry configurations for WebSocket.
+#
+# + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely.
+# + intervalInMillis - The number of milliseconds to delay before attempting to reconnect.
+# + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
+#                persist.
+# + maxWaitIntervalInMillis - Maximum time of the retry interval in milliseconds.
+public type WebSocketRetryConfig record {|
+    int maxCount = 0;
+    int intervalInMillis = 1000;
+    float backOffFactor = 1.0;
+    int maxWaitIntervalInMillis = 30000;
 |};
 
 type ClientInferredConfig record {|
@@ -269,6 +286,7 @@ type ClientInferredConfig record {|
     int maxFrameSize;
     boolean webSocketCompressionEnabled;
     decimal handShakeTimeout;
+    WebSocketRetryConfig? retryConfig;
 |};
 
 # Adds cookies to the custom header.
