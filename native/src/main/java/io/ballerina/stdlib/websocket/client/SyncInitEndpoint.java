@@ -79,10 +79,6 @@ public class SyncInitEndpoint {
             SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
             WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture);
-//            ClientHandshakeFuture handshakeFuture = clientConnector.connect();
-//            handshakeFuture.setWebSocketConnectorListener(syncClientConnectorListener);
-//            handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(wsSyncClient, wsService,
-//                    syncClientConnectorListener, balFuture));
         } catch (Exception e) {
             if (e instanceof BError) {
                 balFuture.complete(e);
