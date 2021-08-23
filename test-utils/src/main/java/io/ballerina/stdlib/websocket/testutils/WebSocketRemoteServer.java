@@ -61,7 +61,7 @@ public final class WebSocketRemoteServer {
     }
 
     public static void stop() {
-        log.info("Shutting down websocket remote server at '" + 21003 + "'");
+        log.info("Shutting down websocket remote server at '" + 21078 + "'");
         try {
             bossGroup.shutdownGracefully().sync();
             workerGroup.shutdownGracefully().sync();
@@ -71,7 +71,7 @@ public final class WebSocketRemoteServer {
     }
 
     public static void initiateServer() {
-        WebSocketRemoteServer remoteServer = new WebSocketRemoteServer(21003);
+        WebSocketRemoteServer remoteServer = new WebSocketRemoteServer(21078);
         try {
             remoteServer.run();
         } catch (InterruptedException e) {

@@ -19,25 +19,24 @@ import ballerina/test;
 import ballerina/io;
 import ballerina/jballerina.java;
 
-string data1 = "";
-string data2 = "";
+string rdata1 = "";
+string rdata2 = "";
 
-// Tests string support for writeTextMessage and onTextMessage
 @test:Config {}
-public function testString() returns error? {
+public function testReadRetry() returns error? {
    @strand {
        thread:"any"
    }
    worker w1 returns error? {
-       Client wsClient = check new("ws://localhost:21003/websocket", { retryConfig: {maxCount: 10} });
+       Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10} });
        check wsClient->writeTextMessage("Hi");
        string firstResp = check wsClient->readTextMessage();
        io:println("Received first connected response from server " + firstResp);
-       data1 = check wsClient->readTextMessage();
-       io:println("Received echo response from server " + data1);
+       rdata1 = check wsClient->readTextMessage();
+       io:println("Received echo response from server " + rdata1);
        runtime:sleep(5);
-       data2 = check wsClient->readTextMessage();
-       io:println("Received connected response from server after retrying " + data2);
+       rdata2 = check wsClient->readTextMessage();
+       io:println("Received connected response from server after retrying " + rdata2);
    }
    @strand {
        thread:"any"
@@ -53,8 +52,8 @@ public function testString() returns error? {
       stopRemoteServer();
    }
    var waitResp = wait {w1, w2};
-   test:assertEquals(data1, "Hi");
-   test:assertEquals(data2, "Connected");
+   test:assertEquals(rdata1, "Hi");
+   test:assertEquals(rdata2, "Connected");
 }
 
 public function startRemoteServer() = @java:Method {
