@@ -56,6 +56,16 @@ public function testReadRetry() returns error? {
    test:assertEquals(rdata2, "Connected");
 }
 
+@test:Config {}
+public function testReadRetryFailure() returns error? {
+    Client|Error wsClient = new("ws://localhost:21800/websocket", { retryConfig: {maxCount: 3} });
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
+    } else {
+        test:assertFail(msg = "Test testReadRetryFailure Failed!");
+    }
+}
+
 public function startRemoteServer() = @java:Method {
     name: "initiateServer",
     'class: "io.ballerina.stdlib.websocket.testutils.WebSocketRemoteServer"
