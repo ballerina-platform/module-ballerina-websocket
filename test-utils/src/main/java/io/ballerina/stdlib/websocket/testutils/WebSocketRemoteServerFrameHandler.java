@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.websocket.testutils;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -28,11 +29,11 @@ import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple WebSocket frame handler for testing.
@@ -62,6 +63,14 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
     public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("channel is inactive");
         isOpen = false;
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        super.userEventTriggered(ctx, evt);
+        if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
+            ChannelFuture f = ctx.channel().writeAndFlush(new TextWebSocketFrame("Connected"));
+        }
     }
 
     @Override

@@ -24,7 +24,6 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +51,6 @@ public class WebSocketHeadersHandler extends ChannelDuplexHandler {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest request = (FullHttpRequest) msg;
-            System.out.println("------------------Channel read called---------------");
-            ctx.channel().writeAndFlush(new TextWebSocketFrame(true, 0, "connected"));
             requestHeaders = request.headers();
         }
         super.channelRead(ctx, msg);
