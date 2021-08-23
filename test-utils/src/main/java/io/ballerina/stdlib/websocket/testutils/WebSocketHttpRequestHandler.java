@@ -28,13 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Simple Handler for testing the support for custom headers by WebSocket client and server.
- * The class is a {@link ChannelDuplexHandler} and returns the request headers for the request and sets a new header
- * to the response.
+ * A handler for HTTP initial request.
  */
-public class WebSocketHeadersHandler extends ChannelDuplexHandler {
+public class WebSocketHttpRequestHandler extends ChannelDuplexHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketHeadersHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(WebSocketHttpRequestHandler.class);
     private HttpHeaders requestHeaders;
 
     @Override

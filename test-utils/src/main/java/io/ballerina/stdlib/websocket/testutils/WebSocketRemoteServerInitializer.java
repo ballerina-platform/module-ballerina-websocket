@@ -44,7 +44,7 @@ public class WebSocketRemoteServerInitializer extends ChannelInitializer<SocketC
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(8192));
         pipeline.addLast(new WebSocketServerCompressionHandler());
-        WebSocketHeadersHandler headersHandler = new WebSocketHeadersHandler();
+        WebSocketHttpRequestHandler headersHandler = new WebSocketHttpRequestHandler();
         pipeline.addLast(headersHandler);
         pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, "xml, json", true));
         WebSocketRemoteServerFrameHandler frameHandler = new WebSocketRemoteServerFrameHandler(headersHandler);

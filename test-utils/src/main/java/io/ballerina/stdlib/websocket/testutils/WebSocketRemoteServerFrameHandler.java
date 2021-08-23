@@ -22,7 +22,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
@@ -44,9 +43,9 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
     private boolean isOpen = true;
     private static final String PING = "ping";
     private static final String CUSTOM_HEADERS = "custom-headers";
-    private WebSocketHeadersHandler headersHandler;
+    private WebSocketHttpRequestHandler headersHandler;
 
-    public WebSocketRemoteServerFrameHandler(WebSocketHeadersHandler headersHandler) {
+    public WebSocketRemoteServerFrameHandler(WebSocketHttpRequestHandler headersHandler) {
         this.headersHandler = headersHandler;
     }
 
@@ -81,11 +80,6 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
             if (PING.equals(text)) {
                 ctx.channel().writeAndFlush(new PingWebSocketFrame(
                         Unpooled.wrappedBuffer(ByteBuffer.wrap("data".getBytes(StandardCharsets.UTF_8)))));
-                return;
-            }
-            if (text.contains(CUSTOM_HEADERS)) {
-                HttpHeaders headers = headersHandler.getRequestHeaders();
-                ctx.writeAndFlush(new TextWebSocketFrame(headers.get(text.split(":")[1])));
                 return;
             }
             ctx.channel().writeAndFlush(new TextWebSocketFrame(frame.isFinalFragment(), 0, text));
