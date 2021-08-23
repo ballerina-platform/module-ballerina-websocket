@@ -71,7 +71,7 @@ public class WebSocketServicesRegistry {
             throw WebSocketUtil.getWebSocketError("", e, WebSocketConstants.ErrorCode.Error.
                     errorCode(), null);
         }
-        logger.info("WebSocketService deployed with context {}", basePath);
+        logger.debug("WebSocketService deployed with context {}", basePath);
     }
 
     public WebSocketServerService findMatching(String path, HttpResourceArguments pathParams,
