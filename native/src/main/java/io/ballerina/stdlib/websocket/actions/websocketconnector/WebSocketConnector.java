@@ -33,10 +33,12 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static io.ballerina.stdlib.websocket.WebSocketConstants.SYNC_CLIENT;
 
 /**

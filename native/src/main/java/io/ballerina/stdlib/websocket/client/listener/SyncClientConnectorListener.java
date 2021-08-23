@@ -34,9 +34,10 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.

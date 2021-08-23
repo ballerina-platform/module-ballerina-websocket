@@ -33,6 +33,7 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
+
 import java.net.URI;
 
 /**
@@ -141,8 +142,6 @@ public class SyncInitEndpoint {
     private static int getIntValue(BMap<BString, Object> configs, String key, int defaultValue) {
         int value = Math.toIntExact(configs.getIntValue(StringUtils.fromString(key)));
         if (value < 0) {
-//            logger.warn("The value set for `{}` needs to be great than than -1. The `{}` value is set to {}", key, key,
-//                    defaultValue);
             value = defaultValue;
         }
         return value;
@@ -151,8 +150,6 @@ public class SyncInitEndpoint {
     private static Double getDoubleValue(BMap<BString, Object> configs) {
         double value = Math.toRadians(configs.getFloatValue(StringUtils.fromString(BACK_OF_FACTOR)));
         if (value < 1) {
-//            logger.warn("The value set for `backOffFactor` needs to be great than than 1. The `backOffFactor`" +
-//                    " value is set to {}", 1.0);
             value = 1.0;
         }
         return value;

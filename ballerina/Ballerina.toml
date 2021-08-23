@@ -105,3 +105,10 @@ path = "./lib/mimepull-@mimepull.version@.jar"
 groupId = "org.jvnet.mimepull"
 artifactId = "mimepull"
 version = "@mimepull.version@"
+
+[[platform.java11.dependency]]
+path = "../test-utils/build/libs/websocket-test-utils-@project.version@.jar"
+groupId = "io.ballerina.stdlib.websocket.testutils"
+scope = "testOnly"
+artifactId = "tcp"
+version = "@project.version@"

@@ -52,17 +52,17 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLException;
@@ -338,7 +338,6 @@ public class WebSocketUtil {
         if (noOfReconnectAttempts < maxAttempts || maxAttempts == 0) {
             retryConnectorConfig.setReconnectAttempts(noOfReconnectAttempts + 1);
             String time = formatter.format(date.getTime());
-            System.out.println("+++++++++++++++++++++Reconnecting+++++++++++++++++++++++++++");
             logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
             createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
             establishWebSocketConnection(webSocketClient, wsService, balFuture);

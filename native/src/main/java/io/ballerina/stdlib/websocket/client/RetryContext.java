@@ -18,6 +18,9 @@
 
 package io.ballerina.stdlib.websocket.client;
 
+/**
+ * Represents retry config.
+ */
 public class RetryContext {
     private int interval = 0;
     private Double backOfFactor = 0.0;

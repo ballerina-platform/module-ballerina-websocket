@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The retry handshake listener for the client.
  *
- * @since 1.2.0
  */
 public class WebSocketClientHandshakeListenerForRetry implements ClientHandshakeListener {
 
