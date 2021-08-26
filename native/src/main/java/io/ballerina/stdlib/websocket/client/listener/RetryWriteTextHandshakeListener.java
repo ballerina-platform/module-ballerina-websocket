@@ -135,10 +135,6 @@ public class RetryWriteTextHandshakeListener implements ClientHandshakeListener 
 
     @Override
     public void onError(Throwable throwable, HttpCarbonResponse httpCarbonResponse) {
-        if (httpCarbonResponse != null) {
-            clientEndpoint.addNativeData(WebSocketConstants.HTTP_RESPONSE,
-                    HttpUtil.createResponseStruct(httpCarbonResponse));
-        }
         setWebSocketOpenConnectionInfo(null, clientEndpoint,
                 (WebSocketService) clientEndpoint.getNativeData(WebSocketConstants.CALL_BACK_SERVICE));
         if (throwable instanceof IOException && WebSocketUtil.reconnectForWrite(connectionInfo, balFuture,

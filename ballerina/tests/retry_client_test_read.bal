@@ -1,4 +1,4 @@
-// Copyright (c) 2020 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -28,7 +28,7 @@ public function testReadRetryHandshake() returns error? {
     }
     worker w1 returns error? {
         io:println("Executing testReadRetryHandshake...");
-        Client|Error wsClient = new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10}, readTimeout: 40 });
+        Client|Error wsClient = new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10, maxWaitInterval: -1}, readTimeout: 40 });
         if (wsClient is Error) {
             test:assertFail(msg = "Test testReadRetryHandshake Failed!");
         }

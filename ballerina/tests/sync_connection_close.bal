@@ -16,7 +16,6 @@
 
 import ballerina/test;
 import ballerina/io;
-//import ballerina/lang.runtime as runtime;
 
 string closeError = "";
 listener Listener l32 = new(21002);
