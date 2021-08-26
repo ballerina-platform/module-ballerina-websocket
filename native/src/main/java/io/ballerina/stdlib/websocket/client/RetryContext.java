@@ -124,14 +124,14 @@ public class RetryContext {
      *
      * @return firstConnectionMadeSuccessfully
      */
-    boolean isFirstConnectionMadeSuccessfully() {
+    public boolean isFirstConnectionMadeSuccessfully() {
         return firstConnectionMadeSuccessfully;
     }
 
     /**
      * Assigns the connection state of the `RetryContext` to the `firstConnectionMadeSuccessfully` variable.
      */
-    void setFirstConnectionMadeSuccessfully() {
+    public void setFirstConnectionMadeSuccessfully() {
         this.firstConnectionMadeSuccessfully = true;
     }
 }

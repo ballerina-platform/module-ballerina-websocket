@@ -34,6 +34,7 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +48,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;
+    private AtomicBoolean futureCompleted;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
 
     public void setConnectionInfo(WebSocketConnectionInfo connectionInfo) {
@@ -66,7 +68,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 BString txtMsg = StringUtils.fromString(stringAggregator.getAggregateString());
                 stringAggregator.resetAggregateString();
-                callback.complete(txtMsg);
+                if (!futureCompleted.get()) {
+                    callback.complete(txtMsg);
+                    futureCompleted.set(true);
+                }
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
@@ -75,11 +80,13 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+            futureCompleted.set(true);
         }
     }
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
+        System.out.println("-------------on binary message----------");
         try {
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
@@ -89,6 +96,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 byte[] binMsg = byteArrAggregator.getAggregateByteArr();
                 byteArrAggregator.resetAggregateByteArr();
                 callback.complete(ValueCreator.createArrayValue(binMsg));
+                futureCompleted.set(true);
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
@@ -97,6 +105,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         } catch (IllegalAccessException | IOException e) {
             callback.complete(WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+            futureCompleted.set(true);
         }
     }
 
@@ -108,11 +117,13 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
         try {
+            if (callback != null && !futureCompleted.get()) {
             int closeCode = webSocketCloseMessage.getCloseCode();
             String closeReason = webSocketCloseMessage.getCloseReason() == null ||
                     webSocketCloseMessage.getCloseReason().equals("") ?
                     "Connection closed: Status code: " + closeCode :
                     webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
+            System.out.println("####################### on close message SyncClientConnectorListener ###############");
             if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
                 if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
                         WebSocketUtil.reconnect(connectionInfo, callback)) {
@@ -125,12 +136,15 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     }
                 }
             }
-            callback.complete(WebSocketUtil
-                    .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
-
+            if (!futureCompleted.get()) {
+                callback.complete(WebSocketUtil
+                        .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
+                futureCompleted.set(true);
+            }
             WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
             wsConnection.removeReadIdleStateHandler();
             WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
+            }
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
                     WebSocketConstants.ErrorCode.ConnectionClosureError));
@@ -140,14 +154,16 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
         try {
-            BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
-            if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
-                    WebSocketUtil.reconnect(connectionInfo, callback)) {
-                return;
-            }
-            if (callback != null) {
+            if (callback != null && !futureCompleted.get()) {
+                BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
+                System.out.println("####################### on error message SyncClientConnectorListener ###############");
+                if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
+                        WebSocketUtil.reconnect(connectionInfo, callback)){
+                    return;
+                }
                 callback.complete(WebSocketUtil
                         .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.Error));
+                futureCompleted.set(true);
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             }
         } catch (IllegalAccessException e) {
@@ -158,9 +174,12 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
         try {
-            callback.complete(WebSocketUtil
-                    .createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
-            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+            if (!futureCompleted.get()) {
+                callback.complete(WebSocketUtil.createWebsocketError(
+                        "Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
+                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+                futureCompleted.set(true);
+            }
         } catch (IllegalAccessException e) {
             // Ignore as it is not possible have an Illegal access
         }
@@ -178,5 +197,9 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     public void setCallback(Future callback) {
         this.callback = callback;
+    }
+
+    public void setFutureCompleted(AtomicBoolean futureCompleted) {
+        this.futureCompleted = futureCompleted;
     }
 }

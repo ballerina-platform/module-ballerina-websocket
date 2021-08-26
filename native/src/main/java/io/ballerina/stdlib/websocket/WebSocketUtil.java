@@ -26,6 +26,7 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -39,6 +40,8 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection
 import io.ballerina.stdlib.http.transport.message.HttpCarbonMessage;
 import io.ballerina.stdlib.websocket.client.RetryContext;
 import io.ballerina.stdlib.websocket.client.WebSocketClientHandshakeListenerForRetry;
+import io.ballerina.stdlib.websocket.client.listener.RetryWriteBinaryHandshakeListener;
+import io.ballerina.stdlib.websocket.client.listener.RetryWriteTextHandshakeListener;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 import io.ballerina.stdlib.websocket.client.listener.WebSocketHandshakeListener;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
@@ -340,12 +343,58 @@ public class WebSocketUtil {
             String time = formatter.format(date.getTime());
             logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
             createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
+            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&reconnectForREAD&&&&&&&&&&&&&&&&&&&&&&");
             establishWebSocketConnection(webSocketClient, wsService, balFuture);
             return true;
         }
         logger.debug(WebSocketConstants.LOG_MESSAGE, "Maximum retry attempts but couldn't connect to the server: ",
                 webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
         return false;
+    }
+
+    public static boolean reconnectForWrite(WebSocketConnectionInfo connectionInfo, Future balFuture,
+                                            AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
+        BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
+        RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
+                RETRY_CONFIG.toString());
+        int interval = retryConnectorConfig.getInterval();
+        int maxInterval = retryConnectorConfig.getMaxInterval();
+        int maxAttempts = retryConnectorConfig.getMaxAttempts();
+        int noOfReconnectAttempts = retryConnectorConfig.getReconnectAttempts();
+        double backOfFactor = retryConnectorConfig.getBackOfFactor();
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        if (noOfReconnectAttempts < maxAttempts || maxAttempts == 0) {
+            retryConnectorConfig.setReconnectAttempts(noOfReconnectAttempts + 1);
+            String time = formatter.format(date.getTime());
+            logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
+            createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
+            System.out.println("********************reconnectForWrite*********************");
+            establishWebSocketConnectionForWrite(webSocketClient, balFuture, futureCompleted, txtMessage, binMessage);
+            return true;
+        }
+        logger.debug(WebSocketConstants.LOG_MESSAGE, "Maximum retry attempts but couldn't connect to the server: ",
+                webSocketClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
+        return false;
+    }
+
+    public static void establishWebSocketConnectionForWrite(BObject webSocketClient, Future balFuture,
+                                                 AtomicBoolean futureCompleted, String message, BArray binMessage) {
+        SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
+                getNativeData(WebSocketConstants.CLIENT_LISTENER);
+        WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.
+                getNativeData(WebSocketConstants.CLIENT_CONNECTOR);
+        ClientHandshakeFuture handshakeFuture = clientConnector.connect();
+        handshakeFuture.setWebSocketConnectorListener(clientConnectorListener);
+        if (WebSocketUtil.hasRetryConfig(webSocketClient)) {
+            if (message != null) {
+                handshakeFuture.setClientHandshakeListener(new RetryWriteTextHandshakeListener(message, webSocketClient,
+                        clientConnectorListener, balFuture, futureCompleted));
+            } else {
+                handshakeFuture.setClientHandshakeListener(new RetryWriteBinaryHandshakeListener(binMessage,
+                        webSocketClient, clientConnectorListener, balFuture, futureCompleted));
+            }
+        }
     }
 
     /**

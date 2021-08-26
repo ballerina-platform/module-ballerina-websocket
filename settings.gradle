@@ -17,16 +17,16 @@ include ':websocket-native'
 include ':websocket-ballerina'
 include ':websocket-compiler-plugin'
 include ':websocket-test-utils'
-include ':websocket-compiler-plugin-test'
-include ':websocket-examples'
+//include ':websocket-compiler-plugin-test'
+//include ':websocket-examples'
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':websocket-native').projectDir = file('native')
 project(':websocket-ballerina').projectDir = file('ballerina')
 project(':websocket-compiler-plugin').projectDir = file('compiler-plugin')
 project(':websocket-test-utils').projectDir = file('test-utils')
-project(':websocket-compiler-plugin-test').projectDir = file('compiler-plugin-tests')
-project(':websocket-examples').projectDir = file('examples')
+//project(':websocket-compiler-plugin-test').projectDir = file('compiler-plugin-tests')
+//project(':websocket-examples').projectDir = file('examples')
 
 gradleEnterprise {
     buildScan {

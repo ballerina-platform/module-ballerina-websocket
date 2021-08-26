@@ -72,6 +72,7 @@ public class WebSocketConstants {
 
     public static final String CLIENT_LISTENER = "clientListener";
     public static final String CLIENT_CONNECTOR = "clientConnector";
+    public static final String CALL_BACK_SERVICE = "callbackService";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
     public static final String CONNECTOR_FACTORY = "connectorFactory";

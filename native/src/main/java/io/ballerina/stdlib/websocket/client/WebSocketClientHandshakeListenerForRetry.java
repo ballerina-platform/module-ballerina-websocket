@@ -12,6 +12,8 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,7 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
     private WebSocketConnectionInfo connectionInfo;
     private Future balFuture;
     private RetryContext retryConfig;
+    private AtomicBoolean futureCompleted;
     private static final Logger logger = LoggerFactory.getLogger(WebSocketClientHandshakeListenerForRetry.class);
 
     public WebSocketClientHandshakeListenerForRetry(BObject webSocketClient, WebSocketService wsService,
@@ -40,6 +43,7 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse carbonResponse) {
+        System.out.println("---------------WebSocket client handshake listener for retry success-----------------------");
         webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(carbonResponse));
         WebSocketUtil.populatWebSocketEndpoint(webSocketConnection, webSocketClient);
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
@@ -56,11 +60,12 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
 
     @Override
     public void onError(Throwable throwable, HttpCarbonResponse response) {
+        System.out.println("---------------WebSocket client handshake listener for retry error-----------------------");
         if (response != null) {
             webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(response));
         }
         setWebSocketOpenConnectionInfo(null, webSocketClient, wsService);
-        if (WebSocketUtil.reconnect(connectionInfo, balFuture)) {
+        if (throwable instanceof IOException && WebSocketUtil.reconnect(connectionInfo, balFuture)) {
             return;
         }
         balFuture.complete(WebSocketUtil.createErrorByType(throwable));
@@ -80,5 +85,9 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
     private void adjustContextOnSuccess(RetryContext retryConfig) {
         retryConfig.setFirstConnectionMadeSuccessfully();
         retryConfig.setReconnectAttempts(0);
+    }
+
+    public void setFutureCompleted(AtomicBoolean futureCompleted) {
+        this.futureCompleted = futureCompleted;
     }
 }

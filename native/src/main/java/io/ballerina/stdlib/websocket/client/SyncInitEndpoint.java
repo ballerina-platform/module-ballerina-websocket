@@ -74,6 +74,7 @@ public class SyncInitEndpoint {
             WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
             wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
+            wsSyncClient.addNativeData(WebSocketConstants.CALL_BACK_SERVICE, wsService);
             wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
                     clientConnectorConfig.getMaxFrameSize());
             SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();

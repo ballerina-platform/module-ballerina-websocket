@@ -87,6 +87,8 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
             ByteBuffer bufferCopy = cloneBuffer(frame.content().nioBuffer());
             ctx.writeAndFlush(new BinaryWebSocketFrame(frame.isFinalFragment(), 0,
                                                        Unpooled.wrappedBuffer(bufferCopy)));
+            System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            System.out.println(StandardCharsets.UTF_8.decode(bufferCopy).toString());
         } else if (frame instanceof CloseWebSocketFrame) {
             ctx.close();
             isOpen = false;
