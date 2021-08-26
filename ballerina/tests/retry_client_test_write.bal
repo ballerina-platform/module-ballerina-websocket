@@ -40,17 +40,7 @@ public function testWriteRetryForTextMessages() returns error? {
         }
         Error? writeResp2 = wsClient->writeTextMessage("Hello");
         if writeResp2 is Error {
-            io:println("Error writing message " + writeResp2.message());
-        }
-        string rResp3 = check wsClient->readTextMessage();
-        io:println("Received echo response from server " + rResp3);
-        string|Error rResp4 = wsClient->readTextMessage();
-        if (rResp4 is Error) {
-            io:println("Error occurred at the 2nd read " + rResp4.message());
-            test:assertFail(msg = "Test testWriteRetry Failed!");
-        } else {
-            io:println("Received echo response from server " + rResp4);
-            test:assertEquals(rResp4, "Hello");
+            test:assertFail(msg = "Test testWriteRetryForTextMessages Failed!");
         }
         stopRemoteServer();
     }
