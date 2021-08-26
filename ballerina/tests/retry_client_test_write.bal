@@ -85,7 +85,7 @@ public function testWriteRetryWithFragmentsForTextMessages() returns error? {
         stopRemoteServer();
         runtime:sleep(0.5);
         check wsClient->writeTextMessage("Hi");
-        Error? writeResp = wsClient->writeTextMessage("Hello Hello Hello Hello Hello");
+        Error? writeResp = wsClient->writeTextMessage("Hello Hello Hello Hello Hello Hello");
         if writeResp is Error {
             test:assertFail(msg = "Test testWriteRetryFailure Failed!");
         }
@@ -120,7 +120,7 @@ public function testWriteRetryForBinaryMessages() returns error? {
         io:println(rdata1);
         stopRemoteServer();
         runtime:sleep(0.5);
-        Error? writeResp = wsClient->writeBinaryMessage("Hi".toBytes());
+        Error? writeResp = wsClient->writeBinaryMessage("Hello".toBytes());
         if writeResp is Error {
             io:println("Error writing message " + writeResp.message());
         }

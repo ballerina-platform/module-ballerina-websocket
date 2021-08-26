@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The retry handshake listener for the client.
@@ -30,7 +29,6 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
     private WebSocketConnectionInfo connectionInfo;
     private Future balFuture;
     private RetryContext retryConfig;
-    private AtomicBoolean futureCompleted;
     private static final Logger logger = LoggerFactory.getLogger(WebSocketClientHandshakeListenerForRetry.class);
 
     public WebSocketClientHandshakeListenerForRetry(BObject webSocketClient, WebSocketService wsService,
@@ -83,9 +81,5 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
     private void adjustContextOnSuccess(RetryContext retryConfig) {
         retryConfig.setFirstConnectionMadeSuccessfully();
         retryConfig.setReconnectAttempts(0);
-    }
-
-    public void setFutureCompleted(AtomicBoolean futureCompleted) {
-        this.futureCompleted = futureCompleted;
     }
 }

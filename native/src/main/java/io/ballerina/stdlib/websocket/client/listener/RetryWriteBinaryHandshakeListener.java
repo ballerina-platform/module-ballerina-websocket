@@ -28,6 +28,7 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector;
+import io.ballerina.stdlib.websocket.client.RetryContext;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
@@ -112,20 +113,17 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
             promiseCombiner.finish(connectionInfo.getWebSocketConnection().getChannel().newPromise()
                     .addListener((ChannelFutureListener) future -> {
                         WebSocketConnector.removeWriteTimeoutHandler(clientEndpoint, connectionInfo);
-                        if (future.isSuccess()) {
-                            WebSocketUtil.handleWebSocketCallback(balFuture, future, logger, connectionInfo,
-                                    binaryCallbackCompleted);
+                        if (webSocketChannelFuture.isSuccess()) {
+                            WebSocketUtil.handleWebSocketCallback(balFuture, webSocketChannelFuture, logger,
+                                    connectionInfo, binaryCallbackCompleted);
                             WebSocketObservabilityUtil
-                                    .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, connectionInfo);
+                                    .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, connectionInfo);
+                            adjustContextOnSuccess((RetryContext) clientEndpoint
+                                    .getNativeData(WebSocketConstants.RETRY_CONFIG.toString()));
                         } else {
-                            if (WebSocketUtil.hasRetryConfig(clientEndpoint) && !binaryCallbackCompleted.get()) {
-                                WebSocketUtil.reconnectForWrite(connectionInfo, balFuture, binaryCallbackCompleted,
-                                        null, message);
-                            } else {
-                                if (!binaryCallbackCompleted.get()) {
-                                    WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture,
-                                            future.cause(), binaryCallbackCompleted);
-                                }
+                            if (!binaryCallbackCompleted.get()) {
+                                WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause(),
+                                        binaryCallbackCompleted);
                             }
                         }
                     }));
@@ -163,5 +161,10 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
                                                 BObject webSocketClient, WebSocketService wsService) {
         this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient);
         webSocketClient.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
+    }
+
+    private void adjustContextOnSuccess(RetryContext retryConfig) {
+        retryConfig.setFirstConnectionMadeSuccessfully();
+        retryConfig.setReconnectAttempts(0);
     }
 }
