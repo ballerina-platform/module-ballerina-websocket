@@ -56,7 +56,7 @@ public final class WebSocketRemoteServer {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new WebSocketRemoteServerInitializer(sslEnabled));
+                .childHandler(new WebSocketRemoteServerInitializer());
         bootstrap.bind(port).sync();
     }
 

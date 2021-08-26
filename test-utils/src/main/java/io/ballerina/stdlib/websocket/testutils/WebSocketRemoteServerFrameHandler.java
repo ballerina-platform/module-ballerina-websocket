@@ -42,7 +42,6 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
     private static final Logger log = LoggerFactory.getLogger(WebSocketRemoteServerFrameHandler.class);
     private boolean isOpen = true;
     private static final String PING = "ping";
-    private static final String CUSTOM_HEADERS = "custom-headers";
     private WebSocketHttpRequestHandler headersHandler;
 
     public WebSocketRemoteServerFrameHandler(WebSocketHttpRequestHandler headersHandler) {
@@ -87,8 +86,6 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
             ByteBuffer bufferCopy = cloneBuffer(frame.content().nioBuffer());
             ctx.writeAndFlush(new BinaryWebSocketFrame(frame.isFinalFragment(), 0,
                                                        Unpooled.wrappedBuffer(bufferCopy)));
-            System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-            System.out.println(StandardCharsets.UTF_8.decode(bufferCopy).toString());
         } else if (frame instanceof CloseWebSocketFrame) {
             ctx.close();
             isOpen = false;

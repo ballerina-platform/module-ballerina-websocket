@@ -321,9 +321,10 @@ public class WebSocketUtil {
     }
 
     /**
-     * Reconnect when the WebSocket connection is lost.
+     * Reconnect when the WebSocket connection is lost while reading or initial handshake.
      *
      * @param connectionInfo - information about the connection.
+     * @param balFuture - Ballerina future to be completed.
      * @return If attempts reconnection, then return true.
      */
     public static boolean reconnect(WebSocketConnectionInfo connectionInfo, Future balFuture) {
@@ -343,7 +344,6 @@ public class WebSocketUtil {
             String time = formatter.format(date.getTime());
             logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
             createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
-            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&reconnectForREAD&&&&&&&&&&&&&&&&&&&&&&");
             establishWebSocketConnection(webSocketClient, wsService, balFuture);
             return true;
         }
@@ -352,6 +352,16 @@ public class WebSocketUtil {
         return false;
     }
 
+    /**
+     * Reconnect when the WebSocket connection is lost while writing to the connection.
+     *
+     * @param connectionInfo - information about the connection.
+     * @param balFuture - Ballerina future to be completed.
+     * @param futureCompleted - Value to check whether the future has already completed.
+     * @param txtMessage - The text message that needs to be sent after a successful retry.
+     * @param binMessage - The binary message that needs to be sent after a successful retry.
+     * @return If attempts reconnection, then return true.
+     */
     public static boolean reconnectForWrite(WebSocketConnectionInfo connectionInfo, Future balFuture,
                                             AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
         BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
@@ -369,7 +379,6 @@ public class WebSocketUtil {
             String time = formatter.format(date.getTime());
             logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
             createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
-            System.out.println("********************reconnectForWrite*********************");
             establishWebSocketConnectionForWrite(webSocketClient, balFuture, futureCompleted, txtMessage, binMessage);
             return true;
         }
@@ -378,8 +387,17 @@ public class WebSocketUtil {
         return false;
     }
 
+    /**
+     * Establish connection with the endpoint. This is used for write operations.
+     *
+     * @param webSocketClient - the WebSocket client.
+     * @param balFuture - Ballerina future to be completed.
+     * @param futureCompleted - Value to check whether the future has already completed.
+     * @param txtMessage - The text message that needs to be sent after a successful retry.
+     * @param binMessage - The binary message that needs to be sent after a successful retry.
+     */
     public static void establishWebSocketConnectionForWrite(BObject webSocketClient, Future balFuture,
-                                                 AtomicBoolean futureCompleted, String message, BArray binMessage) {
+                                                 AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
                 getNativeData(WebSocketConstants.CLIENT_LISTENER);
         WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.
@@ -387,9 +405,9 @@ public class WebSocketUtil {
         ClientHandshakeFuture handshakeFuture = clientConnector.connect();
         handshakeFuture.setWebSocketConnectorListener(clientConnectorListener);
         if (WebSocketUtil.hasRetryConfig(webSocketClient)) {
-            if (message != null) {
-                handshakeFuture.setClientHandshakeListener(new RetryWriteTextHandshakeListener(message, webSocketClient,
-                        clientConnectorListener, balFuture, futureCompleted));
+            if (txtMessage != null) {
+                handshakeFuture.setClientHandshakeListener(new RetryWriteTextHandshakeListener(txtMessage,
+                        webSocketClient, clientConnectorListener, balFuture, futureCompleted));
             } else {
                 handshakeFuture.setClientHandshakeListener(new RetryWriteBinaryHandshakeListener(binMessage,
                         webSocketClient, clientConnectorListener, balFuture, futureCompleted));
@@ -398,10 +416,11 @@ public class WebSocketUtil {
     }
 
     /**
-     * Establish connection with the endpoint.
+     * Establish connection with the endpoint. This is used for read and initial handshake.
      *
      * @param webSocketClient - the WebSocket client.
      * @param wsService - the WebSocket service.
+     * @param balFuture - Ballerina future to be completed.
      */
     public static void establishWebSocketConnection(BObject webSocketClient, WebSocketService wsService,
                                                     Future balFuture) {

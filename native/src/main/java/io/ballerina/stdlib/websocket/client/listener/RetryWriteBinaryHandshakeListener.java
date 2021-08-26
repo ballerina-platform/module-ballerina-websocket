@@ -36,23 +36,25 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.release;
 
 /**
- * A class for handling the handshake of writing text messages after retrying.
+ * A class for handling the handshake of writing binary messages after retrying.
  */
 public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListener {
 
-    private BArray message;
-    private BObject clientEndpoint;
+    private final BArray message;
+    private final BObject clientEndpoint;
     private final SyncClientConnectorListener connectorListener;
     private WebSocketConnectionInfo connectionInfo;
-    private Future balFuture;
+    private final Future balFuture;
     AtomicBoolean binaryCallbackCompleted;
     private static final Logger logger = LoggerFactory.getLogger(RetryWriteBinaryHandshakeListener.class);
 
@@ -68,7 +70,6 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse httpCarbonResponse) {
-        System.out.println("------------------RetryWriteBinaryHandshakeListener on success-------------");
         clientEndpoint.addNativeData(WebSocketConstants.HTTP_RESPONSE,
                 HttpUtil.createResponseStruct(httpCarbonResponse));
         WebSocketUtil.populatWebSocketEndpoint(webSocketConnection, clientEndpoint);
@@ -83,7 +84,8 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
         ByteBuf byteBuf = null;
         ByteBuf lastSlice = null;
         try {
-            WebSocketConnector.setWriteTimeoutHandler(clientEndpoint, balFuture, binaryCallbackCompleted, connectionInfo);
+            WebSocketConnector.setWriteTimeoutHandler(clientEndpoint, balFuture, binaryCallbackCompleted,
+                    connectionInfo);
             byteBuf = WebSocketConnector.fromByteArray(ByteBuffer.wrap(message.getBytes()));
             int noBytes = byteBuf.readableBytes();
             int index = 0;
@@ -94,7 +96,6 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
                 try {
                     slice = byteBuf.retainedSlice(index, size);
                     byte[] chunk = WebSocketConnector.getByteChunk(size, slice);
-                    System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                     ChannelFuture future = connectionInfo.getWebSocketConnection()
                             .pushBinary(ByteBuffer.wrap(chunk), false);
                     promiseCombiner.add(future);
@@ -142,14 +143,14 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
 
     @Override
     public void onError(Throwable throwable, HttpCarbonResponse httpCarbonResponse) {
-        System.out.println("-------------------on Binary Handshake Error--------------------");
         if (httpCarbonResponse != null) {
             clientEndpoint.addNativeData(WebSocketConstants.HTTP_RESPONSE,
                     HttpUtil.createResponseStruct(httpCarbonResponse));
         }
         setWebSocketOpenConnectionInfo(null, clientEndpoint,
                 (WebSocketService) clientEndpoint.getNativeData(WebSocketConstants.CALL_BACK_SERVICE));
-        if (throwable instanceof IOException && WebSocketUtil.reconnectForWrite(connectionInfo, balFuture, binaryCallbackCompleted, null, message)) {
+        if (throwable instanceof IOException && WebSocketUtil.reconnectForWrite(connectionInfo, balFuture,
+                binaryCallbackCompleted, null, message)) {
             return;
         }
         if (!binaryCallbackCompleted.get()) {

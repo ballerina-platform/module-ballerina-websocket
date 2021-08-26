@@ -41,29 +41,14 @@ service class WsServiceSyncClose {
 @test:Config {}
 public function testSyncClientClose() returns Error? {
     Client wsClient = check new("ws://localhost:21002/onCloseText");
-    //@strand {
-    //    thread:"any"
-    //}
-    //worker w1 {
-        io:println("Reading message starting: sync close client");
-        Error? resp1 = wsClient->writeTextMessage("Hi world1");
-        string|Error resp2 = wsClient->readTextMessage();
-        if (resp2 is Error) {
-            closeError = resp2.message();
-        } else {
-            io:println("1st response received at sync close client :" + resp2);
-        }
-    //}
-    //@strand {
-    //    thread:"any"
-    //}
-    //worker w2 {
-    //    io:println("Waiting till close client starts reading text.");
-    //    runtime:sleep(2);
-    //    Error? resp1 = wsClient->writeTextMessage("Hi world1");
-    //    runtime:sleep(2);
-    //}
-    //_ = wait {w1, w2};
+    io:println("Reading message starting: sync close client");
+    Error? resp1 = wsClient->writeTextMessage("Hi world1");
+    string|Error resp2 = wsClient->readTextMessage();
+    if (resp2 is Error) {
+        closeError = resp2.message();
+    } else {
+        io:println("1st response received at sync close client :" + resp2);
+    }
     string msg = "Close the connection: Status code: 1000";
     test:assertEquals(closeError, msg, msg = "");
 }

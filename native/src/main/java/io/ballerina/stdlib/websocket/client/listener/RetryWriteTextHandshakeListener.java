@@ -37,22 +37,24 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.release;
 
 /**
  * A class for handling the handshake of writing text messages after retrying.
  */
 public class RetryWriteTextHandshakeListener implements ClientHandshakeListener {
-    private String message;
-    private BObject clientEndpoint;
+    private final String message;
+    private final BObject clientEndpoint;
     private final SyncClientConnectorListener connectorListener;
     private WebSocketConnectionInfo connectionInfo;
-    private Future balFuture;
-    AtomicBoolean textCallbackCompleted;
+    private final Future balFuture;
+    private AtomicBoolean textCallbackCompleted;
     private static final Logger logger = LoggerFactory.getLogger(RetryWriteTextHandshakeListener.class);
 
     public RetryWriteTextHandshakeListener(String message, BObject clientEndpoint,
@@ -67,7 +69,6 @@ public class RetryWriteTextHandshakeListener implements ClientHandshakeListener 
 
     @Override
     public void onSuccess(WebSocketConnection webSocketConnection, HttpCarbonResponse httpCarbonResponse) {
-        System.out.println("+++++++++++++++++++++on success write++++++++++++++++++");
         clientEndpoint.addNativeData(WebSocketConstants.HTTP_RESPONSE,
                 HttpUtil.createResponseStruct(httpCarbonResponse));
         WebSocketUtil.populatWebSocketEndpoint(webSocketConnection, clientEndpoint);
@@ -134,14 +135,14 @@ public class RetryWriteTextHandshakeListener implements ClientHandshakeListener 
 
     @Override
     public void onError(Throwable throwable, HttpCarbonResponse httpCarbonResponse) {
-        System.out.println("-------------------on Error--------------------");
         if (httpCarbonResponse != null) {
             clientEndpoint.addNativeData(WebSocketConstants.HTTP_RESPONSE,
                     HttpUtil.createResponseStruct(httpCarbonResponse));
         }
         setWebSocketOpenConnectionInfo(null, clientEndpoint,
                 (WebSocketService) clientEndpoint.getNativeData(WebSocketConstants.CALL_BACK_SERVICE));
-        if (throwable instanceof IOException && WebSocketUtil.reconnectForWrite(connectionInfo, balFuture, textCallbackCompleted, message, null)) {
+        if (throwable instanceof IOException && WebSocketUtil.reconnectForWrite(connectionInfo, balFuture,
+                textCallbackCompleted, message, null)) {
             return;
         }
         if (!textCallbackCompleted.get()) {

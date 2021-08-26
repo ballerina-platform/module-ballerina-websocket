@@ -34,11 +34,11 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.
@@ -86,7 +86,6 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-        System.out.println("-------------on binary message----------");
         try {
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
@@ -123,7 +122,6 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     webSocketCloseMessage.getCloseReason().equals("") ?
                     "Connection closed: Status code: " + closeCode :
                     webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
-            System.out.println("####################### on close message SyncClientConnectorListener ###############");
             if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
                 if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
                         WebSocketUtil.reconnect(connectionInfo, callback)) {
@@ -156,9 +154,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         try {
             if (callback != null && !futureCompleted.get()) {
                 BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
-                System.out.println("####################### on error message SyncClientConnectorListener ###############");
                 if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
-                        WebSocketUtil.reconnect(connectionInfo, callback)){
+                        WebSocketUtil.reconnect(connectionInfo, callback)) {
                     return;
                 }
                 callback.complete(WebSocketUtil
@@ -174,12 +171,9 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
         try {
-            if (!futureCompleted.get()) {
-                callback.complete(WebSocketUtil.createWebsocketError(
-                        "Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
-                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
-                futureCompleted.set(true);
-            }
+            callback.complete(WebSocketUtil
+                    .createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
+            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
             // Ignore as it is not possible have an Illegal access
         }

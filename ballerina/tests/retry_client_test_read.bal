@@ -21,7 +21,7 @@ import ballerina/jballerina.java;
 
 string rdata2 = "";
 
-@test:Config {}
+@test:Config {dependsOn: [testWsUpgradeCancelDueToPathError]}
 public function testReadRetryHandshake() returns error? {
     @strand {
         thread:"any"
@@ -46,16 +46,33 @@ public function testReadRetryHandshake() returns error? {
 
 @test:Config {dependsOn: [testReadRetryHandshake]}
 public function testReadRetry() returns error? {
+    Client? websocketClient = ();
     io:println("------------------------------Executing testReadRetry--------------------------------");
     @strand {
         thread:"any"
     }
     worker w1 returns error? {
         startRemoteServer();
-        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10}, readTimeout: 40 });
-        string data = check wsClient->readTextMessage();
-        stopRemoteServer();
-        rdata2 = check wsClient->readTextMessage();
+        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10} });
+        websocketClient = wsClient;
+        string|Error data = wsClient->readTextMessage();
+        if (data is Error) {
+            io:println("^^^^^^^^^^^^^^^Error1^^^^^^^^^^^^^^^^^ ");
+            io:println(data);
+        } else {
+            io:println("*****************Received first connected response from server after retrying " + data);
+        }
+        io:println("^^^^^^^^^^^^^^^Stopping the remote server ^^^^^^^^^^^^^^^^^ ");
+        runtime:sleep(2);
+        io:println("^^^^^^^^^^^^^^^Start reading text again ^^^^^^^^^^^^^^^^^ ");
+        string|Error readData = wsClient->readTextMessage();
+        if (readData is string) {
+            rdata2 = readData;
+            io:println("*****************Received connected response from server after retrying " + readData);
+        } else {
+            io:println("^^^^^^^^^^^^^^^Error^^^^^^^^^^^^^^^^^ ");
+            io:println(readData);
+        }
         io:println("Received connected response from server after retrying " + rdata2);
         stopRemoteServer();
     }
@@ -64,6 +81,8 @@ public function testReadRetry() returns error? {
         thread:"any"
     }
     worker w2 returns error? {
+        runtime:sleep(2);
+        stopRemoteServer();
         runtime:sleep(6);
         startRemoteServer();
     }

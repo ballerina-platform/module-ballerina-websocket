@@ -32,11 +32,6 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 public class WebSocketRemoteServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private static final String WEBSOCKET_PATH = "/websocket";
-    private boolean sslEnabled;
-
-    public WebSocketRemoteServerInitializer(boolean sslEnabled) {
-        this.sslEnabled = sslEnabled;
-    }
 
     @Override
     public void initChannel(SocketChannel ch) {
