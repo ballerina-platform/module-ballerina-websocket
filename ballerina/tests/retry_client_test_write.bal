@@ -20,7 +20,7 @@ import ballerina/io;
 
 @test:Config {dependsOn: [testReadRetryFailure]}
 public function testWriteRetryForTextMessages() returns error? {
-    io:println("------------------------------Executing testWriteRetryForTextMessages--------------------------------");
+    io:println("Executing testWriteRetryForTextMessages...");
     @strand {
         thread:"any"
     }
@@ -56,7 +56,7 @@ public function testWriteRetryForTextMessages() returns error? {
 
 @test:Config {dependsOn: [testWriteRetryForTextMessages]}
 public function testWriteRetryFailureForTextMessages() returns error? {
-    io:println("------------------------------Executing testWriteRetryFailureForTextMessages--------------------------------");
+    io:println("Executing testWriteRetryFailureForTextMessages...");
     startRemoteServer();
     Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 3} });
     stopRemoteServer();
@@ -73,7 +73,7 @@ public function testWriteRetryFailureForTextMessages() returns error? {
 
 @test:Config {dependsOn: [testWriteRetryFailureForTextMessages]}
 public function testWriteRetryWithFragmentsForTextMessages() returns error? {
-    io:println("------------------------------Executing testWriteRetryWithFragmentsForTextMessages--------------------------------");
+    io:println("Executing testWriteRetryWithFragmentsForTextMessages...");
     @strand {
         thread:"any"
     }
@@ -104,7 +104,7 @@ public function testWriteRetryWithFragmentsForTextMessages() returns error? {
 
 @test:Config { dependsOn: [testWriteRetryWithFragmentsForTextMessages] }
 public function testWriteRetryForBinaryMessages() returns error? {
-    io:println("------------------------------Executing testWriteRetryWithFragmentsForTextMessages--------------------------------");
+    io:println("Executing testWriteRetryWithFragmentsForTextMessages...");
     @strand {
         thread:"any"
     }
@@ -116,28 +116,19 @@ public function testWriteRetryForBinaryMessages() returns error? {
         string firstResp = check wsClient->readTextMessage();
         io:println("Received first connected response from server " + firstResp);
         byte[] rdata1 = check wsClient->readBinaryMessage();
-        io:println("********************Received echo response from server ");
+        io:println("Received second echo response from server ");
         io:println(rdata1);
         stopRemoteServer();
         runtime:sleep(0.5);
-        Error? writeResp = wsClient->writeBinaryMessage("Hello".toBytes());
-        if writeResp is Error {
-            io:println("Error writing message " + writeResp.message());
-        }
+        check wsClient->writeBinaryMessage("Hello".toBytes());
         Error? writeResp2 = wsClient->writeBinaryMessage("Hello".toBytes());
-        if writeResp2 is Error {
-            io:println("Error writing message " + writeResp2.message());
-        }
         string rResp3 = check wsClient->readTextMessage();
-        io:println("**********************Received echo response from server " + rResp3);
+        io:println("Received echo response from server " + rResp3);
         byte[]|Error rResp4 = wsClient->readBinaryMessage();
         if (rResp4 is Error) {
             io:println("Error occurred at the 2nd read " + rResp4.message());
             test:assertFail(msg = "Test testWriteRetryForBinaryMessages Failed!");
         } else {
-            io:println("Received echo response from server ");
-            io:println(rResp4);
-            io:println("Hello".toBytes());
             test:assertEquals(rResp4, "Hello".toBytes());
         }
     }
@@ -155,7 +146,7 @@ public function testWriteRetryForBinaryMessages() returns error? {
 
 @test:Config {dependsOn: [testWriteRetryForBinaryMessages]}
 public function testWriteRetryFailureForBinaryMessages() returns error? {
-    io:println("------------------------------Executing testWriteRetryFailureForBinaryMessages--------------------------------");
+    io:println("Executing testWriteRetryFailureForBinaryMessages...");
     startRemoteServer();
     Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 3} });
     stopRemoteServer();
@@ -172,7 +163,7 @@ public function testWriteRetryFailureForBinaryMessages() returns error? {
 
 @test:Config { dependsOn: [testWriteRetryFailureForBinaryMessages] }
 public function testWriteRetryWithFragmentsForBinaryMessages() returns error? {
-    io:println("------------------------------Executing testWriteRetryWithFragmentsForBinaryMessages--------------------------------");
+    io:println("Executing testWriteRetryWithFragmentsForBinaryMessages...");
     @strand {
         thread:"any"
     }
@@ -187,8 +178,6 @@ public function testWriteRetryWithFragmentsForBinaryMessages() returns error? {
         Error? writeResp = wsClient->writeBinaryMessage("Hello Hello Hello Hello Hello Hello".toBytes());
         if writeResp is Error {
             test:assertFail(msg = "Test testWriteRetryWithFragmentsForBinaryMessages Failed!");
-        } else {
-            io:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         }
     }
     @strand {

@@ -27,7 +27,7 @@ public function testReadRetryHandshake() returns error? {
         thread:"any"
     }
     worker w1 returns error? {
-        io:println("------------------------------Executing testReadRetryHandshake--------------------------------");
+        io:println("Executing testReadRetryHandshake...");
         Client|Error wsClient = new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10}, readTimeout: 40 });
         if (wsClient is Error) {
             test:assertFail(msg = "Test testReadRetryHandshake Failed!");
@@ -47,7 +47,7 @@ public function testReadRetryHandshake() returns error? {
 @test:Config {dependsOn: [testReadRetryHandshake]}
 public function testReadRetry() returns error? {
     Client? websocketClient = ();
-    io:println("------------------------------Executing testReadRetry--------------------------------");
+    io:println("Executing testReadRetry...");
     @strand {
         thread:"any"
     }
@@ -55,24 +55,10 @@ public function testReadRetry() returns error? {
         startRemoteServer();
         Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10} });
         websocketClient = wsClient;
-        string|Error data = wsClient->readTextMessage();
-        if (data is Error) {
-            io:println("^^^^^^^^^^^^^^^Error1^^^^^^^^^^^^^^^^^ ");
-            io:println(data);
-        } else {
-            io:println("*****************Received first connected response from server after retrying " + data);
-        }
-        io:println("^^^^^^^^^^^^^^^Stopping the remote server ^^^^^^^^^^^^^^^^^ ");
+        string data = check wsClient->readTextMessage();
+        io:println("Received first connected response from server after retrying " + data);
         runtime:sleep(2);
-        io:println("^^^^^^^^^^^^^^^Start reading text again ^^^^^^^^^^^^^^^^^ ");
-        string|Error readData = wsClient->readTextMessage();
-        if (readData is string) {
-            rdata2 = readData;
-            io:println("*****************Received connected response from server after retrying " + readData);
-        } else {
-            io:println("^^^^^^^^^^^^^^^Error^^^^^^^^^^^^^^^^^ ");
-            io:println(readData);
-        }
+        rdata2 = check wsClient->readTextMessage();
         io:println("Received connected response from server after retrying " + rdata2);
         stopRemoteServer();
     }
@@ -93,7 +79,7 @@ public function testReadRetry() returns error? {
 
 @test:Config {dependsOn: [testReadRetry]}
 public function testReadRetryFailure() returns error? {
-    io:println("------------------------------Executing testReadRetryFailure--------------------------------");
+    io:println("Executing testReadRetryFailure...");
     Client|Error wsClient = new("ws://localhost:21800/websocket", { retryConfig: {maxCount: 3} });
     if (wsClient is Error) {
         test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
