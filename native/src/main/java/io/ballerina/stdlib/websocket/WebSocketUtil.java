@@ -458,7 +458,7 @@ public class WebSocketUtil {
     private static void createDelay(int interval) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         try {
-            if (!countDownLatch.await(interval, TimeUnit.MILLISECONDS)) {
+            if (!countDownLatch.await(interval, TimeUnit.SECONDS)) {
                 countDownLatch.countDown();
             }
         } catch (InterruptedException e) {

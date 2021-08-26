@@ -266,15 +266,15 @@ public type ClientSecureSocket record {|
 # Retry configurations for WebSocket.
 #
 # + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely.
-# + intervalInMillis - The number of milliseconds to delay before attempting to reconnect.
+# + interval - The number of seconds to delay before attempting to reconnect.
 # + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
 #                persist.
-# + maxWaitIntervalInMillis - Maximum time of the retry interval in milliseconds.
+# + maxWaitInterval - Maximum time of the retry interval in seconds.
 public type WebSocketRetryConfig record {|
     int maxCount = 0;
-    int intervalInMillis = 1000;
+    int interval = 1;
     float backOffFactor = 1.0;
-    int maxWaitIntervalInMillis = 30000;
+    int maxWaitInterval = 30;
 |};
 
 type ClientInferredConfig record {|

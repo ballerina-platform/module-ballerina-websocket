@@ -41,8 +41,8 @@ import java.net.URI;
  *
  */
 public class SyncInitEndpoint {
-    private static final String INTERVAL_IN_MILLIS = "intervalInMillis";
-    private static final String MAX_WAIT_INTERVAL = "maxWaitIntervalInMillis";
+    private static final String INTERVAL = "interval";
+    private static final String MAX_WAIT_INTERVAL = "maxWaitInterval";
     private static final String MAX_COUNT = "maxCount";
     private static final String BACK_OF_FACTOR = "backOffFactor";
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
@@ -130,9 +130,9 @@ public class SyncInitEndpoint {
      */
     private static void populateRetryConnectorConfig(BMap<BString, Object> retryConfig,
                                                      RetryContext retryConnectorConfig) {
-        retryConnectorConfig.setInterval(getIntValue(retryConfig, INTERVAL_IN_MILLIS, 1000));
+        retryConnectorConfig.setInterval(getIntValue(retryConfig, INTERVAL, 1));
         retryConnectorConfig.setBackOfFactor(getDoubleValue(retryConfig));
-        retryConnectorConfig.setMaxInterval(getIntValue(retryConfig, MAX_WAIT_INTERVAL, 30000));
+        retryConnectorConfig.setMaxInterval(getIntValue(retryConfig, MAX_WAIT_INTERVAL, 30));
         retryConnectorConfig.setMaxAttempts(getIntValue(retryConfig, MAX_COUNT, 0));
     }
 

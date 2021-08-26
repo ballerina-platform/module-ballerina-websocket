@@ -183,7 +183,7 @@ public function testWriteRetryWithFragmentsForBinaryMessages() returns error? {
         io:println("Received first connected response from server " + firstResp);
         stopRemoteServer();
         runtime:sleep(0.5);
-        check wsClient->writeBinaryMessage("Hi".toBytes());
+        check wsClient->writeBinaryMessage("Hello Hello Hello Hello Hello Hello".toBytes());
         Error? writeResp = wsClient->writeBinaryMessage("Hello Hello Hello Hello Hello Hello".toBytes());
         if writeResp is Error {
             test:assertFail(msg = "Test testWriteRetryWithFragmentsForBinaryMessages Failed!");
