@@ -21,7 +21,7 @@ import java.io.IOException;
  * The retry handshake listener for the client.
  *
  */
-public class WebSocketClientHandshakeListenerForRetry implements ClientHandshakeListener {
+public class RetryWebSocketClientHandshakeListener implements ClientHandshakeListener {
 
     private final WebSocketService wsService;
     private final SyncClientConnectorListener connectorListener;
@@ -29,9 +29,9 @@ public class WebSocketClientHandshakeListenerForRetry implements ClientHandshake
     private WebSocketConnectionInfo connectionInfo;
     private Future balFuture;
     private RetryContext retryConfig;
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketClientHandshakeListenerForRetry.class);
+    private static final Logger logger = LoggerFactory.getLogger(RetryWebSocketClientHandshakeListener.class);
 
-    public WebSocketClientHandshakeListenerForRetry(BObject webSocketClient, WebSocketService wsService,
+    public RetryWebSocketClientHandshakeListener(BObject webSocketClient, WebSocketService wsService,
                                SyncClientConnectorListener connectorListener, Future future, RetryContext retryConfig) {
         this.webSocketClient = webSocketClient;
         this.wsService = wsService;

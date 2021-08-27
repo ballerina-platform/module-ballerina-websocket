@@ -40,16 +40,11 @@ import org.slf4j.LoggerFactory;
 public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketRemoteServerFrameHandler.class);
-    private boolean isOpen = true;
     private static final String PING = "ping";
     private WebSocketHttpRequestHandler headersHandler;
 
     public WebSocketRemoteServerFrameHandler(WebSocketHttpRequestHandler headersHandler) {
         this.headersHandler = headersHandler;
-    }
-
-    public boolean isOpen() {
-        return isOpen;
     }
 
     @Override
@@ -60,7 +55,6 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         log.debug("channel is inactive");
-        isOpen = false;
     }
 
     @Override
@@ -88,7 +82,6 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
                                                        Unpooled.wrappedBuffer(bufferCopy)));
         } else if (frame instanceof CloseWebSocketFrame) {
             ctx.close();
-            isOpen = false;
         } else if (frame instanceof ContinuationWebSocketFrame) {
             ByteBuffer clonedBuffer = cloneBuffer(frame.content().nioBuffer());
             ctx.writeAndFlush(new ContinuationWebSocketFrame(frame.isFinalFragment(), 0,
