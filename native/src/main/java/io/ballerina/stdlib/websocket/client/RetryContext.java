@@ -29,108 +29,50 @@ public class RetryContext {
     private int reconnectAttempts = 0;
     private boolean firstConnectionMadeSuccessfully = false;
 
-    /**
-     * Gets the `interval`.
-     *
-     * @return interval
-     */
     public int getInterval() {
         return interval;
     }
 
-    /**
-     * Assigns the interval of the `RetryContext` to the `interval` variable.
-     *
-     * @param interval - the initial index.
-     */
     public final void setInterval(int interval) {
         this.interval = interval;
     }
 
-    /**
-     * Gets the `backOfFactor`.
-     *
-     * @return backOfFactor
-     */
     public Double getBackOfFactor() {
         return backOfFactor;
     }
 
-    /**
-     * Assigns the` backOfFactor` of the `RetryContext` to the `backOfFactor` variable.
-     *
-     * @param backOfFactor - the rate of increase of the reconnect delay.
-     */
     public void setBackOfFactor(Double backOfFactor) {
         this.backOfFactor = backOfFactor;
     }
 
-    /**
-     * Gets the `maxInterval`.
-     *
-     * @return maximum interval
-     */
     public int getMaxInterval() {
         return maxInterval;
     }
 
-    /**
-     * Assigns the `maxInterval` of the `RetryContext` to the `maxInterval` variable.
-     *
-     * @param maxInterval - the maximum time of the retry interval.
-     */
     public void setMaxInterval(int maxInterval) {
         this.maxInterval = maxInterval;
     }
 
-    /**
-     * Gets the `maxAttempts`.
-     *
-     * @return no of maximum attempts
-     */
     public int getMaxAttempts() {
         return maxAttempts;
     }
 
-    /**
-     * Assigns the `maxAttempts` of the `RetryContext` to the `maxAttempts` variable.
-     *
-     * @param maxAttempts - the maximum number of retry attempts.
-     */
     public void setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
     }
 
-    /**
-     * Gets the `reconnectAttempts`.
-     *
-     * @return no of reconnect attempts
-     */
     public int getReconnectAttempts() {
         return reconnectAttempts;
     }
 
-    /**
-     * Assigns the `reconnectAttempts` of the `RetryContext` to the `reconnectAttempts` variable.
-     *
-     * @param reconnectAttempts - the no of reconnect attempts.
-     */
     public void setReconnectAttempts(int reconnectAttempts) {
         this.reconnectAttempts = reconnectAttempts;
     }
 
-    /**
-     * Gets the `firstConnectionMadeSuccessfully`.
-     *
-     * @return firstConnectionMadeSuccessfully
-     */
     public boolean isFirstConnectionMadeSuccessfully() {
         return firstConnectionMadeSuccessfully;
     }
 
-    /**
-     * Assigns the connection state of the `RetryContext` to the `firstConnectionMadeSuccessfully` variable.
-     */
     public void setFirstConnectionMadeSuccessfully() {
         this.firstConnectionMadeSuccessfully = true;
     }

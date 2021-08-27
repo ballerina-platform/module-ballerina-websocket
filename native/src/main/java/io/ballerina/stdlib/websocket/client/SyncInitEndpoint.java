@@ -123,11 +123,6 @@ public class SyncInitEndpoint {
         return (wsSyncClient.getNativeData(WebSocketConstants.HTTP_RESPONSE));
     }
 
-    /**
-     * Populate the retry config.
-     *  @param retryConfig - the retry config.
-     * @param retryConnectorConfig - the retry connector config.
-     */
     private static void populateRetryConnectorConfig(BMap<BString, Object> retryConfig,
                                                      RetryContext retryConnectorConfig) {
         retryConnectorConfig.setInterval(getIntValue(retryConfig, INTERVAL, 1));

@@ -117,7 +117,7 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
                             WebSocketUtil.handleWebSocketCallback(balFuture, webSocketChannelFuture, logger,
                                     connectionInfo, binaryCallbackCompleted);
                             WebSocketObservabilityUtil
-                                    .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, connectionInfo);
+                                    .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, connectionInfo);
                             adjustContextOnSuccess((RetryContext) clientEndpoint
                                     .getNativeData(WebSocketConstants.RETRY_CONFIG.toString()));
                         } else {

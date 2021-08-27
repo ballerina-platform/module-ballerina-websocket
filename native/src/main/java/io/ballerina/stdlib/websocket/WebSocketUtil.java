@@ -323,7 +323,7 @@ public class WebSocketUtil {
     /**
      * Reconnect when the WebSocket connection is lost while reading or initial handshake.
      *
-     * @param connectionInfo - information about the connection.
+     * @param connectionInfo - Information about the connection.
      * @param balFuture - Ballerina future to be completed.
      * @return If attempts reconnection, then return true.
      */
@@ -355,7 +355,7 @@ public class WebSocketUtil {
     /**
      * Reconnect when the WebSocket connection is lost while writing to the connection.
      *
-     * @param connectionInfo - information about the connection.
+     * @param connectionInfo - Information about the connection.
      * @param balFuture - Ballerina future to be completed.
      * @param futureCompleted - Value to check whether the future has already completed.
      * @param txtMessage - The text message that needs to be sent after a successful retry.
@@ -390,7 +390,7 @@ public class WebSocketUtil {
     /**
      * Establish connection with the endpoint. This is used for write operations.
      *
-     * @param webSocketClient - the WebSocket client.
+     * @param webSocketClient - The WebSocket client.
      * @param balFuture - Ballerina future to be completed.
      * @param futureCompleted - Value to check whether the future has already completed.
      * @param txtMessage - The text message that needs to be sent after a successful retry.
@@ -418,7 +418,7 @@ public class WebSocketUtil {
     /**
      * Establish connection with the endpoint. This is used for read and initial handshake.
      *
-     * @param webSocketClient - the WebSocket client.
+     * @param webSocketClient - The WebSocket client.
      * @param wsService - the WebSocket service.
      * @param balFuture - Ballerina future to be completed.
      */
@@ -440,12 +440,6 @@ public class WebSocketUtil {
         }
     }
 
-    /**
-     * Check whether the client's config has the retryConfig property.
-     *
-     * @param webSocketClient - the WebSocket client.
-     * @return If the client's config has the retry config, then return true.
-     */
     public static boolean hasRetryConfig(BObject webSocketClient) {
         return webSocketClient.getMapValue(CLIENT_ENDPOINT_CONFIG).getMapValue(WebSocketConstants.RETRY_CONFIG) != null;
     }
@@ -453,7 +447,7 @@ public class WebSocketUtil {
     /**
      * Set the time to wait before attempting to reconnect.
      *
-     * @param interval - interval to wait before trying to reconnect.
+     * @param interval - Interval to wait before trying to reconnect.
      */
     private static void createDelay(int interval) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -470,10 +464,10 @@ public class WebSocketUtil {
     /**
      * Calculate the waiting time.
      *
-     * @param interval- interval to wait before trying to reconnect.
-     * @param maxInterval - maximum interval to wait before trying to reconnect.
-     * @param backOfFactor - the rate of increase of to reconnect delay.
-     * @param reconnectAttempts - the number of reconnecting attempts.
+     * @param interval- Interval to wait before trying to reconnect.
+     * @param maxInterval - Maximum interval to wait before trying to reconnect.
+     * @param backOfFactor - The rate of increase of to reconnect delay.
+     * @param reconnectAttempts - The number of reconnecting attempts.
      * @return The time to wait before attempting to reconnect.
      */
     private static int calculateWaitingTime(int interval, int maxInterval, double backOfFactor,
