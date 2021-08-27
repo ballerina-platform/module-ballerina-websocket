@@ -89,7 +89,7 @@ public function testReadRetryFailure() returns error? {
 }
 
 public function startRemoteServer() = @java:Method {
-    name: "initiateServer",
+    name: "start",
     'class: "io.ballerina.stdlib.websocket.testutils.WebSocketRemoteServer"
 } external;
 

@@ -1,4 +1,4 @@
-package io.ballerina.stdlib.websocket.client;
+package io.ballerina.stdlib.websocket.client.listener;
 
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
@@ -9,7 +9,7 @@ import io.ballerina.stdlib.http.transport.message.HttpCarbonResponse;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
-import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
+import io.ballerina.stdlib.websocket.client.RetryContext;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 import org.slf4j.Logger;

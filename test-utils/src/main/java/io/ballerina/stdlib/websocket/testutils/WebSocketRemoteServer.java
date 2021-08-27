@@ -37,15 +37,9 @@ public final class WebSocketRemoteServer {
     private final int port;
     private static EventLoopGroup bossGroup;
     private static EventLoopGroup workerGroup;
-    private boolean sslEnabled = false;
 
     public WebSocketRemoteServer(int port) {
         this.port = port;
-    }
-
-    public WebSocketRemoteServer(int port, boolean sslEnabled) {
-        this.port = port;
-        this.sslEnabled = sslEnabled;
     }
 
     public void run() throws InterruptedException {
@@ -70,7 +64,7 @@ public final class WebSocketRemoteServer {
         }
     }
 
-    public static void initiateServer() {
+    public static void start() {
         WebSocketRemoteServer remoteServer = new WebSocketRemoteServer(21078);
         try {
             remoteServer.run();

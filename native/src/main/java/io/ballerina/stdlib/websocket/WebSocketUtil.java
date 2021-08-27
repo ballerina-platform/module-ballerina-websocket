@@ -39,10 +39,10 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConn
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
 import io.ballerina.stdlib.http.transport.message.HttpCarbonMessage;
 import io.ballerina.stdlib.websocket.client.RetryContext;
-import io.ballerina.stdlib.websocket.client.WebSocketClientHandshakeListenerForRetry;
 import io.ballerina.stdlib.websocket.client.listener.RetryWriteBinaryHandshakeListener;
 import io.ballerina.stdlib.websocket.client.listener.RetryWriteTextHandshakeListener;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
+import io.ballerina.stdlib.websocket.client.listener.WebSocketClientHandshakeListenerForRetry;
 import io.ballerina.stdlib.websocket.client.listener.WebSocketHandshakeListener;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
