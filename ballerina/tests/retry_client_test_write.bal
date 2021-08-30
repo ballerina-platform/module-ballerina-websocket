@@ -26,7 +26,7 @@ public function testWriteRetryForTextMessages() returns error? {
     }
     worker w1 returns error? {
         startRemoteServer();
-        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10} });
+        Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10}});
         check wsClient->writeTextMessage("Hi");
         string firstResp = check wsClient->readTextMessage();
         io:println("Received first connected response from server " + firstResp);
@@ -58,7 +58,7 @@ public function testWriteRetryForTextMessages() returns error? {
 public function testWriteRetryFailureForTextMessages() returns error? {
     io:println("Executing testWriteRetryFailureForTextMessages...");
     startRemoteServer();
-    Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 3} });
+    Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 3}});
     stopRemoteServer();
     runtime:sleep(0.5);
     check wsClient->writeTextMessage("Hi");
@@ -79,7 +79,7 @@ public function testWriteRetryWithFragmentsForTextMessages() returns error? {
     }
     worker w1 returns error? {
         startRemoteServer();
-        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10}, maxFrameSize: 20 });
+        Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10}, maxFrameSize: 20});
         string firstResp = check wsClient->readTextMessage();
         io:println("Received first connected response from server " + firstResp);
         stopRemoteServer();
@@ -102,7 +102,7 @@ public function testWriteRetryWithFragmentsForTextMessages() returns error? {
     var waitResp = wait {w1, w2};
 }
 
-@test:Config { dependsOn: [testWriteRetryWithFragmentsForTextMessages] }
+@test:Config {dependsOn: [testWriteRetryWithFragmentsForTextMessages]}
 public function testWriteRetryForBinaryMessages() returns error? {
     io:println("Executing testWriteRetryWithFragmentsForTextMessages...");
     @strand {
@@ -110,7 +110,7 @@ public function testWriteRetryForBinaryMessages() returns error? {
     }
     worker w1 returns error? {
         startRemoteServer();
-        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10} });
+        Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10}});
         io:println("Hi".toBytes());
         check wsClient->writeBinaryMessage("Hi".toBytes());
         string firstResp = check wsClient->readTextMessage();
@@ -148,7 +148,7 @@ public function testWriteRetryForBinaryMessages() returns error? {
 public function testWriteRetryFailureForBinaryMessages() returns error? {
     io:println("Executing testWriteRetryFailureForBinaryMessages...");
     startRemoteServer();
-    Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 3} });
+    Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 3}});
     stopRemoteServer();
     runtime:sleep(0.5);
     check wsClient->writeBinaryMessage("Hi".toBytes());
@@ -161,7 +161,7 @@ public function testWriteRetryFailureForBinaryMessages() returns error? {
     stopRemoteServer();
 }
 
-@test:Config { dependsOn: [testWriteRetryFailureForBinaryMessages] }
+@test:Config {dependsOn: [testWriteRetryFailureForBinaryMessages]}
 public function testWriteRetryWithFragmentsForBinaryMessages() returns error? {
     io:println("Executing testWriteRetryWithFragmentsForBinaryMessages...");
     @strand {
@@ -169,7 +169,7 @@ public function testWriteRetryWithFragmentsForBinaryMessages() returns error? {
     }
     worker w1 returns error? {
         startRemoteServer();
-        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10}, maxFrameSize: 20 });
+        Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10}, maxFrameSize: 20});
         string firstResp = check wsClient->readTextMessage();
         io:println("Received first connected response from server " + firstResp);
         stopRemoteServer();

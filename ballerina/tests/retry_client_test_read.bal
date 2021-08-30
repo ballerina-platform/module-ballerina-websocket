@@ -28,7 +28,7 @@ public function testReadRetryHandshake() returns error? {
     }
     worker w1 returns error? {
         io:println("Executing testReadRetryHandshake...");
-        Client|Error wsClient = new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10, maxWaitInterval: -1}, readTimeout: 40 });
+        Client|Error wsClient = new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10, maxWaitInterval: -1}, readTimeout: 40 });
         if (wsClient is Error) {
             test:assertFail(msg = "Test testReadRetryHandshake Failed!");
         }
@@ -53,7 +53,7 @@ public function testReadRetry() returns error? {
     }
     worker w1 returns error? {
         startRemoteServer();
-        Client wsClient = check new("ws://localhost:21078/websocket", { retryConfig: {maxCount: 10} });
+        Client wsClient = check new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10}});
         websocketClient = wsClient;
         string data = check wsClient->readTextMessage();
         io:println("Received first connected response from server after retrying " + data);
@@ -80,7 +80,7 @@ public function testReadRetry() returns error? {
 @test:Config {dependsOn: [testReadRetry]}
 public function testReadRetryFailure() returns error? {
     io:println("Executing testReadRetryFailure...");
-    Client|Error wsClient = new("ws://localhost:21800/websocket", { retryConfig: {maxCount: 3} });
+    Client|Error wsClient = new("ws://localhost:21800/websocket", {retryConfig: {maxCount: 3}});
     if (wsClient is Error) {
         test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
     } else {

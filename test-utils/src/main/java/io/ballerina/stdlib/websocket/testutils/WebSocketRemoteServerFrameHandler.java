@@ -25,12 +25,10 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
 public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketRemoteServerFrameHandler.class);
-    private static final String PING = "ping";
     private WebSocketHttpRequestHandler headersHandler;
 
     public WebSocketRemoteServerFrameHandler(WebSocketHttpRequestHandler headersHandler) {
@@ -70,11 +67,6 @@ public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandl
         if (frame instanceof TextWebSocketFrame) {
             // Echos the same text
             String text = ((TextWebSocketFrame) frame).text();
-            if (PING.equals(text)) {
-                ctx.channel().writeAndFlush(new PingWebSocketFrame(
-                        Unpooled.wrappedBuffer(ByteBuffer.wrap("data".getBytes(StandardCharsets.UTF_8)))));
-                return;
-            }
             ctx.channel().writeAndFlush(new TextWebSocketFrame(frame.isFinalFragment(), 0, text));
         } else if (frame instanceof BinaryWebSocketFrame) {
             ByteBuffer bufferCopy = cloneBuffer(frame.content().nioBuffer());

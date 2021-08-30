@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Simple WebSocket server for Test cases.
+ * Simple WebSocket server for test cases.
  */
 public final class WebSocketRemoteServer {
 

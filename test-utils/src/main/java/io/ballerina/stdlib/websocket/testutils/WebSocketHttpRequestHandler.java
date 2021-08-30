@@ -70,13 +70,4 @@ public class WebSocketHttpRequestHandler extends ChannelDuplexHandler {
         }
         super.write(ctx, msg, promise);
     }
-
-    /**
-     * Get http request requestHeaders.
-     *
-     * @return the http request requestHeaders
-     */
-    public HttpHeaders getRequestHeaders() {
-        return requestHeaders;
-    }
 }
