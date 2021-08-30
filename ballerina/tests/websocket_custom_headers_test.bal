@@ -107,6 +107,16 @@ public function testIsOpenCloseCalled() returns error? {
 }
 
 @test:Config {}
+public function testCancelHandshakeAsNotMatchingPath() returns error? {
+    Client|Error wsClient2 = new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/six/false/8.5");
+    if (wsClient2 is Error) {
+        test:assertEquals(wsClient2.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+       test:assertFail("Expected an error for testCancelHandshakeAsNotMatchingPath test");
+    }
+}
+
+@test:Config {}
 public function testPortSharingHttpService() returns error? {
     http:Client clientEndpoint = check new ("http://localhost:21001/helloWorld");
     http:Response response = check clientEndpoint->get("/hello");
