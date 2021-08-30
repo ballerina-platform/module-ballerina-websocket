@@ -28,7 +28,7 @@ public function testReadRetryHandshake() returns error? {
     }
     worker w1 returns error? {
         io:println("Executing testReadRetryHandshake...");
-        Client|Error wsClient = new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10, maxWaitInterval: -1}, readTimeout: 40 });
+        Client|Error wsClient = new("ws://localhost:21078/websocket", {retryConfig: {maxCount: 10, maxWaitInterval: -1}, readTimeout: 40});
         if (wsClient is Error) {
             test:assertFail(msg = "Test testReadRetryHandshake Failed!");
         }

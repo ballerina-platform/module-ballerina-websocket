@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -38,10 +38,10 @@ import org.slf4j.LoggerFactory;
 public class WebSocketRemoteServerFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketRemoteServerFrameHandler.class);
-    private WebSocketHttpRequestHandler headersHandler;
+    private WebSocketHttpRequestHandler httpRequestHandler;
 
-    public WebSocketRemoteServerFrameHandler(WebSocketHttpRequestHandler headersHandler) {
-        this.headersHandler = headersHandler;
+    public WebSocketRemoteServerFrameHandler(WebSocketHttpRequestHandler httpRequestHandler) {
+        this.httpRequestHandler = httpRequestHandler;
     }
 
     @Override
