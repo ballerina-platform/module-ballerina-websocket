@@ -69,7 +69,7 @@ public class RetryWebSocketClientHandshakeListener implements ClientHandshakeLis
             balFuture.complete(null);
         }
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
-        adjustContextOnSuccess(retryConfig);
+        WebSocketUtil.adjustContextOnSuccess(retryConfig);
     }
 
     @Override
@@ -88,15 +88,5 @@ public class RetryWebSocketClientHandshakeListener implements ClientHandshakeLis
                                                 BObject webSocketClient, WebSocketService wsService) {
         this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient);
         webSocketClient.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
-    }
-
-    /**
-     * Sets the value into the `retryContext`.
-     *
-     * @param retryConfig - the retry context that represents a retry config
-     */
-    private void adjustContextOnSuccess(RetryContext retryConfig) {
-        retryConfig.setFirstConnectionMadeSuccessfully();
-        retryConfig.setReconnectAttempts(0);
     }
 }

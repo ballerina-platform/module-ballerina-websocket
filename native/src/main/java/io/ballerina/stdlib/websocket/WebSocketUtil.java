@@ -479,6 +479,11 @@ public class WebSocketUtil {
         return interval;
     }
 
+    public static void adjustContextOnSuccess(RetryContext retryConfig) {
+        retryConfig.setFirstConnectionMadeSuccessfully();
+        retryConfig.setReconnectAttempts(0);
+    }
+
     public static Object getAuthorizationHeader(Environment env) {
         HttpCarbonMessage inboundMessage = (HttpCarbonMessage) env.getStrandLocal(HttpConstants.INBOUND_MESSAGE);
         String authorizationHeader = inboundMessage.getHeader(HttpHeaderNames.AUTHORIZATION.toString());

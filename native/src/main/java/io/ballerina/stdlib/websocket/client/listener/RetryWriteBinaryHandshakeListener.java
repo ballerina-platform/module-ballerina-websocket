@@ -118,7 +118,7 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
                                     connectionInfo, binaryCallbackCompleted);
                             WebSocketObservabilityUtil
                                     .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, connectionInfo);
-                            adjustContextOnSuccess((RetryContext) clientEndpoint
+                            WebSocketUtil.adjustContextOnSuccess((RetryContext) clientEndpoint
                                     .getNativeData(WebSocketConstants.RETRY_CONFIG.toString()));
                         } else {
                             if (!binaryCallbackCompleted.get()) {
@@ -157,10 +157,5 @@ public class RetryWriteBinaryHandshakeListener implements ClientHandshakeListene
                                                 BObject webSocketClient, WebSocketService wsService) {
         this.connectionInfo = new WebSocketConnectionInfo(wsService, webSocketConnection, webSocketClient);
         webSocketClient.addNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO, connectionInfo);
-    }
-
-    private void adjustContextOnSuccess(RetryContext retryConfig) {
-        retryConfig.setFirstConnectionMadeSuccessfully();
-        retryConfig.setReconnectAttempts(0);
     }
 }
