@@ -125,20 +125,37 @@ public class WebSocketResourceDispatcher {
         Object[] bValues = new Object[parameterTypes.length * 2];
         int index = 0;
         int pathParamIndex = 0;
-        for (Type param : parameterTypes) {
-            String typeName = param.getName();
-            switch (typeName) {
-                case HttpConstants.REQUEST:
-                    bValues[index++] = inRequest;
-                    bValues[index++] = true;
-                    break;
-                case WebSocketConstants.PARAM_TYPE_STRING:
-                    bValues[index++] = StringUtils.fromString(pathParamArr.get(pathParamIndex++));
-                    bValues[index++] = true;
-                    break;
-                default:
-                    break;
+        try {
+            for (Type param : parameterTypes) {
+                String typeName = param.getName();
+                switch (typeName) {
+                    case HttpConstants.REQUEST:
+                        bValues[index++] = inRequest;
+                        bValues[index++] = true;
+                        break;
+                    case WebSocketConstants.PARAM_TYPE_STRING:
+                        bValues[index++] = StringUtils.fromString(pathParamArr.get(pathParamIndex++));
+                        bValues[index++] = true;
+                        break;
+                    case WebSocketConstants.PARAM_TYPE_INT:
+                        bValues[index++] = Long.parseLong(pathParamArr.get(pathParamIndex++));
+                        bValues[index++] = true;
+                        break;
+                    case WebSocketConstants.PARAM_TYPE_FLOAT:
+                        bValues[index++] = Double.parseDouble(pathParamArr.get(pathParamIndex++));
+                        bValues[index++] = true;
+                        break;
+                    case WebSocketConstants.PARAM_TYPE_BOOLEAN:
+                        bValues[index++] = Boolean.parseBoolean(pathParamArr.get(pathParamIndex++));
+                        bValues[index++] = true;
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (NumberFormatException e) {
+            webSocketHandshaker.cancelHandshake(404, errMsg);
+            return;
         }
         Map<String, Object> properties = new HashMap<>();
         properties.put(HttpConstants.INBOUND_MESSAGE, httpCarbonMessage);
