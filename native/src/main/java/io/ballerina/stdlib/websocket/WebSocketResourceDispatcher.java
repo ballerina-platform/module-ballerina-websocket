@@ -29,7 +29,9 @@ import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BValue;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
@@ -39,10 +41,12 @@ import io.ballerina.stdlib.http.api.ValueCreatorUtils;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorException;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlSignal;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketTextMessage;
+import io.ballerina.stdlib.http.transport.message.HttpCarbonMessage;
 import io.ballerina.stdlib.http.transport.message.HttpCarbonRequest;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObserverContext;
@@ -52,19 +56,21 @@ import io.ballerina.stdlib.websocket.server.WebSocketConnectionManager;
 import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.netty.handler.codec.http.HttpHeaders;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
 import static io.ballerina.runtime.api.TypeTags.INT_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY;
@@ -119,15 +125,74 @@ public class WebSocketResourceDispatcher {
                 i++;
             }
         }
+        Map<String, HeaderParam> allHeaderParams = new HashMap<>();
+        int otherParamIndex = 0;
+        for (String paramName : resourceFunction.getParamNames()) {
+            BMap annotations = (BMap) resourceFunction.getAnnotation(StringUtils.fromString(PARAM_ANNOT_PREFIX + paramName));
+            if (annotations == null) {
+                otherParamIndex++;
+                continue;
+            }
+            Object[] annotationsKeys = annotations.getKeys();
+            for (Object objKey : annotationsKeys) {
+                String key = ((BString) objKey).getValue();
+                if (key.contains(HEADER_ANNOTATION)) {
+                    Type parameterType = resourceFunction.getParameterTypes()[otherParamIndex];
+                    HeaderParam headerParam = new HeaderParam(paramName);
+                    BMap mapValue = annotations.getMapValue(StringUtils.fromString("ballerina/http:2:Header"));
+                    Object headerName = mapValue.get(HttpConstants.ANN_FIELD_NAME);
+                    if (headerName instanceof BString) {
+                        String value = ((BString) headerName).getValue();
+                        headerParam.setHeaderName(value);
+                    } else {
+                        // if the name field is not stated, use the param token as header key
+                        headerParam.setHeaderName(paramName);
+                    }
+                    allHeaderParams.put(paramName, headerParam);
+                    try {
+                        headerParam.init(parameterType, otherParamIndex);
+                    } catch (WebSocketConnectorException e) {
+                        webSocketHandshaker.cancelHandshake(404, e.getMessage());
+                    }
+                    otherParamIndex++;
+                }
+            }
+        }
 
         HttpUtil.populateInboundRequest(inRequest, inRequestEntity, httpCarbonMessage);
         Type[] parameterTypes = resourceFunction.getParameterTypes();
         Object[] bValues = new Object[parameterTypes.length * 2];
         int index = 0;
         int pathParamIndex = 0;
+        int paramIndex = 0;
         try {
             for (Type param : parameterTypes) {
                 String typeName = param.getName();
+                String paramName = resourceFunction.getParamNames()[paramIndex];
+                if (allHeaderParams.get(paramName) != null) {
+                    HeaderParam headerParam = allHeaderParams.get(paramName);
+                    HttpHeaders httpHeaders = httpCarbonMessage.getHeaders();
+                    String token = headerParam.getHeaderName();
+                    List<String> headerValues = httpHeaders.getAll(token);
+                    if (headerValues.isEmpty()) {
+                        if (headerParam.isNilable()) {
+                            bValues[index++] = null;
+                            bValues[index++] = true;
+                            continue;
+                        } else {
+                            webSocketHandshaker.cancelHandshake(404, errMsg);
+                        }
+                    }
+                    if (headerParam.getTypeTag() == ARRAY_TAG) {
+                        String[] headerArray = headerValues.toArray(new String[0]);
+                        bValues[index++] = StringUtils.fromStringArray(headerArray);
+                    } else {
+                        bValues[index++] = StringUtils.fromString(headerValues.get(0));
+                    }
+                    bValues[index++] = true;
+                    paramIndex++;
+                    continue;
+                }
                 switch (typeName) {
                     case HttpConstants.REQUEST:
                         bValues[index++] = inRequest;
@@ -152,6 +217,7 @@ public class WebSocketResourceDispatcher {
                     default:
                         break;
                 }
+                paramIndex++;
             }
         } catch (NumberFormatException e) {
             webSocketHandshaker.cancelHandshake(404, errMsg);
@@ -176,6 +242,30 @@ public class WebSocketResourceDispatcher {
         subPath = subPath.endsWith(WebSocketConstants.BACK_SLASH) ?
                 subPath.substring(0, subPath.length() - 1) : subPath;
         return subPath;
+    }
+
+    private static void populateHeaderParams(HttpCarbonMessage httpCarbonMessage, HeaderParam headerParam,
+                                             int index, Object[] bValues, WebSocketHandshaker webSocketHandshaker, String errMsg) {
+        HttpHeaders httpHeaders = httpCarbonMessage.getHeaders();
+        String token = headerParam.getHeaderName();
+        List<String> headerValues = httpHeaders.getAll(token);
+        if (headerValues.isEmpty()) {
+            if (headerParam.isNilable()) {
+                bValues[index++] = null;
+                bValues[index++] = true;
+                return;
+            } else {
+                webSocketHandshaker.cancelHandshake(404, errMsg);
+            }
+        }
+        if (headerParam.getTypeTag() == ARRAY_TAG) {
+            String[] headerArray = headerValues.toArray(new String[0]);
+            bValues[index++] = StringUtils.fromStringArray(headerArray);
+            bValues[index++] = true;
+        } else {
+            bValues[index++] = StringUtils.fromString(headerValues.get(0));
+        }
+        bValues[index++] = true;
     }
 
     public static void dispatchOnOpen(WebSocketConnection webSocketConnection, BObject webSocketCaller,
