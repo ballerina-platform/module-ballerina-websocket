@@ -69,9 +69,3 @@ path = "./lib/netty-handler-proxy-@netty.version@.jar"
 groupId = "io.netty"
 artifactId = "netty-handler-proxy"
 version = "@netty.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/netty-codec-http2-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-codec-http2"
-version = "@netty.version@"

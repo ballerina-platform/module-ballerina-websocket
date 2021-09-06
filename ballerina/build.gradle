@@ -94,9 +94,6 @@ dependencies {
     externalJars(group: 'io.netty', name: 'netty-handler-proxy', version: "${nettyVersion}") {
         transitive = false
     }
-    externalJars(group: 'io.netty', name: 'netty-codec-http2', version: "${nettyVersion}") {
-        transitive = false
-    }
     externalJars(group: 'org.testng', name: 'testng', version: "${testngVersion}") {
         transitive = false
     }

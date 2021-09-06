@@ -42,7 +42,6 @@ dependencies {
     implementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
 
     // Transport related dependencies
-    implementation group: 'io.netty', name: 'netty-codec-http2', version:"${nettyVersion}"
     implementation group: 'io.netty', name: 'netty-handler-proxy', version:"${nettyVersion}"
 
     testImplementation group: 'com.mashape.unirest', name: 'unirest-java', version:"${unirestVersion}"
