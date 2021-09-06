@@ -125,9 +125,11 @@ public class SyncInitEndpoint {
 
     private static void populateRetryConnectorConfig(BMap<BString, Object> retryConfig,
                                                      RetryContext retryConnectorConfig) {
-        retryConnectorConfig.setInterval(getIntValue(retryConfig, INTERVAL, 1));
+        retryConnectorConfig.setInterval(WebSocketUtil.findTimeoutInSeconds(retryConfig,
+                StringUtils.fromString(INTERVAL), 1));
         retryConnectorConfig.setBackOfFactor(getDoubleValue(retryConfig));
-        retryConnectorConfig.setMaxInterval(getIntValue(retryConfig, MAX_WAIT_INTERVAL, 30));
+        retryConnectorConfig.setMaxInterval(WebSocketUtil.findTimeoutInSeconds(retryConfig,
+                StringUtils.fromString(MAX_WAIT_INTERVAL), 30));
         retryConnectorConfig.setMaxAttempts(getIntValue(retryConfig, MAX_COUNT, 0));
     }
 

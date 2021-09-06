@@ -272,9 +272,9 @@ public type ClientSecureSocket record {|
 # + maxWaitInterval - Maximum time of the retry interval in seconds.
 public type WebSocketRetryConfig record {|
     int maxCount = 0;
-    int interval = 1;
+    decimal interval = 1;
     float backOffFactor = 1.0;
-    int maxWaitInterval = 30;
+    decimal maxWaitInterval = 30;
 |};
 
 type ClientInferredConfig record {|
