@@ -24,13 +24,19 @@ string output = "";
 string errorMsg = "";
 string pathParam = "";
 string queryParam = "";
+int intPathParam = 0;
+boolean boolPathParam = false;
+float floatPathParam = 0.0;
 int x = 0;
 final map<string> customHeaders = {"X-some-header": "some-header-value"};
 
 service /isOpen/abc on socketListener {
-    resource function get barz/[string xyz]/abc/[string value](http:Request req)
+    resource function get barz/[string xyz]/abc/[string value]/[int xy]/[boolean yy]/[float zy](http:Request req)
                returns Service|UpgradeError  {
        pathParam = <@untainted> xyz;
+       intPathParam = xy;
+       boolPathParam = yy;
+       floatPathParam = zy;
        var qParam = req.getQueryParamValue("para1");
        if (qParam is string) {
           queryParam = <@untainted>qParam;
@@ -73,13 +79,16 @@ service /helloWorld on hl {
 // Test isOpen when close is called
 @test:Config {}
 public function testIsOpenCloseCalled() returns error? {
-    Client wsClient = check new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre?para1=value1");
+    Client wsClient = check new("ws://localhost:21001/isOpen/abc;a=4;b=5/barz/xyz/abc/rre/5/true/2.5?para1=value1");
     check wsClient->writeTextMessage("Hi");
     runtime:sleep(0.5);
 
     test:assertEquals(output, "In service 1 onTextMessage isOpen false");
     test:assertEquals(pathParam, "xyz");
     test:assertEquals(queryParam, "value1");
+    test:assertEquals(intPathParam, 5);
+    test:assertEquals(boolPathParam, true);
+    test:assertEquals(floatPathParam, 2.5);
 
     var resp = wsClient.getHttpResponse();
     if (resp is http:Response) {
@@ -88,13 +97,23 @@ public function testIsOpenCloseCalled() returns error? {
        test:assertFail("Couldn't find the expected values");
     }
 
-    Client wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/");
+    Client wsClient2 = check new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/6/false/8.5");
     check wsClient2->writeTextMessage("Hi");
     runtime:sleep(0.5);
     test:assertEquals(output, "In service 2 onTextMessage isOpen false");
     test:assertEquals(pathParam, "tuv");
     error? err1 = wsClient2->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
     error? err2 = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testCancelHandshakeAsNotMatchingPath() returns error? {
+    Client|Error wsClient2 = new("ws://localhost:21001/isOpen/abc/barz/tuv/abc/cav/six/false/8.5");
+    if (wsClient2 is Error) {
+        test:assertEquals(wsClient2.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+       test:assertFail("Expected an error for testCancelHandshakeAsNotMatchingPath test");
+    }
 }
 
 @test:Config {}
