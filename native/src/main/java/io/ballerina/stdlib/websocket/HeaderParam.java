@@ -24,8 +24,12 @@ import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.stdlib.http.api.HttpErrorType;
 import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorException;
+
 import java.util.List;
 
+/**
+ * Represents a inbound request header parameter details.
+ */
 public class HeaderParam {
     private int typeTag;
     private final String token;
@@ -50,8 +54,9 @@ public class HeaderParam {
             List<Type> memberTypes = ((UnionType) this.type).getMemberTypes();
             int size = memberTypes.size();
             if (size > 2 || !this.type.isNilable()) {
-                throw new WebSocketConnectorException("invalid header param type '" + this.type.getName() + "': a string or an array " +
-                                "of a string can only be union with '()'. Eg: string|() or string[]|()");
+                throw new WebSocketConnectorException("invalid header param type '" + this.type.getName() +
+                        "': a string or an array of a string can only be union with '()'." +
+                        "Eg: string|() or string[]|()");
             }
             this.nilable = true;
             for (Type type : memberTypes) {

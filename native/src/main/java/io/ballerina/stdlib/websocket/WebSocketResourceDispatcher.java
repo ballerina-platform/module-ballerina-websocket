@@ -46,7 +46,6 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlMes
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlSignal;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketTextMessage;
-import io.ballerina.stdlib.http.transport.message.HttpCarbonMessage;
 import io.ballerina.stdlib.http.transport.message.HttpCarbonRequest;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObserverContext;
@@ -57,13 +56,15 @@ import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
 import static io.ballerina.runtime.api.TypeTags.INT_TAG;
@@ -128,7 +129,8 @@ public class WebSocketResourceDispatcher {
         Map<String, HeaderParam> allHeaderParams = new HashMap<>();
         int otherParamIndex = 0;
         for (String paramName : resourceFunction.getParamNames()) {
-            BMap annotations = (BMap) resourceFunction.getAnnotation(StringUtils.fromString(PARAM_ANNOT_PREFIX + paramName));
+            BMap annotations = (BMap) resourceFunction.getAnnotation(
+                    StringUtils.fromString(PARAM_ANNOT_PREFIX + paramName));
             if (annotations == null) {
                 otherParamIndex++;
                 continue;
@@ -242,30 +244,6 @@ public class WebSocketResourceDispatcher {
         subPath = subPath.endsWith(WebSocketConstants.BACK_SLASH) ?
                 subPath.substring(0, subPath.length() - 1) : subPath;
         return subPath;
-    }
-
-    private static void populateHeaderParams(HttpCarbonMessage httpCarbonMessage, HeaderParam headerParam,
-                                             int index, Object[] bValues, WebSocketHandshaker webSocketHandshaker, String errMsg) {
-        HttpHeaders httpHeaders = httpCarbonMessage.getHeaders();
-        String token = headerParam.getHeaderName();
-        List<String> headerValues = httpHeaders.getAll(token);
-        if (headerValues.isEmpty()) {
-            if (headerParam.isNilable()) {
-                bValues[index++] = null;
-                bValues[index++] = true;
-                return;
-            } else {
-                webSocketHandshaker.cancelHandshake(404, errMsg);
-            }
-        }
-        if (headerParam.getTypeTag() == ARRAY_TAG) {
-            String[] headerArray = headerValues.toArray(new String[0]);
-            bValues[index++] = StringUtils.fromStringArray(headerArray);
-            bValues[index++] = true;
-        } else {
-            bValues[index++] = StringUtils.fromString(headerValues.get(0));
-        }
-        bValues[index++] = true;
     }
 
     public static void dispatchOnOpen(WebSocketConnection webSocketConnection, BObject webSocketCaller,
