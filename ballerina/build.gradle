@@ -97,9 +97,6 @@ dependencies {
     externalJars(group: 'io.netty', name: 'netty-codec-http2', version: "${nettyVersion}") {
         transitive = false
     }
-    externalJars(group: 'commons-pool.wso2', name: 'commons-pool', version: "${wso2CommonsPoolVersion}") {
-        transitive = false
-    }
     externalJars(group: 'io.netty', name: 'netty-tcnative-boringssl-static', version: "${nettyTcnativeVersion}") {
         transitive = false
     }
@@ -113,7 +110,6 @@ task updateTomlFiles {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
         def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
         def stdlibDependentNettyVersion = project.nettyVersion
-        def stdlibDependentWso2CommonsPoolVersion = project.wso2CommonsPoolVersion
         def stdlibDependentNettyTcnativeVersion = project.nettyTcnativeVersion
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
@@ -121,7 +117,6 @@ task updateTomlFiles {
         newConfig = newConfig.replace("@stdlib.mimenative.version@", stdlibDependentMimeNativeVersion)
         newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)
         newConfig = newConfig.replace("@netty.version@", stdlibDependentNettyVersion)
-        newConfig = newConfig.replace("@commmon.pool.version@", stdlibDependentWso2CommonsPoolVersion)
         newConfig = newConfig.replace("@tcnative.version@", stdlibDependentNettyTcnativeVersion)
         ballerinaConfigFile.text = newConfig
 

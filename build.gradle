@@ -46,7 +46,6 @@ ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 ext.commonsLang3Version = project.commonsLang3Version
 ext.nettyVersion = project.nettyVersion
 ext.nettyTcnativeVersion = project.nettyTcnativeVersion
-ext.wso2CommonsPoolVersion = project.wso2CommonsPoolVersion
 ext.testngVersion =project.testngVersion
 
 allprojects {

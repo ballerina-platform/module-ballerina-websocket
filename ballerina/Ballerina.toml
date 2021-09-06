@@ -77,12 +77,6 @@ artifactId = "netty-codec-http2"
 version = "@netty.version@"
 
 [[platform.java11.dependency]]
-path = "./lib/commons-pool-@commmon.pool.version@.jar"
-groupId = "commons-pool.wso2"
-artifactId = "commons-pool"
-version = "@commmon.pool.version@"
-
-[[platform.java11.dependency]]
 path = "./lib/netty-tcnative-boringssl-static-@tcnative.version@.jar"
 groupId = "io.netty"
 artifactId = "netty-tcnative-boringssl-static"
