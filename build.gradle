@@ -45,7 +45,6 @@ ext.ballerinaTomlParserVersion = project.ballerinaTomlParserVersion
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 ext.commonsLang3Version = project.commonsLang3Version
 ext.nettyVersion = project.nettyVersion
-ext.nettyTcnativeVersion = project.nettyTcnativeVersion
 ext.testngVersion =project.testngVersion
 
 allprojects {

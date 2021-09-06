@@ -75,9 +75,3 @@ path = "./lib/netty-codec-http2-@netty.version@.jar"
 groupId = "io.netty"
 artifactId = "netty-codec-http2"
 version = "@netty.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/netty-tcnative-boringssl-static-@tcnative.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-tcnative-boringssl-static"
-version = "@tcnative.version@"
