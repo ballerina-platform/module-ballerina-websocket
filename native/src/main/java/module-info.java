@@ -23,7 +23,6 @@ module io.ballerina.stdlib.websocket {
     requires io.ballerina.lang.value;
     requires io.ballerina.stdlib.mime;
     requires io.ballerina.stdlib.io;
-    requires java.xml.bind;
     requires java.management;
     requires org.slf4j;
     requires io.ballerina.stdlib.http;

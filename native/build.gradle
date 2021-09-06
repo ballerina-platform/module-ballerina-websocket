@@ -45,9 +45,6 @@ dependencies {
     implementation group: 'io.netty', name: 'netty-codec-http2', version:"${nettyVersion}"
     implementation group: 'io.netty', name: 'netty-handler-proxy', version:"${nettyVersion}"
 
-    implementation group: 'org.wso2.eclipse.osgi', name: 'org.eclipse.osgi', version:"${wso2EclipseOsgiVersion}"
-    implementation group: 'jakarta.xml.bind', name: 'jakarta.xml.bind-api', version: "${jakartaXmlBindVersion}"
-
     testImplementation group: 'com.mashape.unirest', name: 'unirest-java', version:"${unirestVersion}"
 }
 
