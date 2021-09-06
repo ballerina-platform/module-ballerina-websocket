@@ -18,7 +18,7 @@ import ballerina/test;
 import ballerina/http;
 import ballerina/io;
 
-final map<string> customHeaders = {"someHeader1": "some-header-value"};
+final map<string> customHeader = {"someHeader1": "some-header-value"};
 string header1 = "";
 string? header2 = "";
 string[] header3 = [];
@@ -85,14 +85,14 @@ public function testHeaderParamsWithNillable() returns Error? {
 
 @test:Config {}
 public function testHeaderParamsWithArray() returns Error? {
-    Client wsClient = check new("ws://localhost:21081/onTextString/", {customHeaders: customHeaders});
+    Client wsClient = check new("ws://localhost:21081/onTextString/", {customHeaders: customHeader});
     test:assertEquals(header3, ["some-header-value"]);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
 public function testHeaderParamsWithName() returns Error? {
-    Client wsClient = check new("ws://localhost:21082/onTextString/", {customHeaders: customHeaders});
+    Client wsClient = check new("ws://localhost:21082/onTextString/", {customHeaders: customHeader});
     test:assertEquals(header4, "websocket");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
