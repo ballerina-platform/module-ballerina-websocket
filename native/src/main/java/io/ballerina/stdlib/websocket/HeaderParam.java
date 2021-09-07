@@ -21,31 +21,22 @@ import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
-import io.ballerina.stdlib.http.api.HttpErrorType;
-import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorException;
 
 import java.util.List;
 
 /**
- * Represents a inbound request header parameter details.
+ * Represents an inbound request header parameter details.
  */
 public class HeaderParam {
     private int typeTag;
-    private final String token;
     private boolean nilable;
-    private int index;
     private Type type;
     private String headerName;
 
-    HeaderParam(String token) {
-        this.token = token;
-    }
-
-    public void init(Type type, int index) throws WebSocketConnectorException {
+    public void init(Type type) throws WebSocketConnectorException {
         this.type = type;
         this.typeTag = type.getTag();
-        this.index = index;
         validateHeaderParamType();
     }
 
@@ -71,24 +62,18 @@ public class HeaderParam {
         }
     }
 
-    // Note the validation is only done for the non-object header params. i.e for the string, string[] types
-    private void validateBasicType(Type type) {
+    private void validateBasicType(Type type) throws WebSocketConnectorException {
         if (isValidBasicType(type.getTag()) || (type.getTag() == TypeTags.ARRAY_TAG && isValidBasicType(
                 ((ArrayType) type).getElementType().getTag()))) {
-            // Assign element type as the type of header param
             this.typeTag = type.getTag();
             return;
         }
-        throw HttpUtil.createHttpError("Incompatible header parameter type: '" + type.getName() + "'. " +
-                "expected: string or string[]", HttpErrorType.GENERIC_LISTENER_ERROR);
+        throw new WebSocketConnectorException("Incompatible header parameter type: '" + type.getName() + "'. " +
+                "expected: string or string[]");
     }
 
     private boolean isValidBasicType(int typeTag) {
         return typeTag == TypeTags.STRING_TAG;
-    }
-
-    public String getToken() {
-        return this.token;
     }
 
     public int getTypeTag() {
@@ -97,10 +82,6 @@ public class HeaderParam {
 
     public boolean isNilable() {
         return this.nilable;
-    }
-
-    public int getIndex() {
-        return this.index * 2;
     }
 
     public String getHeaderName() {

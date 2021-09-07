@@ -140,7 +140,7 @@ public class WebSocketResourceDispatcher {
                 String key = ((BString) objKey).getValue();
                 if (key.contains(HEADER_ANNOTATION)) {
                     Type parameterType = resourceFunction.getParameterTypes()[otherParamIndex];
-                    HeaderParam headerParam = new HeaderParam(paramName);
+                    HeaderParam headerParam = new HeaderParam();
                     BMap mapValue = annotations.getMapValue(StringUtils.fromString("ballerina/http:2:Header"));
                     Object headerName = mapValue.get(HttpConstants.ANN_FIELD_NAME);
                     if (headerName instanceof BString) {
@@ -152,7 +152,7 @@ public class WebSocketResourceDispatcher {
                     }
                     allHeaderParams.put(paramName, headerParam);
                     try {
-                        headerParam.init(parameterType, otherParamIndex);
+                        headerParam.init(parameterType);
                     } catch (WebSocketConnectorException e) {
                         webSocketHandshaker.cancelHandshake(404, e.getMessage());
                     }
