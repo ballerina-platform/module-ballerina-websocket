@@ -1,0 +1,120 @@
+// Copyright (c) 2021 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// //www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import ballerina/test;
+import ballerina/http;
+import ballerina/io;
+
+
+listener Listener l83 = new(21083);
+
+service /onTextString on l83 {
+   resource function get barz/[string xyz](@http:Header string upgrade, http:Request req, string foo) returns Service|UpgradeError {
+       io:println(foo);
+       io:println(upgrade);
+       return new WsService83();
+   }
+}
+
+listener Listener l84 = new(21084);
+
+service /onTextString on l84 {
+   resource function get [string xyz]() returns Service|UpgradeError {
+       return new WsService83();
+   }
+}
+
+listener Listener l85 = new(21085);
+
+service /onTextString on l85 {
+   resource function get .(http:Request req, int foo) returns Service|UpgradeError {
+       io:println(foo);
+       return new WsService83();
+   }
+}
+
+listener Listener l86 = new(21086);
+
+service /onTextString on l86 {
+    resource function get .(http:Request req, boolean bar) returns Service|UpgradeError {
+        io:println(bar);
+        return new WsService83();
+    }
+}
+
+listener Listener l87 = new(21087);
+
+service /onTextString on l87 {
+    resource function get foo/[string bar](http:Request req, float xyz) returns Service|UpgradeError {
+        io:println(xyz);
+        return new WsService83();
+    }
+}
+
+listener Listener l88 = new(21088);
+
+service /onTextString on l88 {
+    resource function get foo/[string bar]/bbe(http:Request req, decimal cde, string name, boolean bool) returns Service|UpgradeError {
+        io:println(cde);
+        io:println(name);
+        io:println(bool);
+        return new WsService83();
+    }
+}
+
+service class WsService83 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, string data) returns string? {
+        return data;
+   }
+}
+
+// Tests string support for writeTextMessage and onTextMessage
+@test:Config {}
+public function testStringQueryParamBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:21083/onTextString/barz/xyz?foo=WSO2");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testQueryParamBindingWithoutParams() returns Error? {
+    Client wsClient = check new("ws://localhost:21084/onTextString/xyz?foo=WSO2");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testIntQueryParamBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:21085/onTextString?foo=4");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testBooleanQueryParamBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:21086/onTextString?bar=false");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testFloatQueryParamBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:21087/onTextString/foo/bar?xyz=1.2");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testDecimalQueryParamBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:21088/onTextString/foo/bar/bbe?cde=4.5&name=simba&bool=true");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}

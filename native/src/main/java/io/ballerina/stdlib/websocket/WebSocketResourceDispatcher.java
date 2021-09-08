@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.PredefinedTypes;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
@@ -27,7 +28,9 @@ import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -47,6 +50,7 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketControlSig
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketHandshaker;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketTextMessage;
 import io.ballerina.stdlib.http.transport.message.HttpCarbonRequest;
+import io.ballerina.stdlib.http.uri.URIUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObserverContext;
 import io.ballerina.stdlib.websocket.server.OnUpgradeResourceCallback;
@@ -60,6 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +76,7 @@ import static io.ballerina.runtime.api.TypeTags.INT_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.MAP_TYPE;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION;
@@ -126,48 +132,54 @@ public class WebSocketResourceDispatcher {
                 i++;
             }
         }
+        Type[] parameterTypes = resourceFunction.getParameterTypes();
         Map<String, HeaderParam> allHeaderParams = new HashMap<>();
-        int otherParamIndex = 0;
-        for (String paramName : resourceFunction.getParamNames()) {
-            BMap annotations = (BMap) resourceFunction.getAnnotation(
-                    StringUtils.fromString(PARAM_ANNOT_PREFIX + paramName));
-            if (annotations == null) {
-                otherParamIndex++;
-                continue;
-            }
-            Object[] annotationsKeys = annotations.getKeys();
-            for (Object objKey : annotationsKeys) {
-                String key = ((BString) objKey).getValue();
-                if (key.contains(HEADER_ANNOTATION)) {
-                    Type parameterType = resourceFunction.getParameterTypes()[otherParamIndex];
-                    HeaderParam headerParam = new HeaderParam();
-                    BMap mapValue = annotations.getMapValue(StringUtils.fromString("ballerina/http:2:Header"));
-                    Object headerName = mapValue.get(HttpConstants.ANN_FIELD_NAME);
-                    if (headerName instanceof BString) {
-                        String value = ((BString) headerName).getValue();
-                        headerParam.setHeaderName(value);
-                    } else {
-                        // if the name field is not stated, use the param token as header key
-                        headerParam.setHeaderName(paramName);
+        Map<String, QueryParam> allQueryParams = new HashMap<>();
+        for (int index = pathParamArr.size(); index < parameterTypes.length; index++) {
+            try {
+                String paramName = resourceFunction.getParamNames()[index];
+                String paramType = resourceFunction.getParameterTypes()[index].getName();
+                BMap annotations = (BMap) resourceFunction.getAnnotation(
+                        StringUtils.fromString(PARAM_ANNOT_PREFIX + paramName));
+                if (annotations == null && paramType.equals(HttpConstants.REQUEST)) {
+                    continue;
+                } else if (annotations != null) {
+                    Object[] annotationsKeys = annotations.getKeys();
+                    for (Object objKey : annotationsKeys) {
+                        String key = ((BString) objKey).getValue();
+                        if (key.contains(HEADER_ANNOTATION)) {
+                            Type parameterType = resourceFunction.getParameterTypes()[index];
+                            HeaderParam headerParam = new HeaderParam();
+                            BMap mapValue = annotations.getMapValue(StringUtils.fromString("ballerina/http:2:Header"));
+                            Object headerName = mapValue.get(HttpConstants.ANN_FIELD_NAME);
+                            if (headerName instanceof BString) {
+                                String value = ((BString) headerName).getValue();
+                                headerParam.setHeaderName(value);
+                            } else {
+                                // if the name field is not stated, use the param token as header key
+                                headerParam.setHeaderName(paramName);
+                            }
+                            allHeaderParams.put(paramName, headerParam);
+                            headerParam.init(parameterType);
+                        }
                     }
-                    allHeaderParams.put(paramName, headerParam);
-                    try {
-                        headerParam.init(parameterType);
-                    } catch (WebSocketConnectorException e) {
-                        webSocketHandshaker.cancelHandshake(404, e.getMessage());
-                    }
-                    otherParamIndex++;
+                } else {
+                    Type parameterType = resourceFunction.getParameterTypes()[index];
+                    validateQueryParam(index, resourceFunction, parameterType, allQueryParams);
                 }
+            } catch (WebSocketConnectorException e) {
+                webSocketHandshaker.cancelHandshake(404, e.getMessage());
             }
         }
 
         HttpUtil.populateInboundRequest(inRequest, inRequestEntity, httpCarbonMessage);
-        Type[] parameterTypes = resourceFunction.getParameterTypes();
         Object[] bValues = new Object[parameterTypes.length * 2];
         int index = 0;
         int pathParamIndex = 0;
         int paramIndex = 0;
         try {
+            BMap<BString, Object> urlQueryParams = getQueryParams(httpCarbonMessage.getProperty(
+                    HttpConstants.RAW_QUERY_STR));
             for (Type param : parameterTypes) {
                 String typeName = param.getName();
                 String paramName = resourceFunction.getParamNames()[paramIndex];
@@ -178,8 +190,7 @@ public class WebSocketResourceDispatcher {
                     List<String> headerValues = httpHeaders.getAll(token);
                     if (headerValues.isEmpty()) {
                         if (headerParam.isNilable()) {
-                            bValues[index++] = null;
-                            bValues[index++] = true;
+                            index = createBvaluesForNillable(bValues, index);
                             continue;
                         } else {
                             webSocketHandshaker.cancelHandshake(404, errMsg);
@@ -195,33 +206,111 @@ public class WebSocketResourceDispatcher {
                     paramIndex++;
                     continue;
                 }
-                switch (typeName) {
-                    case HttpConstants.REQUEST:
-                        bValues[index++] = inRequest;
-                        bValues[index++] = true;
-                        break;
-                    case WebSocketConstants.PARAM_TYPE_STRING:
-                        bValues[index++] = StringUtils.fromString(pathParamArr.get(pathParamIndex++));
-                        bValues[index++] = true;
-                        break;
-                    case WebSocketConstants.PARAM_TYPE_INT:
-                        bValues[index++] = Long.parseLong(pathParamArr.get(pathParamIndex++));
-                        bValues[index++] = true;
-                        break;
-                    case WebSocketConstants.PARAM_TYPE_FLOAT:
-                        bValues[index++] = Double.parseDouble(pathParamArr.get(pathParamIndex++));
-                        bValues[index++] = true;
-                        break;
-                    case WebSocketConstants.PARAM_TYPE_BOOLEAN:
-                        bValues[index++] = Boolean.parseBoolean(pathParamArr.get(pathParamIndex++));
-                        bValues[index++] = true;
-                        break;
-                    default:
-                        break;
+                if (pathParamArr.size() > paramIndex) {
+                    switch (typeName) {
+                        case WebSocketConstants.PARAM_TYPE_STRING:
+                            bValues[index++] = StringUtils.fromString(pathParamArr.get(pathParamIndex++));
+                            bValues[index++] = true;
+                            break;
+                        case WebSocketConstants.PARAM_TYPE_INT:
+                            bValues[index++] = Long.parseLong(pathParamArr.get(pathParamIndex++));
+                            bValues[index++] = true;
+                            break;
+                        case WebSocketConstants.PARAM_TYPE_FLOAT:
+                            bValues[index++] = Double.parseDouble(pathParamArr.get(pathParamIndex++));
+                            bValues[index++] = true;
+                            break;
+                        case WebSocketConstants.PARAM_TYPE_BOOLEAN:
+                            bValues[index++] = Boolean.parseBoolean(pathParamArr.get(pathParamIndex++));
+                            bValues[index++] = true;
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    Object queryValue = urlQueryParams.get(StringUtils.fromString(paramName));
+                    QueryParam queryParam = allQueryParams.get(paramName);
+                    BArray queryValueArr = (BArray) queryValue;
+                    switch (typeName) {
+                        case HttpConstants.REQUEST:
+                            bValues[index++] = inRequest;
+                            bValues[index++] = true;
+                            break;
+                        case WebSocketConstants.PARAM_TYPE_STRING:
+                            if (queryValue == null) {
+                                if (queryParam.isNilable()) {
+                                    index = createBvaluesForNillable(bValues, index);
+                                    continue;
+                                } else {
+                                    reportError(paramName);
+                                }
+                            }
+                            bValues[index++] = StringUtils.fromString(String.valueOf((queryValueArr)
+                                    .getBString(0).getValue()));
+                            bValues[index++] = true;
+                            break;
+
+                        case WebSocketConstants.PARAM_TYPE_INT:
+                            if (queryValue == null) {
+                                if (queryParam.isNilable()) {
+                                    index = createBvaluesForNillable(bValues, index);
+                                    continue;
+                                } else {
+                                    reportError(paramName);
+                                }
+                            }
+                            bValues[index++] = Long.parseLong(String.valueOf((queryValueArr).getBString(0).getValue()));
+                            bValues[index++] = true;
+                            break;
+
+                        case WebSocketConstants.PARAM_TYPE_BOOLEAN:
+                            if (queryValue == null) {
+                                if (queryParam.isNilable()) {
+                                    index = createBvaluesForNillable(bValues, index);
+                                    continue;
+                                } else {
+                                    reportError(paramName);
+                                }
+                            }
+                            bValues[index++] = Boolean.parseBoolean(String.valueOf((queryValueArr)
+                                    .getBString(0).getValue()));
+                            bValues[index++] = true;
+                            break;
+
+                        case WebSocketConstants.PARAM_TYPE_FLOAT:
+                            if (queryValue == null) {
+                                if (queryParam.isNilable()) {
+                                    index = createBvaluesForNillable(bValues, index);
+                                    continue;
+                                } else {
+                                    reportError(paramName);
+                                }
+                            }
+                            bValues[index++] = Double.parseDouble(String.valueOf((queryValueArr)
+                                    .getBString(0).getValue()));
+                            bValues[index++] = true;
+                            break;
+
+                        case WebSocketConstants.PARAM_TYPE_DECIMAL:
+                            if (queryValue == null) {
+                                if (queryParam.isNilable()) {
+                                    index = createBvaluesForNillable(bValues, index);
+                                    continue;
+                                } else {
+                                    reportError(paramName);
+                                }
+                            }
+                            bValues[index++] = ValueCreator.createDecimalValue((String.valueOf((queryValueArr)
+                                    .getBString(0).getValue())));
+                            bValues[index++] = true;
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 paramIndex++;
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | WebSocketConnectorException e) {
             webSocketHandshaker.cancelHandshake(404, errMsg);
             return;
         }
@@ -234,6 +323,30 @@ public class WebSocketResourceDispatcher {
                                                  properties, PredefinedTypes.TYPE_ANY, bValues);
     }
 
+    private static int createBvaluesForNillable(Object[] bValues, int index) {
+        bValues[index++] = null;
+        bValues[index++] = true;
+        return index;
+    }
+
+    private static void reportError(String paramName) throws WebSocketConnectorException {
+        throw new WebSocketConnectorException("No query param value found for '" + paramName + "'");
+    }
+
+    public static BMap<BString, Object> getQueryParams(Object rawQueryString) throws WebSocketConnectorException {
+        BMap<BString, Object> queryParams = ValueCreator.createMapValue(MAP_TYPE);
+
+        if (rawQueryString != null) {
+            try {
+                URIUtil.populateQueryParamMap((String) rawQueryString, queryParams);
+            } catch (UnsupportedEncodingException e) {
+                throw new WebSocketConnectorException("Error while retrieving query param from message: "
+                        + e.getMessage());
+            }
+        }
+        return queryParams;
+    }
+
     private static String sanitizeSubPath(String subPath) {
         if (WebSocketConstants.BACK_SLASH.equals(subPath)) {
             return subPath;
@@ -244,6 +357,30 @@ public class WebSocketResourceDispatcher {
         subPath = subPath.endsWith(WebSocketConstants.BACK_SLASH) ?
                 subPath.substring(0, subPath.length() - 1) : subPath;
         return subPath;
+    }
+
+    private static void validateQueryParam(int index, ResourceMethodType balResource, Type parameterType,
+                                           Map<String, QueryParam> allQueryParams) throws WebSocketConnectorException {
+        if (parameterType instanceof UnionType) {
+            List<Type> memberTypes = ((UnionType) parameterType).getMemberTypes();
+            int size = memberTypes.size();
+            if (size > 2 || !parameterType.isNilable()) {
+                throw HttpUtil.createHttpError(
+                        "invalid query param type '" + parameterType.getName() + "': a basic type or an array " +
+                                "of a basic type can only be union with '()' Eg: string|() or string[]|()");
+            }
+            for (Type type : memberTypes) {
+                if (type.getTag() == TypeTags.NULL_TAG) {
+                    continue;
+                }
+                QueryParam queryParam = new QueryParam(type, balResource.getParamNames()[index], true);
+                allQueryParams.put(balResource.getParamNames()[index], queryParam);
+                break;
+            }
+        } else {
+            QueryParam queryParam = new QueryParam(parameterType, balResource.getParamNames()[index], false);
+            allQueryParams.put(balResource.getParamNames()[index], queryParam);
+        }
     }
 
     public static void dispatchOnOpen(WebSocketConnection webSocketConnection, BObject webSocketCaller,
