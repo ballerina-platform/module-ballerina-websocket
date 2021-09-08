@@ -89,9 +89,14 @@ public class WebSocketConnector {
                             WebSocketObservabilityUtil
                                     .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_TEXT, connectionInfo);
                         } else {
-                            if (!textCallbackCompleted.get()) {
-                                WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause(),
-                                        textCallbackCompleted);
+                            if (WebSocketUtil.hasRetryConfig(wsConnection) && !textCallbackCompleted.get()) {
+                                WebSocketUtil.reconnectForWrite(connectionInfo, balFuture, textCallbackCompleted,
+                                        text.getValue(), null);
+                            } else {
+                                if (!textCallbackCompleted.get()) {
+                                    WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture,
+                                            future.cause(), textCallbackCompleted);
+                                }
                             }
                         }
                     }));
@@ -108,7 +113,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    private static void setWriteTimeoutHandler(BObject wsConnection, Future balFuture, 
+    public static void setWriteTimeoutHandler(BObject wsConnection, Future balFuture,
                                                AtomicBoolean textCallbackCompleted, 
                                                WebSocketConnectionInfo connectionInfo) throws IllegalAccessException {
         if (wsConnection.getType().getName().equals(SYNC_CLIENT)) {
@@ -186,8 +191,15 @@ public class WebSocketConnector {
                             WebSocketObservabilityUtil
                                     .observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY, connectionInfo);
                         } else {
-                            WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture, future.cause(),
-                                    binaryCallbackCompleted);
+                            if (WebSocketUtil.hasRetryConfig(wsConnection) && !binaryCallbackCompleted.get()) {
+                                WebSocketUtil.reconnectForWrite(connectionInfo, balFuture, binaryCallbackCompleted,
+                                        null, binaryData);
+                            } else {
+                                if (!binaryCallbackCompleted.get()) {
+                                    WebSocketUtil.setCallbackFunctionBehaviour(connectionInfo, balFuture,
+                                            future.cause(), binaryCallbackCompleted);
+                                }
+                            }
                         }
                     }));
         } catch (IllegalAccessException | IllegalStateException e) {
@@ -203,7 +215,7 @@ public class WebSocketConnector {
         return null;
     }
 
-    private static void removeWriteTimeoutHandler(BObject wsConnection, WebSocketConnectionInfo connectionInfo)
+    public static void removeWriteTimeoutHandler(BObject wsConnection, WebSocketConnectionInfo connectionInfo)
             throws IllegalAccessException {
         if (wsConnection.getType().getName().equals(SYNC_CLIENT)) {
             connectionInfo.getWebSocketConnection().removeWriteIdleStateHandler();
