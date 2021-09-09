@@ -20,10 +20,21 @@ import ballerina/io;
 
 
 listener Listener l83 = new(21083);
+string l83Foo = "";
+string l83Header = "";
+string l84Xyz = "";
+int l85Foo = 0;
+boolean l86Bar = true;
+float l87Xyz = 1.0;
+decimal l88Cde = 1.0;
+string l88Name = "";
+boolean l88Bool = false;
 
 service /onTextString on l83 {
    resource function get barz/[string xyz](@http:Header string upgrade, http:Request req, string foo) returns Service|UpgradeError {
        io:println(foo);
+       l83Foo = foo;
+       l83Header = upgrade;
        io:println(upgrade);
        return new WsService83();
    }
@@ -33,6 +44,7 @@ listener Listener l84 = new(21084);
 
 service /onTextString on l84 {
    resource function get [string xyz]() returns Service|UpgradeError {
+       l84Xyz = xyz;
        return new WsService83();
    }
 }
@@ -41,6 +53,7 @@ listener Listener l85 = new(21085);
 
 service /onTextString on l85 {
    resource function get .(http:Request req, int foo) returns Service|UpgradeError {
+       l85Foo = foo;
        io:println(foo);
        return new WsService83();
    }
@@ -51,6 +64,7 @@ listener Listener l86 = new(21086);
 service /onTextString on l86 {
     resource function get .(http:Request req, boolean bar) returns Service|UpgradeError {
         io:println(bar);
+        l86Bar = bar;
         return new WsService83();
     }
 }
@@ -60,6 +74,7 @@ listener Listener l87 = new(21087);
 service /onTextString on l87 {
     resource function get foo/[string bar](http:Request req, float xyz) returns Service|UpgradeError {
         io:println(xyz);
+        l87Xyz = xyz;
         return new WsService83();
     }
 }
@@ -68,8 +83,11 @@ listener Listener l88 = new(21088);
 
 service /onTextString on l88 {
     resource function get foo/[string bar]/bbe(http:Request req, decimal cde, string name, boolean bool) returns Service|UpgradeError {
+        l88Cde = cde;
         io:println(cde);
+        l88Name = name;
         io:println(name);
+        l88Bool = bool;
         io:println(bool);
         return new WsService83();
     }
@@ -86,35 +104,45 @@ service class WsService83 {
 @test:Config {}
 public function testStringQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21083/onTextString/barz/xyz?foo=WSO2");
+    test:assertEquals(l83Foo, "WSO2");
+    test:assertEquals(l83Header, "websocket");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
 public function testQueryParamBindingWithoutParams() returns Error? {
     Client wsClient = check new("ws://localhost:21084/onTextString/xyz?foo=WSO2");
+    test:assertEquals(l84Xyz, "xyz");
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
 public function testIntQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21085/onTextString?foo=4");
+    test:assertEquals(l85Foo, 4);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
 public function testBooleanQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21086/onTextString?bar=false");
+    test:assertEquals(l86Bar, false);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
 public function testFloatQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21087/onTextString/foo/bar?xyz=1.2");
+    test:assertEquals(l87Xyz, 1.2);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
 
 @test:Config {}
 public function testDecimalQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21088/onTextString/foo/bar/bbe?cde=4.5&name=simba&bool=true");
+    decimal expected = 4.5;
+    test:assertEquals(l88Cde, expected);
+    test:assertEquals(l88Name, "simba");
+    test:assertEquals(l88Bool, true);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
