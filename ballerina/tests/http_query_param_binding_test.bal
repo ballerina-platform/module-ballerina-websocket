@@ -16,7 +16,6 @@
 
 import ballerina/test;
 import ballerina/http;
-import ballerina/io;
 
 string l83Foo = "";
 string l83Header = "";
@@ -32,10 +31,8 @@ listener Listener l83 = new(21083);
 
 service /onTextString on l83 {
    resource function get barz/[string xyz](@http:Header string upgrade, http:Request req, string foo, float? abc) returns Service|UpgradeError {
-       io:println(foo);
        l83Foo = foo;
        l83Header = upgrade;
-       io:println(upgrade);
        return new WsService83();
    }
 }
@@ -54,7 +51,6 @@ listener Listener l85 = new(21085);
 service /onTextString on l85 {
    resource function get .(http:Request req, int foo, string? abc) returns Service|UpgradeError {
        l85Foo = foo;
-       io:println(foo);
        return new WsService83();
    }
 }
@@ -63,7 +59,6 @@ listener Listener l86 = new(21086);
 
 service /onTextString on l86 {
     resource function get .(http:Request req, boolean bar, decimal? abc) returns Service|UpgradeError {
-        io:println(bar);
         l86Bar = bar;
         return new WsService83();
     }
@@ -73,7 +68,6 @@ listener Listener l87 = new(21087);
 
 service /onTextString on l87 {
     resource function get foo/[string bar](http:Request req, float xyz, string? abc, boolean? jkl) returns Service|UpgradeError {
-        io:println(xyz);
         l87Xyz = xyz;
         return new WsService83();
     }
@@ -84,11 +78,8 @@ listener Listener l88 = new(21088);
 service /onTextString on l88 {
     resource function get foo/[string bar]/bbe(http:Request req, decimal cde, string name, boolean bool) returns Service|UpgradeError {
         l88Cde = cde;
-        io:println(cde);
         l88Name = name;
-        io:println(name);
         l88Bool = bool;
-        io:println(bool);
         return new WsService83();
     }
 }
@@ -110,6 +101,16 @@ public function testStringQueryParamBinding() returns Error? {
 }
 
 @test:Config {}
+public function testStringQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21083/onTextString/barz/xyz");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
 public function testQueryParamBindingWithoutParams() returns Error? {
     Client wsClient = check new("ws://localhost:21084/onTextString/xyz?foo=WSO2");
     test:assertEquals(l84Xyz, "xyz");
@@ -124,6 +125,16 @@ public function testIntQueryParamBinding() returns Error? {
 }
 
 @test:Config {}
+public function testIntQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21085/onTextString");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
 public function testBooleanQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21086/onTextString?bar=false");
     test:assertEquals(l86Bar, false);
@@ -131,10 +142,30 @@ public function testBooleanQueryParamBinding() returns Error? {
 }
 
 @test:Config {}
+public function testBooleanQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21086/onTextString");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
 public function testFloatQueryParamBinding() returns Error? {
     Client wsClient = check new("ws://localhost:21087/onTextString/foo/bar?xyz=1.2");
     test:assertEquals(l87Xyz, 1.2);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testFloatQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21087/onTextString/foo/bar");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
 }
 
 @test:Config {}

@@ -150,7 +150,8 @@ public class WebSocketResourceDispatcher {
                         if (key.contains(HEADER_ANNOTATION)) {
                             Type parameterType = resourceFunction.getParameterTypes()[index];
                             HeaderParam headerParam = new HeaderParam();
-                            BMap mapValue = annotations.getMapValue(StringUtils.fromString("ballerina/http:2:Header"));
+                            BMap mapValue = annotations.getMapValue(StringUtils.fromString(
+                                    WebSocketConstants.BALLERINA_HTTP_HEADER));
                             Object headerName = mapValue.get(HttpConstants.ANN_FIELD_NAME);
                             if (headerName instanceof BString) {
                                 String value = ((BString) headerName).getValue();
@@ -368,9 +369,7 @@ public class WebSocketResourceDispatcher {
             List<Type> memberTypes = ((UnionType) parameterType).getMemberTypes();
             int size = memberTypes.size();
             if (size > 2 || !parameterType.isNilable()) {
-                throw HttpUtil.createHttpError(
-                        "invalid query param type '" + parameterType.getName() + "': a basic type or an array " +
-                                "of a basic type can only be union with '()' Eg: string|() or string[]|()");
+                throw new WebSocketConnectorException("Invalid query param type '" + parameterType.getName());
             }
             for (Type type : memberTypes) {
                 if (type.getTag() == TypeTags.NULL_TAG) {

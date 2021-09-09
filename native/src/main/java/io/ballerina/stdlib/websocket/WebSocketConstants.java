@@ -122,6 +122,7 @@ public class WebSocketConstants {
     public static final String PARAM_TYPE_DECIMAL = "decimal";
     public static final String PARAM_ANNOT_PREFIX = "$param$.";
     public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
+    public static final String BALLERINA_HTTP_HEADER = "ballerina/http:2:Header";
 
     public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
     public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";
