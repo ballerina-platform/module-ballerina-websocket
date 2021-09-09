@@ -76,7 +76,7 @@ service /onTextString on l87 {
 listener Listener l88 = new(21088);
 
 service /onTextString on l88 {
-    resource function get foo/[string bar]/bbe(http:Request req, decimal cde, string name, boolean bool) returns Service|UpgradeError {
+    resource function get foo/[string bar]/bbe(http:Request req, decimal cde, string name, boolean bool, int? intVal) returns Service|UpgradeError {
         l88Cde = cde;
         l88Name = name;
         l88Bool = bool;
