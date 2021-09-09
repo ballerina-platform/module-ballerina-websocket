@@ -18,8 +18,6 @@ import ballerina/test;
 import ballerina/http;
 import ballerina/io;
 
-
-listener Listener l83 = new(21083);
 string l83Foo = "";
 string l83Header = "";
 string l84Xyz = "";
@@ -30,8 +28,10 @@ decimal l88Cde = 1.0;
 string l88Name = "";
 boolean l88Bool = false;
 
+listener Listener l83 = new(21083);
+
 service /onTextString on l83 {
-   resource function get barz/[string xyz](@http:Header string upgrade, http:Request req, string foo) returns Service|UpgradeError {
+   resource function get barz/[string xyz](@http:Header string upgrade, http:Request req, string foo, float? abc) returns Service|UpgradeError {
        io:println(foo);
        l83Foo = foo;
        l83Header = upgrade;
@@ -52,7 +52,7 @@ service /onTextString on l84 {
 listener Listener l85 = new(21085);
 
 service /onTextString on l85 {
-   resource function get .(http:Request req, int foo) returns Service|UpgradeError {
+   resource function get .(http:Request req, int foo, string? abc) returns Service|UpgradeError {
        l85Foo = foo;
        io:println(foo);
        return new WsService83();
@@ -62,7 +62,7 @@ service /onTextString on l85 {
 listener Listener l86 = new(21086);
 
 service /onTextString on l86 {
-    resource function get .(http:Request req, boolean bar) returns Service|UpgradeError {
+    resource function get .(http:Request req, boolean bar, decimal? abc) returns Service|UpgradeError {
         io:println(bar);
         l86Bar = bar;
         return new WsService83();
@@ -72,7 +72,7 @@ service /onTextString on l86 {
 listener Listener l87 = new(21087);
 
 service /onTextString on l87 {
-    resource function get foo/[string bar](http:Request req, float xyz) returns Service|UpgradeError {
+    resource function get foo/[string bar](http:Request req, float xyz, string? abc, boolean? jkl) returns Service|UpgradeError {
         io:println(xyz);
         l87Xyz = xyz;
         return new WsService83();

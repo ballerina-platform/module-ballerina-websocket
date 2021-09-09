@@ -28,14 +28,12 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorE
 public class QueryParam {
 
     private final int typeTag;
-    private final String token;
     private final boolean nilable;
     private final Type type;
 
-    QueryParam(Type type, String token, boolean nilable) throws WebSocketConnectorException {
+    QueryParam(Type type, boolean nilable) throws WebSocketConnectorException {
         this.type = type;
         this.typeTag = type.getTag();
-        this.token = token;
         this.nilable = nilable;
         validateQueryParamType();
     }
@@ -51,14 +49,6 @@ public class QueryParam {
     private boolean isValidBasicType(int typeTag) {
         return typeTag == TypeTags.STRING_TAG || typeTag == TypeTags.INT_TAG || typeTag == TypeTags.FLOAT_TAG ||
                 typeTag == TypeTags.BOOLEAN_TAG || typeTag == TypeTags.DECIMAL_TAG;
-    }
-
-    public String getToken() {
-        return this.token;
-    }
-
-    public int getTypeTag() {
-        return this.typeTag;
     }
 
     public boolean isNilable() {
