@@ -48,6 +48,10 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
 
+    public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
+    public static final String LOG_MESSAGE = "{} {}";
+    public static final int STATUS_CODE_ABNORMAL_CLOSURE = 1006;
+
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
     public static final String RESOURCE_NAME_ON_TEXT_MESSAGE = "onTextMessage";
     public static final String RESOURCE_NAME_ON_BINARY_MESSAGE = "onBinaryMessage";
@@ -74,6 +78,7 @@ public class WebSocketConstants {
 
     public static final String CLIENT_LISTENER = "clientListener";
     public static final String CLIENT_CONNECTOR = "clientConnector";
+    public static final String CALL_BACK_SERVICE = "callbackService";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
     public static final String CONNECTOR_FACTORY = "connectorFactory";

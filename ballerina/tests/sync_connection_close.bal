@@ -16,7 +16,6 @@
 
 import ballerina/test;
 import ballerina/io;
-import ballerina/lang.runtime as runtime;
 
 string closeError = "";
 listener Listener l32 = new(21002);
@@ -29,7 +28,7 @@ service /onCloseText on l32 {
 service class WsServiceSyncClose {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) returns Error? {
-        check caller->close(statusCode = 1000, reason = "Close the connection");
+        Error? closeResp = caller->close(statusCode = 1000, reason = "Close the connection");
     }
 
     remote isolated function onClose(Caller caller, string data) returns Error? {
@@ -41,29 +40,14 @@ service class WsServiceSyncClose {
 @test:Config {}
 public function testSyncClientClose() returns Error? {
     Client wsClient = check new("ws://localhost:21002/onCloseText");
-    @strand {
-        thread:"any"
+    io:println("Reading message starting: sync close client");
+    Error? resp1 = wsClient->writeTextMessage("Hi world1");
+    string|Error resp2 = wsClient->readTextMessage();
+    if (resp2 is Error) {
+        closeError = resp2.message();
+    } else {
+        io:println("1st response received at sync close client :" + resp2);
     }
-    worker w1 {
-        io:println("Reading message starting: sync close client");
-
-        string|Error resp1 = wsClient->readTextMessage();
-        if (resp1 is Error) {
-            closeError = resp1.message();
-        } else {
-            io:println("1st response received at sync close client :" + resp1);
-        }
-    }
-    @strand {
-        thread:"any"
-    }
-    worker w2 {
-        io:println("Waiting till close client starts reading text.");
-        runtime:sleep(2);
-        Error? resp1 = wsClient->writeTextMessage("Hi world1");
-        runtime:sleep(2);
-    }
-    _ = wait {w1, w2};
     string msg = "Close the connection: Status code: 1000";
     test:assertEquals(closeError, msg, msg = "");
 }
