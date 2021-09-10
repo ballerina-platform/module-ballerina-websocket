@@ -43,12 +43,7 @@ ext.stdlibUuidVersion = project.stdlibUuidVersion
 ext.slf4jVersion = project.slf4jVersion
 ext.ballerinaTomlParserVersion = project.ballerinaTomlParserVersion
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
-ext.commonsLang3Version = project.commonsLang3Version
 ext.nettyVersion = project.nettyVersion
-ext.nettyTcnativeVersion = project.nettyTcnativeVersion
-ext.wso2CommonsPoolVersion = project.wso2CommonsPoolVersion
-ext.bouncycastleVersion = project.bouncycastleVersion
-ext.mimepullVersion = project.mimepullVersion
 ext.testngVersion =project.testngVersion
 
 allprojects {

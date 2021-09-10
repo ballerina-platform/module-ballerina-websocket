@@ -71,42 +71,6 @@ artifactId = "netty-handler-proxy"
 version = "@netty.version@"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-http2-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-codec-http2"
-version = "@netty.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/commons-pool-@commmon.pool.version@.jar"
-groupId = "commons-pool.wso2"
-artifactId = "commons-pool"
-version = "@commmon.pool.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/bcprov-jdk15on-@bouncycastle.version@.jar"
-groupId = "org.bouncycastle"
-artifactId = "bcprov-jdk15on"
-version = "@bouncycastle.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/bcpkix-jdk15on-@bouncycastle.version@.jar"
-groupId = "org.bouncycastle"
-artifactId = "bcpkix-jdk15on"
-version = "@bouncycastle.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/netty-tcnative-boringssl-static-@tcnative.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-tcnative-boringssl-static"
-version = "@tcnative.version@"
-
-[[platform.java11.dependency]]
-path = "./lib/mimepull-@mimepull.version@.jar"
-groupId = "org.jvnet.mimepull"
-artifactId = "mimepull"
-version = "@mimepull.version@"
-
-[[platform.java11.dependency]]
 path = "../test-utils/build/libs/websocket-test-utils-@project.version@.jar"
 groupId = "io.ballerina.stdlib.websocket.testutils"
 scope = "testOnly"

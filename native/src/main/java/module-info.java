@@ -23,9 +23,6 @@ module io.ballerina.stdlib.websocket {
     requires io.ballerina.lang.value;
     requires io.ballerina.stdlib.mime;
     requires io.ballerina.stdlib.io;
-    requires org.bouncycastle.provider;
-    requires org.bouncycastle.pkix;
-    requires java.xml.bind;
     requires java.management;
     requires org.slf4j;
     requires io.ballerina.stdlib.http;
@@ -35,7 +32,6 @@ module io.ballerina.stdlib.websocket {
     requires io.netty.codec;
     requires io.netty.common;
     requires io.netty.buffer;
-    requires org.apache.commons.lang3;
     exports io.ballerina.stdlib.websocket.server;
     exports io.ballerina.stdlib.websocket;
 }

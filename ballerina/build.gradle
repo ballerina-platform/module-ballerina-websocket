@@ -94,24 +94,6 @@ dependencies {
     externalJars(group: 'io.netty', name: 'netty-handler-proxy', version: "${nettyVersion}") {
         transitive = false
     }
-    externalJars(group: 'io.netty', name: 'netty-codec-http2', version: "${nettyVersion}") {
-        transitive = false
-    }
-    externalJars(group: 'commons-pool.wso2', name: 'commons-pool', version: "${wso2CommonsPoolVersion}") {
-        transitive = false
-    }
-    externalJars(group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: "${bouncycastleVersion}") {
-        transitive = false
-    }
-    externalJars(group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: "${bouncycastleVersion}") {
-        transitive = false
-    }
-    externalJars(group: 'io.netty', name: 'netty-tcnative-boringssl-static', version: "${nettyTcnativeVersion}") {
-        transitive = false
-    }
-    externalJars(group: 'org.jvnet.mimepull', name: 'mimepull', version: "${mimepullVersion}") {
-        transitive = false
-    }
     externalJars(group: 'org.testng', name: 'testng', version: "${testngVersion}") {
         transitive = false
     }
@@ -122,20 +104,12 @@ task updateTomlFiles {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
         def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
         def stdlibDependentNettyVersion = project.nettyVersion
-        def stdlibDependentWso2CommonsPoolVersion = project.wso2CommonsPoolVersion
-        def stdlibDependentBouncycastleVersion = project.bouncycastleVersion
-        def stdlibDependentNettyTcnativeVersion = project.nettyTcnativeVersion
-        def stdlibDependentMimepullVersion = project.mimepullVersion
 
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.mimenative.version@", stdlibDependentMimeNativeVersion)
         newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)
         newConfig = newConfig.replace("@netty.version@", stdlibDependentNettyVersion)
-        newConfig = newConfig.replace("@commmon.pool.version@", stdlibDependentWso2CommonsPoolVersion)
-        newConfig = newConfig.replace("@bouncycastle.version@", stdlibDependentBouncycastleVersion)
-        newConfig = newConfig.replace("@tcnative.version@", stdlibDependentNettyTcnativeVersion)
-        newConfig = newConfig.replace("@mimepull.version@", stdlibDependentMimepullVersion)
         ballerinaConfigFile.text = newConfig
 
         def newCompilerPluginToml = ballerinaCompilerPluginFile.text.replace("@project.version@", project.version)
