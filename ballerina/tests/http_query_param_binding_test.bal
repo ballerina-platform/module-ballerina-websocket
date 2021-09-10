@@ -84,6 +84,46 @@ service /onTextString on l88 {
     }
 }
 
+listener Listener l89 = new(21089);
+
+service /onTextString on l89 {
+    resource function get foo(string xyz) returns Service|UpgradeError {
+        return new WsService83();
+    }
+}
+
+listener Listener l90 = new(21090);
+
+service /onTextString on l90 {
+    resource function get foo(int xyz) returns Service|UpgradeError {
+        return new WsService83();
+    }
+}
+
+listener Listener l91 = new(21091);
+
+service /onTextString on l91 {
+    resource function get foo(boolean xyz) returns Service|UpgradeError {
+        return new WsService83();
+    }
+}
+
+listener Listener l92 = new(21092);
+
+service /onTextString on l92 {
+    resource function get foo(float xyz) returns Service|UpgradeError {
+        return new WsService83();
+    }
+}
+
+listener Listener l93 = new(21093);
+
+service /onTextString on l93 {
+    resource function get foo(decimal xyz) returns Service|UpgradeError {
+        return new WsService83();
+    }
+}
+
 service class WsService83 {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) returns string? {
@@ -176,4 +216,54 @@ public function testDecimalQueryParamBinding() returns Error? {
     test:assertEquals(l88Name, "simba");
     test:assertEquals(l88Bool, true);
     error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testMandatoryStringQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21089/onTextString/foo");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
+public function testMandatoryIntQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21090/onTextString/foo");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
+public function testMandatoryBooleanQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21091/onTextString/foo");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
+public function testMandatoryFloatQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21092/onTextString/foo");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
+}
+
+@test:Config {}
+public function testMandatoryDecimalQueryParamBindingError() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21093/onTextString/foo");
+    if (wsClient is Error) {
+        test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
+    } else {
+        test:assertFail("Expected an resource not found error");
+    }
 }
