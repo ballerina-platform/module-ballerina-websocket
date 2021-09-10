@@ -20,20 +20,19 @@ package io.ballerina.stdlib.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.HttpWsConnectorFactory;
-import io.ballerina.stdlib.http.transport.contract.websocket.ClientHandshakeFuture;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConnector;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConnectorConfig;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
-import io.ballerina.stdlib.websocket.client.listener.WebSocketHandshakeListener;
 
 import java.net.URI;
 
@@ -42,6 +41,10 @@ import java.net.URI;
  *
  */
 public class SyncInitEndpoint {
+    private static final String INTERVAL = "interval";
+    private static final String MAX_WAIT_INTERVAL = "maxWaitInterval";
+    private static final String MAX_COUNT = "maxCount";
+    private static final String BACK_OF_FACTOR = "backOffFactor";
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
         final Future balFuture = env.markAsync();
         try {
@@ -60,17 +63,23 @@ public class SyncInitEndpoint {
                 return null;
             }
             populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
+            if (WebSocketUtil.hasRetryConfig(wsSyncClient)) {
+                @SuppressWarnings(WebSocketConstants.UNCHECKED)
+                BMap<BString, Object> retryConfig = (BMap<BString, Object>) clientEndpointConfig
+                        .getMapValue(WebSocketConstants.RETRY_CONFIG);
+                RetryContext retryConnectorConfig = new RetryContext();
+                populateRetryConnectorConfig(retryConfig, retryConnectorConfig);
+                wsSyncClient.addNativeData(WebSocketConstants.RETRY_CONFIG.toString(), retryConnectorConfig);
+            }
             WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
             wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
+            wsSyncClient.addNativeData(WebSocketConstants.CALL_BACK_SERVICE, wsService);
             wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
                     clientConnectorConfig.getMaxFrameSize());
             SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
-            ClientHandshakeFuture handshakeFuture = clientConnector.connect();
-            handshakeFuture.setWebSocketConnectorListener(syncClientConnectorListener);
-            handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(wsSyncClient, wsService,
-                    syncClientConnectorListener, balFuture));
+            WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture);
         } catch (Exception e) {
             if (e instanceof BError) {
                 balFuture.complete(e);
@@ -112,6 +121,32 @@ public class SyncInitEndpoint {
 
     public static Object getHttpResponse(Environment env, BObject wsSyncClient) {
         return (wsSyncClient.getNativeData(WebSocketConstants.HTTP_RESPONSE));
+    }
+
+    private static void populateRetryConnectorConfig(BMap<BString, Object> retryConfig,
+                                                     RetryContext retryConnectorConfig) {
+        retryConnectorConfig.setInterval(WebSocketUtil.findTimeoutInSeconds(retryConfig,
+                StringUtils.fromString(INTERVAL), 1));
+        retryConnectorConfig.setBackOfFactor(getDoubleValue(retryConfig));
+        retryConnectorConfig.setMaxInterval(WebSocketUtil.findTimeoutInSeconds(retryConfig,
+                StringUtils.fromString(MAX_WAIT_INTERVAL), 30));
+        retryConnectorConfig.setMaxAttempts(getIntValue(retryConfig, MAX_COUNT, 0));
+    }
+
+    private static int getIntValue(BMap<BString, Object> configs, String key, int defaultValue) {
+        int value = Math.toIntExact(configs.getIntValue(StringUtils.fromString(key)));
+        if (value < 0) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    private static Double getDoubleValue(BMap<BString, Object> configs) {
+        double value = Math.toRadians(configs.getFloatValue(StringUtils.fromString(BACK_OF_FACTOR)));
+        if (value < 1) {
+            value = 1.0;
+        }
+        return value;
     }
 
     private SyncInitEndpoint() {
