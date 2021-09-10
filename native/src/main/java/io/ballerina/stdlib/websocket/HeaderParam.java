@@ -45,7 +45,7 @@ public class HeaderParam {
             List<Type> memberTypes = ((UnionType) this.type).getMemberTypes();
             int size = memberTypes.size();
             if (size > 2 || !this.type.isNilable()) {
-                throw new WebSocketConnectorException("invalid header param type '" + this.type.getName() +
+                throw new WebSocketConnectorException("Invalid header param type '" + this.type.getName() +
                         "': a string or an array of a string can only be union with '()'." +
                         "Eg: string|() or string[]|()");
             }

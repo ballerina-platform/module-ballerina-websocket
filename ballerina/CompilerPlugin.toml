@@ -1,4 +1,3 @@
-  
 [plugin]
 id = "websocket-compiler-plugin"
 class = "io.ballerina.stdlib.websocket.plugin.WebSocketCompilerPlugin"

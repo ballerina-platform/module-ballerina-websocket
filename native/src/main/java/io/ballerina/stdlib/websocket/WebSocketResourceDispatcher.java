@@ -251,7 +251,6 @@ public class WebSocketResourceDispatcher {
                                         .getBString(0).getValue()));
                                 bValues[index++] = true;
                                 break;
-
                             case WebSocketConstants.PARAM_TYPE_INT:
                                 if (queryValue == null) {
                                     if (queryParam.isNilable()) {
@@ -265,7 +264,6 @@ public class WebSocketResourceDispatcher {
                                         .getBString(0).getValue()));
                                 bValues[index++] = true;
                                 break;
-
                             case WebSocketConstants.PARAM_TYPE_BOOLEAN:
                                 if (queryValue == null) {
                                     if (queryParam.isNilable()) {
@@ -279,7 +277,6 @@ public class WebSocketResourceDispatcher {
                                         .getBString(0).getValue()));
                                 bValues[index++] = true;
                                 break;
-
                             case WebSocketConstants.PARAM_TYPE_FLOAT:
                                 if (queryValue == null) {
                                     if (queryParam.isNilable()) {
@@ -293,7 +290,6 @@ public class WebSocketResourceDispatcher {
                                         .getBString(0).getValue()));
                                 bValues[index++] = true;
                                 break;
-
                             case WebSocketConstants.PARAM_TYPE_DECIMAL:
                                 if (queryValue == null) {
                                     if (queryParam.isNilable()) {
