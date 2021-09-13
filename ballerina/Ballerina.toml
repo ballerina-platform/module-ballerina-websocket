@@ -1,78 +1,42 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "@toml.version@"
+version = "2.0.0"
 distribution = "slbeta3"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/websocket-native-@project.version@.jar"
-groupId = "ballerina"
-artifactId = "websocket"
-version = "@project.version@"
+path = "../native/build/libs/websocket-native-2.0.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-@stdlib.httpnative.version@.jar"
-groupId = "ballerina"
-artifactId = "http"
-version = "@stdlib.httpnative.version@"
+path = "./lib/http-native-2.0.0-20210903-211100-0e8578b.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/mime-native-@stdlib.mimenative.version@.jar"
-groupId = "ballerina"
-artifactId = "mime-native"
-version = "@stdlib.mimenative.version@"
+path = "./lib/mime-native-2.0.0-20210902-230300-b58f48e.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-common-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-common"
-version = "@netty.version@"
+path = "./lib/netty-common-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-buffer-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-buffer"
-version = "@netty.version@"
+path = "./lib/netty-buffer-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-transport-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-transport"
-version = "@netty.version@"
+path = "./lib/netty-transport-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-resolver-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-resolver"
-version = "@netty.version@"
+path = "./lib/netty-resolver-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-handler-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-handler"
-version = "@netty.version@"
+path = "./lib/netty-handler-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-http-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-codec-http"
-version = "@netty.version@"
+path = "./lib/netty-codec-http-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-codec"
-version = "@netty.version@"
+path = "./lib/netty-codec-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-handler-proxy-@netty.version@.jar"
-groupId = "io.netty"
-artifactId = "netty-handler-proxy"
-version = "@netty.version@"
+path = "./lib/netty-handler-proxy-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-@project.version@.jar"
-groupId = "io.ballerina.stdlib.websocket.testutils"
+path = "../test-utils/build/libs/websocket-test-utils-2.0.0-SNAPSHOT.jar"
 scope = "testOnly"
-artifactId = "tcp"
-version = "@project.version@"

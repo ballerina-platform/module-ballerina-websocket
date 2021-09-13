@@ -1,0 +1,42 @@
+[package]
+org = "ballerina"
+name = "websocket"
+version = "@toml.version@"
+distribution = "slbeta3"
+
+[[platform.java11.dependency]]
+path = "../native/build/libs/websocket-native-@project.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/http-native-@stdlib.httpnative.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/mime-native-@stdlib.mimenative.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-common-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-buffer-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-transport-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-resolver-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-handler-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-codec-http-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-codec-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/netty-handler-proxy-@netty.version@.jar"
+
+[[platform.java11.dependency]]
+path = "../test-utils/build/libs/websocket-test-utils-@project.version@.jar"
+scope = "testOnly"
