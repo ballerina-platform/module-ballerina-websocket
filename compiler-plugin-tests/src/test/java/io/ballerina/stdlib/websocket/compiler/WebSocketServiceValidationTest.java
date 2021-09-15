@@ -18,20 +18,27 @@
 
 package io.ballerina.stdlib.websocket.compiler;
 
+import io.ballerina.projects.CodeActionManager;
 import io.ballerina.projects.DiagnosticResult;
+import io.ballerina.projects.Document;
+import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
+import io.ballerina.projects.plugins.codeaction.CodeActionContextImpl;
+import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.stdlib.websocket.plugin.PluginConstants;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
+import io.ballerina.tools.text.LinePosition;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * This is the compiler plugin for Ballerina WebSocket package.
@@ -51,6 +58,36 @@ public class WebSocketServiceValidationTest {
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
         Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
         assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RESOURCE_ERROR);
+    }
+
+    @Test
+    public void testParametersOfResource1() {
+        Path projectRoot = RESOURCE_DIRECTORY.resolve("sample_package_12");
+        BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectRoot);
+
+        Path filePath = projectRoot.resolve("service.bal");
+        DocumentId documentId = project.documentId(filePath);
+
+        Package currentPackage = project.currentPackage();
+        PackageCompilation compilation = currentPackage.getCompilation();
+        CodeActionManager codeActionManager = compilation.getCodeActionManager();
+
+        Document document = currentPackage.getDefaultModule().document(documentId);
+
+        List<CodeActionInfo> codeActions = compilation.diagnosticResult().diagnostics().stream()
+                .filter(diagnostic -> project.sourceRoot().equals(filePath))
+                .flatMap(diagnostic -> {
+                    CodeActionContextImpl context = CodeActionContextImpl.from(filePath.toUri().toString(),
+                            filePath,
+                            LinePosition.from(24, 8),
+                            document,
+                            compilation.getSemanticModel(documentId.moduleId()),
+                            diagnostic);
+                    return codeActionManager.codeActions(context).stream();
+                })
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(codeActions.size() > 0);
     }
 
     @Test

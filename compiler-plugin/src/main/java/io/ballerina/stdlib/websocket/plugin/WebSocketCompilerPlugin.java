@@ -20,6 +20,9 @@ package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.projects.plugins.CompilerPlugin;
 import io.ballerina.projects.plugins.CompilerPluginContext;
+import io.ballerina.projects.plugins.codeaction.CodeAction;
+
+import java.util.List;
 
 /**
  * This is the compiler plugin for Ballerina WebSocket package.
@@ -28,5 +31,12 @@ public class WebSocketCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new WebSocketServiceAnalyzer());
+        getCodeActions().forEach(compilerPluginContext::addCodeAction);
+    }
+
+    private List<CodeAction> getCodeActions() {
+        return List.of(
+                new AddResourceConfigAnnotation()
+        );
     }
 }
