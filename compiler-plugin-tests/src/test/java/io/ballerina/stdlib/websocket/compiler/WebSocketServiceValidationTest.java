@@ -72,28 +72,6 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
-    public void testMoreThanOneParametersOfResource() {
-        Package currentPackage = loadPackage("sample_package_4");
-        PackageCompilation compilation = currentPackage.getCompilation();
-
-        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
-        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.MORE_THAN_ONE_RESOURCE_PARAM_ERROR);
-    }
-
-    @Test
-    public void testWrongParametersOfResource() {
-        Package currentPackage = loadPackage("sample_package_5");
-        PackageCompilation compilation = currentPackage.getCompilation();
-
-        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
-        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RESOURCE_PARAMETER_ERROR);
-    }
-
-    @Test
     public void testHttpListenerAsWsListener() {
         Package currentPackage = loadPackage("sample_package_6");
         PackageCompilation compilation = currentPackage.getCompilation();

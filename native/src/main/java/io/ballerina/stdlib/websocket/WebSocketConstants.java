@@ -18,8 +18,14 @@
 
 package io.ballerina.stdlib.websocket;
 
+import io.ballerina.runtime.api.PredefinedTypes;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
+
+import static io.ballerina.stdlib.http.api.HttpConstants.ANN_NAME_HEADER;
+import static io.ballerina.stdlib.http.api.HttpConstants.COLON;
 
 /**
  * Constants of WebSocket.
@@ -80,6 +86,8 @@ public class WebSocketConstants {
     public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
     public static final BString CLIENT_HANDSHAKE_TIMEOUT = StringUtils.fromString("handShakeTimeout");
     public static final BString CLIENT_WRITE_TIMEOUT = StringUtils.fromString("writeTimeout");
+    public static final MapType MAP_TYPE = TypeCreator.createMapType(
+            TypeCreator.createArrayType(PredefinedTypes.TYPE_STRING));
 
     public static final String PACKAGE = "ballerina";
     public static final String PROTOCOL_WEBSOCKET = "websocket";
@@ -116,6 +124,10 @@ public class WebSocketConstants {
     public static final String PARAM_TYPE_BOOLEAN = "boolean";
     public static final String PARAM_TYPE_INT = "int";
     public static final String PARAM_TYPE_FLOAT = "float";
+    public static final String PARAM_TYPE_DECIMAL = "decimal";
+    public static final String PARAM_ANNOT_PREFIX = "$param$.";
+    public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
+    public static final String BALLERINA_HTTP_HEADER = "ballerina/http:2:Header";
 
     public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
     public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";
