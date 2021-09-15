@@ -30,11 +30,7 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.NewExpressionNode;
-import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
-import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -80,7 +76,6 @@ public class WebSocketUpgradeServiceValidator {
             }
         });
         if (resourceNode != null) {
-            validateResourceParams(resourceNode);
             validateResourceReturnTypes(resourceNode);
             ReturnStatementNodeVisitor returnStatementNodeVisitor = new ReturnStatementNodeVisitor();
             resourceNode.accept(returnStatementNodeVisitor);
@@ -121,23 +116,6 @@ public class WebSocketUpgradeServiceValidator {
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    private void validateResourceParams(FunctionDefinitionNode resourceNode) {
-        if (resourceNode != null) {
-            SeparatedNodeList<ParameterNode> parameterNodes = resourceNode.functionSignature().parameters();
-            if (parameterNodes.size() > 1) {
-                Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.MORE_THAN_ONE_RESOURCE_PARAM_ERROR,
-                        resourceNode.location());
-            } else if (!parameterNodes.isEmpty()) {
-                RequiredParameterNode requiredParameterNode = (RequiredParameterNode) parameterNodes.get(0);
-                Node parameterTypeName = requiredParameterNode.typeName();
-                if (!parameterTypeName.toString().contains(PluginConstants.HTTP_REQUEST)) {
-                    Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RESOURCE_PARAMETER_ERROR,
-                            resourceNode.location(), PluginConstants.HTTP_REQUEST);
                 }
             }
         }
