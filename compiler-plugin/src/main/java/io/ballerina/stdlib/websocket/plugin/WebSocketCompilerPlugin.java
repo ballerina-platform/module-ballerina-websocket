@@ -36,7 +36,7 @@ public class WebSocketCompilerPlugin extends CompilerPlugin {
 
     private List<CodeAction> getCodeActions() {
         return List.of(
-                new AddResourceConfigAnnotation()
+                new AddWebSocketCodeTemplate()
         );
     }
 }

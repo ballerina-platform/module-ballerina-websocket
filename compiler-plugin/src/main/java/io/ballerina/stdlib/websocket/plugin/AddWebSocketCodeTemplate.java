@@ -42,12 +42,12 @@ import java.util.Optional;
 import org.wso2.ballerinalang.compiler.diagnostic.properties.NonCatProperty;
 
 /**
- * This is the compiler plugin for Ballerina WebSocket package.
+ * Code action to add resource config to a resource method.
  */
-public class AddResourceConfigAnnotation implements CodeAction {
+public class AddWebSocketCodeTemplate implements CodeAction {
     @Override
     public List<String> supportedDiagnosticCodes() {
-        return List.of(PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_IN_RESOURCE.getErrorCode());
+        return List.of(PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode());
     }
 
     @Override
@@ -67,7 +67,7 @@ public class AddResourceConfigAnnotation implements CodeAction {
 
         CodeActionArgument locationArg = CodeActionArgument.from("node.location",
                 functionDefinitionNode.location().lineRange());
-        return Optional.of(CodeActionInfo.from("Add `http:ResourceConfig` annotation", List.of(locationArg)));
+        return Optional.of(CodeActionInfo.from("Add websocket resource code snippet", List.of(locationArg)));
         //return Optional.empty();
     }
 
