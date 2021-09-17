@@ -97,9 +97,18 @@ public class AddWebSocketCodeTemplate implements CodeAction {
 
         List<TextEdit> textEdits = new ArrayList<>();
 
-        String insertText = "resource function get .() {\n}";
-        TextRange textRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(), 0);
-        textEdits.add(TextEdit.from(textRange, insertText));
+        String insertResourceText = "\n\tresource function get .() returns websocket:Service|websocket:Error"
+                + "{\n\t\treturn new WsService(); \n\t}\n";
+        TextRange resourceTextRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(), 0);
+        String insertWsServiceText = "\n\nservice class WsService {\n" +
+                "    *websocket:Service;\n" +
+                "    remote isolated function onTextMessage(websocket:Caller caller,\n" +
+                "                                 string text) returns websocket:Error? {\n" +
+                "    }\n" +
+                "}";
+        TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange().endOffset(), 0);
+        textEdits.add(TextEdit.from(resourceTextRange, insertResourceText));
+        textEdits.add(TextEdit.from(insertWsServiceTextRange, insertWsServiceText));
         TextDocumentChange change = TextDocumentChange.from(textEdits.toArray(new TextEdit[0]));
         return Collections.singletonList(new DocumentEdit(codeActionExecutionContext.fileUri(),
                 SyntaxTree.from(syntaxTree, change)));
@@ -107,7 +116,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
 
     @Override
     public String name() {
-        return "ADD_RESOURCE_CONFIG_ANNOTATION";
+        return "ADD_RESOURCE_CODE_SNIPPET";
     }
 
     public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {
