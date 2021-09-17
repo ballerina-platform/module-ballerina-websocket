@@ -27,10 +27,11 @@ import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
 import io.ballerina.stdlib.websocket.plugin.PluginConstants;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * This is the compiler plugin for Ballerina WebSocket package.
@@ -56,8 +57,6 @@ public class WebSocketServiceValidationTest {
     public void testCodeActions() {
         Path projectRoot = RESOURCE_DIRECTORY.resolve("sample_package_37");
         BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectRoot);
-
-        Path filePath = projectRoot.resolve("service.bal");
 
         Package currentPackage = project.currentPackage();
         PackageCompilation compilation = currentPackage.getCompilation();
