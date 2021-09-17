@@ -81,7 +81,8 @@ public class PluginConstants {
         FUNCTION_NOT_ACCEPTED_BY_THE_SERVICE("Function `{0}` not accepted by the service",
                 "WEBSOCKET_105"),
         INVALID_LISTENER_INIT_PARAMS("`websocket:ListenerConfiguration` not allowed with `http:Listener` "
-                + "as the `websocket:Listener` ", "WEBSOCKET_106");
+                + "as the `websocket:Listener` ", "WEBSOCKET_106"),
+        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107");;
 
         private final String error;
         private final String errorCode;

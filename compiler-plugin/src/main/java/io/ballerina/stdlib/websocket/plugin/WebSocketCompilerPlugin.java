@@ -28,5 +28,6 @@ public class WebSocketCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new WebSocketServiceAnalyzer());
+        compilerPluginContext.addCodeAction(new AddWebSocketCodeTemplate());
     }
 }
