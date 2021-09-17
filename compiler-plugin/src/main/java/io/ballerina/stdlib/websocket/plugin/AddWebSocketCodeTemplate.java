@@ -35,11 +35,12 @@ import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocumentChange;
 import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
+import org.wso2.ballerinalang.compiler.diagnostic.properties.NonCatProperty;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.wso2.ballerinalang.compiler.diagnostic.properties.NonCatProperty;
 
 /**
  * Code action to add resource config to a resource method.
@@ -99,14 +100,16 @@ public class AddWebSocketCodeTemplate implements CodeAction {
 
         String insertResourceText = "\n\tresource function get .() returns websocket:Service|websocket:Error"
                 + "{\n\t\treturn new WsService(); \n\t}\n";
-        TextRange resourceTextRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(), 0);
+        TextRange resourceTextRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(),
+                0);
         String insertWsServiceText = "\n\nservice class WsService {\n" +
                 "    *websocket:Service;\n" +
                 "    remote isolated function onTextMessage(websocket:Caller caller,\n" +
                 "                                 string text) returns websocket:Error? {\n" +
                 "    }\n" +
                 "}";
-        TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange().endOffset(), 0);
+        TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange()
+                .endOffset(), 0);
         textEdits.add(TextEdit.from(resourceTextRange, insertResourceText));
         textEdits.add(TextEdit.from(insertWsServiceTextRange, insertWsServiceText));
         TextDocumentChange change = TextDocumentChange.from(textEdits.toArray(new TextEdit[0]));
