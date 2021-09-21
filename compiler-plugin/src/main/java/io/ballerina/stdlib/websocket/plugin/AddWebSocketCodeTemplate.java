@@ -71,7 +71,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
 
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
                 serviceDeclarationNode.location().lineRange());
-        return Optional.of(CodeActionInfo.from("Add WebSocket resource code snippet", List.of(locationArg)));
+        return Optional.of(CodeActionInfo.from("Add resource", List.of(locationArg)));
     }
 
     @Override
