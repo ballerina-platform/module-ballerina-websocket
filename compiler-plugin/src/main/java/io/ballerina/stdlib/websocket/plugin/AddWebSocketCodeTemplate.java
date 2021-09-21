@@ -43,9 +43,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Code action to add resource config to a resource method.
+ * Code action to add resource code snippet.
  */
 public class AddWebSocketCodeTemplate implements CodeAction {
+
+    public static final String NODE_LOCATION = "node.location";
+
     @Override
     public List<String> supportedDiagnosticCodes() {
         return List.of(PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode());
@@ -64,10 +67,10 @@ public class AddWebSocketCodeTemplate implements CodeAction {
             return Optional.empty();
         }
 
-        ServiceDeclarationNode functionDefinitionNode = (ServiceDeclarationNode) diagnosticProperty.value();
+        ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) diagnosticProperty.value();
 
-        CodeActionArgument locationArg = CodeActionArgument.from("node.location",
-                functionDefinitionNode.location().lineRange());
+        CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
+                serviceDeclarationNode.location().lineRange());
         return Optional.of(CodeActionInfo.from("Add WebSocket resource code snippet", List.of(locationArg)));
     }
 
@@ -75,7 +78,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
     public List<DocumentEdit> execute(CodeActionExecutionContext codeActionExecutionContext) {
         LineRange lineRange = null;
         for (CodeActionArgument argument : codeActionExecutionContext.arguments()) {
-            if ("node.location".equals(argument.key())) {
+            if (NODE_LOCATION.equals(argument.key())) {
                 lineRange = argument.valueAs(LineRange.class);
             }
         }
