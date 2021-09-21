@@ -94,10 +94,6 @@ public class AddWebSocketCodeTemplate implements CodeAction {
         }
 
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
-        if (serviceDeclarationNode.metadata().isPresent() &&
-                !serviceDeclarationNode.metadata().get().annotations().isEmpty()) {
-            return Collections.emptyList();
-        }
 
         List<TextEdit> textEdits = new ArrayList<>();
 
@@ -106,10 +102,10 @@ public class AddWebSocketCodeTemplate implements CodeAction {
         TextRange resourceTextRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(),
                 0);
         String insertWsServiceText = "\n\nservice class WsService {\n" +
-                "    *websocket:Service;\n" +
-                "    remote isolated function onTextMessage(websocket:Caller caller,\n" +
-                "                                 string text) returns websocket:Error? {\n" +
-                "    }\n" +
+                "\t*websocket:Service;\n" +
+                "\tremote isolated function onTextMessage(websocket:Caller caller, string text)\n" +
+                "\t\t\t\t\t\t\t\treturns websocket:Error? {\n" +
+                "\t}\n" +
                 "}";
         TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange()
                 .endOffset(), 0);
