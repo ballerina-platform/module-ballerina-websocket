@@ -60,7 +60,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.0.0"
+version = "2.0.31"
 transitive = false
 dependencies = [
 	{org = "ballerina", name = "auth"},
