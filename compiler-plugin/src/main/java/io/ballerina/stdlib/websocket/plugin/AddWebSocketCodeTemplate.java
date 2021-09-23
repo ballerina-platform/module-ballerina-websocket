@@ -48,6 +48,15 @@ import java.util.Optional;
 public class AddWebSocketCodeTemplate implements CodeAction {
 
     public static final String NODE_LOCATION = "node.location";
+    public static final String RESOURCE_TEXT = "\n\tresource function get .() returns " +
+            "websocket:Service|websocket:Error " +
+            "{\n\t\treturn new WsService(); \n\t}\n";
+    public static final String SERVICE_TEXT = "\n\nservice class WsService {\n" +
+            "\t*websocket:Service;\n\n" +
+            "\tremote isolated function onTextMessage(websocket:Caller caller, string text) " +
+            "returns websocket:Error? {\n" +
+            "\t}\n" +
+            "}";
 
     @Override
     public List<String> supportedDiagnosticCodes() {
@@ -97,20 +106,12 @@ public class AddWebSocketCodeTemplate implements CodeAction {
 
         List<TextEdit> textEdits = new ArrayList<>();
 
-        String insertResourceText = "\n\tresource function get .() returns websocket:Service|websocket:Error"
-                + "{\n\t\treturn new WsService(); \n\t}\n";
         TextRange resourceTextRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(),
                 0);
-        String insertWsServiceText = "\n\nservice class WsService {\n" +
-                "\t*websocket:Service;\n" +
-                "\tremote isolated function onTextMessage(websocket:Caller caller, string text)\n" +
-                "\t\t\t\t\t\t\t\treturns websocket:Error? {\n" +
-                "\t}\n" +
-                "}";
         TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange()
                 .endOffset(), 0);
-        textEdits.add(TextEdit.from(resourceTextRange, insertResourceText));
-        textEdits.add(TextEdit.from(insertWsServiceTextRange, insertWsServiceText));
+        textEdits.add(TextEdit.from(resourceTextRange, RESOURCE_TEXT));
+        textEdits.add(TextEdit.from(insertWsServiceTextRange, SERVICE_TEXT));
         TextDocumentChange change = TextDocumentChange.from(textEdits.toArray(new TextEdit[0]));
         return Collections.singletonList(new DocumentEdit(codeActionExecutionContext.fileUri(),
                 SyntaxTree.from(syntaxTree, change)));
