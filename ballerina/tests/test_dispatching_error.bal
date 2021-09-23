@@ -56,7 +56,7 @@ public function testDispatchingErrorOnTextMessage() returns Error? {
 }
 
 // Tests dispatching error onBinaryMessage
-@test:Config {}
+@test:Config {enable: false}
 public function testDispatchingErrorOnBinaryMessage() returns Error? {
     Client wsClient = check new ("ws://localhost:21072/onDispatchError/");
     byte[] data = [5, 24, 56, 45];
