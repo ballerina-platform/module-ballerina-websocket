@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.http.api.nativeimpl.ModuleUtils;
 
 import static io.ballerina.stdlib.http.api.HttpConstants.ANN_NAME_HEADER;
 import static io.ballerina.stdlib.http.api.HttpConstants.COLON;
@@ -127,7 +128,7 @@ public class WebSocketConstants {
     public static final String PARAM_TYPE_DECIMAL = "decimal";
     public static final String PARAM_ANNOT_PREFIX = "$param$.";
     public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
-    public static final String BALLERINA_HTTP_HEADER = "ballerina/http:2:Header";
+    public static final String BALLERINA_HTTP_HEADER = ModuleUtils.getHttpPackageIdentifier() + COLON + ANN_NAME_HEADER;
 
     public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
     public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";
