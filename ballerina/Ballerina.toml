@@ -1,11 +1,11 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "2.0.0"
+version = "2.0.11"
 distribution = "slbeta3"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/websocket-native-2.0.0-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.0.11.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/http-native-2.0.0-20210922-184100-3dd04cb.jar"
@@ -38,5 +38,5 @@ path = "./lib/netty-codec-4.1.65.Final.jar"
 path = "./lib/netty-handler-proxy-4.1.65.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.0.0-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.0.11.jar"
 scope = "testOnly"
