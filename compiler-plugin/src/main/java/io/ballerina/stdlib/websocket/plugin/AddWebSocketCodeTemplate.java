@@ -29,13 +29,11 @@ import io.ballerina.projects.plugins.codeaction.CodeActionExecutionContext;
 import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.projects.plugins.codeaction.DocumentEdit;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticProperty;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocumentChange;
 import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
-import org.wso2.ballerinalang.compiler.diagnostic.properties.NonCatProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,20 +64,11 @@ public class AddWebSocketCodeTemplate implements CodeAction {
     @Override
     public Optional<CodeActionInfo> codeActionInfo(CodeActionContext codeActionContext) {
         Diagnostic diagnostic = codeActionContext.diagnostic();
-        List<DiagnosticProperty<?>> properties = diagnostic.properties();
-        if (properties.isEmpty()) {
+        if (diagnostic.location() == null) {
             return Optional.empty();
         }
-        DiagnosticProperty<?> diagnosticProperty = properties.get(0);
-        if (!(diagnosticProperty instanceof NonCatProperty) ||
-                !(diagnosticProperty.value() instanceof ServiceDeclarationNode)) {
-            return Optional.empty();
-        }
-
-        ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) diagnosticProperty.value();
-
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
-                serviceDeclarationNode.location().lineRange());
+                diagnostic.location().lineRange());
         return Optional.of(CodeActionInfo.from("Add resource", List.of(locationArg)));
     }
 

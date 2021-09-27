@@ -38,7 +38,6 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
-import org.wso2.ballerinalang.compiler.diagnostic.properties.NonCatProperty;
 
 import java.util.List;
 
@@ -64,8 +63,7 @@ public class WebSocketUpgradeServiceValidator {
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode(),
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getError(),
                     DiagnosticSeverity.INTERNAL);
-            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location(),
-                    List.of(new NonCatProperty(serviceDeclarationNode))));
+            ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, serviceDeclarationNode.location()));
         }
         if (serviceDeclarationNode.members().size() > 1) {
             int numResources = (int) serviceDeclarationNode.members().stream()
