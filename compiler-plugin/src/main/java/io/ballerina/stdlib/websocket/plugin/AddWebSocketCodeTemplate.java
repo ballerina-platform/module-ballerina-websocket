@@ -48,7 +48,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
     public static final String NODE_LOCATION = "node.location";
     public static final String RESOURCE_TEXT = "\n\tresource function get .() returns " +
             "websocket:Service|websocket:Error " +
-            "{\n\t\treturn new WsService(); \n\t}\n";
+            "{\n\t\treturn new WsService();\n\t}\n";
     public static final String SERVICE_TEXT = "\n\nservice class WsService {\n" +
             "\t*websocket:Service;\n\n" +
             "\tremote isolated function onTextMessage(websocket:Caller caller, string text) " +
