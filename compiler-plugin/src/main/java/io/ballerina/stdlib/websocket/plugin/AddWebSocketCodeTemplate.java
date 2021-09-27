@@ -46,14 +46,15 @@ import java.util.Optional;
 public class AddWebSocketCodeTemplate implements CodeAction {
 
     public static final String NODE_LOCATION = "node.location";
-    public static final String RESOURCE_TEXT = "\n\tresource function get .() returns " +
+    public static final String LS = System.lineSeparator();
+    public static final String RESOURCE_TEXT = LS + "\tresource function get .() returns " +
             "websocket:Service|websocket:Error " +
-            "{\n\t\treturn new WsService();\n\t}\n";
-    public static final String SERVICE_TEXT = "\n\nservice class WsService {\n" +
-            "\t*websocket:Service;\n\n" +
+            "{" + LS + "\t\treturn new WsService();" + LS + "\t}" + LS;
+    public static final String SERVICE_TEXT = LS + LS + "service class WsService {" + LS +
+            "\t*websocket:Service;" + LS + LS +
             "\tremote isolated function onTextMessage(websocket:Caller caller, string text) " +
-            "returns websocket:Error? {\n" +
-            "\t}\n" +
+            "returns websocket:Error? {"  + LS +
+            "\t}" + LS +
             "}";
 
     @Override
