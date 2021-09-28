@@ -54,6 +54,19 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testCodeActions() {
+        Path projectRoot = RESOURCE_DIRECTORY.resolve("sample_package_37");
+        BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectRoot);
+
+        Package currentPackage = project.currentPackage();
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT);
+    }
+
+    @Test
     public void testParametersOfResource() {
         Package currentPackage = loadPackage("sample_package_2");
         PackageCompilation compilation = currentPackage.getCompilation();
