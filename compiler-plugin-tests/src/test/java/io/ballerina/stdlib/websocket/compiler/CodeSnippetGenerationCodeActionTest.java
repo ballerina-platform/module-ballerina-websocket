@@ -60,7 +60,7 @@ public class CodeSnippetGenerationCodeActionTest extends AbstractCodeActionTest 
         LineRange lineRange = LineRange.from("service.bal", LinePosition.from(2, 0),
                 LinePosition.from(2, 47));
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION, lineRange);
-        CodeActionInfo codeAction = CodeActionInfo.from("Add resource", List.of(locationArg));
+        CodeActionInfo codeAction = CodeActionInfo.from("Insert service template", List.of(locationArg));
         codeAction.setProviderName("WEBSOCKET_107/ballerina/websocket/ADD_RESOURCE_CODE_SNIPPET");
         return codeAction;
     }

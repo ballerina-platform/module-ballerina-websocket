@@ -70,7 +70,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
         }
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
                 diagnostic.location().lineRange());
-        return Optional.of(CodeActionInfo.from("Add resource", List.of(locationArg)));
+        return Optional.of(CodeActionInfo.from("Insert service template", List.of(locationArg)));
     }
 
     @Override
