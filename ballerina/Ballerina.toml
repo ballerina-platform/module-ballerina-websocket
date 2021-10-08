@@ -8,10 +8,10 @@ distribution = "slbeta3"
 path = "../native/build/libs/websocket-native-2.0.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-2.0.0-20211007-231200-c19485f.jar"
+path = "./lib/http-native-2.0.0-20211004-211500-40ce81a.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/mime-native-2.0.0-20211007-222300-16f9d0a.jar"
+path = "./lib/mime-native-2.0.0-20211004-202800-4ac2016.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/netty-common-4.1.68.Final.jar"
