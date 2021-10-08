@@ -8,34 +8,34 @@ distribution = "slbeta3"
 path = "../native/build/libs/websocket-native-2.0.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-2.0.0-20210924-102300-61e4522.jar"
+path = "./lib/http-native-2.0.0-20211004-211500-40ce81a.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/mime-native-2.0.0-20210924-084000-2150f38.jar"
+path = "./lib/mime-native-2.0.0-20211004-202800-4ac2016.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-common-4.1.65.Final.jar"
+path = "./lib/netty-common-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-buffer-4.1.65.Final.jar"
+path = "./lib/netty-buffer-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-transport-4.1.65.Final.jar"
+path = "./lib/netty-transport-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-resolver-4.1.65.Final.jar"
+path = "./lib/netty-resolver-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-handler-4.1.65.Final.jar"
+path = "./lib/netty-handler-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-http-4.1.65.Final.jar"
+path = "./lib/netty-codec-http-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-4.1.65.Final.jar"
+path = "./lib/netty-codec-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-handler-proxy-4.1.65.Final.jar"
+path = "./lib/netty-handler-proxy-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
 path = "../test-utils/build/libs/websocket-test-utils-2.0.0-SNAPSHOT.jar"
