@@ -36,6 +36,8 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,12 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
 
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
+        List<Diagnostic> diagnostics = ctx.semanticModel().diagnostics();
+        for (Diagnostic diagnostic : diagnostics) {
+            if (Utils.equals(diagnostic.diagnosticInfo().severity().name(), String.valueOf(DiagnosticSeverity.ERROR))) {
+                return;
+            }
+        }
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
 
         String modulePrefix = Utils.getPrefix(ctx);

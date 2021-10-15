@@ -22,6 +22,10 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.TypeReferenceNode;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+
+import java.util.List;
 
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.SERVICE;
 
@@ -31,6 +35,12 @@ import static io.ballerina.stdlib.websocket.plugin.PluginConstants.SERVICE;
 public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAnalysisContext> {
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
+        List<Diagnostic> diagnostics = syntaxNodeAnalysisContext.semanticModel().diagnostics();
+        for (Diagnostic diagnostic : diagnostics) {
+            if (Utils.equals(diagnostic.diagnosticInfo().severity().name(), String.valueOf(DiagnosticSeverity.ERROR))) {
+                return;
+            }
+        }
         ClassDefinitionNode classDefNode = (ClassDefinitionNode) syntaxNodeAnalysisContext.node();
         String modulePrefix = Utils.getPrefix(syntaxNodeAnalysisContext);
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.TYPE_REFERENCE).forEach(node -> {
