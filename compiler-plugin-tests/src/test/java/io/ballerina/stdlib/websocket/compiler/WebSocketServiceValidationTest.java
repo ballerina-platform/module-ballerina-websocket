@@ -83,6 +83,19 @@ public class WebSocketServiceValidationTest {
 //    }
 
     @Test
+    public void testCodeActions() {
+        Path projectRoot = RESOURCE_DIRECTORY.resolve("sample_package_37");
+        BuildProject project = BuildProject.load(getEnvironmentBuilder(), projectRoot);
+
+        Package currentPackage = project.currentPackage();
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT);
+    }
+
+    @Test
     public void testParametersOfResource() {
         Package currentPackage = loadPackage("sample_package_2");
         PackageCompilation compilation = currentPackage.getCompilation();
@@ -98,28 +111,6 @@ public class WebSocketServiceValidationTest {
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.diagnostics().size(), 0);
-    }
-
-    @Test
-    public void testMoreThanOneParametersOfResource() {
-        Package currentPackage = loadPackage("sample_package_4");
-        PackageCompilation compilation = currentPackage.getCompilation();
-
-        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
-        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.MORE_THAN_ONE_RESOURCE_PARAM_ERROR);
-    }
-
-    @Test
-    public void testWrongParametersOfResource() {
-        Package currentPackage = loadPackage("sample_package_5");
-        PackageCompilation compilation = currentPackage.getCompilation();
-
-        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.diagnostics().size(), 1);
-        Diagnostic diagnostic = (Diagnostic) diagnosticResult.diagnostics().toArray()[0];
-        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_RESOURCE_PARAMETER_ERROR);
     }
 
     @Test

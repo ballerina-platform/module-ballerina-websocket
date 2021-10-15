@@ -18,9 +18,9 @@
 
 package io.ballerina.stdlib.websocket.plugin;
 
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.plugins.codeaction.CodeAction;
 import io.ballerina.projects.plugins.codeaction.CodeActionArgument;
@@ -29,22 +29,34 @@ import io.ballerina.projects.plugins.codeaction.CodeActionExecutionContext;
 import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.projects.plugins.codeaction.DocumentEdit;
 import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticProperty;
 import io.ballerina.tools.text.LineRange;
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocumentChange;
 import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.wso2.ballerinalang.compiler.diagnostic.properties.NonCatProperty;
 
 /**
- * Code action to add resource config to a resource method.
+ * Code action to add resource code snippet.
  */
 public class AddWebSocketCodeTemplate implements CodeAction {
+
+    public static final String NODE_LOCATION = "node.location";
+    public static final String LS = System.lineSeparator();
+    public static final String RESOURCE_TEXT = LS + "\tresource function get .() returns " +
+            "websocket:Service|websocket:Error " +
+            "{" + LS + "\t\treturn new WsService();" + LS + "\t}" + LS;
+    public static final String SERVICE_TEXT = LS + LS + "service class WsService {" + LS +
+            "\t*websocket:Service;" + LS + LS +
+            "\tremote isolated function onTextMessage(websocket:Caller caller, string text) " +
+            "returns websocket:Error? {"  + LS +
+            "\t}" + LS +
+            "}";
+
     @Override
     public List<String> supportedDiagnosticCodes() {
         return List.of(PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode());
@@ -53,29 +65,19 @@ public class AddWebSocketCodeTemplate implements CodeAction {
     @Override
     public Optional<CodeActionInfo> codeActionInfo(CodeActionContext codeActionContext) {
         Diagnostic diagnostic = codeActionContext.diagnostic();
-        List<DiagnosticProperty<?>> properties = diagnostic.properties();
-        if (properties.isEmpty()) {
+        if (diagnostic.location() == null) {
             return Optional.empty();
         }
-        DiagnosticProperty<?> diagnosticProperty = properties.get(0);
-        if (!(diagnosticProperty instanceof NonCatProperty) ||
-                !(diagnosticProperty.value() instanceof FunctionDefinitionNode)) {
-            return Optional.empty();
-        }
-
-        FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) diagnosticProperty.value();
-
-        CodeActionArgument locationArg = CodeActionArgument.from("node.location",
-                functionDefinitionNode.location().lineRange());
-        return Optional.of(CodeActionInfo.from("Add websocket resource code snippet", List.of(locationArg)));
-        //return Optional.empty();
+        CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
+                diagnostic.location().lineRange());
+        return Optional.of(CodeActionInfo.from("Insert service template", List.of(locationArg)));
     }
 
     @Override
     public List<DocumentEdit> execute(CodeActionExecutionContext codeActionExecutionContext) {
         LineRange lineRange = null;
         for (CodeActionArgument argument : codeActionExecutionContext.arguments()) {
-            if ("node.location".equals(argument.key())) {
+            if (NODE_LOCATION.equals(argument.key())) {
                 lineRange = argument.valueAs(LineRange.class);
             }
         }
@@ -86,30 +88,28 @@ public class AddWebSocketCodeTemplate implements CodeAction {
 
         SyntaxTree syntaxTree = codeActionExecutionContext.currentDocument().syntaxTree();
         NonTerminalNode node = findNode(syntaxTree, lineRange);
-        if (!(node instanceof FunctionDefinitionNode)) {
+        if (!(node instanceof ServiceDeclarationNode)) {
             return Collections.emptyList();
         }
 
-        FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
-        if (functionDefinitionNode.metadata().isPresent() &&
-                !functionDefinitionNode.metadata().get().annotations().isEmpty()) {
-            return Collections.emptyList();
-        }
+        ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) node;
 
         List<TextEdit> textEdits = new ArrayList<>();
 
-        String insertText = "@http:ResourceConfig {}" +
-                System.lineSeparator() +
-                " ".repeat(Math.max(0, functionDefinitionNode.lineRange().startLine().offset()));
-        TextRange textRange = TextRange.from(functionDefinitionNode.textRange().startOffset(), 0);
-        textEdits.add(TextEdit.from(textRange, insertText));
+        TextRange resourceTextRange = TextRange.from(serviceDeclarationNode.openBraceToken().textRange().endOffset(),
+                0);
+        TextRange insertWsServiceTextRange = TextRange.from(serviceDeclarationNode.closeBraceToken().textRange()
+                .endOffset(), 0);
+        textEdits.add(TextEdit.from(resourceTextRange, RESOURCE_TEXT));
+        textEdits.add(TextEdit.from(insertWsServiceTextRange, SERVICE_TEXT));
         TextDocumentChange change = TextDocumentChange.from(textEdits.toArray(new TextEdit[0]));
-        return Collections.singletonList(new DocumentEdit(codeActionExecutionContext.fileUri(), SyntaxTree.from(syntaxTree, change)));
+        return Collections.singletonList(new DocumentEdit(codeActionExecutionContext.fileUri(),
+                SyntaxTree.from(syntaxTree, change)));
     }
 
     @Override
     public String name() {
-        return "ADD_RESOURCE_CONFIG_ANNOTATION";
+        return "ADD_RESOURCE_CODE_SNIPPET";
     }
 
     public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {
