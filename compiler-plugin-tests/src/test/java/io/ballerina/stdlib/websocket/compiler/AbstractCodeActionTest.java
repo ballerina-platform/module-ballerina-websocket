@@ -114,7 +114,7 @@ public abstract class AbstractCodeActionTest {
                             document,
                             compilation.getSemanticModel(documentId.moduleId()),
                             diagnostic);
-                    return codeActionManager.codeActions(context).stream();
+                    return codeActionManager.codeActions(context).getCodeActions().stream();
                 })
                 .collect(Collectors.toList());
     }
