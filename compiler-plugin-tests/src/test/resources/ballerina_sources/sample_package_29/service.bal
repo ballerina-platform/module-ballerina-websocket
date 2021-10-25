@@ -17,5 +17,6 @@ service isolated class WsService {
     }
 
     remote function onError(error err) returns error? {
+        return ();
     }
 }

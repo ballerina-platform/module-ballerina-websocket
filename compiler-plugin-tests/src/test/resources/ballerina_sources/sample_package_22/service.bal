@@ -11,6 +11,7 @@ service /basic/ws on hl {
 service isolated class WsService {
     *websocket:Service;
     remote function onError(websocket:Caller caller, string 'err) returns error? {
+        return ();
     }
 
     remote function onIdleTimeout(websocket:Caller caller, string text) {

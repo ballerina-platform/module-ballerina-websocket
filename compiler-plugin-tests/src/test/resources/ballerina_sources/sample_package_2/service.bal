@@ -34,5 +34,6 @@ service isolated class WsService {
     }
 
     remote function onTextMessage(string text) returns byte[]? {
+        return ();
     }
 }

@@ -11,8 +11,10 @@ service /basic/ws on hl {
 service isolated class WsService {
     *ws:Service;
     remote function onOpen(ws:Caller caller) returns ws:Error? {
+        return ();
     }
 
     remote function onClose(string message, int status) returns ws:Error? {
+        return ();
     }
 }

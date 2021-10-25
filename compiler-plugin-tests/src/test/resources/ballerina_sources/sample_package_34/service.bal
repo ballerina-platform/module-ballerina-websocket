@@ -36,11 +36,12 @@ service isolated class WsService {
     }
 
     remote function onTextMessage(websocket:Caller caller, string text) returns error? {
+        return ();
     }
 }
 
 service /helloWorld on hl {
     resource function get hello(http:Caller caller, http:Request req) returns error? {
-        check caller->respond("Hello World!");
+        return caller->respond("Hello World!");
     }
 }
