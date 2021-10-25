@@ -23,7 +23,6 @@ service /onPanic on l75 {
         if (true) {
            panic error("panic from the service");
         }
-        return new WsService75();
     }
 }
 
