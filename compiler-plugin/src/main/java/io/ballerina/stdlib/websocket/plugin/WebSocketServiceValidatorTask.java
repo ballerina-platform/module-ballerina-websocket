@@ -37,7 +37,7 @@ public class WebSocketServiceValidatorTask implements AnalysisTask<SyntaxNodeAna
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         List<Diagnostic> diagnostics = syntaxNodeAnalysisContext.semanticModel().diagnostics();
         for (Diagnostic diagnostic : diagnostics) {
-            if (Utils.equals(diagnostic.diagnosticInfo().severity().name(), String.valueOf(DiagnosticSeverity.ERROR))) {
+            if (diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR) {
                 return;
             }
         }
