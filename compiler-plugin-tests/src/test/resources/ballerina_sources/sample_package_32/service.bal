@@ -10,6 +10,7 @@ service /basic/ws on hl {
 
 service isolated class WsService {
     remote function onError(websocket:Caller caller) returns websocket:Error? {
+        return ();
     }
 
     remote function onIdleTimeout(websocket:Client caller) returns string {
@@ -17,5 +18,6 @@ service isolated class WsService {
     }
 
     remote function onTextMessage(websocket:Caller caller, int status) returns websocket:Error? {
+        return ();
     }
 }

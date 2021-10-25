@@ -33,6 +33,7 @@ isolated function initClientAuth(ClientConfiguration config) returns AuthError? 
     } else {
         check handleClientOAuth2(authConfig, config);
     }
+    return ();
 }
 
 isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientConfiguration clientConfig)
@@ -44,6 +45,7 @@ isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientCo
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, jwtToken);
     }
+    return ();
 }
 
 isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfiguration clientConfig)
@@ -55,6 +57,7 @@ isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfigur
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BASIC, basicAuthToken);
     }
+    return ();
 }
 
 isolated function handleClientBearerTokenAuth(BearerTokenConfig config, ClientConfiguration clientConfig) {
@@ -70,6 +73,7 @@ isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientConfigurati
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, oauthToken);
     }
+    return ();
 }
 
 isolated function setAuthHeader(ClientConfiguration clientConfig, string authScheme, string token) {
