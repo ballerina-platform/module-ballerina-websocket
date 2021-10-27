@@ -1,5 +1,10 @@
+import ballerina/http;
 import ballerina/websocket;
 
-service /foo on new websocket:Listener(9090) returns websocket:Service|error {
-    return new WsService();
+listener websocket:Listener securedEP = new(9090);
+
+service /foo on securedEP {
+    resource function get bar(http:Request req) returns websocket:Service|websocket:AuthError {
+        return new WsService();
+    }
 }
