@@ -23,7 +23,7 @@ apply plugin: 'java'
 description = 'Ballerina - WebSocket Examples'
 
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
-def examples = ["chat-application/client", "chat-application/server"]
+def examples = ["chat-application/client", "chat-application/server", "taxi-service-management/server", "taxi-service-management/rider", "taxi-service-management/driver"]
 
 dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
