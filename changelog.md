@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- [Introduce readMessage Client API](https://github.com/ballerina-platform/ballerina-standard-library/issues/1180)
+
+## [1.2.0-beta.3] - 2021-10-10
+
+### Added
 - [Introduce write time out for WebSocket client](https://github.com/ballerina-platform/ballerina-standard-library/issues/1609)
 - [Add OAuth2 JWT bearer grant type support](https://github.com/ballerina-platform/ballerina-standard-library/issues/1788)
 - [Implement retry for WebSocket client](https://github.com/ballerina-platform/ballerina-standard-library/issues/1715)
