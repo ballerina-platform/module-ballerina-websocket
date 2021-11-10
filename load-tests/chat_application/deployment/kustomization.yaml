@@ -1,0 +1,10 @@
+resources:
+  - chat_application.yaml
+  - ingress.yaml
+patches:
+- path: deployment-patch.yaml
+  target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: chat-application-deployment
