@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'load-tests/'
+      - 'load-tests/**'
   workflow_dispatch:
 
 jobs:
