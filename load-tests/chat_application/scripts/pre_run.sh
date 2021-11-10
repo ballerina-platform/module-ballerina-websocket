@@ -19,5 +19,5 @@
 set -e
 
 echo "----------Downloading websocket plugin tool----------"
-wget https://bitbucket.org/pjtr/jmeter-websocket-samplers/downloads/JMeterWebSocketSamplers-1.2.8.jar
+wget -O JMeterWebSocketSamplers-1.2.8.jar https://bitbucket.org/pjtr/jmeter-websocket-samplers/downloads/JMeterWebSocketSamplers-1.2.8.jar
 cp JMeterWebSocketSamplers-1.2.8.jar /opt/base-image/apache-jmeter-5.4/bin/ext
