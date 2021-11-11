@@ -6,6 +6,8 @@ on:
       - main
     paths-ignore:
       - 'load-tests/**'
+      - '*.md'
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
