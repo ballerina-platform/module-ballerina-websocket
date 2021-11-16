@@ -24,11 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 
-import static io.ballerina.stdlib.websocket.WebSocketConstants.WSS_ENDPOINT_STARTED;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.WSS_ENDPOINT_STOPPED;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.WS_ENDPOINT_STARTED;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.WS_ENDPOINT_STOPPED;
-
 /**
  * An implementation of the LifeCycleEventListener. This can be used to listen to the WebSocket connector
  * life cycle events.
@@ -39,20 +34,12 @@ public class WebSocketConnectorPortBindingListener implements PortBindingEventLi
 
     @Override
     public void onOpen(String serverConnectorId, boolean wss) {
-        if (wss) {
-            console.println(WSS_ENDPOINT_STARTED + serverConnectorId);
-        } else {
-            console.println(WS_ENDPOINT_STARTED + serverConnectorId);
-        }
+
     }
 
     @Override
     public void onClose(String serverConnectorId, boolean wss) {
-        if (wss) {
-            console.println(WSS_ENDPOINT_STOPPED + serverConnectorId);
-        } else {
-            console.println(WS_ENDPOINT_STOPPED + serverConnectorId);
-        }
+
     }
 
     @Override
