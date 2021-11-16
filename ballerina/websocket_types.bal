@@ -15,7 +15,7 @@
 // under the License.
 
 # The WebSocket service type
-public type Service service object {
+public type Service distinct service object {
 };
 
 # The WebSocket service type to handle ping/pong frames
