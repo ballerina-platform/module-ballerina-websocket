@@ -9,6 +9,8 @@ service /basic/ws on hl {
 }
 
 service isolated class WsService {
+    *websocket:Service;
+
     remote function onOpen(websocket:Caller caller, string xyz) returns websocket:Error? {
         return ();
     }
