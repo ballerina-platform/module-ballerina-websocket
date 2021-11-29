@@ -17,6 +17,8 @@ service /basic/ws on hl {
 }
 
 service isolated class WsService {
+    *websocket:Service;
+
     remote function onClose(websocket:Caller caller, string message, int status, int status2) {
     }
 

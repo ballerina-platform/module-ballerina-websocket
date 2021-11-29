@@ -203,6 +203,14 @@ public isolated client class Client {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
+    # Reads data from the WebSocket connection
+    #
+    # + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
+    #            if an error occurs when receiving
+    remote isolated function readMessage() returns string|byte[]|Error = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
+    } external;
+
     isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
                          returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"

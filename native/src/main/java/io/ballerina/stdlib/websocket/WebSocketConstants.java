@@ -130,11 +130,6 @@ public class WebSocketConstants {
     public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
     public static final String BALLERINA_HTTP_HEADER = ModuleUtils.getHttpPackageIdentifier() + COLON + ANN_NAME_HEADER;
 
-    public static final String WSS_ENDPOINT_STARTED = "[ballerina/websocket] started WSS listener ";
-    public static final String WS_ENDPOINT_STARTED = "[ballerina/websocket] started WS listener ";
-    public static final String WSS_ENDPOINT_STOPPED = "[ballerina/websocket] stopped WSS listener ";
-    public static final String WS_ENDPOINT_STOPPED = "[ballerina/websocket] stopped WS listener ";
-
     private WebSocketConstants() {
     }
 
