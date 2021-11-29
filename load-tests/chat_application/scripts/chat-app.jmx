@@ -31,7 +31,7 @@
           <eu.luminis.jmeter.wssampler.OpenWebSocketSampler guiclass="eu.luminis.jmeter.wssampler.OpenWebSocketSamplerGui" testclass="eu.luminis.jmeter.wssampler.OpenWebSocketSampler" testname="WebSocket Open Connection" enabled="true">
             <boolProp name="TLS">false</boolProp>
             <stringProp name="server">bal.perf.test</stringProp>
-            <stringProp name="port">9090</stringProp>
+            <stringProp name="port">80</stringProp>
             <stringProp name="path">/chat/bhashinee</stringProp>
             <stringProp name="connectTimeout">999999</stringProp>
             <stringProp name="readTimeout">60000</stringProp>
