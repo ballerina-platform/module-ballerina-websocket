@@ -316,11 +316,21 @@ public class WebSocketResourceDispatcher {
         }
         Map<String, Object> properties = new HashMap<>();
         properties.put(HttpConstants.INBOUND_MESSAGE, httpCarbonMessage);
-        wsService.getRuntime().invokeMethodAsync(wsService.getBalService(), resourceFunction.getName(), null,
-                                                 ModuleUtils.getOnUpgradeMetaData(),
-                                                 new OnUpgradeResourceCallback(webSocketHandshaker, wsService,
-                                                                               connectionManager),
-                                                 properties, PredefinedTypes.TYPE_ANY, bValues);
+        BObject balservice = wsService.getBalService();
+        String function = resourceFunction.getName();
+        if (balservice.getType().isIsolated() && balservice.getType().isIsolated(function)) {
+            wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, resourceFunction.getName(), null,
+                    ModuleUtils.getOnUpgradeMetaData(),
+                    new OnUpgradeResourceCallback(webSocketHandshaker, wsService,
+                            connectionManager),
+                    properties, PredefinedTypes.TYPE_ANY, bValues);
+        } else {
+            wsService.getRuntime().invokeMethodAsyncSequentially(balservice, resourceFunction.getName(), null,
+                    ModuleUtils.getOnUpgradeMetaData(),
+                    new OnUpgradeResourceCallback(webSocketHandshaker, wsService,
+                            connectionManager),
+                    properties, PredefinedTypes.TYPE_ANY, bValues);
+        }
     }
 
     private static int createBvaluesForNillable(Object[] bValues, int index) {
@@ -858,11 +868,21 @@ public class WebSocketResourceDispatcher {
             Map<String, Object> properties = new HashMap<>();
             WebSocketObserverContext observerContext = new WebSocketObserverContext(connectionInfo);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            wsService.getRuntime().invokeMethodAsync(balservice, resource, null, metaData, callback,
-                    properties, PredefinedTypes.TYPE_ANY, bValues);
+            if (balservice.getType().isIsolated() && balservice.getType().isIsolated(resource)) {
+                wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, resource, null, metaData, callback,
+                        properties, PredefinedTypes.TYPE_ANY, bValues);
+            } else {
+                wsService.getRuntime().invokeMethodAsyncSequentially(balservice, resource, null, metaData, callback,
+                        properties, PredefinedTypes.TYPE_ANY, bValues);
+            }
         } else {
-            wsService.getRuntime().invokeMethodAsync(balservice, resource, null, metaData, callback,
-                    bValues);
+            if (balservice.getType().isIsolated() && balservice.getType().isIsolated(resource)) {
+                wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, resource, null, metaData, callback,
+                        null, PredefinedTypes.TYPE_ANY, bValues);
+            } else {
+                wsService.getRuntime().invokeMethodAsyncSequentially(balservice, resource, null, metaData, callback,
+                        null, PredefinedTypes.TYPE_ANY, bValues);
+            }
         }
         WebSocketObservabilityUtil.observeResourceInvocation(connectionInfo, resource);
     }
