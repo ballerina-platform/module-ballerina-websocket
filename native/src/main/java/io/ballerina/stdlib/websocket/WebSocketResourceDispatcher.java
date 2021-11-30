@@ -318,14 +318,14 @@ public class WebSocketResourceDispatcher {
         properties.put(HttpConstants.INBOUND_MESSAGE, httpCarbonMessage);
         BObject balservice = wsService.getBalService();
         String function = resourceFunction.getName();
-        if (balservice.getType().isIsolated() && balservice.getType().isIsolated(function)) {
-            wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, resourceFunction.getName(), null,
+        if (isIsolated(balservice, function)) {
+            wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, function, null,
                     ModuleUtils.getOnUpgradeMetaData(),
                     new OnUpgradeResourceCallback(webSocketHandshaker, wsService,
                             connectionManager),
                     properties, PredefinedTypes.TYPE_ANY, bValues);
         } else {
-            wsService.getRuntime().invokeMethodAsyncSequentially(balservice, resourceFunction.getName(), null,
+            wsService.getRuntime().invokeMethodAsyncSequentially(balservice, function, null,
                     ModuleUtils.getOnUpgradeMetaData(),
                     new OnUpgradeResourceCallback(webSocketHandshaker, wsService,
                             connectionManager),
@@ -868,7 +868,7 @@ public class WebSocketResourceDispatcher {
             Map<String, Object> properties = new HashMap<>();
             WebSocketObserverContext observerContext = new WebSocketObserverContext(connectionInfo);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            if (balservice.getType().isIsolated() && balservice.getType().isIsolated(resource)) {
+            if (isIsolated(balservice, resource)) {
                 wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, resource, null, metaData, callback,
                         properties, PredefinedTypes.TYPE_ANY, bValues);
             } else {
@@ -876,7 +876,7 @@ public class WebSocketResourceDispatcher {
                         properties, PredefinedTypes.TYPE_ANY, bValues);
             }
         } else {
-            if (balservice.getType().isIsolated() && balservice.getType().isIsolated(resource)) {
+            if (isIsolated(balservice, resource)) {
                 wsService.getRuntime().invokeMethodAsyncConcurrently(balservice, resource, null, metaData, callback,
                         null, PredefinedTypes.TYPE_ANY, bValues);
             } else {
@@ -885,5 +885,9 @@ public class WebSocketResourceDispatcher {
             }
         }
         WebSocketObservabilityUtil.observeResourceInvocation(connectionInfo, resource);
+    }
+
+    private static boolean isIsolated(BObject serviceObj, String remoteMethod) {
+        return serviceObj.getType().isIsolated() && serviceObj.getType().isIsolated(remoteMethod);
     }
 }
