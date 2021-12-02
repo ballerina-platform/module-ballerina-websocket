@@ -4,12 +4,14 @@
 
 This example shows how to use the Ballerina WebSocket package to implement a simple taxi service management application. This is certainly a simplified representation of a real-life implementation created for demonstration purposes.
 There are three parties involved:
-1. Taxi Management Service — The intermediate WebSocket server
+1. Taxi Management Service — The intermediate WebSocket server. Use the server application.
 2. Drivers — Use the driver application
 3. Riders — Use the rider application
 
-Drivers can register for the Taxi Management Service. Assume that the drivers are given an application. Starting that application will register the drivers and then the drivers’ locations will be shared with riders. The WebSocket server acts as the intermediary between the riders and the drivers. All the data will be transferred through the server.
-Users are capable of registering as riders via the rider application. Once they register, they’ll be updated about the availability of drivers and their locations. Driver locations will be updated as they move. All the connections are WebSocket connections.
+Drivers and riders can register for the Taxi Management Service. Assume that the drivers and riders are given separate applications to register. Starting that application will register the drivers and riders. Then the drivers’ locations will be shared with riders. 
+
+The WebSocket server acts as the intermediary between the riders and the drivers. All the data will be transferred through the server.
+Users are capable of registering as riders via the rider application. Once they register, they’ll be updated about the availability of drivers and their locations. Driver locations will be updated as they move. 
 
 ## Implementation
 
