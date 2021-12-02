@@ -37,11 +37,9 @@ service class WsService75 {
 @test:Config {}
 public function testPanicErrorFromUpgradeService() returns Error? {
     Client|Error wsClient = new ("ws://localhost:21075/onPanic/");
+    test:assertTrue(wsClient is Error);
     if (wsClient is Error) {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: "
                                + "500 Internal Server Error");
-    } else {
-        test:assertFail("Should return an InvalidHandshakeError");
-        error? result = wsClient->close(1001, "Close the connection", timeout = 0);
     }
 }
