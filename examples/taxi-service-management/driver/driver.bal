@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/random;
 import ballerina/lang.runtime;
+import ballerina/random;
 import ballerina/websocket;
 
 public function main() returns error? {

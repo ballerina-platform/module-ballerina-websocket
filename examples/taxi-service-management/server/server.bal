@@ -75,11 +75,11 @@ isolated service class DriverService {
 // of the drivers.
 service /subscribe on taxiMgtListener {
     resource function get [string name](http:Request req) returns websocket:Service|websocket:UpgradeError {
-        return new SubscriberService(name);
+        return new RiderService(name);
     }
 }
 
-service class SubscriberService {
+service class RiderService {
     *websocket:Service;
 
     final string clientName;
