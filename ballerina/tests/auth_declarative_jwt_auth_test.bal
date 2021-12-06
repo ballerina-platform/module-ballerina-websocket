@@ -104,11 +104,9 @@ public function testJwtAuthServiceAuthzFailure() {
             }
         }
     });
+    test:assertTrue(wsClient is Error);
     if (wsClient is Error) {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 403 Forbidden");
-    } else {
-        test:assertFail(msg = "Test Failed!");
-        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
     }
 }
 
@@ -134,10 +132,8 @@ public function testJwtAuthServiceAuthnFailure() {
             }
         }
     });
+    test:assertTrue(wsClient is Error);
     if (wsClient is Error) {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 401 Unauthorized");
-    } else {
-        test:assertFail(msg = "Test Failed!");
-        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
     }
 }

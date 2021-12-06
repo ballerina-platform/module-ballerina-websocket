@@ -19,4 +19,4 @@
 set -e
 source base-scenario.sh
 
-jmeter -n -t "$scriptsDir/"chat-app.jmx -l "$resultsDir/"original.jtl
+jmeter -n -t "$scriptsDir/"chat-app.jmx -l "$resultsDir/"original.jtl -Jusers=10
