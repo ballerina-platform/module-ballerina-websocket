@@ -25,7 +25,7 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 
 2. [Listener](#2-listener)
 
-The WebSocket listener can be constructed with a port or a http:Listener. When initiating the listener it opens up the port and attaches the upgrade service which quite similar to an http service at the given service path. 
+The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service which quite similar to an http service at the given service path. 
 
 3. [Service Types](#3-service-types)
 
@@ -87,7 +87,7 @@ remote function onPong(websocket:Caller caller, byte[] data) {
 onIdleTimeout: This remote method is dispatched when the idle timeout is reached. The idleTimeout has to be configured either in the WebSocket service or the client configuration.
 ```ballerina
 remote function onIdleTimeout(websocket:Client caller) {
-   io:println("Connection timed out");
+    io:println("Connection timed out");
 }
 ```
 
@@ -100,9 +100,45 @@ remote function onClose(websocket:Caller caller, int statusCode, string reason) 
 
 onError: This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
 ```ballerina
-remote function onError(websocket:Caller caller) {
+remote function onError(websocket:Caller caller, error err) {
+    io:println(err.message());
 }
 ```
 
 4. [Client](#4-client)
 
+`websocket:Client` can be used to send and receive data synchronously over WebSocket connection. 
+
+#### Send and receive messages using 'websocket:Client'
+
+1. Send a text message.
+```ballerina
+   check wsClient->writeTextMessage("Text message");
+```
+
+2. Send a binary message
+```ballerina
+   check wsClient->writeBinaryMessage("Text message".toBytes());
+```
+
+3. Receive a text message
+```ballerina
+   string textResp = check wsClient->readTextMessage();
+```
+
+4. Receive a binary message
+```ballerina
+   byte[] textResp = check wsClient->readBinaryMessage();
+```
+
+5. Receive a message without prior knowledge of message type.
+```ballerina
+   byte[]|string|websocket:Error data = wsClient->readMessage();
+   if (data is string) {
+       io:println(data);
+   } else if (data is byte[]) {
+       io:println(data);
+   } else {
+       io:println("Error occurred", data.message());
+   }
+```
