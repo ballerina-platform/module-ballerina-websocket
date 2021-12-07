@@ -142,3 +142,32 @@ remote function onError(websocket:Caller caller, error err) {
        io:println("Error occurred", data.message());
    }
 ```
+6. Send ping message
+```ballerina
+   check wsClient->ping([5, 24, 56, 243]);
+```
+
+7. Send pong message
+```ballerina
+   check wsClient->pong([5, 24, 56, 243]);
+```
+
+8. Receive ping/pong messages
+To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote functions respectively.
+```ballerina
+   service class PingPongService {
+       *websocket:PingPongService;
+       remote function onPong(websocket:Caller wsEp, byte[] data) {
+           io:println("Pong received", data);
+       }
+       
+       remote isolated function onPing(websocket:Caller caller, byte[] localData) returns byte[] {
+           return localData;
+       }    
+       
+   }
+   
+   websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
+```
+If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller`. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
+
