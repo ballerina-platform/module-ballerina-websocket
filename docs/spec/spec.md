@@ -17,17 +17,21 @@ cloud that makes it easier to use, combine, and create network services.
 3. [Service Types](#3-service-types)
    * 3.1. [Upgrade Service](#31-upgrade-service)
    * 3.2. [WebSocket Service](#32-websocket-service)
-4. [Client](#3-client)
+4. [Client](#4-client)
+5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
+   * 5.1. [SSL/TLS](#51-ssl-tls)
+   * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
+6. Samples
 
-## 1. Overview
+## 1. [Overview](#1-overview)
 
 WebSocket is a protocol that allows a long held full-duplex connection between a server and client. This specification elaborates on how Ballerina language provides a tested WebSocket client and server implementation that is compliant with the [RFC 6455](https://www.rfc-editor.org/rfc/rfc6455.html).
 
-2. [Listener](#2-listener)
+## 2. [Listener](#2-listener)
 
 The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service which quite similar to an http service at the given service path. 
 
-3. [Service Types](#3-service-types)
+## 3. [Service Types](#3-service-types)
 
 ### 3.1 UpgradeService
 Upgrade service is pretty much similar to a http service. It has a single `get` resource, which takes in a http:Request optionally. The `get` resource returns a websocket:Service to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
@@ -105,7 +109,7 @@ remote function onError(websocket:Caller caller, error err) {
 }
 ```
 
-4. [Client](#4-client)
+## 4. [Client](#4-client)
 
 `websocket:Client` can be used to send and receive data synchronously over WebSocket connection. 
 
@@ -171,3 +175,119 @@ To receive ping/pong messages, users have to register a `websocket:PingPongServi
 ```
 If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller`. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
 
+9. Close the connection
+```ballerina
+   check wsClient->close();
+```
+
+## 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
+
+Ballerina provides inbuilt support for SSL/TLS and configurations to enforce authentication and authorization such as Basic Auth, JWT auth, and OAuth2.
+
+### 5.1. [SSL/TLS](#51-ssl-tls)
+You can configure a secure socket for your WebSocket listener and client to upgrade to a TCP connection with TLS.
+
+The TLS-enabled Listener
+
+```ballerina
+listener websocket:Listener wsListener = new(9090,
+    secureSocket = {
+        key: {
+             certFile: "/path/to/public.crt",
+             keyFile: "/path/to/private.key"
+        }
+    }
+);
+```
+
+The TLS-enabled Client
+
+```ballerina
+websocket:Client wsClient = check new (string `wss://localhost:9090/taxi/${username}`,
+    secureSocket = {
+        cert: "/path/to/public.crt"
+    }
+);
+```
+
+### 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
+
+#### Listener
+
+The Ballerina WebSocket library provides built-in support for the following listener authentication mechanisms that are validated in the initial upgrade request.
+1. Basic authentication
+2. JWT authentication
+3. OAuth2 authentication
+
+To enable one of the above, you should configure the `auth` field in `websocket:ServiceConfig` annotation which consists of the following records:
+1. FileUserStoreConfigWithScopes
+2. LdapUserStoreConfigWithScopes
+3. JwtValidatorConfigWithScopes
+4. OAuth2IntrospectionConfigWithScopes
+
+Each of the above records consists of configurations specific to each type as `FileUserStoreConfig` , `LdapUserStoreConfig` ,`JwtValidatorConfig` and `OAuth2IntrospectionConfig` respectively. You just have to configure them and there will be no need for any extensions or handlers. Ballerina will perform the required validation for you.
+
+```ballerina
+
+listener websocket:Listener wsListener = new(9090,
+    secureSocket = {
+        key: {
+            certFile: "../resource/path/to/public.crt",
+            keyFile: "../resource/path/to/private.key"
+        }
+    }
+);
+
+@websocket:ServiceConfig {
+     auth: [
+        {
+            oauth2IntrospectionConfig: {
+                url: "https://localhost:9445/oauth2/introspect",
+                tokenTypeHint: "access_token",
+                scopeKey: "scp",
+                clientConfig: {
+                    secureSocket: {
+                        cert: "../resource/path/to/introspect/service/public.crt"
+                    }
+                }
+            },
+            scopes: ["write", "update"]
+        }
+    ]
+}
+service /ws on wsListener {
+    resource function get .() returns websocket:Service|websocket:UpgradeError {
+        // ....
+    }
+}
+```
+
+#### Client
+
+The Ballerina WebSocket client can be configured to send authentication information to the endpoint being invoked. The Ballerina WebSocket library also has built-in support for the following client authentication mechanisms.
+1. Basic authentication
+2. JWT authentication
+3. OAuth2 authentication
+
+The following code snippet shows how a WebSocket client can be configured to call a secured endpoint. The `auth` field of the client configurations (websocket:ClientConfiguration) should have either one of the `CredentialsConfig`, `BearerTokenConfig`, `JwtIssuerConfig`, `OAuth2ClientCredentialsGrantConfig`, `OAuth2PasswordGrantConfig`, and `OAuth2RefreshTokenGrantConfig` records. Once this is configured, Ballerina will take care of the rest of the validation process.
+
+```ballerina
+websocket:Client wsClient = check new (string `wss://localhost:9090/taxi/${username}`,
+     auth = {
+         tokenUrl: "https://localhost:9445/oauth2/token",
+         username: "johndoe",
+         password: "A3ddj3w",
+         clientId: "3MVG9YDQS5WtC11paU2WcQjBB3L5w4gz52uriT8ksZ3nUVjKvrfQMrU4uvZohTftxStwNEW4cfStBEGRxRL68",
+         clientSecret: "9205371918321623741",
+         scopes: ["write", "update"],
+         clientConfig: {
+             secureSocket: {
+                 cert: "../resource/path/to/introspect/service/public.crt"
+             }
+         }
+     },
+     secureSocket = {
+         cert: "../resource/path/to/public.crt"
+     }
+);
+```
