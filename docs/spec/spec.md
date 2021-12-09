@@ -2,8 +2,8 @@
 
 _Owners_: @shafreenAnfar @bhashinee
 _Reviewers_: @shafreenAnfar    
-_Created_: 2021/11/30  
-_Updated_: 2021/11/30  
+_Created_: 2021/12/09  
+_Updated_: 2021/12/09  
 _Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-library/issues/2165)
 
 # Introduction
@@ -21,7 +21,7 @@ cloud that makes it easier to use, combine, and create network services.
 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
    * 5.1. [SSL/TLS](#51-ssl-tls)
    * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
-6. Samples
+6. [Samples](#6-samples)
 
 ## 1. [Overview](#1-overview)
 
@@ -290,4 +290,54 @@ websocket:Client wsClient = check new (string `wss://localhost:9090/taxi/${usern
          cert: "../resource/path/to/public.crt"
      }
 );
+```
+
+## 6. [Samples](#6-samples)
+
+Listener
+
+```ballerina
+import ballerina/io;
+import ballerina/websocket;
+
+service /basic/ws on new websocket:Listener(9090) {
+   resource isolated function get .() returns websocket:Service|websocket:Error {
+       return new WsService();
+   }
+}
+
+service class WsService {
+    *websocket:Service;
+    remote isolated function onTextMessage(websocket:Caller caller, string text) returns websocket:Error? {
+        io:println("Text message: " + text);
+        check caller->writeTextMessage(text);
+    }
+    
+    remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) returns websocket:Error? {
+        io:println(data);
+        check caller->writeBinaryMessage(data);
+    }
+}
+```
+
+Client
+
+```ballerina
+import ballerina/io;
+import ballerina/websocket;
+
+public function main() returns error? {
+   websocket:Client wsClient = check new("ws://localhost:9090/basic/ws");
+
+   check wsClient->writeTextMessage("Text message");
+
+   string textResp = check wsClient->readTextMessage();
+   io:println(textResp);
+   
+   check wsClient->writeBinaryMessage("Binary message".toBytes());
+
+   byte[] byteResp = check wsClient->readBinaryMessage();
+   string stringResp = check 'string:fromBytes(byteResp);
+   io:println(stringResp);
+}
 ```
