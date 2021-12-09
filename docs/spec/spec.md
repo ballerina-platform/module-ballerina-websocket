@@ -29,15 +29,17 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 
 ## 2. [Listener](#2-listener)
 
-The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service which quite similar to an http service at the given service path. 
+The WebSocket listener can be constructed with a port or an `http:Listener`. When initiating the listener it opens up the port and attaches the upgrade service which is quite similar to an HTTP service at the given service path. 
 
 ## 3. [Service Types](#3-service-types)
 
 ### 3.1 UpgradeService
-Upgrade service is pretty much similar to a http service. It has a single `get` resource, which takes in a http:Request optionally. The `get` resource returns a websocket:Service to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
+
+Upgrade service is pretty much similar to an HTTP service. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 
 ### 3.1 Service
-Once the WebSocket upgrade is accepted by the UpgradeService, it returns a ws:Service. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
+
+Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `ws:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
 
 ```ballerina
 service /ws on new websocket:Listener(21003) {
@@ -173,7 +175,7 @@ To receive ping/pong messages, users have to register a `websocket:PingPongServi
    
    websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
 ```
-If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller`. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
+If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
 
 9. Close the connection
 ```ballerina
