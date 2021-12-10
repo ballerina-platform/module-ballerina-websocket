@@ -6,10 +6,10 @@ authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
 license = ["Apache-2.0"]
-distribution = "slbeta3"
+distribution = "slbeta6"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/websocket-native-2.0.2-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.1.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/http-native-2.0.2-20211204-103100-79cfa25.jar"
@@ -42,5 +42,5 @@ path = "./lib/netty-codec-4.1.68.Final.jar"
 path = "./lib/netty-handler-proxy-4.1.68.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.0.2-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.1.0-SNAPSHOT.jar"
 scope = "testOnly"
