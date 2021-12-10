@@ -55,7 +55,7 @@ public class Listener {
     # + websocketService - The service that needs to be attached
     # + name - Name of the service
     # + return - An `error` if an error occurred during the service attachment process or else `()`
-    public isolated function attach(Service websocketService, string[]|string? name = ()) returns error? = @java:Method {
+    public isolated function attach(UpgradeService websocketService, string[]|string? name = ()) returns error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.serviceendpoint.Register",
         name: "register"
     } external;
@@ -66,7 +66,7 @@ public class Listener {
     #
     # + websocketService - The service to be detached
     # + return - An `error` if one occurred during detaching of a service or else `()`
-    public isolated function detach(Service websocketService) returns error? = @java:Method {
+    public isolated function detach(UpgradeService websocketService) returns error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.serviceendpoint.Detach",
         name: "detach"
     } external;
