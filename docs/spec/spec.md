@@ -1,6 +1,6 @@
 # Specification: Ballerina WebSocket Library
 
-_Owners_: @shafreenAnfar @bhashinee
+_Owners_: @shafreenAnfar @bhashinee 
 _Reviewers_: @shafreenAnfar    
 _Created_: 2021/12/09  
 _Updated_: 2021/12/09  
@@ -8,7 +8,7 @@ _Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-librar
 
 # Introduction
 
-This is the specification for WebSocket standard library which is used to implement WebSocket compliant 'listener' and 'client' using [Ballerina programming language](https://ballerina.io/), which is an open-source programming language for the
+This is the specification for WebSocket standard library which is used to implement WebSocket compliant `listener` and `client` using [Ballerina programming language](https://ballerina.io/), which is an open-source programming language for the
 cloud that makes it easier to use, combine, and create network services. 
 
 # Contents
@@ -29,8 +29,7 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 
 ## 2. [Listener](#2-listener)
 
-The WebSocket listener can be constructed with a port or an `http:Listener`. When initiating the listener it opens up the port and attaches the upgrade service which is quite similar to an HTTP service at the given service path. 
-
+The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service at the given service path. It is also worth noting that upgrade service is quite similar to an HTTP service.
 ## 3. [Service Types](#3-service-types)
 
 ### 3.1 UpgradeService
@@ -39,46 +38,59 @@ Upgrade service is pretty much similar to an HTTP service. It has a single `get`
 
 ### 3.1 Service
 
-Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `ws:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
+Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
 
 ```ballerina
 service /ws on new websocket:Listener(21003) {
     resource function get .(http:Request req) returns websocket:Service|websocket:UpgradeError {
         return new WsService();
+    }    
 }
         
 service class WsService {
-  *websocket:Service;
-  remote isolated function onTextMessage(websocket:Caller caller, string data) returns websocket:Error? {
-      check caller->writeTextMessage(data);
-  }
+    *websocket:Service;
+    remote isolated function onTextMessage(websocket:Caller caller, string data) returns websocket:Error? {
+        check caller->writeTextMessage(data);
+    }
 }              
 ```
 
 #### Remote methods associated with websocket:Service
 
-onOpen: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
+##### onOpen
+
+As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
+
 ```ballerina
 remote function onOpen(websocket:Caller caller) returns error? {
-   io:println("Opened a WebSocket connection"`);
+    io:println("Opened a WebSocket connection"`);
 }
 ```
 
-onTextMessage: The received text messages are dispatched to this remote method.
+##### onTextMessage
+
+The received text messages are dispatched to this remote method.
+
 ```ballerina
 remote isolated function onTextMessage(websocket:Caller caller, string text) returns websocket:Error? {
-    io:println("Text message: " + text);
+     io:println("Text message: " + text);
 }
 ```
 
-onBinaryMessage: The received binary messages are dispatched to this remote method.
+##### onBinaryMessage
+
+The received binary messages are dispatched to this remote method.
+
 ```ballerina
 remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) returns websocket:Error? {
     io:println("Binary message: " + data);
 }
 ```
 
-onPing and onPong: The received ping and pong messages are dispatched to these remote methods respectively. You do not need to explicitly control these messages as they are handled automatically by the services and clients.
+##### onPing and onPong
+
+The received ping and pong messages are dispatched to these remote methods respectively. You do not need to explicitly control these messages as they are handled automatically by the services and clients.
+
 ```ballerina
 remote function onPing(websocket:Caller caller, byte[] data) returns error? {
     io:println(string `Ping received with data: ${data.toBase64()}`);
@@ -90,21 +102,30 @@ remote function onPong(websocket:Caller caller, byte[] data) {
 }
 ```
 
-onIdleTimeout: This remote method is dispatched when the idle timeout is reached. The idleTimeout has to be configured either in the WebSocket service or the client configuration.
+##### onIdleTimeout
+
+This remote method is dispatched when the idle timeout is reached. The idleTimeout has to be configured either in the WebSocket service or the client configuration.
+
 ```ballerina
 remote function onIdleTimeout(websocket:Client caller) {
     io:println("Connection timed out");
 }
 ```
 
-onClose: This remote method is dispatched when a close frame with a statusCode and a reason is received.
+##### onClose
+
+This remote method is dispatched when a close frame with a statusCode and a reason is received.
+
 ```ballerina
 remote function onClose(websocket:Caller caller, int statusCode, string reason) {
     io:println(string `Client closed connection with ${statusCode} because of ${reason}`);
 }
 ```
 
-onError: This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
+##### onError
+
+This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
+
 ```ballerina
 remote function onError(websocket:Caller caller, error err) {
     io:println(err.message());
@@ -113,31 +134,64 @@ remote function onError(websocket:Caller caller, error err) {
 
 ## 4. [Client](#4-client)
 
-`websocket:Client` can be used to send and receive data synchronously over WebSocket connection. 
+`websocket:Client` can be used to send and receive data synchronously over WebSocket connection. The underlying implementation is non-blocking.
 
 #### Send and receive messages using 'websocket:Client'
 
-1. Send a text message.
+##### writeTextMessage
+
+```ballerina
+remote isolated function writeTextMessage(string data) returns Error? {}
+```
+`writeTextMessage` API can be used to send a text message. It takes in the message to be sent as a `string` and returns an error if an error occurs while sending the text message to the connection.
+
 ```ballerina
    check wsClient->writeTextMessage("Text message");
 ```
 
-2. Send a binary message
+##### writeBinaryMessage
+
+```ballerina
+remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
+```
+
+`writeBinaryMessage` API can be used to send a binary message. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the binary message to the connection.
+
 ```ballerina
    check wsClient->writeBinaryMessage("Text message".toBytes());
 ```
 
-3. Receive a text message
+##### readTextMessage
+
+```ballerina
+remote isolated function readTextMessage() returns string|Error {}
+```
+
+`readTextMessage` API can be used to receive a text message. It returns the complete text message as a `string` or else an error if an error occurs while reading the messages.
 ```ballerina
    string textResp = check wsClient->readTextMessage();
 ```
 
-4. Receive a binary message
+##### readBinaryMessage 
+
+```ballerina
+remote isolated function readBinaryMessage() returns byte[]|Error {}
+```
+
+`readBinaryMessage` API can be used to receive a binary message. It returns the complete binary message as a `byte[]` or else an error if an error occurs while reading the messages.
+
 ```ballerina
    byte[] textResp = check wsClient->readBinaryMessage();
 ```
 
-5. Receive a message without prior knowledge of message type.
+##### readMessage
+
+```ballerina
+remote isolated function readMessage() returns string|byte[]|Error {}
+```
+
+`readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
+
 ```ballerina
    byte[]|string|websocket:Error data = wsClient->readMessage();
    if (data is string) {
@@ -148,17 +202,45 @@ remote function onError(websocket:Caller caller, error err) {
        io:println("Error occurred", data.message());
    }
 ```
-6. Send ping message
+
+##### close
+
+```ballerina
+remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {}
+```
+
+`close` API can be used to close the connection. It takes in the optional parameters `statusCode` for closing the connection, `reason` for closing the connection if there is any and the `timeout` to wait until a close frame is received from the remote endpoint.
+
+```ballerina
+   check wsClient->close();
+```
+
+##### ping
+
+```ballerina
+remote isolated function ping(byte[] data) returns Error? {}
+```
+
+`ping` API can be used to send ping messages. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the ping message to the connection.
+
 ```ballerina
    check wsClient->ping([5, 24, 56, 243]);
 ```
 
-7. Send pong message
+##### pong
+
+```ballerina
+remote isolated function pong(byte[] data) returns Error? {}
+```
+
+`pong` API can be used to send pong messages. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the pong message to the connection.
+
 ```ballerina
    check wsClient->pong([5, 24, 56, 243]);
 ```
 
-8. Receive ping/pong messages
+##### onPing and onPong remote methods
+
 To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote functions respectively.
 ```ballerina
    service class PingPongService {
@@ -176,11 +258,6 @@ To receive ping/pong messages, users have to register a `websocket:PingPongServi
    websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
 ```
 If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
-
-9. Close the connection
-```ballerina
-   check wsClient->close();
-```
 
 ## 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
 
