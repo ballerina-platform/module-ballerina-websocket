@@ -66,6 +66,8 @@ public class WebSocketServiceValidator {
             case PluginConstants.ON_TEXT_MESSAGE:
                 Utils.validateOnTextMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
+            case PluginConstants.ON_PING_MESSAGE:
+            case PluginConstants.ON_PONG_MESSAGE:
             case PluginConstants.ON_BINARY_MESSAGE:
                 Utils.validateOnBinaryMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
