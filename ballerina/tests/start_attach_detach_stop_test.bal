@@ -19,7 +19,7 @@ import ballerina/test;
 
 listener Listener lis = new(21077);
 
-Service dummyService = service object {
+UpgradeService dummyService = service object {
     resource function get .() returns Service|UpgradeError {
         return new WsService70();
     }
