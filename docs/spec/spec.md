@@ -36,7 +36,7 @@ The WebSocket listener can be constructed with a port or an http:Listener. When 
 
 Upgrade service is pretty much similar to an HTTP service. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 
-### 3.1 Service
+### 3.2 Service
 
 Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
 

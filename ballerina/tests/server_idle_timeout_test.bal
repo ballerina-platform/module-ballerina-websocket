@@ -50,7 +50,7 @@ public function testServerIdletimeout() returns Error? {
 
 @test:Config {}
 public function testDetachError() returns error? {
-    Service dummyService = service object {
+    UpgradeService dummyService = service object {
            isolated remote function onTextMessage(Caller caller)  {
 
            }
