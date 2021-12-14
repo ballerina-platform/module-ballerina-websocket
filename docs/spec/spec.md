@@ -83,7 +83,7 @@ The received binary messages are dispatched to this remote method.
 
 ```ballerina
 remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) returns websocket:Error? {
-    io:println("Binary message: " + data);
+    io:println(data);
 }
 ```
 
