@@ -66,7 +66,7 @@ public isolated client class Client {
     # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent.
+    # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
@@ -273,11 +273,11 @@ public type ClientSecureSocket record {|
 
 # Retry configurations for WebSocket.
 #
-# + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely.
-# + interval - The number of seconds to delay before attempting to reconnect.
+# + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely
+# + interval - The number of seconds to delay before attempting to reconnect
 # + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
-#                persist.
-# + maxWaitInterval - Maximum time of the retry interval in seconds.
+#                persist
+# + maxWaitInterval - Maximum time of the retry interval in seconds
 public type WebSocketRetryConfig record {|
     int maxCount = 0;
     decimal interval = 1;
