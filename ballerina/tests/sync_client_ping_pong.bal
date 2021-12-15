@@ -42,7 +42,7 @@ service class WsServiceSyncPingPong {
     remote isolated function onPong(Caller caller, byte[] localData) {
         io:println("On server pong");
         var returnVal = caller->writeTextMessage("pong received");
-        if (returnVal is Error) {
+        if returnVal is Error {
             panic <error>returnVal;
         }
     }
@@ -62,7 +62,7 @@ service isolated class clientPingPongCallbackService {
     remote isolated function onPong(Caller caller, byte[] localData) {
         io:println("On sync client pong");
         var returnVal = caller->writeTextMessage("pong received");
-        if (returnVal is Error) {
+        if returnVal is Error {
            panic <error>returnVal;
         }
     }
@@ -80,7 +80,7 @@ public function testSyncClientPingPong() returns Error? {
         io:println("Reading message starting: sync ping pong client");
 
         string|Error resp1 = wsClient->readTextMessage();
-        if (resp1 is Error) {
+        if resp1 is Error {
             pingPongMsg = resp1.message();
         } else {
             pingPongMsg = resp1;

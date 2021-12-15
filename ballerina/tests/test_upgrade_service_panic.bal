@@ -20,7 +20,7 @@ listener Listener l75 = new(21075);
 
 service /onPanic on l75 {
     resource function get .() returns Service|UpgradeError {
-        if (true) {
+        if true {
            panic error("panic from the service");
         }
     }
@@ -38,7 +38,7 @@ service class WsService75 {
 public function testPanicErrorFromUpgradeService() returns Error? {
     Client|Error wsClient = new ("ws://localhost:21075/onPanic/");
     test:assertTrue(wsClient is Error);
-    if (wsClient is Error) {
+    if wsClient is Error {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: "
                                + "500 Internal Server Error");
     }

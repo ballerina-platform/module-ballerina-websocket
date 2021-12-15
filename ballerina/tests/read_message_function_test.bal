@@ -48,33 +48,33 @@ public function testSyncClientReadMessage() returns error? {
    }
    worker w1 returns error? {
       byte[]|string|Error resp1 = wsClient->readMessage();
-      if (resp1 is string) {
+      if resp1 is string {
          readMessageStringOutput = readMessageStringOutput + resp1;
       }
 
       byte[]|string|Error resp2 = check wsClient->readMessage();
-      if (resp2 is string) {
+      if resp2 is string {
          readMessageStringOutput = readMessageStringOutput + resp2;
-      } else if (resp2 is byte[]) {
+      } else if resp2 is byte[] {
          readMessageByteOutput = resp2.toString();
       }
 
       byte[]|string|Error resp3 = check wsClient->readMessage();
-      if (resp3 is string) {
+      if resp3 is string {
          readMessageStringOutput = readMessageStringOutput + resp3;
       }
 
       runtime:sleep(3);
 
       byte[]|string|Error resp4 = check wsClient->readMessage();
-      if (resp4 is string) {
+      if resp4 is string {
          readMessageStringOutput = readMessageStringOutput + resp4;
-      } else if (resp4 is byte[]) {
+      } else if resp4 is byte[] {
          readMessageByteOutput = readMessageByteOutput + resp4.toString();
       }
 
       byte[]|string|Error resp5 = check wsClient->readTextMessage();
-      if (resp5 is string) {
+      if resp5 is string {
          readMessageStringOutput = readMessageStringOutput + resp5;
       }
    }

@@ -50,7 +50,7 @@ public isolated client class Client {
         };
         self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
-        if (pingPongHandler is PingPongService) {
+        if pingPongHandler is PingPongService {
             self.pingPongService = pingPongHandler;
         } else {
             self.pingPongService = ();
@@ -110,9 +110,9 @@ public isolated client class Client {
     # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
         int code = 1000;
-        if (statusCode is int) {
-            if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
-                statusCode <= 2999 || statusCode > 4999) {
+        if statusCode is int {
+            if statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
+                statusCode <= 2999 || statusCode > 4999 {
                 string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
                 return error ConnectionClosureError(errorMessage);
             }
@@ -303,11 +303,11 @@ type ClientInferredConfig record {|
 public isolated function addCookies(ClientConfiguration config) {
    string cookieHeader = "";
    var cookiesToAdd = config["cookies"];
-   if (cookiesToAdd is http:Cookie[]) {
+   if cookiesToAdd is http:Cookie[] {
        http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
            var cookiePath = c.path;
            int l = 0;
-           if (cookiePath is string) {
+           if cookiePath is string {
                l = cookiePath.length();
            }
           return l;
@@ -318,7 +318,7 @@ public isolated function addCookies(ClientConfiguration config) {
        lock {
            updateLastAccessedTime(cookiesToAdd);
        }
-       if (cookieHeader != "") {
+       if cookieHeader != "" {
            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
            map<string> headers = config["customHeaders"];
            headers["Cookie"] = cookieHeader;

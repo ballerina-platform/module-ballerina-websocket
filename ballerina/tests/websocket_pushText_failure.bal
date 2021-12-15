@@ -29,9 +29,9 @@ service class PushTextFailureService {
    *Service;
    remote function onOpen(Caller caller) {
        Error? err1 = caller->close(timeout = 0);
-       var err = caller->writeTextMessage("hey");
-       if (err is Error) {
-           errorMsg2 = <@untainted>err.message();
+       Error? err = caller->writeTextMessage("hey");
+       if err is Error {
+           errorMsg2 = err.message();
        }
    }
 }

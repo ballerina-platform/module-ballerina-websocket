@@ -43,7 +43,7 @@ public function testSyncClientClose() returns Error? {
     io:println("Reading message starting: sync close client");
     Error? resp1 = wsClient->writeTextMessage("Hi world1");
     string|Error resp2 = wsClient->readTextMessage();
-    if (resp2 is Error) {
+    if resp2 is Error {
         closeError = resp2.message();
     } else {
         io:println("1st response received at sync close client :" + resp2);

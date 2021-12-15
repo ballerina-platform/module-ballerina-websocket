@@ -38,7 +38,7 @@ service class SyncSslErrorService {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
-        if (returnVal is Error) {
+        if returnVal is Error {
             panic <error>returnVal;
         }
     }
@@ -55,7 +55,7 @@ public function testSyncClientSslError() {
             }
         }
     });
-    if (wsClient is Error) {
+    if wsClient is Error {
         sslErrString = wsClient.message();
     }
     test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
@@ -64,7 +64,7 @@ public function testSyncClientSslError() {
 @test:Config {}
 public function testSslWithJavaDefaults() {
     Client|Error wsClient = new("wss://localhost:21058/sslTest");
-    if (wsClient is Error) {
+    if wsClient is Error {
         sslErrString = wsClient.message();
     }
     test:assertTrue(strings:includes(sslErrString, "unable to find valid certification path to requested target"));
