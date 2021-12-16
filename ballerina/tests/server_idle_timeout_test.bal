@@ -57,13 +57,13 @@ public function testDetachError() returns error? {
        };
     check l70.gracefulStop();
     error? detachedRes = l70.detach(dummyService);
-    if (detachedRes is error) {
+    if detachedRes is error {
         test:assertEquals(detachedRes.message(), "Error: Cannot detach service. Service has not been registered");
     } else {
         test:assertFail("Expected a detaching error");
     }
     error? immStop = l70.immediateStop();
-    if (immStop is error) {
+    if immStop is error {
         test:assertEquals(immStop.message(), "not implemented");
     } else {
         test:assertFail("Expected an error");
@@ -73,7 +73,7 @@ public function testDetachError() returns error? {
 @test:Config {}
 public function testConnectionRefused() returns Error? {
     Error|Client wsClient = new("ws://localhost:21071/idleTimeoutError/");
-    if (wsClient is Error) {
+    if wsClient is Error {
         test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
     } else {
         test:assertFail("Expected a connection refused error");

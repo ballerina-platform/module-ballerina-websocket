@@ -78,7 +78,7 @@ public class Listener {
     public isolated function init(int|http:Listener 'listener, *ListenerConfiguration config) returns Error? {
         self.instanceId = uuid();
         self.config = config;
-        if ('listener is http:Listener) {
+        if 'listener is http:Listener {
            self.httpListener = 'listener;
         } else {
            self.port = 'listener;
@@ -134,7 +134,7 @@ public type ListenerSecureSocket record {|
 # + return - The random string
 isolated function uuid() returns string {
     var result = java:toString(nativeUuid());
-    if (result is string) {
+    if result is string {
         return result;
     } else {
         panic error("Error occured when converting the UUID to string.");

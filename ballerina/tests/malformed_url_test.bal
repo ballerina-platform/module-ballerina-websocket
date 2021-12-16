@@ -20,7 +20,7 @@ import ballerina/test;
 @test:Config {}
 public function testMalformedUrl() returns Error? {
     Client|Error wsClient = new("xxx");
-    if (wsClient is Error) {
+    if wsClient is Error {
         test:assertEquals(wsClient.message(), "Error: Malformed URL: xxx");
     } else {
         test:assertFail("Expected a malformed URL error");

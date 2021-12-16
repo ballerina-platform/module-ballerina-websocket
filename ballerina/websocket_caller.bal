@@ -31,7 +31,7 @@ public isolated client class Caller {
     # Pushes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent.
+    # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
