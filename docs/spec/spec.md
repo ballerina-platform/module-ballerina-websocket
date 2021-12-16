@@ -17,6 +17,13 @@ cloud that makes it easier to use, combine, and create network services.
 3. [Service Types](#3-service-types)
    * 3.1. [Upgrade Service](#31-upgrade-service)
    * 3.2. [WebSocket Service](#32-websocket-service)
+     * [Remote methods associated with websocket:Service](#remote-methods-associated-with-websocket:Service)
+       * [onOpen](#on-open)
+       * [onTextMessage](#on-text-message)
+       * [onBinaryMessage](#on-binary-message)
+       * [onPing and onPong](#ping-pong)
+       * [onIdleTimeout](#on-idle-timeout)
+       * [onClose](#on-close)
 4. [Client](#4-client)
 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
    * 5.1. [SSL/TLS](#51-ssl-tls)
@@ -32,11 +39,11 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service at the given service path. It is also worth noting that upgrade service is quite similar to an HTTP service.
 ## 3. [Service Types](#3-service-types)
 
-### 3.1 UpgradeService
+### 3.1 [UpgradeService](#31-upgrade-service)
 
 Upgrade service is pretty much similar to an HTTP service. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 
-### 3.2 Service
+### 3.2 [WebSocket Service](#32-websocket-service)
 
 Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
 
@@ -55,9 +62,9 @@ service class WsService {
 }              
 ```
 
-#### Remote methods associated with websocket:Service
+#### [Remote methods associated with websocket:Service](#remote-methods-associated-with-websocket:Service)
 
-##### onOpen
+##### [onOpen](on-open)
 
 As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
@@ -67,7 +74,7 @@ remote function onOpen(websocket:Caller caller) returns error? {
 }
 ```
 
-##### onTextMessage
+##### [onTextMessage](#on-text-message)
 
 The received text messages are dispatched to this remote method.
 
@@ -77,7 +84,7 @@ remote isolated function onTextMessage(websocket:Caller caller, string text) ret
 }
 ```
 
-##### onBinaryMessage
+##### [onBinaryMessage](#on-binary-message)
 
 The received binary messages are dispatched to this remote method.
 
@@ -87,7 +94,7 @@ remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) r
 }
 ```
 
-##### onPing and onPong
+##### [onPing and onPong](#ping-pong)
 
 The received ping and pong messages are dispatched to these remote methods respectively. You do not need to explicitly control these messages as they are handled automatically by the services and clients.
 
@@ -102,7 +109,7 @@ remote function onPong(websocket:Caller caller, byte[] data) {
 }
 ```
 
-##### onIdleTimeout
+##### [onIdleTimeout](#on-idle-timeout)
 
 This remote method is dispatched when the idle timeout is reached. The idleTimeout has to be configured either in the WebSocket service or the client configuration.
 
@@ -112,7 +119,7 @@ remote function onIdleTimeout(websocket:Client caller) {
 }
 ```
 
-##### onClose
+##### [onClose](#on-close)
 
 This remote method is dispatched when a close frame with a statusCode and a reason is received.
 
@@ -122,7 +129,7 @@ remote function onClose(websocket:Caller caller, int statusCode, string reason) 
 }
 ```
 
-##### onError
+##### [onError](#on-error)
 
 This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
 
