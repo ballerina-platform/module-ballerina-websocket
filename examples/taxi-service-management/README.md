@@ -8,6 +8,8 @@ There are three parties involved:
 2. Drivers — Use the driver application
 3. Riders — Use the rider application
 
+![](../../../../../../Downloads/taxi.jpeg)
+
 Drivers and riders can register for the Taxi Management Service. Assume that the drivers and riders are given separate applications to register. Starting that application will register the drivers and riders. Then the drivers’ locations will be shared with riders. 
 
 The WebSocket server acts as the intermediary between the riders and the drivers. All the data will be transferred through the server.
