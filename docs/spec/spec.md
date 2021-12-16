@@ -91,7 +91,7 @@ The received text messages are dispatched to this remote method.
 
 ```ballerina
 remote isolated function onTextMessage(websocket:Caller caller, string text) returns websocket:Error? {
-    io:println("Text message: " + text);
+     io:println("Text message: " + text);
 }
 ```
 
@@ -164,7 +164,7 @@ remote isolated function writeTextMessage(string data) returns Error? {}
 `writeTextMessage` API can be used to send a text message. It takes in the message to be sent as a `string` and returns an error if an error occurs while sending the text message to the connection.
 
 ```ballerina
-check wsClient->writeTextMessage("Text message");
+   check wsClient->writeTextMessage("Text message");
 ```
 
 ##### [writeBinaryMessage](#writebinarymessage)
@@ -176,7 +176,7 @@ remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
 `writeBinaryMessage` API can be used to send a binary message. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the binary message to the connection.
 
 ```ballerina
-check wsClient->writeBinaryMessage("Text message".toBytes());
+   check wsClient->writeBinaryMessage("Text message".toBytes());
 ```
 
 ##### [readTextMessage](#readtextmessage)
@@ -187,7 +187,7 @@ remote isolated function readTextMessage() returns string|Error {}
 
 `readTextMessage` API can be used to receive a text message. It returns the complete text message as a `string` or else an error if an error occurs while reading the messages.
 ```ballerina
-string textResp = check wsClient->readTextMessage();
+   string textResp = check wsClient->readTextMessage();
 ```
 
 ##### [readBinaryMessage](#readbinarymessage)
@@ -199,7 +199,7 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 `readBinaryMessage` API can be used to receive a binary message. It returns the complete binary message as a `byte[]` or else an error if an error occurs while reading the messages.
 
 ```ballerina
-byte[] textResp = check wsClient->readBinaryMessage();
+   byte[] textResp = check wsClient->readBinaryMessage();
 ```
 
 ##### [readMessage](#readmessage)
@@ -211,14 +211,14 @@ remote isolated function readMessage() returns string|byte[]|Error {}
 `readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
 
 ```ballerina
-byte[]|string|websocket:Error data = wsClient->readMessage();
-if (data is string) {
-    io:println(data);
-} else if (data is byte[]) {
-    io:println(data);
-} else {
-    io:println("Error occurred", data.message());
-}
+   byte[]|string|websocket:Error data = wsClient->readMessage();
+   if (data is string) {
+       io:println(data);
+   } else if (data is byte[]) {
+       io:println(data);
+   } else {
+       io:println("Error occurred", data.message());
+   }
 ```
 
 ##### [close](#close)
@@ -230,7 +230,7 @@ remote isolated function close(int? statusCode = 1000, string? reason = (), deci
 `close` API can be used to close the connection. It takes in the optional parameters `statusCode` for closing the connection, `reason` for closing the connection if there is any and the `timeout` to wait until a close frame is received from the remote endpoint.
 
 ```ballerina
-check wsClient->close();
+   check wsClient->close();
 ```
 
 ##### [ping](#ping)
@@ -242,7 +242,7 @@ remote isolated function ping(byte[] data) returns Error? {}
 `ping` API can be used to send ping messages. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the ping message to the connection.
 
 ```ballerina
-check wsClient->ping([5, 24, 56, 243]);
+   check wsClient->ping([5, 24, 56, 243]);
 ```
 
 ##### [pong](#pong)
@@ -254,24 +254,26 @@ remote isolated function pong(byte[] data) returns Error? {}
 `pong` API can be used to send pong messages. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the pong message to the connection.
 
 ```ballerina
-check wsClient->pong([5, 24, 56, 243]);
+   check wsClient->pong([5, 24, 56, 243]);
 ```
 
 ##### [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
 
 To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote functions respectively.
 ```ballerina
-service class PingPongService {
-    *websocket:PingPongService;
-    remote function onPong(websocket:Caller wsEp, byte[] data) {
-        io:println("Pong received", data);
-    }
+   service class PingPongService {
+       *websocket:PingPongService;
+       remote function onPong(websocket:Caller wsEp, byte[] data) {
+           io:println("Pong received", data);
+       }
        
-    remote isolated function onPing(websocket:Caller caller, byte[] localData) returns byte[] {
-        return localData;
-    }         
-}
-websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
+       remote isolated function onPing(websocket:Caller caller, byte[] localData) returns byte[] {
+           return localData;
+       }    
+       
+   }
+   
+   websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
 ```
 If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
 
