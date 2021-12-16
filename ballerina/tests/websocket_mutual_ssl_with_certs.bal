@@ -41,7 +41,7 @@ service class SslService2 {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
-        if returnVal is Error {
+        if (returnVal is Error) {
             panic <error>returnVal;
         }
     }
@@ -59,7 +59,7 @@ public function testMutualSslWithCertsAndKeys() returns Error? {
             }
         }
     });
-    if wsClient is Error {
+    if (wsClient is Error) {
         io:println(wsClient.message());
         test:assertFail("Expected a successful mTLS connection");
     } else {

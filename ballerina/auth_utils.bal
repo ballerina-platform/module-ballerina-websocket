@@ -22,13 +22,13 @@ import ballerina/oauth2;
 // Call relevant auth handling function based on the provided configurations
 isolated function initClientAuth(ClientConfiguration config) returns AuthError? {
     ClientAuthConfig? authConfig = config?.auth;
-    if authConfig is () {
+    if (authConfig is ()) {
        return;
-    } else if authConfig is CredentialsConfig {
+    } else if (authConfig is CredentialsConfig) {
         check handleClientBasicAuth(authConfig, config);
-    } else if authConfig is BearerTokenConfig {
+    } else if (authConfig is BearerTokenConfig) {
         handleClientBearerTokenAuth(authConfig, config);
-    } else if authConfig is JwtIssuerConfig {
+    } else if (authConfig is JwtIssuerConfig) {
         check handleClientSelfSignedJwtAuth(authConfig, config);
     } else {
         check handleClientOAuth2(authConfig, config);
@@ -40,7 +40,7 @@ isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientCo
                      returns AuthError? {
     jwt:ClientSelfSignedJwtAuthProvider provider = new(config);
     string|jwt:Error jwtToken = provider.generateToken();
-    if jwtToken is jwt:Error {
+    if (jwtToken is jwt:Error) {
         return prepareClientAuthError("Failed to enrich request with JWT.", jwtToken);
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, jwtToken);
@@ -52,7 +52,7 @@ isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfigur
                        returns AuthError? {
     auth:ClientBasicAuthProvider provider = new(config);
     string|auth:Error basicAuthToken = provider.generateToken();
-    if basicAuthToken is auth:Error {
+    if (basicAuthToken is auth:Error) {
         return prepareClientAuthError("Failed to enrich request with Basic Auth token.", basicAuthToken);
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BASIC, basicAuthToken);
@@ -68,7 +68,7 @@ isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientConfigurati
                         returns AuthError? {
     oauth2:ClientOAuth2Provider provider = new(config);
     string|oauth2:Error oauthToken = provider.generateToken();
-    if oauthToken is oauth2:Error {
+    if (oauthToken is oauth2:Error) {
         return prepareClientAuthError("Failed to enrich request with OAuth2 token.", oauthToken);
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, oauthToken);
@@ -85,7 +85,7 @@ isolated function setAuthHeader(ClientConfiguration clientConfig, string authSch
 // Logs and prepares the `error` as an `websocket:AuthError`.
 isolated function prepareClientAuthError(string message, error? err = ()) returns AuthError {
     log:printError(message, 'error = err);
-    if err is error {
+    if (err is error) {
         return error AuthError(message + " " + err.message(), err);
     }
     return error AuthError(message);

@@ -32,11 +32,11 @@ import ballerina/oauth2;
 # + serviceRef - The service reference where the resource locates
 public isolated function authenticateResource(Service serviceRef) {
     ListenerAuthConfig[]? authConfig = getServiceAuthConfig(serviceRef);
-    if authConfig is () {
+    if (authConfig is ()) {
         return;
     }
     string|http:HeaderNotFoundError header = getAuthorizationHeader();
-    if header is string {
+    if (header is string) {
         http:Unauthorized|http:Forbidden? result = tryAuthenticate(<ListenerAuthConfig[]>authConfig, header);
         if (result is http:Unauthorized) {
             notifyFailure(result.status.code);
@@ -50,34 +50,34 @@ public isolated function authenticateResource(Service serviceRef) {
 
 isolated function tryAuthenticate(ListenerAuthConfig[] authConfig, string header) returns http:Unauthorized|http:Forbidden? {
     foreach ListenerAuthConfig config in authConfig {
-        if config is FileUserStoreConfigWithScopes {
+        if (config is FileUserStoreConfigWithScopes) {
             http:ListenerFileUserStoreBasicAuthHandler handler = new(config.fileUserStoreConfig);
             auth:UserDetails|http:Unauthorized authn = handler.authenticate(header);
             string|string[]? scopes = config?.scopes;
-            if authn is auth:UserDetails {
+            if (authn is auth:UserDetails) {
                 if (scopes is string|string[]) {
                     http:Forbidden? authz = handler.authorize(authn, scopes);
                     return authz;
                 }
                 return;
             }
-        } else if config is LdapUserStoreConfigWithScopes {
+        } else if (config is LdapUserStoreConfigWithScopes) {
             http:ListenerLdapUserStoreBasicAuthHandler handler = new(config.ldapUserStoreConfig);
             auth:UserDetails|http:Unauthorized authn = handler->authenticate(header);
             string|string[]? scopes = config?.scopes;
-            if authn is auth:UserDetails {
-                if scopes is string|string[] {
+            if (authn is auth:UserDetails) {
+                if (scopes is string|string[]) {
                     http:Forbidden? authz = handler->authorize(authn, scopes);
                     return authz;
                 }
                 return;
             }
-        } else if config is JwtValidatorConfigWithScopes {
+        } else if (config is JwtValidatorConfigWithScopes) {
             http:ListenerJwtAuthHandler handler = new(config.jwtValidatorConfig);
             jwt:Payload|http:Unauthorized authn = handler.authenticate(header);
             string|string[]? scopes = config?.scopes;
-            if authn is jwt:Payload {
-                if scopes is string|string[] {
+            if (authn is jwt:Payload) {
+                if (scopes is string|string[]) {
                     http:Forbidden? authz = handler.authorize(authn, scopes);
                     return authz;
                 }
@@ -87,9 +87,9 @@ isolated function tryAuthenticate(ListenerAuthConfig[] authConfig, string header
             // Here, config is OAuth2IntrospectionConfigWithScopes
             http:ListenerOAuth2Handler handler = new(config.oauth2IntrospectionConfig);
             oauth2:IntrospectionResponse|http:Unauthorized|http:Forbidden auth = handler->authorize(header, config?.scopes);
-            if auth is oauth2:IntrospectionResponse {
+            if (auth is oauth2:IntrospectionResponse) {
                 return;
-            } else if auth is http:Forbidden {
+            } else if (auth is http:Forbidden) {
                 return auth;
             }
         }
@@ -101,7 +101,7 @@ isolated function tryAuthenticate(ListenerAuthConfig[] authConfig, string header
 isolated function getServiceAuthConfig(Service serviceRef) returns ListenerAuthConfig[]? {
     typedesc<any> serviceTypeDesc = typeof serviceRef;
     var serviceAnnotation = serviceTypeDesc.@ServiceConfig;
-    if serviceAnnotation is () {
+    if (serviceAnnotation is ()) {
         return;
     }
     WSServiceConfig serviceConfig = <WSServiceConfig>serviceAnnotation;
