@@ -24,7 +24,7 @@ ClientConfiguration config = {subProtocols: ["xml"]};
 
 service class errorResourceService {
    remote function onError(Caller clientCaller, Error err) {
-       errMessage = <@untainted>err.message();
+       errMessage = err.message();
    }
 }
 
@@ -42,32 +42,20 @@ service class ErrorServer {
        io:println("The Connection ID websocket client exceptions test: " + caller.getConnectionId());
    }
 
-   remote isolated function onPing(Caller caller, byte[] localData) {
-       var returnVal = caller->pong(localData);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+   remote isolated function onPing(Caller caller, byte[] localData) returns error? {
+       check caller->pong(localData);
    }
 
-   remote isolated function onPong(Caller caller, byte[] localData) {
-       var returnVal = caller->ping(localData);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+   remote isolated function onPong(Caller caller, byte[] localData) returns error? {
+       check caller->ping(localData);
    }
 
-   remote isolated function onTextMessage(Caller caller, string text) {
-       var err = caller->writeTextMessage(text);
-       if (err is Error) {
-           io:println("Error occurred when sending text message" + err.message());
-       }
+   remote isolated function onTextMessage(Caller caller, string text) returns error? {
+       check caller->writeTextMessage(text);
    }
 
-   remote isolated function onBinaryMessage(Caller caller, byte[] data) {
-       var returnVal = caller->writeBinaryMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+   remote isolated function onBinaryMessage(Caller caller, byte[] data) returns error? {
+       check caller->writeBinaryMessage(data);
    }
 
    remote isolated function onClose(Caller ep, int statusCode, string reason) {
@@ -78,7 +66,7 @@ service class ErrorServer {
 @test:Config {enable:false}
 public function testConnectionError() returns Error? {
    Error|Client wsClient = new ("ws://lmnop.ls", config = config);
-   if (wsClient is Error) {
+   if wsClient is Error {
        test:assertEquals(wsClient.message(), "ConnectionError: IO Error");
    } else {
        test:assertFail("Expected a connection error to be returned");
@@ -94,7 +82,7 @@ public function testLongFrameError() returns Error? {
    Client wsClientEp = check new ("ws://localhost:21030/websocket");
    runtime:sleep(0.5);
    var err = wsClientEp->ping(pingData);
-   if (err is error) {
+   if err is error {
        test:assertEquals(err.message(), "ProtocolError: io.netty.handler.codec.TooLongFrameException: " +
            "invalid payload for PING (payload length must be <= 125, was 148");
    } else {
@@ -110,7 +98,7 @@ public function testConnectionClosedError() returns Error? {
    error? result = wsClientEp->close(timeout = 0);
    runtime:sleep(2);
    var err = wsClientEp->writeTextMessage("some");
-   if (err is error) {
+   if err is error {
        test:assertEquals(err.message(), "ConnectionClosureError: Close frame already sent. Cannot push text data!");
    } else {
        test:assertFail("Mismatched output");
@@ -121,7 +109,7 @@ public function testConnectionClosedError() returns Error? {
 @test:Config {}
 public function testHandshakeError() returns Error? {
    Error|Client wsClientEp = new ("ws://localhost:21030/websocket", config = config);
-   if (wsClientEp is Error) {
+   if wsClientEp is Error {
       errMessage = wsClientEp.message();
    }
    test:assertEquals(errMessage, "InvalidHandshakeError: Invalid subprotocol. Actual: null. Expected one of: xml");

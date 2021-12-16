@@ -34,6 +34,8 @@ public class PluginConstants {
     static final String ON_IDLE_TIMEOUT = "onIdleTimeout";
     static final String ON_TEXT_MESSAGE = "onTextMessage";
     static final String ON_BINARY_MESSAGE = "onBinaryMessage";
+    static final String ON_PING_MESSAGE = "onPing";
+    static final String ON_PONG_MESSAGE = "onPong";
     static final String REMOTE_KEY_WORD = "remote";
     static final String RESOURCE_KEY_WORD = "resource";
     static final String HTTP_REQUEST = "http:Request";

@@ -27,7 +27,7 @@ public function testEmptyForKeystore() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "KeyStore file location must be provided for secure connection");
     } else {
         test:assertFail("Expected an keystore file not found error");
@@ -44,7 +44,7 @@ public function testEmptyPasswordForKeystore() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "KeyStore password must be provided for secure connection");
     } else {
         test:assertFail("Expected an keystore password not found error");
@@ -61,7 +61,7 @@ public function testEmptyCertFile() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "Certificate file location must be provided for secure connection");
     } else {
         test:assertFail("Expected an cert file not found error");
@@ -78,7 +78,7 @@ public function testEmptyKeyFile() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "Private key file location must be provided for secure connection");
     } else {
         test:assertFail("Expected an key file not found error");
@@ -102,7 +102,7 @@ public function testEmptyTrustore() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "TrustStore file location must be provided for secure connection");
     } else {
         test:assertFail("Expected an trust store not found error");
@@ -126,7 +126,7 @@ public function testEmptyTrustorePassword() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "TrustStore password must be provided for secure connection");
     } else {
         test:assertFail("Expected an trust store password not found error");
@@ -147,7 +147,7 @@ public function testTrustedCertFile() returns Error? {
             }
         }
     });
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "Certificate file location must be provided for secure connection");
     } else {
         test:assertFail("Expected an trusted cert file not found error");
@@ -157,7 +157,7 @@ public function testTrustedCertFile() returns Error? {
 @test:Config {}
 public function testListenerPortNotDefined() returns Error? {
     Listener|Error l17 = new(0);
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(), "Listener port is not defined");
     } else {
         test:assertFail("Expected an listener port is not defined error");
@@ -167,7 +167,7 @@ public function testListenerPortNotDefined() returns Error? {
 @test:Config {}
 public function testListenerIncorrectIdleTimeout() returns Error? {
     Listener|Error l17 = new(9090, {timeout: -1});
-    if (l17 is Error) {
+    if l17 is Error {
         test:assertEquals(l17.message(),
                     "Idle timeout cannot be negative. If you want to disable the timeout please use value 0");
     } else {

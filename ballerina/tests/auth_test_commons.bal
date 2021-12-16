@@ -49,15 +49,15 @@ service /oauth2 on sts {
 
     resource function post introspect(http:Request request) returns json {
         string|http:ClientError payload = request.getTextPayload();
-        if (payload is string) {
+        if payload is string {
             string[] parts = regex:split(payload, "&");
             foreach string part in parts {
-                if (part.indexOf("token=") is int) {
+                if part.indexOf("token=") is int {
                     string token = regex:split(part, "=")[1];
-                    if (token == ACCESS_TOKEN_1) {
+                    if token == ACCESS_TOKEN_1 {
                         json response = { "active": true, "exp": 3600, "scp": "write update" };
                         return response;
-                    } else if (token == ACCESS_TOKEN_2) {
+                    } else if token == ACCESS_TOKEN_2 {
                         json response = { "active": true, "exp": 3600, "scp": "read" };
                         return response;
                     } else {

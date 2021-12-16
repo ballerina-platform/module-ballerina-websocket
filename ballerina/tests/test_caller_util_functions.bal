@@ -43,15 +43,15 @@ service class WsService62 {
       caller.setAttribute("test2", "removedAttr");
       isSecure = caller.isSecure();
       value:Cloneable rmAttr = caller.removeAttribute("test2");
-      if (rmAttr is string) {
+      if rmAttr is string {
           removedAttr = rmAttr;
       }
       value:Cloneable attr = caller.getAttribute("test");
-      if (attr is string) {
+      if attr is string {
           attr1 = attr;
       }
       string? protocol = caller.getNegotiatedSubProtocol();
-      if (protocol is string) {
+      if protocol is string {
          serviceSubProtocol = protocol;
       }
   }

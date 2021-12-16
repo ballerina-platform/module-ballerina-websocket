@@ -39,7 +39,7 @@ service class SyncSslService {
     *Service;
     remote isolated function onTextMessage(Caller caller, string data) {
         var returnVal = caller->writeTextMessage(data);
-        if (returnVal is Error) {
+        if returnVal is Error {
             panic <error>returnVal;
         }
     }
@@ -64,7 +64,7 @@ public function testSyncClientSsl() returns Error? {
         io:println("Reading message starting: sync ssl client");
 
         string|Error resp1 = wsClient->readTextMessage();
-        if (resp1 is Error) {
+        if resp1 is Error {
             io:println("Error creating client");
             sslString = resp1.message();
         } else {
@@ -81,7 +81,7 @@ public function testSyncClientSsl() returns Error? {
         var resp1 = wsClient->writeTextMessage("Hi world1");
         string removedAttr = <string> wsClient.removeAttribute("test");
         test:assertEquals(removedAttr, "testSyncClientSsl");
-        if (resp1 is Error) {
+        if resp1 is Error {
             io:println("Error occured when sending the text to ssl server");
         } else {
             io:println("Succesfully sent frame to ssl service");

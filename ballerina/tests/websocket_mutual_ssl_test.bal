@@ -48,11 +48,8 @@ service /sslTest on l65 {
 
 service class SslService {
     *Service;
-    remote isolated function onTextMessage(Caller caller, string data) {
-        var returnVal = caller->writeTextMessage(data);
-        if (returnVal is Error) {
-            panic <error>returnVal;
-        }
+    remote isolated function onTextMessage(Caller caller, string data) returns error? {
+        check caller->writeTextMessage(data);
     }
 }
 
@@ -78,7 +75,7 @@ public function testMutualSslWithKeyStores() returns Error? {
             sessionTimeout: 200
         }
     });
-    if (wsClient is Error) {
+    if wsClient is Error {
         test:assertFail("Expected a successful mTLS connection");
     } else {
         test:assertEquals(wsClient.isSecure(), true);

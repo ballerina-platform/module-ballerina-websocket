@@ -9,13 +9,13 @@ license = ["Apache-2.0"]
 distribution = "slbeta6"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/websocket-native-2.1.0-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.1.0.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-2.0.2-20211210-023800-e11f636.jar"
+path = "./lib/http-native-2.1.0.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/mime-native-2.0.2-20211210-014300-7f903fe.jar"
+path = "./lib/mime-native-2.1.0.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/netty-common-4.1.71.Final.jar"
@@ -42,5 +42,5 @@ path = "./lib/netty-codec-4.1.71.Final.jar"
 path = "./lib/netty-handler-proxy-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.1.0-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.1.0.jar"
 scope = "testOnly"

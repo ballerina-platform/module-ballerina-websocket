@@ -47,7 +47,7 @@ service class SslProxy {
 
    remote function onTextMessage(Caller wsEp, string text) returns Error? {
        Client? proxyClient = self.wsClientEp;
-       if (proxyClient is Client) {
+       if proxyClient is Client {
            check proxyClient->writeTextMessage(text);
            string proxyData = check proxyClient->readTextMessage();
            check wsEp->writeTextMessage(proxyData);
@@ -56,7 +56,7 @@ service class SslProxy {
 
    remote function onBinaryMessage(Caller wsEp, byte[] data) returns Error? {
        Client? proxyClient = self.wsClientEp;
-       if (proxyClient is Client) {
+       if proxyClient is Client {
            check proxyClient->writeBinaryMessage(data);
            byte[] proxyData = check proxyClient->readBinaryMessage();
            check wsEp->writeBinaryMessage(proxyData);
@@ -88,17 +88,14 @@ service class SslProxyServer {
    }
 
    remote function onTextMessage(Caller caller, string text) {
-       var err = caller->writeTextMessage(text);
-       if (err is Error) {
+       Error? err = caller->writeTextMessage(text);
+       if err is Error {
            io:println("Error occurred when sending text message: ", err);
        }
    }
 
-   remote function onBinaryMessage(Caller caller, byte[] data) {
-       var returnVal = caller->writeBinaryMessage(data);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+   remote function onBinaryMessage(Caller caller, byte[] data) returns error? {
+       check caller->writeBinaryMessage(data);
    }
 }
 
