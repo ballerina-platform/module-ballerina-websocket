@@ -1,6 +1,6 @@
 # Proposal: Implement readMessage API for WebSocket client
 
-_Owners_: @shafreenAnfar @bhashinee
+_Owners_: @shafreenAnfar @bhashinee  
 _Reviewers_: @shafreenAnfar    
 _Created_: 2021/11/01  
 _Updated_: 2021/11/01  
