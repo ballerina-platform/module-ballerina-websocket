@@ -46,25 +46,25 @@ public function testSyncClientByteArray() returns Error? {
    @strand {
       thread:"any"
    }
-   worker w1 {
+   worker w1 returns error? {
       io:println("Reading message starting: sync byte[] client");
-      byte[] resp1 = checkpanic wsClient->readBinaryMessage();
+      byte[] resp1 = check wsClient->readBinaryMessage();
       aggregatedByteOutput = aggregatedByteOutput + resp1.toString();
       io:println("1st response received at sync byte[] client :" + resp1.toString());
 
-      byte[] resp2 = checkpanic wsClient->readBinaryMessage();
+      byte[] resp2 = check wsClient->readBinaryMessage();
       aggregatedByteOutput = aggregatedByteOutput + resp2.toString();
       io:println("2nd response received at sync byte[] client :" + resp2.toString());
 
-      byte[] resp3 = checkpanic wsClient->readBinaryMessage();
+      byte[] resp3 = check wsClient->readBinaryMessage();
       aggregatedByteOutput = aggregatedByteOutput + resp3.toString();
       io:println("3rd response received at sync byte[] client :" + resp3.toString());
 
-      byte[] resp4 = checkpanic wsClient->readBinaryMessage();
+      byte[] resp4 = check wsClient->readBinaryMessage();
       aggregatedByteOutput = aggregatedByteOutput + resp4.toString();
       io:println("4th response received at sync byte[] client :" + resp4.toString());
 
-      byte[] resp5 = checkpanic wsClient->readBinaryMessage();
+      byte[] resp5 = check wsClient->readBinaryMessage();
       aggregatedByteOutput = aggregatedByteOutput + resp5.toString();
       io:println("final response received at sync byte[] client :" + resp5.toString());
    }
@@ -82,7 +82,7 @@ public function testSyncClientByteArray() returns Error? {
       Error? resp4 = wsClient->writeBinaryMessage("Hello4".toBytes());
       Error? resp5 =  wsClient->writeBinaryMessage("Hello5".toBytes());
    }
-   _ = wait {w1, w2};
+   var waitResp = wait {w1, w2};
    string msg = "[72,101,108,108,111][72,101,108,108,111,50][72,101,108,108,111,51][72,101,108,108,111,52][72,101,108,108,111,53]";
    test:assertEquals(aggregatedByteOutput, msg, msg = "");
    runtime:sleep(2);

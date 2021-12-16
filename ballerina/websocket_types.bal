@@ -18,6 +18,10 @@
 public type Service distinct service object {
 };
 
+# The WebSocket upgrade service type
+public type UpgradeService distinct service object {
+};
+
 # The WebSocket service type to handle ping/pong frames
 public type PingPongService distinct isolated service object {
 };

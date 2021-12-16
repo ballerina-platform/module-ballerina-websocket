@@ -28,7 +28,7 @@ service isolated class ClientPingPongCallBackService {
 @test:Config {}
 public function testErrorCallbackService() returns Error? {
     Error|Client wsClient = new("ws://localhost:21057/pingpong", config = {pingPongHandler : new ClientPingPongCallBackService()});
-    if (wsClient is Error) {
+    if wsClient is Error {
         test:assertEquals("Error: The callback service should be a PingPongService", wsClient.message());
     } else {
         test:assertFail("Expected an error in call back service");
