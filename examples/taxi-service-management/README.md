@@ -1,4 +1,4 @@
-# Chat Application
+# Taxi Management Service
 
 ## Overview
 
@@ -7,6 +7,8 @@ There are three parties involved:
 1. Taxi Management Service — The intermediate WebSocket server. Use the server application.
 2. Drivers — Use the driver application
 3. Riders — Use the rider application
+
+![Taxi Management Service](./taxi.jpeg)
 
 Drivers and riders can register for the Taxi Management Service. Assume that the drivers and riders are given separate applications to register. Starting that application will register the drivers and riders. Then the drivers’ locations will be shared with riders. 
 
