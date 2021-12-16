@@ -1,6 +1,6 @@
 # Specification: Ballerina WebSocket Library
 
-_Owners_: @shafreenAnfar @bhashinee 
+_Owners_: @shafreenAnfar @bhashinee  
 _Reviewers_: @shafreenAnfar    
 _Created_: 2021/12/09  
 _Updated_: 2021/12/09  
@@ -56,7 +56,7 @@ Upgrade service is pretty much similar to an HTTP service. It has a single `get`
 
 ### 3.2. [WebSocket Service](#32-websocket-service)
 
-Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
+Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions that do not have any configs. Receiving messages will get dispatched to the relevant remote function. Each remote function is explained below.
 
 ```ballerina
 service /ws on new websocket:Listener(21003) {
