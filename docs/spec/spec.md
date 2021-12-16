@@ -39,11 +39,11 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service at the given service path. It is also worth noting that upgrade service is quite similar to an HTTP service.
 ## 3. [Service Types](#3-service-types)
 
-### 3.1 [UpgradeService](#31-upgrade-service)
+### 3.1. [UpgradeService](#31-upgrade-service)
 
 Upgrade service is pretty much similar to an HTTP service. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
 
-### 3.2 [WebSocket Service](#32-websocket-service)
+### 3.2. [WebSocket Service](#32-websocket-service)
 
 Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions(onTextMessage, onBinaryMessage, onError, onOpen, onIdleTimeout, onClose, onPing, onPong) that do not have any configs. Receiving messages will get dispatched to the relevant remote function. 
 
