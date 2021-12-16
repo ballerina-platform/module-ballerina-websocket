@@ -26,6 +26,16 @@ cloud that makes it easier to use, combine, and create network services.
        * [onClose](#onclose)
        * [onError](#onerror)
 4. [Client](#4-client)
+   * 4.1. [Send and receive messages using the Client](#41-send-and-receive-messages-using-the-client)
+     * [writeTextMessage](#writetextmessage)
+     * [writeBinaryMessage](#writebinarymessage)
+     * [readTextMessage](#readtextmessage)
+     * [readBinaryMessage](#readbinarymessage)
+     * [readMessage](#readmessage)
+     * [close](#close)
+     * [ping](#ping)
+     * [pong](#pong)
+     * [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
    * 5.1. [SSL/TLS](#51-ssl-tls)
    * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
@@ -144,9 +154,9 @@ remote function onError(websocket:Caller caller, error err) {
 
 `websocket:Client` can be used to send and receive data synchronously over WebSocket connection. The underlying implementation is non-blocking.
 
-#### Send and receive messages using 'websocket:Client'
+#### 4.1. [Send and receive messages using the Client](#41-send-and-receive-messages-using-the-client)
 
-##### writeTextMessage
+##### [writeTextMessage](#writetextmessage)
 
 ```ballerina
 remote isolated function writeTextMessage(string data) returns Error? {}
@@ -157,7 +167,7 @@ remote isolated function writeTextMessage(string data) returns Error? {}
 check wsClient->writeTextMessage("Text message");
 ```
 
-##### writeBinaryMessage
+##### [writeBinaryMessage](#writebinarymessage)
 
 ```ballerina
 remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
@@ -169,7 +179,7 @@ remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
 check wsClient->writeBinaryMessage("Text message".toBytes());
 ```
 
-##### readTextMessage
+##### [readTextMessage](#readtextmessage)
 
 ```ballerina
 remote isolated function readTextMessage() returns string|Error {}
@@ -180,7 +190,7 @@ remote isolated function readTextMessage() returns string|Error {}
 string textResp = check wsClient->readTextMessage();
 ```
 
-##### readBinaryMessage 
+##### [readBinaryMessage](#readbinarymessage)
 
 ```ballerina
 remote isolated function readBinaryMessage() returns byte[]|Error {}
@@ -192,7 +202,7 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 byte[] textResp = check wsClient->readBinaryMessage();
 ```
 
-##### readMessage
+##### [readMessage](#readmessage)
 
 ```ballerina
 remote isolated function readMessage() returns string|byte[]|Error {}
@@ -211,7 +221,7 @@ if (data is string) {
 }
 ```
 
-##### close
+##### [close](#close)
 
 ```ballerina
 remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {}
@@ -223,7 +233,7 @@ remote isolated function close(int? statusCode = 1000, string? reason = (), deci
 check wsClient->close();
 ```
 
-##### ping
+##### [ping](#ping)
 
 ```ballerina
 remote isolated function ping(byte[] data) returns Error? {}
@@ -235,7 +245,7 @@ remote isolated function ping(byte[] data) returns Error? {}
 check wsClient->ping([5, 24, 56, 243]);
 ```
 
-##### pong
+##### [pong](#pong)
 
 ```ballerina
 remote isolated function pong(byte[] data) returns Error? {}
@@ -247,7 +257,7 @@ remote isolated function pong(byte[] data) returns Error? {}
 check wsClient->pong([5, 24, 56, 243]);
 ```
 
-##### onPing and onPong remote methods
+##### [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
 
 To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote functions respectively.
 ```ballerina
