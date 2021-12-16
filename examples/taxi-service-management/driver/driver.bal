@@ -21,10 +21,10 @@ import ballerina/websocket;
 
 public function main() returns error? {
     string username = io:readln("Enter username: ");
-    websocket:Client wsClient = check new(string `ws://localhost:9091/taxi/${username}`);
-    string connectedMsg = check wsClient->readTextMessage();
+    websocket:Client driverClient = check new(string `ws://localhost:9091/taxi/${username}`);
+    string connectedMsg = check driverClient->readTextMessage();
     io:println(connectedMsg);
-    check updateLocation(wsClient);
+    check updateLocation(driverClient);
 }
 
 // This function simulates a real time gps location updates. 

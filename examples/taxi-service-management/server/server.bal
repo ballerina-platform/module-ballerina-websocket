@@ -55,7 +55,7 @@ isolated service class DriverService {
         worker broadcast returns error? {
             lock {
                 string? driverName = driversMap[caller.getConnectionId()];
-                if (driverName is string) {
+                if driverName is string {
                     string locationUpdateMsg = driverName + " updated the location " + location;
                     // Broadcast the live locations to registered riders.
                     broadcast(locationUpdateMsg);
@@ -108,7 +108,7 @@ isolated function broadcast(string msg) {
     lock {
         foreach var con in clientsMap {
             websocket:Error? err = con->writeTextMessage(msg);
-            if (err is websocket:Error) {
+            if err is websocket:Error {
                 io:println("Error sending message:" + err.message());
             }
         }   
