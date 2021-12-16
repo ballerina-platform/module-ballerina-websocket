@@ -15,15 +15,16 @@ cloud that makes it easier to use, combine, and create network services.
 1. [Overview](#1-overview)
 2. [Listener](#2-listener)
 3. [Service Types](#3-service-types)
-   * 3.1. [Upgrade Service](#31-upgrade-service)
+   * 3.1. [UpgradeService](#31-upgradeservice)
    * 3.2. [WebSocket Service](#32-websocket-service)
-     * [Remote methods associated with websocket:Service](#remote-methods-associated-with-websocket:Service)
-       * [onOpen](#on-open)
-       * [onTextMessage](#on-text-message)
-       * [onBinaryMessage](#on-binary-message)
-       * [onPing and onPong](#ping-pong)
-       * [onIdleTimeout](#on-idle-timeout)
-       * [onClose](#on-close)
+     * 3.2.1. [Remote methods associated with WebSocket Service](#321-remote-methods-associated-with-websocket-service)
+       * [onOpen](#onopen)
+       * [onTextMessage](#ontextmessage)
+       * [onBinaryMessage](#onbinarymessage)
+       * [onPing and onPong](#onping-and-onpong)
+       * [onIdleTimeout](#onidletimeout)
+       * [onClose](#onclose)
+       * [onError](#onerror)
 4. [Client](#4-client)
 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
    * 5.1. [SSL/TLS](#51-ssl-tls)
@@ -62,9 +63,9 @@ service class WsService {
 }              
 ```
 
-#### [Remote methods associated with websocket:Service](#remote-methods-associated-with-websocket:Service)
+#### 3.2.1. [Remote methods associated with WebSocket Service](#remote-methods-associated-with-websocket-service)
 
-##### [onOpen](on-open)
+##### [onOpen](onopen)
 
 As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
@@ -74,7 +75,7 @@ remote function onOpen(websocket:Caller caller) returns error? {
 }
 ```
 
-##### [onTextMessage](#on-text-message)
+##### [onTextMessage](#ontextmessage)
 
 The received text messages are dispatched to this remote method.
 
@@ -84,7 +85,7 @@ remote isolated function onTextMessage(websocket:Caller caller, string text) ret
 }
 ```
 
-##### [onBinaryMessage](#on-binary-message)
+##### [onBinaryMessage](#onbinarymessage)
 
 The received binary messages are dispatched to this remote method.
 
@@ -94,7 +95,7 @@ remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) r
 }
 ```
 
-##### [onPing and onPong](#ping-pong)
+##### [onPing and onPong](#onping-and-onpong)
 
 The received ping and pong messages are dispatched to these remote methods respectively. You do not need to explicitly control these messages as they are handled automatically by the services and clients.
 
@@ -109,7 +110,7 @@ remote function onPong(websocket:Caller caller, byte[] data) {
 }
 ```
 
-##### [onIdleTimeout](#on-idle-timeout)
+##### [onIdleTimeout](#onidletimeout)
 
 This remote method is dispatched when the idle timeout is reached. The idleTimeout has to be configured either in the WebSocket service or the client configuration.
 
@@ -119,7 +120,7 @@ remote function onIdleTimeout(websocket:Client caller) {
 }
 ```
 
-##### [onClose](#on-close)
+##### [onClose](#onclose)
 
 This remote method is dispatched when a close frame with a statusCode and a reason is received.
 
@@ -129,7 +130,7 @@ remote function onClose(websocket:Caller caller, int statusCode, string reason) 
 }
 ```
 
-##### [onError](#on-error)
+##### [onError](#onerror)
 
 This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
 
