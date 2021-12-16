@@ -48,6 +48,32 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 ## 2. [Listener](#2-listener)
 
 The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service at the given service path. It is also worth noting that upgrade service is quite similar to an HTTP service.
+
+## 2.1. [Configurations](#21-configurations)
+
+When initializing the listener, following configurations can be provided,
+```ballerina
+# Provides a set of configurations for HTTP service endpoints.
+#
+# + host - The host name/IP of the endpoint
+# + http1Settings - Configurations related to HTTP/1.x protocol
+# + secureSocket - The SSL configurations for the service endpoint. This needs to be configured in order to
+#                  communicate through WSS.
+# + timeout - Period of time in seconds that a connection waits for a read/write operation in the
+#                     initial upgrade request. Use value 0 to disable timeout
+# + server - The server name which should appear as a response header
+# + webSocketCompressionEnabled - Enable support for compression in WebSocket
+# + requestLimits - Configurations associated with inbound request size limits
+public type ListenerConfiguration record {|
+    string host = "0.0.0.0";
+    ListenerHttp1Settings http1Settings = {};
+    ListenerSecureSocket secureSocket?;
+    decimal timeout = 120;
+    string? server = ();
+    boolean webSocketCompressionEnabled = true;
+    RequestLimitConfigs requestLimits = {};
+|};
+```
 ## 3. [Service Types](#3-service-types)
 
 ### 3.1. [UpgradeService](#31-upgrade-service)
