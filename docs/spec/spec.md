@@ -14,8 +14,11 @@ cloud that makes it easier to use, combine, and create network services.
 # Contents
 1. [Overview](#1-overview)
 2. [Listener](#2-listener)
+   * 2.1. [Listener Configurations](#21-listener-configurations)
+   * 2.2. [Initialization](#22-initialization)
 3. [Service Types](#3-service-types)
    * 3.1. [UpgradeService](#31-upgradeservice)
+     * 3.1.1. [UpgradeService Configurations](#311-upgradeservice-configurations)
    * 3.2. [WebSocket Service](#32-websocket-service)
      * 3.2.1. [Remote methods associated with WebSocket Service](#321-remote-methods-associated-with-websocket-service)
        * [onOpen](#onopen)
@@ -26,7 +29,9 @@ cloud that makes it easier to use, combine, and create network services.
        * [onClose](#onclose)
        * [onError](#onerror)
 4. [Client](#4-client)
-   * 4.1. [Send and receive messages using the Client](#41-send-and-receive-messages-using-the-client)
+   * 4.1. [Client Configurations](#41-client-configurations)
+   * 4.2. [Initialization](#42-initialization)
+   * 4.3. [Send and receive messages using the Client](#43-send-and-receive-messages-using-the-client)
      * [writeTextMessage](#writetextmessage)
      * [writeBinaryMessage](#writebinarymessage)
      * [readTextMessage](#readtextmessage)
@@ -36,10 +41,10 @@ cloud that makes it easier to use, combine, and create network services.
      * [ping](#ping)
      * [pong](#pong)
      * [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
-5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
+6. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
    * 5.1. [SSL/TLS](#51-ssl-tls)
    * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
-6. [Samples](#6-samples)
+7. [Samples](#6-samples)
 
 ## 1. [Overview](#1-overview)
 
@@ -49,7 +54,7 @@ WebSocket is a protocol that allows a long held full-duplex connection between a
 
 The WebSocket listener can be constructed with a port or an http:Listener. When initiating the listener it opens up the port and attaches the upgrade service at the given service path. It is also worth noting that upgrade service is quite similar to an HTTP service.
 
-## 2.1. [Configurations](#21-configurations)
+### 2.1. [Listener Configurations](#21-listener-configurations)
 
 When initializing the listener, following configurations can be provided,
 ```ballerina
@@ -74,11 +79,150 @@ public type ListenerConfiguration record {|
     RequestLimitConfigs requestLimits = {};
 |};
 ```
+
+`ListenerHttp1Settings` record contains the settings related to HTTP/1.x protocol. This is an included record from the HTTP package, and this will only be applicable to the initial WebSocket upgrade request.
+```ballerina
+# Provides settings related to HTTP/1.x protocol.
+public type ListenerHttp1Settings record {|
+    *http:ListenerHttp1Settings;
+|};
+```
+
+The actual `ListenerHttp1Settings` record in the HTTP package contains the following fields.
+
+```ballerina
+# Provides settings related to HTTP/1.x protocol.
+#
+# + keepAlive - Can be set to either `KEEPALIVE_AUTO`, which respects the `connection` header, or `KEEPALIVE_ALWAYS`,
+#               which always keeps the connection alive, or `KEEPALIVE_NEVER`, which always closes the connection
+# + maxPipelinedRequests - Defines the maximum number of requests that can be processed at a given time on a single
+#                          connection. By default 10 requests can be pipelined on a single connection and user can
+#                          change this limit appropriately.
+public type ListenerHttp1Settings record {|
+    KeepAlive keepAlive = KEEPALIVE_AUTO;
+    int maxPipelinedRequests = MAX_PIPELINED_REQUESTS;
+|};
+```
+
+`ListenerSecureSocket` record contains configurations related to enabling SSL/TLS on the listener side, and it is an included record from the HTTP package. More details and examples of how to configure them can be found in a following section on `Securing the WebSocket Connections`.
+```ballerina
+# Configures the SSL/TLS options to be used for WebSocket service.
+public type ListenerSecureSocket record {|
+    *http:ListenerSecureSocket;
+|};
+```
+
+The actual `ListenerSecureSocket` record in the HTTP package contains the following fields.
+```ballerina
+# Configures the SSL/TLS options to be used for HTTP service.
+#
+# + key - Configurations associated with `crypto:KeyStore` or combination of certificate and (PKCS8) private key of the server
+# + mutualSsl - Configures associated with mutual SSL operations
+# + protocol - SSL/TLS protocol related options
+# + certValidation - Certificate validation against OCSP_CRL, OCSP_STAPLING related options
+# + ciphers - List of ciphers to be used
+#             eg: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+# + shareSession - Enable/Disable new SSL session creation
+# + handshakeTimeout - SSL handshake time out
+# + sessionTimeout - SSL session time out
+public type ListenerSecureSocket record {|
+    crypto:KeyStore|CertKey key;
+    record {|
+        VerifyClient verifyClient = REQUIRE;
+        crypto:TrustStore|string cert;
+    |} mutualSsl?;
+    record {|
+        Protocol name;
+        string[] versions = [];
+    |} protocol?;
+    record {|
+        CertValidationType 'type = OCSP_STAPLING;
+        int cacheSize;
+        int cacheValidityPeriod;
+    |} certValidation?;
+    string[] ciphers = ["TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+                        "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+                        "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                        "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"];
+    boolean shareSession = true;
+    decimal handshakeTimeout?;
+    decimal sessionTimeout?;
+|};
+```
+
+`RequestLimitConfigs` record represents configurations related to maximum sizes of URI, headers and entity body which is also an included record from the hTTP package as this will only be applicable to the initial WebSocket upgrade request.
+```ballerina
+# Provides inbound request URI, total header and entity body size threshold configurations.
+public type RequestLimitConfigs record {|
+    *http:RequestLimitConfigs;
+|};
+```
+
+The actual `RequestLimitConfigs` record in the HTTP package contains the following fields.
+```ballerina
+# Provides inbound request URI, total header and entity body size threshold configurations.
+#
+# + maxUriLength - Maximum allowed length for a URI. Exceeding this limit will result in a `414 - URI Too Long`
+#                  response
+# + maxHeaderSize - Maximum allowed size for headers. Exceeding this limit will result in a
+#                   `431 - Request Header Fields Too Large` response
+# + maxEntityBodySize - Maximum allowed size for the entity body. By default it is set to -1 which means there
+#                       is no restriction `maxEntityBodySize`, On the Exceeding this limit will result in a
+#                       `413 - Payload Too Large` response
+public type RequestLimitConfigs record {|
+    int maxUriLength = 4096;
+    int maxHeaderSize = 8192;
+    int maxEntityBodySize = -1;
+|};
+```
+### 2.2. [Initialization](#22-initialization)
+
+The WebSocket listener can be initialized by providing the `port` or a `http:Listener` and optionally a `ListenerConfiguration`.
+```ballerina
+# Gets invoked during the module initialization to initialize the listener.
+# ```ballerina
+# listener websocket:Listener securedEP = new(9090,
+#   secureSocket = {
+#       key: {
+#           certFile: "../resource/path/to/public.crt",
+#           keyFile: "../resource/path/to/private.key"
+#       }
+#   }
+# );
+# ```
+#
+# + port - Listening port of the WebSocket service listener
+# + config - Configurations for the WebSocket service listener
+public isolated function init(int|http:Listener 'listener, *ListenerConfiguration config) returns Error? {
+```
+
 ## 3. [Service Types](#3-service-types)
 
 ### 3.1. [UpgradeService](#31-upgrade-service)
 
 Upgrade service is pretty much similar to an HTTP service. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
+
+#### 3.1.1. [UpgradeService Configurations](#311-upgradeservice-configurations)
+
+When writing the service, following configurations can be provided,
+```ballerina
+# Configurations for a WebSocket service.
+#
+# + subProtocols - Negotiable sub protocol by the service
+# + idleTimeout - Idle timeout for the client connection. Upon timeout, `onIdleTimeout` resource (if defined)
+#                          in the server service will be triggered. Note that this overrides the `timeout` config
+#                          in the `websocket:Listener` which is applicable only for the initial HTTP upgrade request.
+# + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
+#                  If this is not set or is negative or zero, the default frame size which is 65536 will be used.
+# + auth - Listener authenticaton configurations
+public type WSServiceConfig record {|
+    string[] subProtocols = [];
+    decimal idleTimeout = 0;
+    int maxFrameSize = 65536;
+    ListenerAuthConfig[] auth?;
+|};
+```
 
 ### 3.2. [WebSocket Service](#32-websocket-service)
 
@@ -180,126 +324,205 @@ remote function onError(websocket:Caller caller, error err) {
 
 `websocket:Client` can be used to send and receive data synchronously over WebSocket connection. The underlying implementation is non-blocking.
 
-#### 4.1. [Send and receive messages using the Client](#41-send-and-receive-messages-using-the-client)
+### 4.1. [Client Configurations](#41-client-configurations)
 
-##### [writeTextMessage](#writetextmessage)
-
+When initializing the client, following configurations can be provided,
 ```ballerina
-remote isolated function writeTextMessage(string data) returns Error? {}
+# Client configurations for WebSocket clients.
+#
+# + subProtocols - Negotiable sub protocols of the client
+# + customHeaders - Custom headers, which should be sent to the server
+# + readTimeout - Read timeout (in seconds) of the client
+# + secureSocket - SSL/TLS-related options
+# + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
+#                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used
+# + webSocketCompressionEnabled - Enable support for compression in the WebSocket
+# + handShakeTimeout - Time (in seconds) that a connection waits to get the response of
+#                               the WebSocket handshake. If the timeout exceeds, then the connection is terminated with
+#                               an error. If the value < 0, then the value sets to the default value(300)
+# + cookies - An Array of `http:Cookie`
+# + auth - Configurations related to client authentication
+# + pingPongHandler - A service to handle the ping/pong frames.
+#                     Resources in this service gets called on the receipt of ping/pong frames from the server
+public type ClientConfiguration record {|
+    string[] subProtocols = [];
+    map<string> customHeaders = {};
+    decimal readTimeout = -1;
+    ClientSecureSocket? secureSocket = ();
+    int maxFrameSize = 65536;
+    boolean webSocketCompressionEnabled = true;
+    decimal handShakeTimeout = 300;
+    http:Cookie[] cookies?;
+    ClientAuthConfig auth?;
+    PingPongService pingPongHandler?;
+|};
 ```
+### 4.2. [Initialization](#42-initialization)
+
+A client can be initialized by providing the WebSocket server url and the `ClientConfiguration`.
+```ballerina
+# Initializes the synchronous client when called.
+# ```ballerina
+# websocket:Client wsClient = check new("ws://localhost:9090/foo", { retryConfig: { maxCount: 20 } });
+# ```
+#
+# + url - URL of the target service
+# + config - The configurations to be used when initializing the client
+public isolated function init(string url, *ClientConfiguration config) returns Error? {
+```
+
+### 4.3. [Send and receive messages using the Client](#43-send-and-receive-messages-using-the-client)
+
+#### [writeTextMessage](#writetextmessage)
+
 `writeTextMessage` API can be used to send a text message. It takes in the message to be sent as a `string` and returns an error if an error occurs while sending the text message to the connection.
 
 ```ballerina
-   check wsClient->writeTextMessage("Text message");
+# Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
+# will be lost.
+# ```ballerina
+# check wsClient->writeTextMessage("Text message");
+# ```
+#
+# + data - Data to be sent.
+# + return  - A `websocket:Error` if an error occurs when sending
+remote isolated function writeTextMessage(string data) returns Error? {}
 ```
 
-##### [writeBinaryMessage](#writebinarymessage)
-
-```ballerina
-remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
-```
+#### [writeBinaryMessage](#writebinarymessage)
 
 `writeBinaryMessage` API can be used to send a binary message. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the binary message to the connection.
 
 ```ballerina
-   check wsClient->writeBinaryMessage("Text message".toBytes());
+# Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
+# that message will be lost.
+# ```ballerina
+# check wsClient->writeBinaryMessage("Text message".toBytes());
+# ```
+#
+# + data - Binary data to be sent
+# + return  - A `websocket:Error` if an error occurs when sending
+remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
 ```
 
-##### [readTextMessage](#readtextmessage)
+#### [readTextMessage](#readtextmessage)
+
+`readTextMessage` API can be used to receive a text message. It returns the complete text message as a `string` or else an error if an error occurs while reading the messages.
 
 ```ballerina
+# Reads text messages in a synchronous manner
+# ```ballerina
+# string textResp = check wsClient->readTextMessage();
+# ```
+#
+# + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
 remote isolated function readTextMessage() returns string|Error {}
 ```
 
-`readTextMessage` API can be used to receive a text message. It returns the complete text message as a `string` or else an error if an error occurs while reading the messages.
-```ballerina
-   string textResp = check wsClient->readTextMessage();
-```
-
-##### [readBinaryMessage](#readbinarymessage)
-
-```ballerina
-remote isolated function readBinaryMessage() returns byte[]|Error {}
-```
+#### [readBinaryMessage](#readbinarymessage)
 
 `readBinaryMessage` API can be used to receive a binary message. It returns the complete binary message as a `byte[]` or else an error if an error occurs while reading the messages.
 
 ```ballerina
-   byte[] textResp = check wsClient->readBinaryMessage();
+# Reads binary data in a synchronous manner
+# ```ballerina
+# byte[] textResp = check wsClient->readBinaryMessage();
+# ```
+#
+# + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
+remote isolated function readBinaryMessage() returns byte[]|Error {}
 ```
 
-##### [readMessage](#readmessage)
-
-```ballerina
-remote isolated function readMessage() returns string|byte[]|Error {}
-```
+#### [readMessage](#readmessage)
 
 `readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
 
 ```ballerina
-   byte[]|string|websocket:Error data = wsClient->readMessage();
-   if (data is string) {
-       io:println(data);
-   } else if (data is byte[]) {
-       io:println(data);
-   } else {
-       io:println("Error occurred", data.message());
-   }
+# Reads data from the WebSocket connection
+# ```ballerina
+# byte[]|string|websocket:Error data = wsClient->readMessage();
+# if (data is string) {
+#     io:println(data);
+# } else if (data is byte[]) {
+#     io:println(data);
+# } else {
+#     io:println("Error occurred", data.message());
+# }
+#```
+#
+# + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
+#            if an error occurs when receiving
+remote isolated function readMessage() returns string|byte[]|Error {}
 ```
 
-##### [close](#close)
-
-```ballerina
-remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {}
-```
+#### [close](#close)
 
 `close` API can be used to close the connection. It takes in the optional parameters `statusCode` for closing the connection, `reason` for closing the connection if there is any and the `timeout` to wait until a close frame is received from the remote endpoint.
 
 ```ballerina
-   check wsClient->close();
+# Closes the connection.
+# ```ballerina
+# check wsClient->close();
+# ```
+#
+# + statusCode - Status code for closing the connection
+# + reason - Reason for closing the connection
+# + timeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
+#                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
+#                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
+#                   waits until a close frame is received. If the WebSocket frame is received from the remote
+#                   endpoint within the waiting period, the connection is terminated immediately.
+# + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
+remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {}
 ```
 
-##### [ping](#ping)
-
-```ballerina
-remote isolated function ping(byte[] data) returns Error? {}
-```
+#### [ping](#ping)
 
 `ping` API can be used to send ping messages. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the ping message to the connection.
 
 ```ballerina
-   check wsClient->ping([5, 24, 56, 243]);
+# Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
+# ```ballerina
+# check wsClient->ping([5, 24, 56, 243]);
+# ```
+#
+# + data - Binary data to be sent
+# + return  - A `websocket:Error` if an error occurs when sending
+remote isolated function ping(byte[] data) returns Error? {}
 ```
 
-##### [pong](#pong)
-
-```ballerina
-remote isolated function pong(byte[] data) returns Error? {}
-```
+#### [pong](#pong)
 
 `pong` API can be used to send pong messages. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the pong message to the connection.
 
 ```ballerina
-   check wsClient->pong([5, 24, 56, 243]);
+# Sends a pong message to the connection. If an error occurs while sending the pong frame to the connection, that
+# the frame will be lost.
+# ```ballerina
+# check wsClient->pong([5, 24, 56, 243]);
+# ```
+#
+# + data - Binary data to be sent
+# + return  - A `websocket:Error` if an error occurs when sending
+remote isolated function pong(byte[] data) returns Error? {}
 ```
 
-##### [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
+#### [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
 
 To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote functions respectively.
 ```ballerina
-   service class PingPongService {
-       *websocket:PingPongService;
-       remote function onPong(websocket:Caller wsEp, byte[] data) {
-           io:println("Pong received", data);
-       }
-       
-       remote isolated function onPing(websocket:Caller caller, byte[] localData) returns byte[] {
-           return localData;
-       }    
-       
+service class PingPongService {
+   *websocket:PingPongService;
+   remote function onPong(websocket:Caller wsEp, byte[] data) {
+       io:println("Pong received", data);
    }
    
-   websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
+   remote isolated function onPing(websocket:Caller caller, byte[] localData) returns byte[] {
+       return localData;
+   }    
+}
+
+websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
 ```
 If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
 
