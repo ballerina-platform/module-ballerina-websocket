@@ -19,7 +19,6 @@ import ballerina/io;
 import ballerina/websocket;
 
 listener websocket:Listener taxiMgtListener = new websocket:Listener(9091);
-isolated map<string> driversMap = {};
 isolated map<websocket:Caller> clientsMap = {};
 
 // This service is for drivers to register and send locations.
@@ -41,9 +40,6 @@ isolated service class DriverService {
     remote isolated function onOpen(websocket:Caller caller) returns websocket:Error? {
         string welcomeMsg = "Hi " + self.driverName + "! Your location will be shared with the riders";
         check caller->writeTextMessage(welcomeMsg);
-        lock {
-            driversMap[caller.getConnectionId()] = self.driverName;
-        }
         broadcast("Driver " + self.driverName + " ready for a ride");
     }
 
@@ -53,21 +49,14 @@ isolated service class DriverService {
             thread:"any"
         }
         worker broadcast returns error? {
-            lock {
-                string? driverName = driversMap[caller.getConnectionId()];
-                if driverName is string {
-                    string locationUpdateMsg = driverName + " updated the location " + location;
-                    // Broadcast the live locations to registered riders.
-                    broadcast(locationUpdateMsg);
-                }
-            }
+            string locationUpdateMsg = self.driverName + " updated the location " + location;
+            // Broadcast the live locations to registered riders.
+            broadcast(locationUpdateMsg);
         }
     }
 
     remote isolated function onClose(websocket:Caller caller, int statusCode, string reason) {
-        lock {
-            _ = driversMap.remove(caller.getConnectionId());
-        }
+        io:println(self.driverName + " got disconnected");
     }
 }
 
