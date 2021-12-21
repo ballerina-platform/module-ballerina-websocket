@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/auth;
+import ballerina/http;
 import ballerina/jwt;
 import ballerina/oauth2;
 
@@ -139,3 +140,7 @@ public type ListenerAuthConfig FileUserStoreConfigWithScopes|
                                LdapUserStoreConfigWithScopes|
                                JwtValidatorConfigWithScopes|
                                OAuth2IntrospectionConfigWithScopes;
+
+// Defines the listener authentication handlers.
+type ListenerAuthHandler http:ListenerFileUserStoreBasicAuthHandler|http:ListenerLdapUserStoreBasicAuthHandler|
+                         http:ListenerJwtAuthHandler|http:ListenerOAuth2Handler;
