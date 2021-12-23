@@ -41,10 +41,10 @@ cloud that makes it easier to use, combine, and create network services.
      * [ping](#ping)
      * [pong](#pong)
      * [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
-6. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
+5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
    * 5.1. [SSL/TLS](#51-ssl-tls)
    * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
-7. [Samples](#6-samples)
+6. [Samples](#6-samples)
 
 ## 1. [Overview](#1-overview)
 
@@ -245,7 +245,7 @@ service class WsService {
 
 #### 3.2.1. [Remote methods associated with WebSocket Service](#remote-methods-associated-with-websocket-service)
 
-##### [onOpen](onopen)
+##### [onOpen](#onopen)
 
 As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
@@ -359,7 +359,7 @@ public type ClientConfiguration record {|
 ```
 ### 4.2. [Initialization](#42-initialization)
 
-A client can be initialized by providing the WebSocket server url and the `ClientConfiguration`.
+A client can be initialized by providing the WebSocket server url and optionally the `ClientConfiguration`.
 ```ballerina
 # Initializes the synchronous client when called.
 # ```ballerina
