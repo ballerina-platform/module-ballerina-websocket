@@ -5,7 +5,7 @@ version = "@toml.version@"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
-icon = "resources/icon.png"
+icon = "icon.png"
 license = ["Apache-2.0"]
 distribution = "slbeta6"
 
