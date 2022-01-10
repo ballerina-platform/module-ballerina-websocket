@@ -58,7 +58,9 @@ public class WebSocketUpgradeServiceValidator {
 
     void validate() {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
-        if (serviceDeclarationNode.members().isEmpty()) {
+        boolean hasRemoteService = serviceDeclarationNode.members().stream().anyMatch(child ->
+                child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION);
+        if (serviceDeclarationNode.members().isEmpty() || !hasRemoteService) {
             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getErrorCode(),
                     PluginConstants.CompilationErrors.TEMPLATE_CODE_GENERATION_HINT.getError(),
