@@ -51,36 +51,36 @@ public function testSyncClient() returns Error? {
                                subProtocols: ["xml"], maxFrameSize: 2147483650, readTimeout: 2147483650
                            });
    string? protocol = wsClient.getNegotiatedSubProtocol();
-   if (protocol is string) {
+   if protocol is string {
        subProtocol = protocol;
    }
    @strand {
       thread:"any"
    }
-   worker w1 {
+   worker w1 returns error? {
       io:println("Reading message starting: sync text client. Connection id" + wsClient.getConnectionId());
       connId1 = wsClient.getConnectionId();
-      string resp1 = checkpanic wsClient->readTextMessage();
+      string resp1 = check wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp1;
       io:println("1st response received at sync text client :" + resp1);
 
       wsClient.setAttribute("test", "testSyncClient");
 
-      var resp2 = checkpanic wsClient->readTextMessage();
+      string resp2 = check wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp2;
       io:println("2nd response received at sync text client :" + resp2);
 
-      var resp3 = checkpanic wsClient->readTextMessage();
+      string resp3 = check wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp3;
       io:println("3rd response received at sync text client :" + resp3);
 
       runtime:sleep(3);
 
-      var resp4 = checkpanic wsClient->readTextMessage();
+      string resp4 = check wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp4;
       io:println("4th response received at sync text client :" + resp4);
 
-      var resp5 = checkpanic wsClient->readTextMessage();
+      string resp5 = check wsClient->readTextMessage();
       aggregatedTextOutput = aggregatedTextOutput + resp5;
       io:println("Final response received at sync text client :" + resp5);
    }
@@ -99,7 +99,7 @@ public function testSyncClient() returns Error? {
       Error? resp4 = wsClient->writeTextMessage("Hi world4");
       Error? resp5 = wsClient->writeTextMessage("Hi world5");
    }
-   _ = wait {w1, w2};
+   var waitResp = wait {w1, w2};
    string msg = "Hi world1Hi world2Hi world3Hi world4Hi world5";
    test:assertEquals(aggregatedTextOutput, msg);
    test:assertEquals(wsClient.isSecure(), false);

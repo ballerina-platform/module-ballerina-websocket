@@ -44,7 +44,7 @@ service class WsService71 {
 @test:Config {}
 public function testHandshakeTimeoutError() returns Error? {
    Client|Error wsClient = new("ws://localhost:21076/onTextString", { handShakeTimeout: 1 });
-   if (wsClient is Client) {
+   if wsClient is Client {
       test:assertFail("Expected a handshake timeout error");
    } else {
       io:println(wsClient.message());
@@ -56,10 +56,10 @@ public function testHandshakeTimeoutError() returns Error? {
 @test:Config {}
 public function testResetTimeoutAfterHandshake() returns Error? {
    Client|Error wsClient = new("ws://localhost:21076/onTextString", { handShakeTimeout: 4 });
-   if (wsClient is Client) {
+   if wsClient is Client {
        check wsClient->writeTextMessage("Hello Ballerina");
        Error|string data = wsClient->readTextMessage();
-       if (data is string) {
+       if data is string {
           test:assertEquals("Hello Ballerina", data);
        } else {
           test:assertFail("Should read the content without any error");

@@ -10,7 +10,7 @@ on:
         required: false
       clusterName:
         description: 'Cluster name'
-        default: 'bal-perf-cluster-test'
+        default: 'websocket-perf-cluster-test'
         required: false
 
 jobs:
@@ -33,4 +33,4 @@ jobs:
           repo: ballerina-platform/ballerina-performance-cloud
           ref: refs/heads/main
           token: ${{ secrets.BALLERINA_BOT_TOKEN }}
-          inputs: '{ "repo-name": "module-ballerina-websocket", "tests": "${{ github.event.inputs.tests }}", "zipURL": ${{ steps.setRuntimeUrl.outputs.runtimeUrl}}, "clusterName": "${{ github.event.inputs.clusterName }}" }'
+          inputs: '{ "repo-name": "module-ballerina-websocket", "tests": "${{ github.event.inputs.tests }}", "zipURL": ${{ steps.setRuntimeUrl.outputs.runtimeUrl}}, "clusterName": "${{ github.event.inputs.clusterName }}", "dispatchType": "websocket-load-test" }'

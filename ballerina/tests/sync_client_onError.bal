@@ -48,7 +48,7 @@ public function testSyncClientError() returns Error? {
         io:println("Reading message starting: sync error client");
 
         string|Error resp1 = wsClient->readTextMessage();
-        if (resp1 is Error) {
+        if resp1 is Error {
             corruptedFrameError = resp1.message();
         } else {
             io:println("1st response received at sync close client :" + resp1);
