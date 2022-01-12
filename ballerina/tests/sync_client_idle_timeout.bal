@@ -50,13 +50,13 @@ public function testSyncIdleTimeOutError() returns Error? {
         io:println("Reading message starting: sync idle timeout client");
 
         string|Error resp1 = wsClient->readTextMessage();
-        if (resp1 is Error) {
+        if resp1 is Error {
             idleTimeOutError = resp1.message();
         } else {
             io:println("1st response received at sync idle timeout client :" + resp1);
         }
         string|Error resp2 = wsClient->readTextMessage();
-        if (resp2 is Error) {
+        if resp2 is Error {
             idleTimeOutError = resp2.message();
         } else {
             secondReadResp = resp2;

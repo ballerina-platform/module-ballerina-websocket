@@ -18,10 +18,10 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.num_threads">10</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">10</stringProp>
+        <stringProp name="ThreadGroup.duration">900</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
@@ -31,7 +31,7 @@
           <eu.luminis.jmeter.wssampler.OpenWebSocketSampler guiclass="eu.luminis.jmeter.wssampler.OpenWebSocketSamplerGui" testclass="eu.luminis.jmeter.wssampler.OpenWebSocketSampler" testname="WebSocket Open Connection" enabled="true">
             <boolProp name="TLS">false</boolProp>
             <stringProp name="server">bal.perf.test</stringProp>
-            <stringProp name="port">9090</stringProp>
+            <stringProp name="port">80</stringProp>
             <stringProp name="path">/chat/bhashinee</stringProp>
             <stringProp name="connectTimeout">999999</stringProp>
             <stringProp name="readTimeout">60000</stringProp>

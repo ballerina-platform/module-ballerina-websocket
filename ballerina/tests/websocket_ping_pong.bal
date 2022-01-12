@@ -33,29 +33,23 @@ service class ServerPingPongService {
    remote isolated function onOpen(Caller caller) {
    }
 
-   remote isolated function onPing(Caller caller, byte[] localData) {
-       var returnVal = caller->pong(localData);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+   remote isolated function onPing(Caller caller, byte[] localData) returns error? {
+       check caller->pong(localData);
    }
 
-   remote isolated function onPong(Caller caller, byte[] localData) {
-       var returnVal = caller->ping(localData);
-       if (returnVal is Error) {
-           panic <error>returnVal;
-       }
+   remote isolated function onPong(Caller caller, byte[] localData) returns error? {
+       check caller->ping(localData);
    }
 }
 
 service isolated class pingPongCallbackService {
    *PingPongService;
    remote function onPing(Caller wsEp, byte[] localData) {
-       expectedPongData1 = <@untainted>localData;
+       expectedPongData1 = localData;
    }
 
    remote function onPong(Caller wsEp, byte[] localData) {
-       expectedPongData = <@untainted>localData;
+       expectedPongData = localData;
    }
 }
 

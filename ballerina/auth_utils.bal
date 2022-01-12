@@ -18,46 +18,46 @@ import ballerina/auth;
 import ballerina/jwt;
 import ballerina/log;
 import ballerina/oauth2;
+import ballerina/regex;
 
 // Call relevant auth handling function based on the provided configurations
 isolated function initClientAuth(ClientConfiguration config) returns AuthError? {
     ClientAuthConfig? authConfig = config?.auth;
-    if (authConfig is ()) {
+    if authConfig is () {
        return;
-    } else if (authConfig is CredentialsConfig) {
-        check handleClientBasicAuth(authConfig, config);
-    } else if (authConfig is BearerTokenConfig) {
-        handleClientBearerTokenAuth(authConfig, config);
-    } else if (authConfig is JwtIssuerConfig) {
-        check handleClientSelfSignedJwtAuth(authConfig, config);
+    } else if authConfig is CredentialsConfig {
+        return handleClientBasicAuth(authConfig, config);
+    } else if authConfig is BearerTokenConfig {
+        return handleClientBearerTokenAuth(authConfig, config);
+    } else if authConfig is JwtIssuerConfig {
+        return handleClientSelfSignedJwtAuth(authConfig, config);
     } else {
-        check handleClientOAuth2(authConfig, config);
+        return handleClientOAuth2(authConfig, config);
     }
-    return ();
 }
 
 isolated function handleClientSelfSignedJwtAuth(JwtIssuerConfig config, ClientConfiguration clientConfig)
                      returns AuthError? {
     jwt:ClientSelfSignedJwtAuthProvider provider = new(config);
     string|jwt:Error jwtToken = provider.generateToken();
-    if (jwtToken is jwt:Error) {
+    if jwtToken is jwt:Error {
         return prepareClientAuthError("Failed to enrich request with JWT.", jwtToken);
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, jwtToken);
     }
-    return ();
+    return;
 }
 
 isolated function handleClientBasicAuth(CredentialsConfig config, ClientConfiguration clientConfig)
                        returns AuthError? {
     auth:ClientBasicAuthProvider provider = new(config);
     string|auth:Error basicAuthToken = provider.generateToken();
-    if (basicAuthToken is auth:Error) {
+    if basicAuthToken is auth:Error {
         return prepareClientAuthError("Failed to enrich request with Basic Auth token.", basicAuthToken);
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BASIC, basicAuthToken);
     }
-    return ();
+    return;
 }
 
 isolated function handleClientBearerTokenAuth(BearerTokenConfig config, ClientConfiguration clientConfig) {
@@ -68,12 +68,12 @@ isolated function handleClientOAuth2(OAuth2GrantConfig config, ClientConfigurati
                         returns AuthError? {
     oauth2:ClientOAuth2Provider provider = new(config);
     string|oauth2:Error oauthToken = provider.generateToken();
-    if (oauthToken is oauth2:Error) {
+    if oauthToken is oauth2:Error {
         return prepareClientAuthError("Failed to enrich request with OAuth2 token.", oauthToken);
     } else {
         setAuthHeader(clientConfig, AUTH_SCHEME_BEARER, oauthToken);
     }
-    return ();
+    return;
 }
 
 isolated function setAuthHeader(ClientConfiguration clientConfig, string authScheme, string token) {
@@ -82,10 +82,15 @@ isolated function setAuthHeader(ClientConfiguration clientConfig, string authSch
     clientConfig[CUSTOM_HEADERS] = headers;
 }
 
+// Extract the scheme from `string` header.
+isolated function extractScheme(string header) returns string {
+    return regex:split(header, " ")[0];
+}
+
 // Logs and prepares the `error` as an `websocket:AuthError`.
 isolated function prepareClientAuthError(string message, error? err = ()) returns AuthError {
     log:printError(message, 'error = err);
-    if (err is error) {
+    if err is error {
         return error AuthError(message + " " + err.message(), err);
     }
     return error AuthError(message);

@@ -52,13 +52,14 @@ public class CodeSnippetGenerationCodeActionTest extends AbstractCodeActionTest 
     @DataProvider
     private Object[][] testDataProvider() {
         return new Object[][]{
-                {"service.bal", 2, 8, getExpectedCodeAction(), "result.bal"}
+                {"service.bal", 2, 8, getExpectedCodeAction("service.bal", 2, 47), "result.bal"},
+                {"service2.bal", 2, 8, getExpectedCodeAction("service2.bal", 5, 1), "result2.bal"}
         };
     }
 
-    private CodeActionInfo getExpectedCodeAction() {
-        LineRange lineRange = LineRange.from("service.bal", LinePosition.from(2, 0),
-                LinePosition.from(2, 47));
+    private CodeActionInfo getExpectedCodeAction(String filePath, int line, int offset) {
+        LineRange lineRange = LineRange.from(filePath, LinePosition.from(2, 0),
+                LinePosition.from(line, offset));
         CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION, lineRange);
         CodeActionInfo codeAction = CodeActionInfo.from("Insert service template", List.of(locationArg));
         codeAction.setProviderName("WEBSOCKET_107/ballerina/websocket/ADD_RESOURCE_CODE_SNIPPET");

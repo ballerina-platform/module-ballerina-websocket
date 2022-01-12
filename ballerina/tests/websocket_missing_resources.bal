@@ -35,7 +35,7 @@ service /onlyOnBinary on l17 {
 service class OnlyOnBinary {
   *Service;
    remote function onBinaryMessage(Caller caller, byte[] data) returns Error? {
-       binData = <@untainted>data;
+       binData = data;
    }
 }
 
@@ -50,22 +50,22 @@ service /onlyOnText on l25 {
 service class OnlyOnText {
    *Service;
    remote function onTextMessage(Caller caller, string data) returns Error? {
-       expectedData = <@untainted>data;
+       expectedData = data;
    }
 }
 
 service class callbackService {
    *Service;
    remote function onTextMessage(Caller wsEp, string text) {
-       expectedData = <@untainted>text;
+       expectedData = text;
    }
 
    remote function onBinaryMessage(Caller wsEp, byte[] data) {
-       binData = <@untainted>data;
+       binData = data;
    }
 
    remote function onPing(Caller wsEp, byte[] data) {
-       expectedPingBinaryData = <@untainted>data;
+       expectedPingBinaryData = data;
    }
 }
 
@@ -77,10 +77,10 @@ public function testMissingOnText() returns Error? {
    byte[] binaryData = [5, 24, 56, 243];
    check wsClient->writeTextMessage("Hi");
    runtime:sleep(0.5);
-   test:assertEquals(expectedData, "", msg = "Data mismatched");
+   test:assertEquals(expectedData, "", "Data mismatched");
    check wsClient->writeBinaryMessage(binaryData);
    runtime:sleep(0.5);
-   test:assertEquals(binData, binaryData, msg = "Data mismatched");
+   test:assertEquals(binData, binaryData, "Data mismatched");
    error? result = wsClient->close(timeout = 0);
 }
 

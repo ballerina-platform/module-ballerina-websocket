@@ -56,7 +56,7 @@ ClientConfiguration clientConf = {
 public function testSendCookieWithSyncClient() returns error? {
    Client wsClient = check new("ws://localhost:21316/testCookieSync/", config = clientConf);
    var resp = wsClient.getHttpResponse();
-   if (resp is http:Response) {
+   if resp is http:Response {
       http:Cookie[] respCookies = resp.getCookies();
       http:Cookie respCookie = respCookies[0];
       test:assertEquals(respCookie.toStringValue(), "username=name");

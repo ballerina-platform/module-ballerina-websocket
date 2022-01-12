@@ -73,11 +73,9 @@ public function testBearerTokenAuthServiceAuthzFailure() {
             token: ACCESS_TOKEN_2
         }
     });
-    if (wsClient is Error) {
+    test:assertTrue(wsClient is Error);
+    if wsClient is Error {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 403 Forbidden");
-    } else {
-        test:assertFail(msg = "Test Failed!");
-        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
     }
 }
 
@@ -88,10 +86,8 @@ public function testBearerTokenAuthServiceAuthnFailure() {
             token: ACCESS_TOKEN_3
         }
     });
-    if (wsClient is Error) {
+    test:assertTrue(wsClient is Error);
+    if wsClient is Error {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 401 Unauthorized");
-    } else {
-        test:assertFail(msg = "Test Failed!");
-        error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
     }
 }

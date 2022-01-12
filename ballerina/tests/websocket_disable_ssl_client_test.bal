@@ -34,11 +34,8 @@ service /sslTest on l67 {
 
 service class SslService3 {
     *Service;
-    remote isolated function onTextMessage(Caller caller, string data) {
-        var returnVal = caller->writeTextMessage(data);
-        if (returnVal is Error) {
-            panic <error>returnVal;
-        }
+    remote isolated function onTextMessage(Caller caller, string data) returns error? {
+        check caller->writeTextMessage(data);
     }
 }
 
@@ -50,7 +47,7 @@ public function testDisabledSsl() returns Error? {
             enable: false
         }
     });
-    if (wsClient is Error) {
+    if wsClient is Error {
         io:println(wsClient.message());
         test:assertFail("Expected a successful TLS connection");
     } else {

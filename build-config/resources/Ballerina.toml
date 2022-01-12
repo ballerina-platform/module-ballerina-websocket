@@ -5,8 +5,9 @@ version = "@toml.version@"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
+icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "slbeta3"
+distribution = "2201.0.0"
 
 [[platform.java11.dependency]]
 path = "../native/build/libs/websocket-native-@project.version@.jar"

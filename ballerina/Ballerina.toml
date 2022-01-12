@@ -1,46 +1,47 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "2.0.1"
+version = "2.2.0"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
+icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "slbeta3"
+distribution = "2201.0.0"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/websocket-native-2.0.1-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.2.0-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-2.0.1-20211110-001100-0fda3bb.jar"
+path = "./lib/http-native-2.2.0-20220112-010100-abf517a.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/mime-native-2.0.1-20211109-232100-241f3d6.jar"
+path = "./lib/mime-native-2.2.0-20220112-001200-d67a15e.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-common-4.1.68.Final.jar"
+path = "./lib/netty-common-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-buffer-4.1.68.Final.jar"
+path = "./lib/netty-buffer-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-transport-4.1.68.Final.jar"
+path = "./lib/netty-transport-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-resolver-4.1.68.Final.jar"
+path = "./lib/netty-resolver-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-handler-4.1.68.Final.jar"
+path = "./lib/netty-handler-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-http-4.1.68.Final.jar"
+path = "./lib/netty-codec-http-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-codec-4.1.68.Final.jar"
+path = "./lib/netty-codec-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/netty-handler-proxy-4.1.68.Final.jar"
+path = "./lib/netty-handler-proxy-4.1.71.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.0.1-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.2.0-SNAPSHOT.jar"
 scope = "testOnly"

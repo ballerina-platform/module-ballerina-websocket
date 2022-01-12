@@ -50,7 +50,7 @@ public isolated client class Client {
         };
         self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
-        if (pingPongHandler is PingPongService) {
+        if pingPongHandler is PingPongService {
             self.pingPongService = pingPongHandler;
         } else {
             self.pingPongService = ();
@@ -66,7 +66,7 @@ public isolated client class Client {
     # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent.
+    # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
@@ -110,9 +110,9 @@ public isolated client class Client {
     # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
         int code = 1000;
-        if (statusCode is int) {
-            if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
-                statusCode <= 2999 || statusCode > 4999) {
+        if statusCode is int {
+            if statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
+                statusCode <= 2999 || statusCode > 4999 {
                 string errorMessage = "Failed to execute close. Invalid status code: " + statusCode.toString();
                 return error ConnectionClosureError(errorMessage);
             }
@@ -203,6 +203,14 @@ public isolated client class Client {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
+    # Reads data from the WebSocket connection
+    #
+    # + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
+    #            if an error occurs when receiving
+    remote isolated function readMessage() returns string|byte[]|Error = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
+    } external;
+
     isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
                          returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"
@@ -265,11 +273,11 @@ public type ClientSecureSocket record {|
 
 # Retry configurations for WebSocket.
 #
-# + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely.
-# + interval - The number of seconds to delay before attempting to reconnect.
+# + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely
+# + interval - The number of seconds to delay before attempting to reconnect
 # + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
-#                persist.
-# + maxWaitInterval - Maximum time of the retry interval in seconds.
+#                persist
+# + maxWaitInterval - Maximum time of the retry interval in seconds
 public type WebSocketRetryConfig record {|
     int maxCount = 0;
     decimal interval = 1;
@@ -295,11 +303,11 @@ type ClientInferredConfig record {|
 public isolated function addCookies(ClientConfiguration config) {
    string cookieHeader = "";
    var cookiesToAdd = config["cookies"];
-   if (cookiesToAdd is http:Cookie[]) {
+   if cookiesToAdd is http:Cookie[] {
        http:Cookie[] sortedCookies = cookiesToAdd.sort(array:ASCENDING, isolated function(http:Cookie c) returns int {
            var cookiePath = c.path;
            int l = 0;
-           if (cookiePath is string) {
+           if cookiePath is string {
                l = cookiePath.length();
            }
           return l;
@@ -310,7 +318,7 @@ public isolated function addCookies(ClientConfiguration config) {
        lock {
            updateLastAccessedTime(cookiesToAdd);
        }
-       if (cookieHeader != "") {
+       if cookieHeader != "" {
            cookieHeader = cookieHeader.substring(0, cookieHeader.length() - 2);
            map<string> headers = config["customHeaders"];
            headers["Cookie"] = cookieHeader;

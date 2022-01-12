@@ -125,7 +125,7 @@ public function testWriteRetryForBinaryMessages() returns error? {
         string rResp3 = check wsClient->readTextMessage();
         io:println("Received echo response from server " + rResp3);
         byte[]|Error rResp4 = wsClient->readBinaryMessage();
-        if (rResp4 is Error) {
+        if rResp4 is Error {
             io:println("Error occurred at the 2nd read " + rResp4.message());
             test:assertFail(msg = "Test testWriteRetryForBinaryMessages Failed!");
         } else {
