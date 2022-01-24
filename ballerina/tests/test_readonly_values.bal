@@ -20,30 +20,29 @@ import ballerina/test;
 listener Listener l77 = new(21012);
 
 service /onReadonlyBinary on l77 {
-   resource function get .() returns Service|UpgradeError {
-       return new WsService77();
-   }
+    resource function get .() returns Service|UpgradeError {
+        return new WsService77();
+    }
 }
 
 service class WsService77 {
-  *Service;
-  remote isolated function onBinaryMessage(Caller caller, readonly & byte[] data) returns byte[]? {
-      return data;
-  }
-
-  remote isolated function onPing(Caller caller, readonly & byte[] data) returns byte[]? {
+    *Service;
+    remote isolated function onBinaryMessage(Caller caller, readonly & byte[] data) returns byte[]? {
         return data;
-  }
+    }
+
+    remote isolated function onPing(Caller caller, readonly & byte[] data) returns byte[]? {
+        return data;
+    }
 }
 
-// Tests string support for writeTextMessage and onTextMessage
+// Tests readonly support for onBinaryMessage
 @test:Config {}
 public function testReadonlyBinary() returns Error? {
-   Client wsClient = check new("ws://localhost:21012/onReadonlyBinary/", {writeTimeout: 1});
-   check wsClient->writeBinaryMessage([5, 24, 56]);
-   byte[] data = check wsClient->readBinaryMessage();
-   check wsClient->ping(data);
-   runtime:sleep(0.5);
-   test:assertEquals(data, [5, 24, 56]);
-   error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+    Client wsClient = check new("ws://localhost:21012/onReadonlyBinary/");
+    check wsClient->writeBinaryMessage([5, 24, 56]);
+    byte[] data = check wsClient->readBinaryMessage();
+    check wsClient->ping(data);
+    runtime:sleep(0.5);
+    test:assertEquals(data, [5, 24, 56]);
 }
