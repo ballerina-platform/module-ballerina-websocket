@@ -436,6 +436,15 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testReadOnlyBinaryMessage() {
+        Package currentPackage = loadPackage("sample_package_40");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
     public void testOnPongAndOnPing() {
         Package currentPackage = loadPackage("sample_package_39");
         PackageCompilation compilation = currentPackage.getCompilation();
