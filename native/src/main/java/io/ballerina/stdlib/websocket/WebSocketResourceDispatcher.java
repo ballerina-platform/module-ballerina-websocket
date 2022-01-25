@@ -72,6 +72,7 @@ import java.util.Map;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
+import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.INT_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
@@ -594,6 +595,10 @@ public class WebSocketResourceDispatcher {
                 break;
             case ARRAY_TAG:
                 bValues[index++] = ValueCreator.createArrayValue(byteArray);
+                bValues[index++] = true;
+                break;
+            case INTERSECTION_TAG:
+                bValues[index++] = ValueCreator.createReadonlyArrayValue(byteArray);
                 bValues[index++] = true;
                 break;
             default:

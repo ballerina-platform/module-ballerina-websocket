@@ -436,6 +436,17 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testReadOnlyBinaryMessage() {
+        Package currentPackage = loadPackage("sample_package_40");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY);
+    }
+
+    @Test
     public void testOnPongAndOnPing() {
         Package currentPackage = loadPackage("sample_package_39");
         PackageCompilation compilation = currentPackage.getCompilation();
