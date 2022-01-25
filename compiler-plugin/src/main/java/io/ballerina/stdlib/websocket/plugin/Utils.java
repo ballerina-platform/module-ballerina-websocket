@@ -94,8 +94,9 @@ public class Utils {
             for (ParameterSymbol inputParam : inputParams) {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
-                if (!paramSignature.equals(BYTE_ARRAY) && !paramSignature.equals(moduleId + COLON + CALLER) &&
-                        !(inputParam.typeDescriptor().typeKind() == TypeDescKind.INTERSECTION)) {
+                if (!(paramSignature.equals(BYTE_ARRAY) || paramSignature.equals(moduleId + COLON + CALLER) ||
+                        (inputParam.typeDescriptor().typeKind() == TypeDescKind.INTERSECTION &&
+                                paramSignature.contains(BYTE_ARRAY)))) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY,
                             resourceNode.location(), resourceNode.location(), paramSignature);
                 }

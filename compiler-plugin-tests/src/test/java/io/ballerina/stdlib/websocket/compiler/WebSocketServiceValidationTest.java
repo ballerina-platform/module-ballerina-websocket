@@ -441,7 +441,9 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+        Assert.assertEquals(diagnosticResult.errors().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY);
     }
 
     @Test

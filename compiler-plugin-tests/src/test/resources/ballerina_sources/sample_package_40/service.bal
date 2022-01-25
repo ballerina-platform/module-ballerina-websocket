@@ -12,7 +12,7 @@ service isolated class WsService {
     remote function onBinaryMessage(websocket:Caller caller, readonly & byte[] data) {
     }
 
-    remote function onPing(websocket:Caller caller, readonly & byte[] data) {
+    remote function onPing(readonly & websocket:Caller caller, readonly & byte[] data) {
     }
 
     remote function onPong(websocket:Caller caller, readonly & byte[] data) {
