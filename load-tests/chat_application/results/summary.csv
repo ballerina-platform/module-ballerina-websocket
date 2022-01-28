@@ -1,3 +1,4 @@
 Label,# Samples,Average,Median,90% Line,95% Line,99% Line,Min,Max,Error %,Throughput,Received KB/sec,Std. Dev.,Date,Payload,Users
 WebSocket request-response Sampler,9229741,0,0,1,1,2,0,72,0.00%,11833.9,277.4,4.99,1641197175,50,10
 WebSocket request-response Sampler,8811036,0,0,1,1,1,0,85,0.00%,11296.2,264.8,6.23,1643277178,50,10
+WebSocket request-response Sampler,9079872,0,0,1,1,1,0,76,0.00%,11640.9,272.8,6.13,1643333902,50,10
