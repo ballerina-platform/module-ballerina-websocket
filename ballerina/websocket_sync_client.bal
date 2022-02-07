@@ -250,7 +250,7 @@ public type ClientConfiguration record {|
 # + auth - Configurations related to client authentication
 # + pingPongHandler - A service to handle the ping/pong frames.
 # Resources in this service gets called on the receipt of ping/pong frames from the server
-# + retryConfig - Retry related configurations
+# + retryConfig - Retry-related configurations
 public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
