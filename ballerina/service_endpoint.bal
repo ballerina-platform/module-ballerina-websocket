@@ -97,9 +97,9 @@ public class Listener {
 # + host - The host name/IP of the endpoint
 # + http1Settings - Configurations related to HTTP/1.x protocol
 # + secureSocket - The SSL configurations for the service endpoint. This needs to be configured in order to
-#                  communicate through WSS.
+# communicate through WSS
 # + timeout - Period of time in seconds that a connection waits for a read/write operation in the
-#                     initial upgrade request. Use value 0 to disable timeout
+# initial upgrade request. Use value 0 to disable timeout
 # + server - The server name which should appear as a response header
 # + webSocketCompressionEnabled - Enable support for compression in WebSocket
 # + requestLimits - Configurations associated with inbound request size limits
