@@ -25,7 +25,7 @@
 #   in the server service will be triggered. Note that this overrides the `timeout` config
 #   in the `websocket:Listener`, which is applicable only for the initial HTTP upgrade request
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
-#   If this is not set or is negative or zero, the default frame size which is 65536 will be used
+#   If this is not set or is negative or zero, the default frame size, which is 65536 will be used
 # + auth - Listener authentication configurations
 public type WSServiceConfig record {|
     string[] subProtocols = [];
