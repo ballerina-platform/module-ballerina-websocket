@@ -243,7 +243,7 @@ All contributors are encouraged to read the [Ballerina Code of Conduct](https://
 
 ## Useful Links
 
-* For more information go to the [`websocket` library](https://lib.ballerina.io/ballerina/jwt/latest).
+* For more information go to the [`websocket` library](https://lib.ballerina.io/ballerina/websocket/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 * Chat live with us via our [Slack channel](https://ballerina.io/community/slack/).
 * Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
