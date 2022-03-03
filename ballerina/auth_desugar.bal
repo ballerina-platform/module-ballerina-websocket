@@ -36,16 +36,14 @@ public isolated function authenticateResource(Service serviceRef) {
     if authConfig is () {
         return;
     }
-    string|http:HeaderNotFoundError header = getAuthorizationHeader();
-    if header is string {
-        http:Unauthorized|http:Forbidden? result = tryAuthenticate(<ListenerAuthConfig[]>authConfig, header);
-        if result is http:Unauthorized {
-            notifyFailure(result.status.code);
-        } else if result is http:Forbidden {
-            notifyFailure(result.status.code);
+    string|http:HeaderNotFoundError authHeader = getAuthorizationHeader();
+    if authHeader is string {
+        http:Unauthorized|http:Forbidden? result = tryAuthenticate(<ListenerAuthConfig[]>authConfig, authHeader);
+        if result is http:Unauthorized || result is http:Forbidden {
+            sendError(result);
         }
     } else {
-        notifyFailure(401);
+        sendError(authHeader);
     }
 }
 
@@ -186,10 +184,14 @@ isolated function getServiceAuthConfig(Service serviceRef) returns ListenerAuthC
     return serviceConfig?.auth;
 }
 
-isolated function notifyFailure(int responseCode) {
+isolated function sendError(http:Unauthorized|http:Forbidden|http:HeaderNotFoundError authError) {
     // This panic is added to break the execution of the implementation inside the resource function after there is
     // an authn/authz failure and responded with 401/403 internally.
-    panic error(responseCode.toString() + " received by auth desugar.");
+    if authError is http:Unauthorized || authError is http:HeaderNotFoundError {
+        panic error AuthnError("Authentication error at auth-desugar.");
+    } else {
+        panic error AuthzError("Authorization error at auth-desugar.");
+    }
 }
 
 isolated function getAuthorizationHeader() returns string|http:HeaderNotFoundError = @java:Method {
