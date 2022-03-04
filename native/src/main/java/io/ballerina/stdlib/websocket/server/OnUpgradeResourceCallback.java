@@ -47,15 +47,16 @@ public class OnUpgradeResourceCallback implements Callback {
     @Override
     public void notifySuccess(Object result) {
         if (result instanceof BError) {
-            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
-                webSocketHandshaker.cancelHandshake(401, ((BError) result).getErrorMessage().toString());
+            BError error = (BError) result;
+            if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(401, error.getErrorMessage().toString());
                 return;
             }
-            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
-                webSocketHandshaker.cancelHandshake(403, ((BError) result).getErrorMessage().toString());
+            if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(403, error.getErrorMessage().toString());
                 return;
             }
-            webSocketHandshaker.cancelHandshake(400, ((BError) result).getErrorMessage().toString());
+            webSocketHandshaker.cancelHandshake(400, error.getErrorMessage().toString());
             return;
         }
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
@@ -75,12 +76,12 @@ public class OnUpgradeResourceCallback implements Callback {
     public void notifyFailure(BError error) {
         // These checks are added to release the failure path since there is an authn/authz failure and responded
         // with 401/403 internally.
-        if (error.getMessage().equals("401 received by auth desugar.")) {
-            webSocketHandshaker.cancelHandshake(401, error.getMessage());
+        if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
+            webSocketHandshaker.cancelHandshake(401, null);
             return;
         }
-        if (error.getMessage().equals("403 received by auth desugar.")) {
-            webSocketHandshaker.cancelHandshake(403, error.getMessage());
+        if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
+            webSocketHandshaker.cancelHandshake(403, null);
             return;
         }
         // When panicked from the upgrade service.
