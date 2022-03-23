@@ -72,7 +72,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
             if (finalFragment) {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 Object message;
-                switch (targetType.getTag()) {
+                int typeTag = targetType == null ? TypeTags.STRING_TAG : targetType.getTag();
+                switch (typeTag) {
                     case TypeTags.JSON_TAG:
                         message = JsonUtils.parse(stringAggregator.getAggregateString());
                         break;
