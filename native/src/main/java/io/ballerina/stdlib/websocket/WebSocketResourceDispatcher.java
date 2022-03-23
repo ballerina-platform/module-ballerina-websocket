@@ -23,19 +23,24 @@ import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BValue;
+import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.stdlib.http.api.HttpConstants;
@@ -60,6 +65,7 @@ import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.ballerinalang.langlib.value.CloneWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +83,6 @@ import static io.ballerina.runtime.api.TypeTags.INT_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.MAP_TYPE;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION;
@@ -96,6 +101,7 @@ import static io.ballerina.stdlib.websocket.observability.WebSocketObservability
  */
 public class WebSocketResourceDispatcher {
     private static final Logger log = LoggerFactory.getLogger(WebSocketResourceDispatcher.class);
+    public static final MapType MAP_TYPE = TypeCreator.createMapType(PredefinedTypes.TYPE_JSON);
 
     private WebSocketResourceDispatcher() {
     }
@@ -462,20 +468,46 @@ public class WebSocketResourceDispatcher {
             if (finalFragment) {
                 stringAggregator.appendAggregateString(textMessage.getText());
                 int index = 0;
-                for (Type param : parameterTypes) {
-                    String typeName = param.getName();
-                    switch (typeName) {
-                    case WebSocketConstants.WEBSOCKET_CALLER:
-                        bValues[index++] = wsEndpoint;
-                        bValues[index++] = true;
-                        break;
-                    case WebSocketConstants.PARAM_TYPE_STRING:
-                        bValues[index++] = StringUtils.fromString(stringAggregator.getAggregateString());
-                        bValues[index++] = true;
-                        break;
-                    default:
-                        break;
+                try {
+                    for (Type param : parameterTypes) {
+                        int typeTag = param.getTag();
+                        switch (typeTag) {
+                            case OBJECT_TYPE_TAG:
+                                bValues[index++] = wsEndpoint;
+                                bValues[index++] = true;
+                                break;
+                            case STRING_TAG:
+                                bValues[index++] = StringUtils.fromString(stringAggregator.getAggregateString());
+                                bValues[index++] = true;
+                                break;
+                            case TypeTags.JSON_TAG:
+                                Object json = JsonUtils.parse(stringAggregator.getAggregateString());
+                                bValues[index++] = json;
+                                bValues[index++] = true;
+                                break;
+                            case TypeTags.XML_TAG:
+                                BXml bxml = XmlUtils.parse(stringAggregator.getAggregateString());
+                                bValues[index++] = bxml;
+                                bValues[index++] = true;
+                                break;
+                            case TypeTags.RECORD_TYPE_TAG:
+                            case ARRAY_TAG:
+                                Object record = CloneWithType.convert(param, JsonUtils.parse(
+                                        stringAggregator.getAggregateString()));
+                                if (record instanceof BError) {
+                                    sendDataBindingError(webSocketConnection, (BError) record);
+                                    return;
+                                }
+                                bValues[index++] = record;
+                                bValues[index++] = true;
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                } catch (BError bError) {
+                    sendDataBindingError(webSocketConnection, bError);
+                    return;
                 }
                 executeResource(wsService, balservice,
                         new WebSocketResourceCallback(connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE),
@@ -489,6 +521,15 @@ public class WebSocketResourceDispatcher {
         } catch (Exception e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
         }
+    }
+
+    private static void sendDataBindingError(WebSocketConnection webSocketConnection, BError bError) {
+        String errorMessage = bError.getMessage();
+        if (errorMessage.length() > 100) {
+            errorMessage = errorMessage.substring(0, 80) + "...";
+        }
+        webSocketConnection.terminateConnection(1003,
+                String.format("data binding failed: %s", errorMessage));
     }
 
     public static void dispatchOnBinary(WebSocketConnectionInfo connectionInfo, WebSocketBinaryMessage binaryMessage) {

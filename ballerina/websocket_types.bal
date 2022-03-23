@@ -25,3 +25,6 @@ public type UpgradeService distinct service object {
 # The WebSocket service type to handle ping/pong frames.
 public type PingPongService distinct isolated service object {
 };
+
+# The types of data values that are expected by the WebSocket `client` to return after the data binding operation.
+public type TargetType typedesc<string|xml|json|record {| anydata...; |}|record {| anydata...; |}[]>;
