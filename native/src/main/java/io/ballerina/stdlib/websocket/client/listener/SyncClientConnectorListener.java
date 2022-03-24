@@ -38,11 +38,12 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.ballerinalang.langlib.value.CloneWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.
@@ -105,7 +106,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
-        } catch (IllegalAccessException|BError e) {
+        } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
                 callback.complete(WebSocketUtil
                         .createWebsocketError(String.format("data binding failed: %s", e),

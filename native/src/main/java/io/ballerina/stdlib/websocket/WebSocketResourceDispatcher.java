@@ -518,7 +518,7 @@ public class WebSocketResourceDispatcher {
                 stringAggregator.appendAggregateString(textMessage.getText());
                 webSocketConnection.readNextFrame();
             }
-        } catch (Exception e) {
+        } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
         }
     }
