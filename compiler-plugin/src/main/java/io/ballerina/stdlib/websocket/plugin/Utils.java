@@ -47,6 +47,7 @@ public class Utils {
 
     public static final String PREFIX = "ballerina/websocket:";
     public static final String CALLER = "Caller";
+    public static final String CLIENT = "Client";
     public static final String BYTE_ARRAY = "byte[]";
     public static final String STRING = "string";
     public static final String INT = "int";
@@ -222,14 +223,24 @@ public class Utils {
     static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
             FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
-        if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
-            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
-                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+        if (inputParams.size() == 1) {
+            TypeDescKind kind = inputParams.get(0).typeDescriptor().typeKind();
+            if (!kind.isStringType() && !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
+            !kind.equals(TypeDescKind.ARRAY) && (kind.equals(TypeDescKind.TYPE_REFERENCE) &&
+                    inputParams.get(0).signature().contains(COLON + CALLER) ||
+                    inputParams.get(0).signature().contains(COLON + CLIENT))) {
+                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                        resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+            }
         } else {
             for (ParameterSymbol inputParam : inputParams) {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
-                if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
+                TypeDescKind kind = inputParam.typeDescriptor().typeKind();
+                if (!kind.equals(TypeDescKind.STRING) && !paramSignature.equals(moduleId + COLON + CALLER) &&
+                        !kind.equals(TypeDescKind.XML) && !kind.equals(TypeDescKind.JSON) &&
+                        !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
+                        !kind.equals(TypeDescKind.ARRAY)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
                             resourceNode.location(), paramSignature);
                 }
