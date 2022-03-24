@@ -177,7 +177,7 @@ public function testDispatchingErrorJsonDataBinding() returns Error? {
     }
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testDispatchingErrorXmlDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onXml");
     check wsClient->writeTextMessage(jsonVal);
@@ -190,7 +190,7 @@ public function testDispatchingErrorXmlDataBinding() returns Error? {
     }
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testDispatchingErrorRecordArrayDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onRecordArr");
     check wsClient->writeTextMessage(jsonVal);

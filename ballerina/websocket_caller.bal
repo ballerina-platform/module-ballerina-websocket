@@ -33,7 +33,7 @@ public isolated client class Caller {
     #
     # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(string|xml|json|record {| anydata...; |}|record {| anydata...; |}[] data) returns Error? {
+    remote isolated function writeTextMessage(string|xml|json|record {}|record {}[] data) returns Error? {
         return self.externWriteTextMessage(getString(data));
     }
 
