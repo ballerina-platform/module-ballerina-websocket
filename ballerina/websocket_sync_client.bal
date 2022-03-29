@@ -68,7 +68,7 @@ public isolated client class Client {
     #
     # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(string|xml|json|record {}|record {}[] data) returns Error? {
+    remote isolated function writeTextMessage(xml|json|record {}|record {}[] data) returns Error? {
         return self.externWriteTextMessage(getString(data));
     }
 
@@ -368,7 +368,7 @@ isolated function getClone(http:Cookie cookie, time:Utc createdTime, time:Utc la
     return new http:Cookie(cookie.name, cookie.value, options);
 }
 
-isolated function getString(string|xml|json|record {}|record {}[] data) returns string {
+isolated function getString(xml|json|record {}|record {}[] data) returns string {
     string text = "";
     if (data is string) {
         text = data;

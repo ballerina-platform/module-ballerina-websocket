@@ -86,6 +86,16 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         message = CloneWithType.convert(targetType, JsonUtils.parse(
                                 stringAggregator.getAggregateString()));
                         break;
+                    case TypeTags.INT_TAG:
+                        message = Long.parseLong(stringAggregator.getAggregateString());
+                        break;
+                    case TypeTags.FLOAT_TAG:
+                        message = Double.parseDouble(stringAggregator.getAggregateString());
+                        break;
+                    case TypeTags.DECIMAL_TAG:
+                        message = ValueCreator.createDecimalValue(
+                                stringAggregator.getAggregateString());
+                        break;
                     default:
                         message = StringUtils.fromString(stringAggregator.getAggregateString());
                         break;
@@ -106,8 +116,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
-        } catch (IllegalAccessException | BError e) {
-            if (e instanceof BError) {
+        } catch (IllegalAccessException | BError | NumberFormatException e) {
+            if (e instanceof BError || e instanceof NumberFormatException) {
                 callback.complete(WebSocketUtil
                         .createWebsocketError(String.format("data binding failed: %s", e),
                                 WebSocketConstants.ErrorCode.Error));

@@ -501,6 +501,19 @@ public class WebSocketResourceDispatcher {
                                 bValues[index++] = record;
                                 bValues[index++] = true;
                                 break;
+                            case TypeTags.INT_TAG:
+                                bValues[index++] = Long.parseLong(stringAggregator.getAggregateString());
+                                bValues[index++] = true;
+                                break;
+                            case TypeTags.FLOAT_TAG:
+                                bValues[index++] = Double.parseDouble(stringAggregator.getAggregateString());
+                                bValues[index++] = true;
+                                break;
+                            case TypeTags.DECIMAL_TAG:
+                                bValues[index++] = ValueCreator.createDecimalValue(
+                                        stringAggregator.getAggregateString());
+                                bValues[index++] = true;
+                                break;
                             default:
                                 break;
                         }
