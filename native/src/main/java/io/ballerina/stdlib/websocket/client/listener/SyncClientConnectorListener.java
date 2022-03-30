@@ -96,6 +96,9 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         message = ValueCreator.createDecimalValue(
                                 stringAggregator.getAggregateString());
                         break;
+                    case TypeTags.BOOLEAN_TAG:
+                        message = Boolean.parseBoolean(stringAggregator.getAggregateString());;
+                        break;
                     default:
                         message = StringUtils.fromString(stringAggregator.getAggregateString());
                         break;

@@ -80,12 +80,97 @@ service class WsService81 {
     }
 }
 
+service /onInt on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService87();
+    }
+}
+
+service class WsService87 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, int data) returns Error? {
+        check caller->writeTextMessage(data);
+    }
+}
+
+service /onFloat on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService84();
+    }
+}
+
+service class WsService84 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, float data) returns Error? {
+        check caller->writeTextMessage(data);
+    }
+}
+
+service /onDecimal on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService85();
+    }
+}
+
+service class WsService85 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, decimal data) returns Error? {
+        check caller->writeTextMessage(data);
+    }
+}
+
+service /onBoolean on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService86();
+    }
+}
+
+service class WsService86 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, boolean data) returns Error? {
+        check caller->writeTextMessage(data);
+    }
+}
+
 @test:Config {}
 public function testJsonDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onJson/");
     check wsClient->writeTextMessage(jsonVal);
     json data = check wsClient->readTextMessage();
     test:assertEquals(data, jsonVal);
+}
+
+@test:Config {}
+public function testIntDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onInt/");
+    check wsClient->writeTextMessage(1);
+    int data = check wsClient->readTextMessage();
+    test:assertEquals(1, data);
+}
+
+@test:Config {}
+public function testFloatDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onFloat/");
+    check wsClient->writeTextMessage(1.0);
+    float data = check wsClient->readTextMessage();
+    test:assertEquals(1.0, data);
+}
+
+@test:Config {}
+public function testDecimalDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onDecimal/");
+    decimal val = 3.0;
+    check wsClient->writeTextMessage(val);
+    decimal data = check wsClient->readTextMessage();
+    test:assertEquals(val, data);
+}
+
+@test:Config {}
+public function testBooleanDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onBoolean/");
+    check wsClient->writeTextMessage("true");
+    boolean data = check wsClient->readTextMessage();
+    test:assertTrue(data);
 }
 
 @test:Config {}
@@ -210,6 +295,82 @@ public function testDispatchingErrorRecordDataBinding() returns Error? {
     Coord|Error data = wsClient->readTextMessage();
     string errMessage = "data binding failed: {ballerina/lang.value}ConversionError: Status code: 1003";
     if data is Coord {
+        test:assertFail("Expected a service dispatching binding error");
+    } else {
+        test:assertEquals(data.message(), errMessage);
+    }
+}
+
+@test:Config {}
+public function testClientIntErrorDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onJson/");
+    check wsClient->writeTextMessage(jsonVal);
+    int|Error data = wsClient->readTextMessage();
+    if data is int {
+        test:assertFail("Expected a binding error");
+    } else {
+        test:assertTrue(data.message().startsWith("data binding failed"));
+    }
+}
+
+@test:Config {}
+public function testClientFloatErrorDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onJson/");
+    check wsClient->writeTextMessage(jsonVal);
+    float|Error data = wsClient->readTextMessage();
+    if data is float {
+        test:assertFail("Expected a binding error");
+    } else {
+        test:assertTrue(data.message().startsWith("data binding failed"));
+    }
+}
+
+@test:Config {}
+public function testClientDecimalErrorDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onJson/");
+    check wsClient->writeTextMessage(jsonVal);
+    decimal|Error data = wsClient->readTextMessage();
+    if data is decimal {
+        test:assertFail("Expected a binding error");
+    } else {
+        test:assertTrue(data.message().startsWith("data binding failed"));
+    }
+}
+
+@test:Config {}
+public function testDispatchingErrorIntDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onInt");
+    check wsClient->writeTextMessage("Hello");
+    int|Error data = wsClient->readTextMessage();
+    string errMessage = "data binding failed: For input string: \"Hello\": Status code: 1003";
+    if data is int {
+        test:assertFail("Expected a service dispatching binding error");
+    } else {
+        test:assertEquals(data.message(), errMessage);
+    }
+}
+
+@test:Config {}
+public function testDispatchingErrorFloatDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onFloat");
+    check wsClient->writeTextMessage("Hello");
+    float|Error data = wsClient->readTextMessage();
+    string errMessage = "data binding failed: For input string: \"Hello\": Status code: 1003";
+    if data is float {
+        test:assertFail("Expected a service dispatching binding error");
+    } else {
+        test:assertEquals(data.message(), errMessage);
+    }
+}
+
+@test:Config {}
+public function testDispatchingErrorDecimalDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onDecimal");
+    check wsClient->writeTextMessage("Hello");
+    decimal|Error data = wsClient->readTextMessage();
+    string errMessage = "data binding failed: Character H is neither a decimal digit number, decimal point,"
+                + " nor \"e\" notation exponential mark.: Status code: 1003";
+    if data is decimal {
         test:assertFail("Expected a service dispatching binding error");
     } else {
         test:assertEquals(data.message(), errMessage);

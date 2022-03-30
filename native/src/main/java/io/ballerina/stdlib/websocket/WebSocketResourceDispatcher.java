@@ -495,7 +495,7 @@ public class WebSocketResourceDispatcher {
                                 Object record = CloneWithType.convert(param, JsonUtils.parse(
                                         stringAggregator.getAggregateString()));
                                 if (record instanceof BError) {
-                                    sendDataBindingError(webSocketConnection, (BError) record);
+                                    sendDataBindingError(webSocketConnection, ((BError) record).getMessage());
                                     return;
                                 }
                                 bValues[index++] = record;
@@ -514,12 +514,16 @@ public class WebSocketResourceDispatcher {
                                         stringAggregator.getAggregateString());
                                 bValues[index++] = true;
                                 break;
+                            case TypeTags.BOOLEAN_TAG:
+                                bValues[index++] = Boolean.parseBoolean(stringAggregator.getAggregateString());
+                                bValues[index++] = true;
+                                break;
                             default:
                                 break;
                         }
                     }
-                } catch (BError bError) {
-                    sendDataBindingError(webSocketConnection, bError);
+                } catch (BError | NumberFormatException error) {
+                    sendDataBindingError(webSocketConnection, error.getMessage());
                     return;
                 }
                 executeResource(wsService, balservice,
@@ -536,8 +540,7 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    private static void sendDataBindingError(WebSocketConnection webSocketConnection, BError bError) {
-        String errorMessage = bError.getMessage();
+    private static void sendDataBindingError(WebSocketConnection webSocketConnection, String errorMessage) {
         if (errorMessage.length() > 100) {
             errorMessage = errorMessage.substring(0, 80) + "...";
         }
