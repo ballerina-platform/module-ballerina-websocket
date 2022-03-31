@@ -19,9 +19,12 @@ package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.Qualifier;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 
 /**
@@ -39,9 +42,14 @@ public class WebSocketServiceValidator {
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
                 || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(methodNode -> {
             FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
-            if (functionDefinitionNode.qualifierList().get(0).text().equals(PluginConstants.REMOTE_KEY_WORD)) {
+            NodeList<Token> qualifierList = functionDefinitionNode.qualifierList();
+            if (qualifierList.isEmpty()) {
+                return;
+            }
+            String qualifier = qualifierList.get(0).text();
+            if (qualifier.equals(Qualifier.REMOTE.getValue())) {
                 filterRemoteFunctions(functionDefinitionNode);
-            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(PluginConstants.RESOURCE_KEY_WORD)) {
+            } else if (qualifier.equals(Qualifier.RESOURCE.getValue())) {
                 reportInvalidFunction(functionDefinitionNode);
             }
         });
