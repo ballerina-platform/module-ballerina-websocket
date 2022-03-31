@@ -226,7 +226,9 @@ public class Utils {
         if (inputParams.size() == 1) {
             TypeDescKind kind = inputParams.get(0).typeDescriptor().typeKind();
             if (!kind.isStringType() && !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
-            !kind.equals(TypeDescKind.ARRAY) && (kind.equals(TypeDescKind.TYPE_REFERENCE) &&
+                    !kind.equals(TypeDescKind.BOOLEAN) && !kind.equals(TypeDescKind.INT) &&
+                    !kind.equals(TypeDescKind.DECIMAL) && !kind.equals(TypeDescKind.FLOAT) &&
+                    !kind.equals(TypeDescKind.ARRAY) && (kind.equals(TypeDescKind.TYPE_REFERENCE) &&
                     inputParams.get(0).signature().contains(COLON + CALLER) ||
                     inputParams.get(0).signature().contains(COLON + CLIENT))) {
                 reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
@@ -237,10 +239,12 @@ public class Utils {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
                 TypeDescKind kind = inputParam.typeDescriptor().typeKind();
-                if (!kind.equals(TypeDescKind.STRING) && !paramSignature.equals(moduleId + COLON + CALLER) &&
-                        !kind.equals(TypeDescKind.XML) && !kind.equals(TypeDescKind.JSON) &&
+                if (!kind.isStringType() && !paramSignature.equals(moduleId + COLON + CALLER) &&
+                        !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
                         !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
-                        !kind.equals(TypeDescKind.ARRAY)) {
+                        !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
+                        !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
+                        !kind.equals(TypeDescKind.FLOAT)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
                             resourceNode.location(), paramSignature);
                 }
