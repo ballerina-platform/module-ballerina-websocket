@@ -19,6 +19,7 @@ package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
+import io.ballerina.compiler.api.symbols.Qualifier;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -45,9 +46,10 @@ public class WebSocketServiceValidator {
             if (qualifierList.isEmpty()) {
                 return;
             }
-            if (qualifierList.get(0).text().equals(PluginConstants.REMOTE_KEY_WORD)) {
+            String qualifier = qualifierList.get(0).text();
+            if (qualifier.equals(Qualifier.REMOTE.getValue())) {
                 filterRemoteFunctions(functionDefinitionNode);
-            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(PluginConstants.RESOURCE_KEY_WORD)) {
+            } else if (qualifier.equals(Qualifier.RESOURCE.getValue())) {
                 reportInvalidFunction(functionDefinitionNode);
             }
         });

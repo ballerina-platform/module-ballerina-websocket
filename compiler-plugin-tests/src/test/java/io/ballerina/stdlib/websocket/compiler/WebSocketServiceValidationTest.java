@@ -461,7 +461,7 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
     }
 
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
