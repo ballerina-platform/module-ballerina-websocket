@@ -444,7 +444,7 @@ public class WebSocketServiceValidationTest {
 
     @Test
     public void testOnTextWithValidDataBindingInput() {
-        Package currentPackage = loadPackage("sample_package_41");
+        Package currentPackage = loadPackage("sample_package_43");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();

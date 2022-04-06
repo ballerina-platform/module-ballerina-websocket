@@ -68,7 +68,7 @@ public isolated client class Client {
     #
     # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(xml|json|record {}|record {}[] data) returns Error? {
+    remote isolated function writeTextMessage(anydata data) returns Error? {
         return self.externWriteTextMessage(getString(data));
     }
 
@@ -368,17 +368,18 @@ isolated function getClone(http:Cookie cookie, time:Utc createdTime, time:Utc la
     return new http:Cookie(cookie.name, cookie.value, options);
 }
 
-isolated function getString(xml|json|record {}|record {}[] data) returns string {
+isolated function getString(anydata data) returns string {
     string text = "";
-    if (data is string) {
+    if data is string {
         text = data;
-    } else if (data is json) {
-        text = data.toJsonString();
-    } else {
+    } else if data is xml {
         text = data.toString();
+    } else {
+        text = data.toJson().toString();
     }
     return text;
 }
+
 
 const EQUALS = "=";
 const SPACE = " ";
