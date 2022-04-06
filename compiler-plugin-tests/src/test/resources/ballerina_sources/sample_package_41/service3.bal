@@ -1,4 +1,4 @@
-// Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,20 +16,11 @@
 
 import ballerina/websocket;
 
-public type Coord record {
-    int x;
-    int y;
-};
-
-service /basic/ws on new websocket:Listener(9090) {
-   resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
-       return new WsService2();
-   }
-}
-
-service isolated class WsService2 {
+service class ShuttleService {
     *websocket:Service;
+    int i;
 
-    remote function onTextMessage(websocket:Caller caller, Coord data) {
+    function init() { // no qualifier
+        self.i = 0;
     }
 }
