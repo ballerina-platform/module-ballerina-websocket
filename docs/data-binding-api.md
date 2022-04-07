@@ -1,6 +1,6 @@
 ## Summary
 
-Data binding helps to access the incoming and outgoing text data in the user's desired parameter type. Subtypes of `json`, and `xml`, `record{}`, `record{}[]` will be the supported parameter types. This proposal discusses ways to provide data binding for both on listener side as well as the client side.
+Data binding helps to access the incoming and outgoing text data in the user's desired parameter type. Subtypes of `anydata` will be the supported parameter types. This proposal discusses ways to provide data binding for both on listener side as well as the client side.
 
 ## Goals
 
@@ -12,7 +12,7 @@ As of now, the Ballerina WebSocket package doesn’t provide direct data binding
 
 ## Description
 
-Data binding support will be added to the text messages as the serialization is text-based and will be supported in both the client-side and the listener side. `json` and its subtypes, `xml`, `record{}`, and `record{}` are the data types to be supported.
+Data binding support will be added to the text messages as the serialization is text-based and will be supported in both the client-side and the listener side. Subtypes of `anydata` are the data types to be supported.
 
 ### Listener
 
@@ -38,12 +38,12 @@ If the data binding fails, the connection will get terminated by sending a close
 
 The WebSocket client has `writeTextMessage`  API to write text data to the connection. As of now `writeTextMessage` API only accepts `string` as a parameter.
 
-This API will be extended to accept  `json` and `xml` types as well. As the `json` type will only accept the json compatible closed records and records which are open only by json, API will be extended to accept `record {}|record {}[] ` as well.
+This API will be extended to accept  `anydata` types as well.
 
 **writeTextMessage**
 
 ```ballerina
-remote isolated function writeTextMessage(xml|json|record {}|record {}[] data) returns Error?
+remote isolated function writeTextMessage(anydata data) returns Error?
 ```
 Whatever the data type given as the input parameter will be converted to a `string` internally and sent as text data.
 
@@ -53,7 +53,7 @@ If the data binding fails, a `websocket:Error` will be returned from the API.
 
 To receive data, the WebSocket client has `readTextMessage`, `readBinaryMessage` and `readMessage`. `readMessage` API was introduced because of a limitation for a scenario like a reverse proxy where the client does not have prior knowledge of the data. And it is a rarely used API.  As mentioned earlier, we support binding for sub-protocols of text messages and this API supports both text and binary data types, data binding support will be added only to `readTextMessage` API.
 
-The contextually-expected data type is inferred from the LHS variable type. Allowed data types would be `json` and its subtypes, `xml`, `record{}` and `record{}[]`.
+The contextually-expected data type is inferred from the LHS variable type. Allowed data types would be subtypes of `anydata`.
 
 Ex:
 ```ballerina
@@ -70,7 +70,7 @@ Caller APIs will also be extended similar to the Client's `writeTextMessage` API
 **writeTextMessage**
 
 ```ballerina
-remote isolated function writeTextMessage(xml|json|record {}|record {}[] data) returns Error?
+remote isolated function writeTextMessage(anydata data) returns Error?
 ```
 
 If the data binding fails, a `websocket:Error` will be returned from the API.
