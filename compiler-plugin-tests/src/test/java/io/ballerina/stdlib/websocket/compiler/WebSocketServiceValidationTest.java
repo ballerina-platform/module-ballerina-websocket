@@ -262,11 +262,9 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
-        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
     }
 
     @Test
@@ -374,11 +372,9 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
-        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
 
     }
 

@@ -191,8 +191,7 @@ public isolated client class Client {
 
     # Reads text messages in a synchronous manner.
     #
-    # + targetType - The payload type (`string`, `xml`, `json`, `record {}`, or
-    #                `record {}[]`), which is expected to be returned after data binding
+    # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
     remote isolated function readTextMessage(TargetType targetType = <>) returns targetType|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
