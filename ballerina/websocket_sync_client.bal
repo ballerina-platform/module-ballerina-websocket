@@ -380,7 +380,6 @@ isolated function getString(anydata data) returns string {
     return text;
 }
 
-
 const EQUALS = "=";
 const SPACE = " ";
 const SEMICOLON = ";";

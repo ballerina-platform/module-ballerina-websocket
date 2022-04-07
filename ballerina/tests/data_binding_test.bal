@@ -132,6 +132,84 @@ service class WsService86 {
     }
 }
 
+service /onReturnInt on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService88();
+    }
+}
+
+service class WsService88 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, int data) returns int {
+        return data;
+    }
+}
+
+service /onReturnFloat on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService89();
+    }
+}
+
+service class WsService89 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, float data) returns float {
+        return data;
+    }
+}
+
+service /onReturnDecimal on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService90();
+    }
+}
+
+service class WsService90 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, decimal data) returns decimal {
+        return data;
+    }
+}
+
+service /onReturnRecord on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService91();
+    }
+}
+
+service class WsService91 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, Coord data) returns Coord {
+        return data;
+    }
+}
+
+service /onReturnJson on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService92();
+    }
+}
+
+service class WsService92 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, json data) returns json {
+        return data;
+    }
+}
+
+service /onReturnXml on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService93();
+    }
+}
+
+service class WsService93 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, xml data) returns xml {
+        return data;
+    }
+}
+
 @test:Config {}
 public function testJsonDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onJson/");
@@ -342,7 +420,7 @@ public function testDispatchingErrorIntDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onInt");
     check wsClient->writeTextMessage("Hello");
     int|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: For input string: \"Hello\": Status code: 1003";
+    string errMessage = "data binding failed: unrecognized token 'Hello' at line: 1 column: 7: Status code: 1003";
     if data is int {
         test:assertFail("Expected a service dispatching binding error");
     } else {
@@ -355,7 +433,7 @@ public function testDispatchingErrorFloatDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onFloat");
     check wsClient->writeTextMessage("Hello");
     float|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: For input string: \"Hello\": Status code: 1003";
+    string errMessage = "data binding failed: unrecognized token 'Hello' at line: 1 column: 7: Status code: 1003";
     if data is float {
         test:assertFail("Expected a service dispatching binding error");
     } else {
@@ -368,11 +446,59 @@ public function testDispatchingErrorDecimalDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onDecimal");
     check wsClient->writeTextMessage("Hello");
     decimal|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: Character H is neither a decimal digit number, decimal point,"
-                + " nor \"e\" notation exponential mark.: Status code: 1003";
+    string errMessage = "data binding failed: unrecognized token 'Hello' at line: 1 column: 7: Status code: 1003";
     if data is decimal {
         test:assertFail("Expected a service dispatching binding error");
     } else {
         test:assertEquals(data.message(), errMessage);
     }
+}
+
+@test:Config {}
+public function testReturnInt() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReturnInt");
+    check wsClient->writeTextMessage(55);
+    int data = check wsClient->readTextMessage();
+    test:assertEquals(data, 55);
+}
+
+@test:Config {}
+public function testReturnFloat() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReturnFloat");
+    check wsClient->writeTextMessage(55.01);
+    float data = check wsClient->readTextMessage();
+    test:assertEquals(data, 55.01);
+}
+
+@test:Config {}
+public function testReturnDecimal() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReturnDecimal");
+    decimal val = 55.014;
+    check wsClient->writeTextMessage(val);
+    decimal data = check wsClient->readTextMessage();
+    test:assertEquals(data, val);
+}
+
+@test:Config {}
+public function testReturnRecord() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReturnRecord");
+    check wsClient->writeTextMessage(recordVal);
+    Coord data = check wsClient->readTextMessage();
+    test:assertEquals(data, recordVal);
+}
+
+@test:Config {}
+public function testReturnJsonDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReturnJson/");
+    check wsClient->writeTextMessage(jsonVal);
+    json data = check wsClient->readTextMessage();
+    test:assertEquals(data, jsonVal);
+}
+
+@test:Config {}
+public function testReturnXmlDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReturnXml/");
+    check wsClient->writeTextMessage(xmlVal);
+    xml data = check wsClient->readTextMessage();
+    test:assertEquals(data, xmlVal);
 }

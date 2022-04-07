@@ -480,45 +480,20 @@ public class WebSocketResourceDispatcher {
                                 bValues[index++] = StringUtils.fromString(stringAggregator.getAggregateString());
                                 bValues[index++] = true;
                                 break;
-                            case TypeTags.JSON_TAG:
-                                Object json = JsonUtils.parse(stringAggregator.getAggregateString());
-                                bValues[index++] = json;
-                                bValues[index++] = true;
-                                break;
                             case TypeTags.XML_TAG:
                                 BXml bxml = XmlUtils.parse(stringAggregator.getAggregateString());
                                 bValues[index++] = bxml;
                                 bValues[index++] = true;
                                 break;
-                            case TypeTags.RECORD_TYPE_TAG:
-                            case ARRAY_TAG:
-                                Object record = CloneWithType.convert(param, JsonUtils.parse(
+                            default:
+                                Object value = CloneWithType.convert(param, JsonUtils.parse(
                                         stringAggregator.getAggregateString()));
-                                if (record instanceof BError) {
-                                    sendDataBindingError(webSocketConnection, ((BError) record).getMessage());
+                                if (value instanceof BError) {
+                                    sendDataBindingError(webSocketConnection, ((BError) value).getMessage());
                                     return;
                                 }
-                                bValues[index++] = record;
+                                bValues[index++] = value;
                                 bValues[index++] = true;
-                                break;
-                            case TypeTags.INT_TAG:
-                                bValues[index++] = Long.parseLong(stringAggregator.getAggregateString());
-                                bValues[index++] = true;
-                                break;
-                            case TypeTags.FLOAT_TAG:
-                                bValues[index++] = Double.parseDouble(stringAggregator.getAggregateString());
-                                bValues[index++] = true;
-                                break;
-                            case TypeTags.DECIMAL_TAG:
-                                bValues[index++] = ValueCreator.createDecimalValue(
-                                        stringAggregator.getAggregateString());
-                                bValues[index++] = true;
-                                break;
-                            case TypeTags.BOOLEAN_TAG:
-                                bValues[index++] = Boolean.parseBoolean(stringAggregator.getAggregateString());
-                                bValues[index++] = true;
-                                break;
-                            default:
                                 break;
                         }
                     }
