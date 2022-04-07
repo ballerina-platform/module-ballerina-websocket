@@ -224,13 +224,11 @@ public class Utils {
             FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1) {
-            TypeDescKind kind = inputParams.get(0).typeDescriptor().typeKind();
-            if (!kind.isStringType() && !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
-                    !kind.equals(TypeDescKind.BOOLEAN) && !kind.equals(TypeDescKind.INT) &&
-                    !kind.equals(TypeDescKind.DECIMAL) && !kind.equals(TypeDescKind.FLOAT) &&
-                    !kind.equals(TypeDescKind.ARRAY) && (kind.equals(TypeDescKind.TYPE_REFERENCE) &&
-                    inputParams.get(0).signature().contains(COLON + CALLER) ||
-                    inputParams.get(0).signature().contains(COLON + CLIENT))) {
+            ParameterSymbol inputParam = inputParams.get(0);
+            TypeDescKind kind = inputParam.typeDescriptor().typeKind();
+            String paramSignature = inputParam.typeDescriptor().signature();
+            if (!(isValidInput(getModuleId(inputParam), paramSignature, kind)) &&
+                    inputParams.get(0).signature().contains(COLON + CALLER)) {
                 reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
                         resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
             }
@@ -239,19 +237,45 @@ public class Utils {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
                 TypeDescKind kind = inputParam.typeDescriptor().typeKind();
-                if (!kind.isStringType() && !paramSignature.equals(moduleId + COLON + CALLER) &&
-                        !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
-                        !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
-                        !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
-                        !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
-                        !kind.equals(TypeDescKind.FLOAT)) {
+                if (isValidInput(moduleId, paramSignature, kind)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
                             resourceNode.location(), paramSignature);
                 }
             }
         }
         TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
-        validateOnDataReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+        validateOnTextReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+    }
+
+    private static boolean isValidInput(String moduleId, String paramSignature, TypeDescKind kind) {
+        return !kind.isStringType() && !paramSignature.equals(moduleId + COLON + CALLER) &&
+                !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
+                !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
+                !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
+                !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
+                !kind.equals(TypeDescKind.FLOAT);
+    }
+
+    public static void validateOnTextReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
+                                                 FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
+        if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
+            for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
+                if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE
+                        && symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
+                        symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
+                        && !(symbol.typeKind() == TypeDescKind.INT) && !(symbol.typeKind() == TypeDescKind.BOOLEAN)
+                        && !(symbol.typeKind() == TypeDescKind.DECIMAL) && !(symbol.typeKind() == TypeDescKind.JSON)
+                        && !(symbol.typeKind() == TypeDescKind.XML)) {
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
+                            resourceNode.location(), symbol.signature(), functionName);
+                }
+            }
+        } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !(returnTypeSymbol.typeKind()
+                == TypeDescKind.ARRAY) && !(returnTypeSymbol.typeKind() == TypeDescKind.STRING)) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
+                    resourceNode.location(), returnTypeSymbol.signature(),
+                    functionName);
+        }
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {
