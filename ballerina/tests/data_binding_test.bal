@@ -25,6 +25,17 @@ json jsonVal = {x: 1, y: 2};
 xml xmlVal = xml `<book>The Lost World</book>`;
 Coord recordVal = {x: 1, y: 2};
 Coord[] recordArrVal = [{x: 1, y: 2}, {x: 3, y: 4}];
+json[] jsonArr = [{"name":"John","salary":100},{"name":"Jane","salary":200}];
+
+public type Employee record {
+    readonly string name;
+    int salary;
+};
+
+table<Employee> key(name) t = table [
+    { name: "John", salary: 100 },
+    { name: "Jane", salary: 200 }
+];
 
 listener Listener l78 = new(22078);
 
@@ -207,6 +218,32 @@ service class WsService93 {
     *Service;
     remote isolated function onTextMessage(Caller caller, xml data) returns xml {
         return data;
+    }
+}
+
+service /onJsonArr on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService95();
+    }
+}
+
+service class WsService95 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, json[] data) returns error? {
+        check caller->writeTextMessage(data);
+    }
+}
+
+service /onTable on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService94();
+    }
+}
+
+service class WsService94 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, table<Employee> key(name) data) returns error? {
+        check caller->writeTextMessage(data);
     }
 }
 
@@ -501,4 +538,28 @@ public function testReturnXmlDataBinding() returns Error? {
     check wsClient->writeTextMessage(xmlVal);
     xml data = check wsClient->readTextMessage();
     test:assertEquals(data, xmlVal);
+}
+
+@test:Config {}
+public function testJsonArrDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onJsonArr/");
+    check wsClient->writeTextMessage(jsonArr);
+    json[] data = check wsClient->readTextMessage();
+    test:assertEquals(data, jsonArr);
+}
+
+@test:Config {}
+public function testAnydataDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onJsonArr/");
+    check wsClient->writeTextMessage(jsonArr);
+    anydata data = check wsClient->readTextMessage();
+    test:assertEquals(data, jsonArr);
+}
+
+@test:Config {}
+public function testTableDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onTable/");
+    check wsClient->writeTextMessage(t);
+    table<Employee> key(name) data = check wsClient->readTextMessage();
+    test:assertEquals(data, t);
 }

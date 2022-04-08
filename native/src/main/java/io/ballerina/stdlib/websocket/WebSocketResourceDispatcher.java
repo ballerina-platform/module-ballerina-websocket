@@ -66,6 +66,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -483,6 +484,13 @@ public class WebSocketResourceDispatcher {
                             case TypeTags.XML_TAG:
                                 BXml bxml = XmlUtils.parse(stringAggregator.getAggregateString());
                                 bValues[index++] = bxml;
+                                bValues[index++] = true;
+                                break;
+                            case TypeTags.TABLE_TAG:
+                                Object table = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                        stringAggregator.getAggregateString()),
+                                        ValueCreator.createTypedescValue(param));
+                                bValues[index++] = table;
                                 bValues[index++] = true;
                                 break;
                             default:

@@ -39,6 +39,7 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +81,11 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         break;
                     case TypeTags.XML_TAG:
                         message = XmlUtils.parse(stringAggregator.getAggregateString());
+                        break;
+                    case TypeTags.TABLE_TAG:
+                        message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                        stringAggregator.getAggregateString()),
+                                ValueCreator.createTypedescValue(targetType));
                         break;
                     default:
                         message = CloneWithType.convert(targetType, JsonUtils.parse(
