@@ -159,12 +159,13 @@ public class Utils {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL)
                         && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.signature()
                         .endsWith(SyntaxKind.COLON_TOKEN.stringValue() + ERROR))) {
-                    repoteDiagnostics(WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL,
+                    repoteDiagnostics(String.format("%s%s%s%s",
+                                    WebSocketConstants.PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL),
                             resourceNode, ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
                 }
             }
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL)) {
-            repoteDiagnostics(WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL,
+            repoteDiagnostics(String.format("%s%s%s%s", WebSocketConstants.PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL),
                     resourceNode, ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
         }
     }

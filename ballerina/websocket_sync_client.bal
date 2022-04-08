@@ -374,7 +374,7 @@ isolated function getString(anydata data) returns string {
     } else if data is xml {
         text = data.toString();
     } else {
-        text = data.toJson().toString();
+        text = data.toJsonString();
     }
     return text;
 }
