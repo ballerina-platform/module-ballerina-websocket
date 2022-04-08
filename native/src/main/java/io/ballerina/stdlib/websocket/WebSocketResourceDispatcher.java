@@ -486,16 +486,20 @@ public class WebSocketResourceDispatcher {
                                 bValues[index++] = bxml;
                                 bValues[index++] = true;
                                 break;
-                            case TypeTags.TABLE_TAG:
-                                Object table = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
-                                        stringAggregator.getAggregateString()),
-                                        ValueCreator.createTypedescValue(param));
-                                bValues[index++] = table;
+                            case TypeTags.RECORD_TYPE_TAG:
+                                Object record = CloneWithType.convert(param, JsonUtils.parse(
+                                stringAggregator.getAggregateString()));
+                                if (record instanceof BError) {
+                                    sendDataBindingError(webSocketConnection, ((BError) record).getMessage());
+                                    return;
+                                }
+                                bValues[index++] = record;
                                 bValues[index++] = true;
                                 break;
                             default:
-                                Object value = CloneWithType.convert(param, JsonUtils.parse(
-                                        stringAggregator.getAggregateString()));
+                                Object value = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                                stringAggregator.getAggregateString()),
+                                        ValueCreator.createTypedescValue(param));
                                 if (value instanceof BError) {
                                     sendDataBindingError(webSocketConnection, ((BError) value).getMessage());
                                     return;

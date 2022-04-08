@@ -37,6 +37,8 @@ table<Employee> key(name) t = table [
     { name: "Jane", salary: 200 }
 ];
 
+string errorMessage = "data binding failed";
+
 listener Listener l78 = new(22078);
 
 service /onRecord on l78 {
@@ -151,7 +153,7 @@ service /onReturnInt on l78 {
 
 service class WsService88 {
     *Service;
-    remote isolated function onTextMessage(Caller caller, int data) returns int {
+    remote isolated function onTextMessage(int data) returns int {
         return data;
     }
 }
@@ -177,7 +179,7 @@ service /onReturnDecimal on l78 {
 
 service class WsService90 {
     *Service;
-    remote isolated function onTextMessage(Caller caller, decimal data) returns decimal {
+    remote isolated function onTextMessage(decimal data) returns decimal {
         return data;
     }
 }
@@ -203,7 +205,7 @@ service /onReturnJson on l78 {
 
 service class WsService92 {
     *Service;
-    remote isolated function onTextMessage(Caller caller, json data) returns json {
+    remote isolated function onTextMessage(json data) returns json {
         return data;
     }
 }
@@ -317,12 +319,10 @@ public function testErrorRecordArrayDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onRecord");
     check wsClient->writeTextMessage(recordVal);
     Coord[]|Error cord = wsClient->readTextMessage();
-    string errMessage = "data binding failed: error(\"{ballerina/lang.value}ConversionError\",message=\"'map" 
-                        + "<json>' value cannot be converted to 'websocket:Coord[]'\")";
-    if cord is Coord[] {
+     if cord is Coord[] {
         test:assertFail("Expected a binding error");
     } else {
-        test:assertEquals(cord.message(), errMessage);
+        test:assertTrue(cord.message().startsWith(errorMessage));
     }
 }
 
@@ -331,11 +331,10 @@ public function testErrorRecordDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onXml");
     check wsClient->writeTextMessage(xmlVal);
     Coord|Error cord = wsClient->readTextMessage();
-    string errMessage = "data binding failed: error(\"unrecognized token '<book>The' at line: 1 column: 11\")";
     if cord is Coord {
         test:assertFail("Expected a binding error");
     } else {
-        test:assertEquals(cord.message(), errMessage);
+        test:assertTrue(cord.message().startsWith(errorMessage));
     }
 }
 
@@ -355,12 +354,11 @@ public function testErrorXmlDataBinding() returns Error? {
 public function testErrorJsonDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onXml");
     check wsClient->writeTextMessage(xmlVal);
-    string errMessage = "data binding failed: error(\"unrecognized token '<book>The' at line: 1 column: 11\")";
     json|Error data = wsClient->readTextMessage();
     if data is json {
         test:assertFail("Expected a binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -369,11 +367,10 @@ public function testDispatchingErrorJsonDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onJson");
     check wsClient->writeTextMessage(xmlVal);
     json|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: unrecognized token '<book>The' at line: 1 column: 11: Status code: 1003";
     if data is json {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -382,11 +379,10 @@ public function testDispatchingErrorXmlDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onXml");
     check wsClient->writeTextMessage(jsonVal);
     xml|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: failed to parse xml: Unexpected character '{' (code 123) in prolog; expected '<'...: Status code: 1003";
     if data is xml {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -395,11 +391,10 @@ public function testDispatchingErrorRecordArrayDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onRecordArr");
     check wsClient->writeTextMessage(jsonVal);
     Coord|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: {ballerina/lang.value}ConversionError: Status code: 1003";
     if data is Coord {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -408,11 +403,10 @@ public function testDispatchingErrorRecordDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onRecord");
     check wsClient->writeTextMessage(recordArrVal);
     Coord|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: {ballerina/lang.value}ConversionError: Status code: 1003";
     if data is Coord {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -424,7 +418,7 @@ public function testClientIntErrorDataBinding() returns Error? {
     if data is int {
         test:assertFail("Expected a binding error");
     } else {
-        test:assertTrue(data.message().startsWith("data binding failed"));
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -436,7 +430,7 @@ public function testClientFloatErrorDataBinding() returns Error? {
     if data is float {
         test:assertFail("Expected a binding error");
     } else {
-        test:assertTrue(data.message().startsWith("data binding failed"));
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -448,7 +442,7 @@ public function testClientDecimalErrorDataBinding() returns Error? {
     if data is decimal {
         test:assertFail("Expected a binding error");
     } else {
-        test:assertTrue(data.message().startsWith("data binding failed"));
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -457,11 +451,10 @@ public function testDispatchingErrorIntDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onInt");
     check wsClient->writeTextMessage("Hello");
     int|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: unrecognized token 'Hello' at line: 1 column: 7: Status code: 1003";
     if data is int {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -470,11 +463,10 @@ public function testDispatchingErrorFloatDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onFloat");
     check wsClient->writeTextMessage("Hello");
     float|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: unrecognized token 'Hello' at line: 1 column: 7: Status code: 1003";
     if data is float {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -483,11 +475,10 @@ public function testDispatchingErrorDecimalDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onDecimal");
     check wsClient->writeTextMessage("Hello");
     decimal|Error data = wsClient->readTextMessage();
-    string errMessage = "data binding failed: unrecognized token 'Hello' at line: 1 column: 7: Status code: 1003";
     if data is decimal {
         test:assertFail("Expected a service dispatching binding error");
     } else {
-        test:assertEquals(data.message(), errMessage);
+        test:assertTrue(data.message().startsWith(errorMessage));
     }
 }
 
@@ -562,4 +553,16 @@ public function testTableDataBinding() returns Error? {
     check wsClient->writeTextMessage(t);
     table<Employee> key(name) data = check wsClient->readTextMessage();
     test:assertEquals(data, t);
+}
+
+@test:Config {}
+public function testErrorTableDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onTable/");
+    check wsClient->writeTextMessage("jsonArr");
+    table<Employee> key(name)|Error data = wsClient->readTextMessage();
+    if data is Error {
+        test:assertTrue(data.message().startsWith(errorMessage));
+    } else {
+        test:assertFail("Expected a service dispatching binding error");
+    }
 }
