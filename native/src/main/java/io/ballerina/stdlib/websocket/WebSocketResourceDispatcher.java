@@ -509,7 +509,7 @@ public class WebSocketResourceDispatcher {
                                 break;
                         }
                     }
-                } catch (BError | NumberFormatException error) {
+                } catch (BError error) {
                     sendDataBindingError(webSocketConnection, error.getMessage());
                     return;
                 }

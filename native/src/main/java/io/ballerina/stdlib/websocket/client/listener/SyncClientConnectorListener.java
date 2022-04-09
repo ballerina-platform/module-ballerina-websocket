@@ -82,14 +82,14 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     case TypeTags.XML_TAG:
                         message = XmlUtils.parse(stringAggregator.getAggregateString());
                         break;
-                    case TypeTags.TABLE_TAG:
+                    case TypeTags.RECORD_TYPE_TAG:
+                        message = CloneWithType.convert(targetType, JsonUtils.parse(
+                                stringAggregator.getAggregateString()));
+                        break;
+                    default:
                         message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
                                         stringAggregator.getAggregateString()),
                                 ValueCreator.createTypedescValue(targetType));
-                        break;
-                    default:
-                        message = CloneWithType.convert(targetType, JsonUtils.parse(
-                                stringAggregator.getAggregateString()));
                         break;
                 }
                 stringAggregator.resetAggregateString();
