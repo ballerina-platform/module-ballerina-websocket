@@ -1,3 +1,11 @@
+# Proposal: Implement Data Binding Support
+
+_Owners_: @shafreenAnfar @bhashinee  
+_Reviewers_: @shafreenAnfar    
+_Created_: 2022/04/12  
+_Updated_: 2022/04/12  
+_Issue_: [#2761](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)  
+
 ## Summary
 
 Data binding helps to access the incoming and outgoing text data in the user's desired parameter type. Subtypes of `anydata` will be the supported parameter types. This proposal discusses ways to provide data binding for both on listener side as well as the client side.
@@ -74,6 +82,26 @@ remote isolated function writeTextMessage(anydata data) returns Error?
 ```
 
 If the data binding fails, a `websocket:Error` will be returned from the API.
+
+### Message Serialization and Deserialization
+
+This section is to describe how serialization and deserialization happen for text data.
+
+**Serialization**
+
+Newly introduced APIs accept `anydata` as the input parameter. The input data is internally converted to `string` regardless of the data type when sent over the connection.
+
+- If a `string` is given, it is directly sent to the connection without any data conversions.
+- If an `xml` is given, it is directly converted to a `string` using the Ballerina `toString` function.
+- Rest of the data types will be converted to `json` and then to the `string` representation of that using the Ballerina `toJsonString` function.
+
+**Deserialization**
+
+When it comes to deserialization also the same.
+
+- If the contextually-expected data type is `string`, received data will be directly presented to the API without doing any deserialization.
+- If the contextually-expected data type is `xml`, received text data will be deserialized to `xml`.
+- All the other data types are treated as `json` and received text data will be deserialized to `json`.
 
 ## Testing
 
