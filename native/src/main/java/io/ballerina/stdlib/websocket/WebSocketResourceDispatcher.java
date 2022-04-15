@@ -23,13 +23,18 @@ import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.IntersectionType;
+import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -60,6 +65,9 @@ import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.ballerinalang.langlib.value.CloneReadOnly;
+import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +85,6 @@ import static io.ballerina.runtime.api.TypeTags.INT_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.MAP_TYPE;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION;
@@ -96,6 +103,7 @@ import static io.ballerina.stdlib.websocket.observability.WebSocketObservability
  */
 public class WebSocketResourceDispatcher {
     private static final Logger log = LoggerFactory.getLogger(WebSocketResourceDispatcher.class);
+    public static final MapType MAP_TYPE = TypeCreator.createMapType(PredefinedTypes.TYPE_JSON);
 
     private WebSocketResourceDispatcher() {
     }
@@ -462,20 +470,74 @@ public class WebSocketResourceDispatcher {
             if (finalFragment) {
                 stringAggregator.appendAggregateString(textMessage.getText());
                 int index = 0;
-                for (Type param : parameterTypes) {
-                    String typeName = param.getName();
-                    switch (typeName) {
-                    case WebSocketConstants.WEBSOCKET_CALLER:
-                        bValues[index++] = wsEndpoint;
+                try {
+                    for (Type param : parameterTypes) {
+                        int typeTag = param.getTag();
+                        boolean readOnly = false;
+                        if (typeTag == INTERSECTION_TAG) {
+                            List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
+                            if (memberTypes.size() > 2) {
+                                sendDataBindingError(webSocketConnection, "invalid param type '" + param.getName() +
+                                        "': only readonly intersection is allowed");
+                                return;
+                            }
+                            readOnly = true;
+                            for (Type type : memberTypes) {
+                                if (type.getTag() == TypeTags.READONLY_TAG) {
+                                    continue;
+                                }
+                                param = type;
+                                typeTag = type.getTag();
+                                break;
+                            }
+                        }
+                        Object bValue;
+                        switch (typeTag) {
+                            case OBJECT_TYPE_TAG:
+                                bValue = wsEndpoint;
+                                break;
+                            case STRING_TAG:
+                                bValue = StringUtils.fromString(stringAggregator.getAggregateString());
+                                break;
+                            case TypeTags.XML_TAG:
+                                Object bXml = XmlUtils.parse(stringAggregator.getAggregateString());
+                                if (readOnly) {
+                                    bXml = CloneReadOnly.cloneReadOnly(bXml);
+                                }
+                                bValue = bXml;
+                                break;
+                            case TypeTags.RECORD_TYPE_TAG:
+                                Object record = CloneWithType.convert(param, JsonUtils.parse(
+                                stringAggregator.getAggregateString()));
+                                if (record instanceof BError) {
+                                    sendDataBindingError(webSocketConnection, ((BError) record).getMessage());
+                                    return;
+                                }
+                                if (readOnly) {
+                                    record = CloneReadOnly.cloneReadOnly(record);
+                                }
+                                bValue = record;
+                                break;
+                            default:
+                                Object value = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                        stringAggregator.getAggregateString()),
+                                        ValueCreator.createTypedescValue(param));
+                                if (value instanceof BError) {
+                                    sendDataBindingError(webSocketConnection, ((BError) value).getMessage());
+                                    return;
+                                }
+                                if (readOnly) {
+                                    value = CloneReadOnly.cloneReadOnly(value);
+                                }
+                                bValue = value;
+                                break;
+                        }
+                        bValues[index++] = bValue;
                         bValues[index++] = true;
-                        break;
-                    case WebSocketConstants.PARAM_TYPE_STRING:
-                        bValues[index++] = StringUtils.fromString(stringAggregator.getAggregateString());
-                        bValues[index++] = true;
-                        break;
-                    default:
-                        break;
                     }
+                } catch (BError error) {
+                    sendDataBindingError(webSocketConnection, error.getMessage());
+                    return;
                 }
                 executeResource(wsService, balservice,
                         new WebSocketResourceCallback(connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE),
@@ -486,9 +548,17 @@ public class WebSocketResourceDispatcher {
                 stringAggregator.appendAggregateString(textMessage.getText());
                 webSocketConnection.readNextFrame();
             }
-        } catch (Exception e) {
+        } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
         }
+    }
+
+    private static void sendDataBindingError(WebSocketConnection webSocketConnection, String errorMessage) {
+        if (errorMessage.length() > 100) {
+            errorMessage = errorMessage.substring(0, 80) + "...";
+        }
+        webSocketConnection.terminateConnection(1003,
+                String.format("data binding failed: %s", errorMessage));
     }
 
     public static void dispatchOnBinary(WebSocketConnectionInfo connectionInfo, WebSocketBinaryMessage binaryMessage) {

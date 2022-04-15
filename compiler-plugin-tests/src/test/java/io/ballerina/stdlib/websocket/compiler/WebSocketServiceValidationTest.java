@@ -262,22 +262,9 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
-        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
-    }
-
-    @Test
-    public void testOnTextWithInvalidInputParams() {
-        Package currentPackage = loadPackage("sample_package_24");
-        PackageCompilation compilation = currentPackage.getCompilation();
-
-        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 1);
-        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT);
     }
 
     @Test
@@ -370,15 +357,13 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 4);
+        Assert.assertEquals(diagnosticResult.errors().size(), 3);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
         assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT);
         Diagnostic diagnostic3 = (Diagnostic) diagnosticResult.errors().toArray()[2];
         assertDiagnostic(diagnostic3, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES);
-        Diagnostic diagnostic4 = (Diagnostic) diagnosticResult.errors().toArray()[3];
-        assertDiagnostic(diagnostic4, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT);
     }
 
     @Test
@@ -387,11 +372,9 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
-        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
-        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
 
     }
 
@@ -449,6 +432,24 @@ public class WebSocketServiceValidationTest {
     @Test
     public void testOnPongAndOnPing() {
         Package currentPackage = loadPackage("sample_package_39");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
+    public void testOnTextWithValidDataBindingInput() {
+        Package currentPackage = loadPackage("sample_package_43");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
+    public void testSingleParamOnTextWithValidDataBindingInput() {
+        Package currentPackage = loadPackage("sample_package_42");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();

@@ -263,7 +263,7 @@ remote function onOpen(websocket:Caller caller) returns error? {
 
 ##### [onTextMessage](#ontextmessage)
 
-The received text messages are dispatched to this remote method.
+The received text messages are dispatched to this remote method. Data binding support is provided to accept the text messages as `anydata`.
 
 ```ballerina
 remote isolated function onTextMessage(websocket:Caller caller, string text) returns websocket:Error? {
@@ -381,7 +381,7 @@ public isolated function init(string url, *ClientConfiguration config) returns E
 
 #### [writeTextMessage](#writetextmessage)
 
-`writeTextMessage` API can be used to send a text message. It takes in the message to be sent as a `string` and returns an error if an error occurs while sending the text message to the connection.
+`writeTextMessage` API can be used to send a text message. It takes in the message to be sent as subtypes of `anydata` and returns an error if an error occurs while sending the text message to the connection.
 
 ```ballerina
 # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
@@ -392,7 +392,7 @@ public isolated function init(string url, *ClientConfiguration config) returns E
 #
 # + data - Data to be sent.
 # + return  - A `websocket:Error` if an error occurs when sending
-remote isolated function writeTextMessage(string data) returns Error? {}
+remote isolated function writeTextMessage(anydata data) returns Error? {}
 ```
 
 #### [writeBinaryMessage](#writebinarymessage)
@@ -413,7 +413,7 @@ remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
 
 #### [readTextMessage](#readtextmessage)
 
-`readTextMessage` API can be used to receive a text message. It returns the complete text message as a `string` or else an error if an error occurs while reading the messages.
+`readTextMessage` API can be used to receive a text message. It returns the complete text message as one of subtypes of `anydata` or else an error if an error occurs while reading the messages. The contextually-expected data type is inferred from the LHS variable type.
 
 ```ballerina
 # Reads text messages in a synchronous manner

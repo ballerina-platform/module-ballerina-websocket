@@ -68,9 +68,9 @@ public isolated client class Client {
     #
     # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
-    } external;
+    remote isolated function writeTextMessage(anydata data) returns Error? {
+        return self.externWriteTextMessage(getString(data));
+    }
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
@@ -191,8 +191,9 @@ public isolated client class Client {
 
     # Reads text messages in a synchronous manner.
     #
+    # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
-    remote isolated function readTextMessage() returns string|Error = @java:Method {
+    remote isolated function readTextMessage(typedesc<anydata> targetType = <>) returns targetType|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
@@ -224,6 +225,11 @@ public isolated client class Client {
     isolated function externGetNegotiatedSubProtocol() returns string? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.WebSocketUtil",
         name: "getNegotiatedSubProtocol"
+    } external;
+
+    isolated function externWriteTextMessage(string data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector",
+        name: "writeTextMessage"
     } external;
 }
 
@@ -359,6 +365,18 @@ isolated function getClone(http:Cookie cookie, time:Utc createdTime, time:Utc la
     options.createdTime = createdTime;
     options.lastAccessedTime = lastAccessedTime;
     return new http:Cookie(cookie.name, cookie.value, options);
+}
+
+isolated function getString(anydata data) returns string {
+    string text = "";
+    if data is string {
+        text = data;
+    } else if data is xml {
+        text = data.toString();
+    } else {
+        text = data.toJsonString();
+    }
+    return text;
 }
 
 const EQUALS = "=";
