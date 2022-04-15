@@ -17,7 +17,6 @@
 import ballerina/io;
 import ballerina/test;
 
-
 listener Listener closeLis = new(22079);
 
 service /ws on closeLis {
@@ -58,7 +57,7 @@ public function testConnectionErrorWithoutOnClose() returns Error? {
     check cl->writeTextMessage("hello");
     Error? conClose = cl->close(timeout = 60);
     if conClose is error {
-	    test:assertFail("Connection close failed");
+        test:assertFail("Connection close failed");
     }
 }
 
@@ -68,6 +67,6 @@ public function testConnectionErrorWithOnClose() returns Error? {
     check cl->writeTextMessage("hello");
     Error? conClose = cl->close(timeout = 60);
     if conClose is error {
-	    test:assertFail("Connection close failed");
+        test:assertFail("Connection close failed");
     }
 }
