@@ -21,11 +21,11 @@ listener Listener closeLis = new(22079);
 
 service /ws on closeLis {
     resource function get ser () returns Service {
-        return new WsService96();
+        return new WsService100();
     }
 }
 
-service class WsService96 {
+service class WsService100 {
     *Service;
 
     remote function onTextMessage(string text) returns error? {
@@ -35,11 +35,11 @@ service class WsService96 {
 
 service /ws1 on closeLis {
     resource function get onClose () returns Service {
-        return new WsService97();
+        return new WsService101();
     }
 }
 
-service class WsService97 {
+service class WsService101 {
     *Service;
 
     remote function onTextMessage(string text) returns error? {
