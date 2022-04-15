@@ -40,7 +40,6 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BValue;
-import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
 import io.ballerina.stdlib.http.api.HttpConstants;
@@ -475,16 +474,12 @@ public class WebSocketResourceDispatcher {
                         switch (typeTag) {
                             case OBJECT_TYPE_TAG:
                                 bValues[index++] = wsEndpoint;
-                                bValues[index++] = true;
                                 break;
                             case STRING_TAG:
                                 bValues[index++] = StringUtils.fromString(stringAggregator.getAggregateString());
-                                bValues[index++] = true;
                                 break;
                             case TypeTags.XML_TAG:
-                                BXml bxml = XmlUtils.parse(stringAggregator.getAggregateString());
-                                bValues[index++] = bxml;
-                                bValues[index++] = true;
+                                bValues[index++] = XmlUtils.parse(stringAggregator.getAggregateString());;
                                 break;
                             case TypeTags.RECORD_TYPE_TAG:
                                 Object record = CloneWithType.convert(param, JsonUtils.parse(
@@ -494,20 +489,19 @@ public class WebSocketResourceDispatcher {
                                     return;
                                 }
                                 bValues[index++] = record;
-                                bValues[index++] = true;
                                 break;
                             default:
                                 Object value = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
-                                                stringAggregator.getAggregateString()),
+                                        stringAggregator.getAggregateString()),
                                         ValueCreator.createTypedescValue(param));
                                 if (value instanceof BError) {
                                     sendDataBindingError(webSocketConnection, ((BError) value).getMessage());
                                     return;
                                 }
                                 bValues[index++] = value;
-                                bValues[index++] = true;
                                 break;
                         }
+                        bValues[index++] = true;
                     }
                 } catch (BError error) {
                     sendDataBindingError(webSocketConnection, error.getMessage());
