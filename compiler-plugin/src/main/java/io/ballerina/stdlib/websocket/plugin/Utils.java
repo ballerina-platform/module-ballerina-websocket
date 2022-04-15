@@ -252,7 +252,7 @@ public class Utils {
                 !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
                 !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
                 !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
-                !kind.equals(TypeDescKind.FLOAT);
+                !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION);
     }
 
     public static void validateOnTextReturnTypes(TypeSymbol returnTypeSymbol, String functionName,

@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
@@ -64,6 +65,7 @@ import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.ballerinalang.langlib.value.CloneReadOnly;
 import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
@@ -471,15 +473,38 @@ public class WebSocketResourceDispatcher {
                 try {
                     for (Type param : parameterTypes) {
                         int typeTag = param.getTag();
+                        boolean readOnly = false;
+                        if (typeTag == INTERSECTION_TAG) {
+                            List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
+                            if (memberTypes.size() > 2) {
+                                sendDataBindingError(webSocketConnection, "invalid param type '" + param.getName() +
+                                        "': only readonly intersection is allowed");
+                                return;
+                            }
+                            readOnly = true;
+                            for (Type type : memberTypes) {
+                                if (type.getTag() == TypeTags.READONLY_TAG) {
+                                    continue;
+                                }
+                                param = type;
+                                typeTag = type.getTag();
+                                break;
+                            }
+                        }
+                        Object bValue;
                         switch (typeTag) {
                             case OBJECT_TYPE_TAG:
-                                bValues[index++] = wsEndpoint;
+                                bValue = wsEndpoint;
                                 break;
                             case STRING_TAG:
-                                bValues[index++] = StringUtils.fromString(stringAggregator.getAggregateString());
+                                bValue = StringUtils.fromString(stringAggregator.getAggregateString());
                                 break;
                             case TypeTags.XML_TAG:
-                                bValues[index++] = XmlUtils.parse(stringAggregator.getAggregateString());;
+                                Object bXml = XmlUtils.parse(stringAggregator.getAggregateString());
+                                if (readOnly) {
+                                    bXml = CloneReadOnly.cloneReadOnly(bXml);
+                                }
+                                bValue = bXml;
                                 break;
                             case TypeTags.RECORD_TYPE_TAG:
                                 Object record = CloneWithType.convert(param, JsonUtils.parse(
@@ -488,7 +513,10 @@ public class WebSocketResourceDispatcher {
                                     sendDataBindingError(webSocketConnection, ((BError) record).getMessage());
                                     return;
                                 }
-                                bValues[index++] = record;
+                                if (readOnly) {
+                                    record = CloneReadOnly.cloneReadOnly(record);
+                                }
+                                bValue = record;
                                 break;
                             default:
                                 Object value = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
@@ -498,9 +526,13 @@ public class WebSocketResourceDispatcher {
                                     sendDataBindingError(webSocketConnection, ((BError) value).getMessage());
                                     return;
                                 }
-                                bValues[index++] = value;
+                                if (readOnly) {
+                                    value = CloneReadOnly.cloneReadOnly(value);
+                                }
+                                bValue = value;
                                 break;
                         }
+                        bValues[index++] = bValue;
                         bValues[index++] = true;
                     }
                 } catch (BError error) {

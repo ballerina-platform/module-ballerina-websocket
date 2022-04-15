@@ -30,6 +30,6 @@ service /basic/ws on new websocket:Listener(9090) {
 service isolated class WsService2 {
     *websocket:Service;
 
-    remote function onTextMessage(websocket:Caller caller, Coord data) {
+    remote function onTextMessage(websocket:Caller caller, readonly & Coord data) {
     }
 }

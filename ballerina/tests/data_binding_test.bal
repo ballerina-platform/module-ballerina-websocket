@@ -249,6 +249,58 @@ service class WsService94 {
     }
 }
 
+service /onReadonlyjson on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService96();
+    }
+}
+
+service class WsService96 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, readonly & json data) returns Error? {
+        check caller->writeTextMessage(data is json & readonly);
+    }
+}
+
+service /onReadonlyXml on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService97();
+    }
+}
+
+service class WsService97 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, readonly & xml data) returns Error? {
+        check caller->writeTextMessage(data is readonly);
+    }
+}
+
+service /onReadonlyRecord on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService98();
+    }
+}
+
+service class WsService98 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, readonly & Coord data) returns Error? {
+        check caller->writeTextMessage(data is readonly);
+    }
+}
+
+service /onReadonlyInt on l78 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService99();
+    }
+}
+
+service class WsService99 {
+    *Service;
+    remote isolated function onTextMessage(Caller caller, readonly & int data) returns Error? {
+        check caller->writeTextMessage(data is readonly);
+    }
+}
+
 @test:Config {}
 public function testJsonDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onJson/");
@@ -258,11 +310,27 @@ public function testJsonDataBinding() returns Error? {
 }
 
 @test:Config {}
+public function testReadonlyJsonDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReadonlyjson/");
+    check wsClient->writeTextMessage(jsonVal);
+    boolean data = check wsClient->readTextMessage();
+    test:assertTrue(data);
+}
+
+@test:Config {}
 public function testIntDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onInt/");
     check wsClient->writeTextMessage(1);
     int data = check wsClient->readTextMessage();
     test:assertEquals(1, data);
+}
+
+@test:Config {}
+public function testReadonlyIntDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReadonlyInt/");
+    check wsClient->writeTextMessage(1);
+    boolean data = check wsClient->readTextMessage();
+    test:assertTrue(data);
 }
 
 @test:Config {}
@@ -299,11 +367,27 @@ public function testXmlDataBinding() returns Error? {
 }
 
 @test:Config {}
+public function testReadonlyXmlDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReadonlyXml/");
+    check wsClient->writeTextMessage(xmlVal);
+    boolean data = check wsClient->readTextMessage();
+    test:assertTrue(data);
+}
+
+@test:Config {}
 public function testRecordDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22078/onRecord/");
     check wsClient->writeTextMessage(recordVal);
     Coord cord = check wsClient->readTextMessage();
     test:assertEquals(cord, recordVal);
+}
+
+@test:Config {}
+public function testReadonlyRecordDataBinding() returns Error? {
+    Client wsClient = check new("ws://localhost:22078/onReadonlyRecord/");
+    check wsClient->writeTextMessage(recordVal);
+    boolean cord = check wsClient->readTextMessage();
+    test:assertTrue(cord);
 }
 
 @test:Config {}

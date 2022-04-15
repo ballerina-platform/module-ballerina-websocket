@@ -77,7 +77,7 @@ public class WebSocketResourceCallback implements Callback {
         } else if (resource.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE)) {
             sendTextMessage(StringUtils.fromString(result.toString()), promiseCombiner);
         } else {
-            log.error("Invalid return type");
+            log.error("invalid return type");
         }
     }
 
