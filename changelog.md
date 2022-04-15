@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- [Add data binding support for WebSocket](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
+
+## [2.2.1] - 2022-03-02
+
 ### Changed
 - [Mark Websocket Service type as distinct](https://github.com/ballerina-platform/ballerina-standard-library/issues/2398)
 
