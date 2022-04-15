@@ -18,6 +18,7 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BString;
@@ -71,8 +72,12 @@ public class WebSocketResourceCallback implements Callback {
             sendTextMessage((BString) result, promiseCombiner);
         } else if (result instanceof BArray) {
             sendBinaryMessage((BArray) result, promiseCombiner);
-        } else {
+        } else if (result == null) {
             webSocketConnection.readNextFrame();
+        } else if (resource.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE)) {
+            sendTextMessage(StringUtils.fromString(result.toString()), promiseCombiner);
+        } else {
+            log.error("invalid return type");
         }
     }
 

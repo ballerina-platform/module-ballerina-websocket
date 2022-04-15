@@ -47,6 +47,7 @@ public class Utils {
 
     public static final String PREFIX = "ballerina/websocket:";
     public static final String CALLER = "Caller";
+    public static final String CLIENT = "Client";
     public static final String BYTE_ARRAY = "byte[]";
     public static final String STRING = "string";
     public static final String INT = "int";
@@ -113,15 +114,14 @@ public class Utils {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE
                         && symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
                         symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)) {
-                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
-                            resourceNode.location(), symbol.signature(), functionName);
+                    repoteDiagnostics(functionName, resourceNode, ctx,
+                            PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
             }
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !(returnTypeSymbol.typeKind()
                 == TypeDescKind.ARRAY) && !(returnTypeSymbol.typeKind() == TypeDescKind.STRING)) {
-            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA,
-                    resourceNode.location(), returnTypeSymbol.signature(),
-                    functionName);
+            repoteDiagnostics(functionName, resourceNode, ctx,
+                    PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, returnTypeSymbol.signature());
         }
     }
 
@@ -159,14 +159,14 @@ public class Utils {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL)
                         && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.signature()
                         .endsWith(SyntaxKind.COLON_TOKEN.stringValue() + ERROR))) {
-                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES,
-                            resourceNode.location(), functionName,
-                            WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL);
+                    repoteDiagnostics(String.format("%s%s%s%s",
+                                    WebSocketConstants.PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL),
+                            resourceNode, ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
                 }
             }
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL)) {
-            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, resourceNode.location(),
-                    functionName, WebSocketConstants.PACKAGE_WEBSOCKET + COLON + ERROR + OPTIONAL);
+            repoteDiagnostics(String.format("%s%s%s%s", WebSocketConstants.PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL),
+                    resourceNode, ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
         }
     }
 
@@ -222,21 +222,69 @@ public class Utils {
     static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
             FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
-        if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
-            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
-                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+        if (inputParams.size() == 1) {
+            ParameterSymbol inputParam = inputParams.get(0);
+            TypeDescKind kind = inputParam.typeDescriptor().typeKind();
+            String paramSignature = inputParam.typeDescriptor().signature();
+            if (!(isValidInput(getModuleId(inputParam), paramSignature, kind)) &&
+                    inputParams.get(0).signature().contains(COLON + CALLER)) {
+                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                        resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+            }
         } else {
             for (ParameterSymbol inputParam : inputParams) {
                 String moduleId = getModuleId(inputParam);
                 String paramSignature = inputParam.typeDescriptor().signature();
-                if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
+                TypeDescKind kind = inputParam.typeDescriptor().typeKind();
+                if (isValidInput(moduleId, paramSignature, kind)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
                             resourceNode.location(), paramSignature);
                 }
             }
         }
         TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
-        validateOnDataReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+        validateOnTextReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+    }
+
+    private static boolean isValidInput(String moduleId, String paramSignature, TypeDescKind kind) {
+        return !kind.isStringType() && !paramSignature.equals(moduleId + COLON + CALLER) &&
+                !kind.isXMLType() && !kind.equals(TypeDescKind.JSON) &&
+                !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
+                !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
+                !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
+                !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION);
+    }
+
+    public static void validateOnTextReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
+                                                 FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
+        if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
+            for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
+                if (validateReturnType(symbol)) {
+                    repoteDiagnostics(functionName, resourceNode, ctx,
+                            PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
+                }
+            }
+        } else if (validateReturnType(returnTypeSymbol)) {
+            repoteDiagnostics(functionName, resourceNode, ctx,
+                    PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, returnTypeSymbol.signature());
+        }
+    }
+
+    private static void repoteDiagnostics(String functionName, FunctionDefinitionNode resourceNode,
+                      SyntaxNodeAnalysisContext ctx, PluginConstants.CompilationErrors invalidReturnTypesOnData,
+                      String signature) {
+        reportDiagnostics(ctx, invalidReturnTypesOnData,
+                resourceNode.location(), signature,
+                functionName);
+    }
+
+    private static boolean validateReturnType(TypeSymbol symbol) {
+        return !(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE)
+                && (symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL)
+                && !(symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
+                && !(symbol.typeKind() == TypeDescKind.INT) && !(symbol.typeKind() == TypeDescKind.BOOLEAN)
+                && !(symbol.typeKind() == TypeDescKind.DECIMAL) && !(symbol.typeKind() == TypeDescKind.JSON)
+                && !(symbol.typeKind() == TypeDescKind.XML) && !(symbol.typeKind() == TypeDescKind.FLOAT);
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {

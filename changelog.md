@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- [Add data binding support for WebSocket](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
+
 ### Fixed
 - [Fix the client connection closure issue](https://github.com/ballerina-platform/ballerina-standard-library/issues/2836)
 

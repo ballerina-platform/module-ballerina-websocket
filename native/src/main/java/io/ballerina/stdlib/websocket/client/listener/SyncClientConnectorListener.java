@@ -18,10 +18,14 @@
 package io.ballerina.stdlib.websocket.client.listener;
 
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.XmlUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
@@ -34,6 +38,8 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +54,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;
+    private Type targetType;
     private AtomicBoolean futureCompleted;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
 
@@ -66,10 +73,34 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
             boolean finalFragment = webSocketTextMessage.isFinalFragment();
             if (finalFragment) {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
-                BString txtMsg = StringUtils.fromString(stringAggregator.getAggregateString());
+                Object message;
+                int typeTag = targetType == null ? TypeTags.STRING_TAG : targetType.getTag();
+                switch (typeTag) {
+                    case TypeTags.STRING_TAG:
+                        message = StringUtils.fromString(stringAggregator.getAggregateString());
+                        break;
+                    case TypeTags.XML_TAG:
+                        message = XmlUtils.parse(stringAggregator.getAggregateString());
+                        break;
+                    case TypeTags.RECORD_TYPE_TAG:
+                        message = CloneWithType.convert(targetType, JsonUtils.parse(
+                                stringAggregator.getAggregateString()));
+                        break;
+                    default:
+                        message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                        stringAggregator.getAggregateString()),
+                                ValueCreator.createTypedescValue(targetType));
+                        break;
+                }
                 stringAggregator.resetAggregateString();
                 if (!futureCompleted.get()) {
-                    callback.complete(txtMsg);
+                    if (message instanceof BError) {
+                        callback.complete(WebSocketUtil
+                                .createWebsocketError(String.format("data binding failed: %s", message),
+                                        WebSocketConstants.ErrorCode.Error));
+                    } else {
+                        callback.complete(message);
+                    }
                     futureCompleted.set(true);
                 }
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
@@ -77,9 +108,15 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
-        } catch (IllegalAccessException e) {
-            callback.complete(WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+        } catch (IllegalAccessException | BError e) {
+            if (e instanceof BError) {
+                callback.complete(WebSocketUtil
+                        .createWebsocketError(String.format("data binding failed: %s", e),
+                                WebSocketConstants.ErrorCode.Error));
+            } else {
+                callback.complete(WebSocketUtil
+                        .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+            }
             futureCompleted.set(true);
         }
     }
@@ -191,6 +228,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     public void setCallback(Future callback) {
         this.callback = callback;
+    }
+
+    public void setTargetType(Type targetType) {
+        this.targetType = targetType;
     }
 
     public void setFutureCompleted(AtomicBoolean futureCompleted) {
