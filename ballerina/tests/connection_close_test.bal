@@ -57,6 +57,7 @@ public function testConnectionErrorWithoutOnClose() returns Error? {
     check cl->writeTextMessage("hello");
     Error? conClose = cl->close(timeout = 60);
     if conClose is error {
+        io:println(conClose);
         test:assertFail("Connection close failed");
     }
 }
@@ -67,6 +68,7 @@ public function testConnectionErrorWithOnClose() returns Error? {
     check cl->writeTextMessage("hello");
     Error? conClose = cl->close(timeout = 60);
     if conClose is error {
+        io:println(conClose);
         test:assertFail("Connection close failed");
     }
 }
