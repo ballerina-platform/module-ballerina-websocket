@@ -57,10 +57,6 @@ public class Close {
             List<BError> errors = new ArrayList<>(1);
             ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                     connectionInfo, countDownLatch);
-            if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
-                connectionInfo.getWebSocketConnection().readNextFrame();
-            }
-            waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
             closeFuture.channel().close().addListener(future -> {
                 WebSocketUtil.setListenerOpenField(connectionInfo);
                 if (errors.isEmpty()) {
@@ -69,6 +65,10 @@ public class Close {
                     balFuture.complete(errors.get(errors.size() - 1));
                 }
             });
+            if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
+                connectionInfo.getWebSocketConnection().readNextFrame();
+            }
+            waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
             WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_CLOSE,
                     connectionInfo);
         } catch (Exception e) {
