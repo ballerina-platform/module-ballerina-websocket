@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.SYNC_CLIENT;
+
 /**
  * {@code Get} is the GET action implementation of the HTTP Connector.
  */
@@ -55,6 +57,9 @@ public class Close {
             List<BError> errors = new ArrayList<>(1);
             ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                     connectionInfo, countDownLatch);
+            if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
+                connectionInfo.getWebSocketConnection().readNextFrame();
+            }
             waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
             closeFuture.channel().close().addListener(future -> {
                 WebSocketUtil.setListenerOpenField(connectionInfo);
