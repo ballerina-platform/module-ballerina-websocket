@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.NODE_LOCATION;
+import static io.ballerina.stdlib.websocket.plugin.Utils.NODE_LOCATION;
 
 /**
  * A class for testing code actions.

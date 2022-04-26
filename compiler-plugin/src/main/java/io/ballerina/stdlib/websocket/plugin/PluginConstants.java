@@ -84,7 +84,15 @@ public class PluginConstants {
                 "WEBSOCKET_105"),
         INVALID_LISTENER_INIT_PARAMS("`websocket:ListenerConfiguration` not allowed with `http:Listener` "
                 + "as the `websocket:Listener` ", "WEBSOCKET_106"),
-        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107");;
+        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107"),
+        ON_TEXT_GENERATION_HINT("Template generation for onTextMessage", "WEBSOCKET_108"),
+        ON_BINARY_GENERATION_HINT("Template generation for onBinaryMessage", "WEBSOCKET_109"),
+        ON_OPEN_GENERATION_HINT("Template generation for onOpen", "WEBSOCKET_110"),
+        ON_IDLE_TIMEOUT_GENERATION_HINT("Template generation for onIdleTimeout", "WEBSOCKET_111"),
+        ON_CLOSE_GENERATION_HINT("Template generation for onClose", "WEBSOCKET_112"),
+        ON_PING_GENERATION_HINT("Template generation for onPing", "WEBSOCKET_113"),
+        ON_PONG_GENERATION_HINT("Template generation for onPong", "WEBSOCKET_114"),
+        ON_ERROR_GENERATION_HINT("Template generation for onError", "WEBSOCKET_115");
 
         private final String error;
         private final String errorCode;

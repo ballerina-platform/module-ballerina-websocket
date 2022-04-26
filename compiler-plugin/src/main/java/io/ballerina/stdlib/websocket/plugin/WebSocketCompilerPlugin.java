@@ -29,5 +29,13 @@ public class WebSocketCompilerPlugin extends CompilerPlugin {
     public void init(CompilerPluginContext compilerPluginContext) {
         compilerPluginContext.addCodeAnalyzer(new WebSocketServiceAnalyzer());
         compilerPluginContext.addCodeAction(new AddWebSocketCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnTextMessageCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnBinaryMessageCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnCloseCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnOpenCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnIdleTimeoutCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnErrorCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnPingCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnPongCodeTemplate());
     }
 }
