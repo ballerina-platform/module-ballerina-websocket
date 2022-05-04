@@ -75,11 +75,11 @@ public isolated client class Client {
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
-    # + data - Binary data to be sent
+    # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
-    } external;
+    remote isolated function writeBinaryMessage(anydata data) returns Error? {
+        return self.externWriteBinaryMessage(getBinary(data));
+    }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
@@ -199,7 +199,7 @@ public isolated client class Client {
 
     # Reads binary data in a synchronous manner.
     #
-    # # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
+    # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
     # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
     remote isolated function readBinaryMessage(typedesc<anydata> targetType = <>) returns targetType|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
@@ -408,6 +408,17 @@ isolated function getSerializedData(anydata data) returns string|byte[] {
         return data;
     }
     return data.toJsonString();
+}
+
+isolated function getBinary(anydata data) returns byte[] {
+    if data is string {
+        return data.toBytes();
+    } else if data is xml {
+        return data.toString().toBytes();
+    } else if data is byte[] {
+        return data;
+    }
+    return data.toJsonString().toBytes();
 }
 
 const EQUALS = "=";
