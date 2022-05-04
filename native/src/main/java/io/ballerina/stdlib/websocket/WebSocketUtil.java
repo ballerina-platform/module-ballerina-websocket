@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -216,6 +217,11 @@ public class WebSocketUtil {
             return "Unexpected error occurred";
         }
         return err.getMessage();
+    }
+
+    public static BString getBString(byte[] byteArray) {
+        return StringUtils.fromString(
+                new String(byteArray, StandardCharsets.UTF_8));
     }
 
     /**

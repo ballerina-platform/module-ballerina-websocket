@@ -74,10 +74,11 @@ public class WebSocketSyncConnector {
         return null;
     }
 
-    public static Object readMessage(Environment env, BObject wsConnection) {
+    public static Object readMessage(Environment env, BObject wsConnection, BTypedesc targetType) {
+        Type targetDataType = targetType.getDescribingType();
         final Future callback = env.markAsync();
         try {
-            readContentFromConnection(wsConnection, callback);
+            readContentFromConnection(wsConnection, callback, targetDataType);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
