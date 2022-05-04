@@ -40,9 +40,10 @@ service class WsService77 {
 @test:Config {}
 public function testReadonlyBinary() returns Error? {
     Client wsClient = check new("ws://localhost:21012/onReadonlyBinary/");
-    check wsClient->writeBinaryMessage([5, 24, 56]);
+    byte[] bindata = [5, 24, 56];
+    check wsClient->writeBinaryMessage(bindata);
     byte[] data = check wsClient->readBinaryMessage();
     check wsClient->ping(data);
     runtime:sleep(0.5);
-    test:assertEquals(data, [5, 24, 56]);
+    test:assertEquals(data, bindata);
 }

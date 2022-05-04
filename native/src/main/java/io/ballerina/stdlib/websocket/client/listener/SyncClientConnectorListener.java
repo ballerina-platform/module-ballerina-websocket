@@ -38,14 +38,12 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 
@@ -90,8 +88,14 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 stringAggregator.getAggregateString()));
                         break;
                     case TypeTags.UNION_TAG:
-                        message = CloneWithType.convert(targetType,
-                                StringUtils.fromString(stringAggregator.getAggregateString()));
+                        if (WebSocketUtil.hasStringType(targetType)) {
+                            message = CloneWithType.convert(targetType,
+                                    StringUtils.fromString(stringAggregator.getAggregateString()));
+                        } else {
+                            message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                            stringAggregator.getAggregateString()),
+                                    ValueCreator.createTypedescValue(targetType));
+                        }
                         break;
                     default:
                         message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
@@ -141,9 +145,6 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 Object message;
                 int typeTag = targetType == null || targetType.toString().equals("byte[]") ?
                         TypeTags.BYTE_TAG : targetType.getTag();
-//                if (targetType != null && targetType.toString().equals("byte[]")) {
-//                    typeTag = BYTE_TAG;
-//                }
                 switch (typeTag) {
                     case BYTE_TAG:
                         message = ValueCreator.createArrayValue(binMsg);
@@ -158,7 +159,12 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         message = CloneWithType.convert(targetType, JsonUtils.parse(getBString(binMsg)));
                         break;
                     case TypeTags.UNION_TAG:
-                        message = CloneWithType.convert(targetType, ValueCreator.createArrayValue(binMsg));
+                        if (WebSocketUtil.hasByteArrayType(targetType)) {
+                            message = CloneWithType.convert(targetType, ValueCreator.createArrayValue(binMsg));
+                        } else {
+                            message = FromJsonStringWithType.fromJsonStringWithType(getBString(binMsg),
+                                    ValueCreator.createTypedescValue(targetType));
+                        }
                         break;
                     default:
                         message = FromJsonStringWithType.fromJsonStringWithType(getBString(binMsg),

@@ -22,9 +22,11 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
@@ -55,6 +57,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.websocketx.CorruptedWebSocketFrameException;
 import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -222,6 +225,16 @@ public class WebSocketUtil {
     public static BString getBString(byte[] byteArray) {
         return StringUtils.fromString(
                 new String(byteArray, StandardCharsets.UTF_8));
+    }
+
+    public static boolean hasStringType(Type targetType) {
+        List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
+        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.STRING_TAG);
+    }
+
+    public static boolean hasByteArrayType(Type targetType) {
+        List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
+        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.ARRAY_TAG);
     }
 
     /**

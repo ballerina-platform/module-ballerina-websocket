@@ -268,27 +268,21 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
-    public void testOnBinaryWithInvalidMandatoryInputParams() {
+    public void testOnBinaryWithValidMandatoryInputParams() {
         Package currentPackage = loadPackage("sample_package_25");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 1);
-        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY_WITH_ONE_PARAMS);
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
     @Test
-    public void testOnBinaryWithInvalidReturnTypes() {
+    public void testOnBinaryWithValidReturnTypes() {
         Package currentPackage = loadPackage("sample_package_26");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
-        Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
-        assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY);
-        Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
-        assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
     }
 
     @Test
@@ -441,6 +435,24 @@ public class WebSocketServiceValidationTest {
     @Test
     public void testOnTextWithValidDataBindingInput() {
         Package currentPackage = loadPackage("sample_package_43");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
+    public void testOnBinaryWithValidDataBindingInput() {
+        Package currentPackage = loadPackage("sample_package_44");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
+    public void testOnMessageWithValidDataBindingInput() {
+        Package currentPackage = loadPackage("sample_package_45");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();

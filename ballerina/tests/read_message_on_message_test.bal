@@ -299,7 +299,20 @@ service /onBinary on l94 {
 
 service class service101 {
     *Service;
-    remote isolated function onMessage(Caller caller, byte[] data) returns Error? {
+    remote isolated function onMessage(Caller caller, byte[]|string data) returns Error? {
+        check caller->writeMessage(data);
+    }
+}
+
+service /onText on l94 {
+    resource function get .() returns Service|UpgradeError {
+        return new service102();
+    }
+}
+
+service class service102 {
+    *Service;
+    remote isolated function onMessage(Caller caller, string|byte[] data) returns Error? {
         check caller->writeMessage(data);
     }
 }
@@ -737,4 +750,36 @@ public function testBinaryXmlDataBinding() returns Error? {
     check wsClient->writeBinaryMessage(xmlVal);
     xml data = check wsClient->readBinaryMessage();
     test:assertEquals(data, xmlVal);
+}
+
+@test:Config {}
+public function testUnionWithStringDataBindingForText() returns Error? {
+    Client wsClient = check new("ws://localhost:22080/onText/");
+    check wsClient->writeMessage(1);
+    int|byte[]|string data = check wsClient->readMessage();
+    test:assertEquals(data, "1");
+}
+
+@test:Config {}
+public function testUnionWithoutStringDataBindingForText() returns Error? {
+    Client wsClient = check new("ws://localhost:22080/onText/");
+    check wsClient->writeMessage(1);
+    int|byte[] data = check wsClient->readMessage();
+    test:assertEquals(data, 1);
+}
+
+@test:Config {}
+public function testUnionWithByteArrDataBindingForBinary() returns Error? {
+    Client wsClient = check new("ws://localhost:22080/onBinary/");
+    check wsClient->writeMessage("1".toBytes());
+    int|byte[]|string data = check wsClient->readMessage();
+    test:assertEquals(data, "1".toBytes());
+}
+
+@test:Config {}
+public function testUnionWithoutByteArrDataBindingForBinary() returns Error? {
+    Client wsClient = check new("ws://localhost:22080/onBinary/");
+    check wsClient->writeMessage("1".toBytes());
+    int|string data = check wsClient->readMessage();
+    test:assertEquals(data, 1);
 }

@@ -120,7 +120,7 @@ public class WebSocketUpgradeServiceValidator {
                                     Utils.validateOnErrorFunction(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
                                 case PluginConstants.ON_TEXT_MESSAGE:
-                                    Utils.validateOnTextMessageFunction(symbol.typeDescriptor(), ctx, resourceNode);
+                                    Utils.validateOnDataFunctions(symbol.typeDescriptor(), ctx, resourceNode);
                                     break;
                                 case PluginConstants.ON_BINARY_MESSAGE:
                                     Utils.validateOnBinaryMessageFunction(symbol.typeDescriptor(), ctx, resourceNode);

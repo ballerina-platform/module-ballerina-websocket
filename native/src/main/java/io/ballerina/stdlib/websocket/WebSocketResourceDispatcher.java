@@ -88,6 +88,7 @@ import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
+import static io.ballerina.stdlib.websocket.WebSocketUtil.hasByteArrayType;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY;
@@ -509,8 +510,14 @@ public class WebSocketResourceDispatcher {
                                 stringAggregator.getAggregateString()));
                                 break;
                             case TypeTags.UNION_TAG:
-                                bValue = CloneWithType.convert(param,
-                                        StringUtils.fromString(stringAggregator.getAggregateString()));
+                                if (WebSocketUtil.hasStringType(param)) {
+                                    bValue = CloneWithType.convert(param,
+                                            StringUtils.fromString(stringAggregator.getAggregateString()));
+                                } else {
+                                    bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                                    stringAggregator.getAggregateString()),
+                                            ValueCreator.createTypedescValue(param));
+                                }
                                 break;
                             default:
                                 bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
@@ -688,7 +695,12 @@ public class WebSocketResourceDispatcher {
                         bValue = CloneWithType.convert(param, JsonUtils.parse(getBString(byteArray)));
                         break;
                     case TypeTags.UNION_TAG:
-                        bValue = CloneWithType.convert(param, ValueCreator.createArrayValue(byteArray));
+                        if (hasByteArrayType(param)) {
+                            bValue = CloneWithType.convert(param, ValueCreator.createArrayValue(byteArray));
+                        } else {
+                            bValue = FromJsonStringWithType.fromJsonStringWithType(getBString(byteArray),
+                                    ValueCreator.createTypedescValue(param));
+                        }
                         break;
                     default:
                         bValue = FromJsonStringWithType.fromJsonStringWithType(getBString(byteArray),

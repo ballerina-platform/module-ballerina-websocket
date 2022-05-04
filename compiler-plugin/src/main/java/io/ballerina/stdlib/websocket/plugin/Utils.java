@@ -219,8 +219,8 @@ public class Utils {
                 PluginConstants.ON_IDLE_TIMEOUT, resourceNode, ctx);
     }
 
-    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
-            FunctionDefinitionNode resourceNode) {
+    static void validateOnDataFunctions(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                        FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1) {
             ParameterSymbol inputParam = inputParams.get(0);
