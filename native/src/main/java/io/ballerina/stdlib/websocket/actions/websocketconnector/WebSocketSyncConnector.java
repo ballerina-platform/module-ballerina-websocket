@@ -44,7 +44,7 @@ public class WebSocketSyncConnector {
         return null;
     }
 
-    private static void readContentFromConnection(BObject wsConnection, Future callback, Type... targetType)
+    private static void readContentFromConnection(BObject wsConnection, Future callback, Type targetType)
             throws IllegalAccessException {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
@@ -56,17 +56,16 @@ public class WebSocketSyncConnector {
                 WebSocketConstants.ANNOTATION_ATTR_READ_IDLE_TIMEOUT, 0);
         connectionInfo.getWebSocketConnection().addReadIdleStateHandler(readTimeoutInSeconds);
         connectorListener.setCallback(callback);
-        if (targetType.length > 0) {
-            connectorListener.setTargetType(targetType[0]);
-        }
+        connectorListener.setTargetType(targetType);
         connectorListener.setFutureCompleted(new AtomicBoolean(false));
         connectionInfo.getWebSocketConnection().readNextFrame();
     }
 
-    public static Object readBinaryMessage(Environment env, BObject wsConnection) {
+    public static Object readBinaryMessage(Environment env, BObject wsConnection, BTypedesc targetType) {
         final Future callback = env.markAsync();
+        Type targetDataType = targetType.getDescribingType();
         try {
-            readContentFromConnection(wsConnection, callback);
+            readContentFromConnection(wsConnection, callback, targetDataType);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
