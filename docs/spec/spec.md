@@ -3,13 +3,18 @@
 _Owners_: @shafreenAnfar @bhashinee  
 _Reviewers_: @shafreenAnfar  
 _Created_: 2021/12/09  
-_Updated_: 2021/12/09  
+_Updated_: 2022/05/05   
 _Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-library/issues/2165)
 
 # Introduction
 
-This is the specification for WebSocket standard library which is used to implement WebSocket compliant `listener` and `client` using [Ballerina programming language](https://ballerina.io/), which is an open-source programming language for the
-cloud that makes it easier to use, combine, and create network services.
+This is the specification for the WebSocket standard library of [Ballerina language](https://ballerina.io/), which provides WebSocket client-server functionalities.
+
+The WebSocket library specification has evolved and may continue to evolve in the future. The released versions of the specification can be found under the relevant GitHub tag.
+
+If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Slack channel](https://ballerina.io/community/). Based on the outcome of the discussion, the specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal, which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
+
+The conforming implementation of the specification is released and included in the distribution. Any deviation from the specification is considered a bug.
 
 # Contents
 1. [Overview](#1-overview)
@@ -468,7 +473,6 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 #### [readMessage](#readmessage)
 
 `readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
-
 ```ballerina
 # Reads data from the WebSocket connection
 # ```ballerina
@@ -482,9 +486,9 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 # }
 #```
 #
-# + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
-#            if an error occurs when receiving
-remote isolated function readMessage() returns string|byte[]|Error {}
+# + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
+# + return - The data sent by the server or a `websocket:Error` if an error occurs when receiving
+remote isolated function readMessage(typedesc<anydata> targetType = <>) returns targetType|Error
 ```
 
 #### [close](#close)
