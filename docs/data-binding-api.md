@@ -4,7 +4,7 @@ _Owners_: @shafreenAnfar @bhashinee
 _Reviewers_: @shafreenAnfar    
 _Created_: 2022/04/12  
 _Updated_: 2022/04/12  
-_Issue_: [#2761](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
+_Issue_: [#2761](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)  
 
 ## Summary
 
@@ -152,7 +152,7 @@ Ex:
 string result = check readBinaryMessage();
 json data = check readBinaryMessage();
 ```
-If the LHS type is some other data type apart from `byte[]`, Incoming data will first be converted to the string representation of the binary data and then be converted to the expected data type.
+If the LHS type is some other data type apart from `byte[]`, incoming data will first be converted to the string representation of the binary data and then be converted to the expected data type.
 
 If the data binding fails, a `websocket:Error` will be returned from the API.
 
