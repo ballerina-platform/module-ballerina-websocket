@@ -87,15 +87,15 @@ string result = check readMessage();
 json data = check readMessage();
 ```
 
-When the receiving data are of the text frame type, data will be deserialized to the expected data type. If the incoming data is of binary frames, and if the LHS type is some other data type apart from `byte[]`, incoming data will first be converted to the string representation of the binary data and then be converted to the expected data type.
+When the receiving data is of the text frame type, data will be deserialized to the expected data type. If the incoming data is of binary frames, and if the LHS type is some other data type apart from `byte[]`, incoming data will first be converted to the string representation of the binary data and then be converted to the expected data type.
 
-Deserialization of the above APIs happens similar to the `onMessage` deserialization. For more details refer to the relevant section.
+Deserialization of the above `readMessage` API happens similar to the `onMessage` deserialization. For more details refer to the relevant section.
 
 If the data binding fails, a `websocket:Error` will be returned from the API.
 
 ### Caller
 
-Caller APIs will also be extended similar to the Client's `writeMessage` APIs.
+Caller will also be extended similar to the Client's `writeMessage` API.
 
 ## Testing
 

@@ -189,7 +189,7 @@ public isolated client class Client {
         'class: "io.ballerina.stdlib.websocket.client.SyncInitEndpoint"
     } external;
 
-    # Reads text messages in a synchronous manner
+    # Reads text messages in a synchronous manner.
     #
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
     remote isolated function readTextMessage() returns string|Error = @java:Method {
