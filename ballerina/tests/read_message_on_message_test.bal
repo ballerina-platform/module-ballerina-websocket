@@ -312,7 +312,7 @@ service /onText on l94 {
 
 service class service102 {
     *Service;
-    remote isolated function onMessage(Caller caller, string|byte[] data) returns Error? {
+    remote isolated function onMessage(Caller caller, string data) returns Error? {
         check caller->writeMessage(data);
     }
 }

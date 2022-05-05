@@ -1,3 +1,11 @@
+# Proposal: Implement Data Binding Support
+
+_Owners_: @shafreenAnfar @bhashinee  
+_Reviewers_: @shafreenAnfar    
+_Created_: 2022/04/12  
+_Updated_: 2022/04/12  
+_Issue_: [#2761](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
+
 ## Summary
 
 Data binding helps to access the incoming and outgoing text data in the user's desired parameter type. Subtypes of `anydata` will be the supported parameter types. This proposal discusses ways to provide data binding for both on listener side as well as the client side.
