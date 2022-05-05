@@ -75,7 +75,7 @@ public isolated client class Client {
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
-    # + data - Data to be sent.
+    # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeBinaryMessage(anydata data) returns Error? {
         return self.externWriteBinaryMessage(getBinary(data));
