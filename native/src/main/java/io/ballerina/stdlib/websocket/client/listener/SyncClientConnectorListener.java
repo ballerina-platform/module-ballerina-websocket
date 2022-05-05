@@ -38,12 +38,14 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 
@@ -143,7 +145,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 byte[] binMsg = byteArrAggregator.getAggregateByteArr();
                 byteArrAggregator.resetAggregateByteArr();
                 Object message;
-                int typeTag = targetType == null || targetType.toString().equals("byte[]") ?
+                int typeTag = targetType == null || targetType.toString().equals(WebSocketConstants.BYTE_ARRAY) ?
                         TypeTags.BYTE_TAG : targetType.getTag();
                 switch (typeTag) {
                     case BYTE_TAG:

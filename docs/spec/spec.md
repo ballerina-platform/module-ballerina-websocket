@@ -30,6 +30,7 @@ The conforming implementation of the specification is released and included in t
        * [onOpen](#onopen)
        * [onTextMessage](#ontextmessage)
        * [onBinaryMessage](#onbinarymessage)
+       * [onMessage](#onmessage)
        * [onPing and onPong](#onping-and-onpong)
        * [onIdleTimeout](#onidletimeout)
        * [onClose](#onclose)
@@ -40,6 +41,7 @@ The conforming implementation of the specification is released and included in t
    * 4.3. [Send and receive messages using the Client](#43-send-and-receive-messages-using-the-client)
      * [writeTextMessage](#writetextmessage)
      * [writeBinaryMessage](#writebinarymessage)
+     * [writeMessage](#writemessage)
      * [readTextMessage](#readtextmessage)
      * [readBinaryMessage](#readbinarymessage)
      * [readMessage](#readmessage)
@@ -273,10 +275,20 @@ remote isolated function onTextMessage(websocket:Caller caller, string text) ret
 
 ##### [onBinaryMessage](#onbinarymessage)
 
-The received binary messages are dispatched to this remote method.
+The received binary messages are dispatched to this remote method. Data binding support is provided to accept the binary messages as `anydata`.
 
 ```ballerina
 remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) returns websocket:Error? {
+    io:println(data);
+}
+```
+
+##### [onMessage](#onmessage)
+
+The received messages are dispatched to this remote method. Data binding support is provided to accept the messages as `anydata`.
+
+```ballerina
+remote isolated function onMessage(websocket:Caller caller, json data) returns websocket:Error? {
     io:println(data);
 }
 ```
@@ -397,7 +409,7 @@ remote isolated function writeTextMessage(anydata data) returns Error? {}
 
 #### [writeBinaryMessage](#writebinarymessage)
 
-`writeBinaryMessage` API can be used to send a binary message. It takes in the message to be sent as a `byte[]` and returns an error if an error occurs while sending the binary message to the connection.
+`writeBinaryMessage` API can be used to send a binary message. It takes in the message to be sent as a subtypes of `anydata`. The data will be converted to `byte[]` before sending. This returns an error if an error occurs while sending the binary message to the connection.
 
 ```ballerina
 # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
@@ -406,9 +418,29 @@ remote isolated function writeTextMessage(anydata data) returns Error? {}
 # check wsClient->writeBinaryMessage("Text message".toBytes());
 # ```
 #
-# + data - Binary data to be sent
+# + data - Data to be sent
 # + return  - A `websocket:Error` if an error occurs when sending
-remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
+remote isolated function writeBinaryMessage(anydata data) returns Error? {
+```
+
+#### [writeMessage](#writemessage)
+
+`writeMessage` API can be used to send messages. It takes in the message to be sent as subtypes of `anydata` and returns an error if an error occurs while sending the message to the connection.
+The input data is internally converted to relevant frame type as follows,
+
+* subtypes of string, xml, json - write out using text frames
+* byte[] - write out using binary frames
+
+```ballerina
+# Writes messages to the connection. If an error occurs while sending the message to the connection, that message
+# will be lost.
+# ```ballerina
+# check wsClient->writeMessage({x: 1, y: 2});
+# ```
+#
+# + data - Data to be sent
+# + return  - A `websocket:Error` if an error occurs when sending
+remote isolated function writeMessage(anydata data) returns Error? {
 ```
 
 #### [readTextMessage](#readtextmessage)
@@ -421,8 +453,9 @@ remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
 # string textResp = check wsClient->readTextMessage();
 # ```
 #
+# + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
 # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
-remote isolated function readTextMessage() returns string|Error {}
+remote isolated function readTextMessage(typedesc<anydata> targetType = <>) returns targetType|Error
 ```
 
 #### [readBinaryMessage](#readbinarymessage)
@@ -435,13 +468,15 @@ remote isolated function readTextMessage() returns string|Error {}
 # byte[] textResp = check wsClient->readBinaryMessage();
 # ```
 #
-# + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
-remote isolated function readBinaryMessage() returns byte[]|Error {}
+# + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
+# + return  - The binary data sent by the server or a `websocket:Error` if an error occurs when receiving
+remote isolated function readBinaryMessage(typedesc<anydata> targetType = <>) returns targetType|Error
 ```
 
 #### [readMessage](#readmessage)
 
-`readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
+`readMessage` API can be used to receive a message without prior knowledge of message type. `anydata` type is supported by this API.
+The contextually-expected data type is inferred from the LHS variable type. If there is an error when converting the expected data type or else any other error occurs while reading the messages, the respective error will be returned from the API.
 
 ```ballerina
 # Reads data from the WebSocket connection
@@ -456,9 +491,9 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 # }
 #```
 #
-# + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
-#            if an error occurs when receiving
-remote isolated function readMessage() returns string|byte[]|Error {}
+# + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
+# + return - The data sent by the server or a `websocket:Error` if an error occurs when receiving
+remote isolated function readMessage(typedesc<anydata> targetType = <>) returns targetType|Error
 ```
 
 #### [close](#close)

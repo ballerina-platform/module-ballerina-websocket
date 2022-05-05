@@ -731,7 +731,7 @@ public class WebSocketResourceDispatcher {
 
     private static int getTypeName(Type param, int typeName) {
         if (typeName == ARRAY_TAG) {
-            if (param.toString().equals("byte[]")) {
+            if (param.toString().equals(WebSocketConstants.BYTE_ARRAY)) {
                 typeName = BYTE_TAG;
             }
         }

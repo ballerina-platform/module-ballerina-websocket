@@ -16,4 +16,8 @@
   ~ under the License.
   -->
 <FindBugsFilter>
+    <Match>
+        <Class name="io.ballerina.stdlib.websocket.WebSocketUtil" />
+        <Bug pattern="BC_UNCONFIRMED_CAST" />
+    </Match>
 </FindBugsFilter>
