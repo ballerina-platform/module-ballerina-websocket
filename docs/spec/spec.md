@@ -3,8 +3,9 @@
 _Owners_: @shafreenAnfar @bhashinee  
 _Reviewers_: @shafreenAnfar  
 _Created_: 2021/12/09  
-_Updated_: 2022/05/05   
-_Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-library/issues/2165)
+_Updated_: 2022/05/05  
+_Edition_: Swan Lake  
+_Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-library/issues/2165)  
 
 # Introduction
 
@@ -472,7 +473,9 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 
 #### [readMessage](#readmessage)
 
-`readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
+`readMessage` API can be used to receive a message without prior knowledge of message type. `anydata` type is supported by this API.
+The contextually-expected data type is inferred from the LHS variable type. If there is an error when converting the expected data type or else any other error occurs while reading the messages, the respective error will be returned from the API 
+
 ```ballerina
 # Reads data from the WebSocket connection
 # ```ballerina

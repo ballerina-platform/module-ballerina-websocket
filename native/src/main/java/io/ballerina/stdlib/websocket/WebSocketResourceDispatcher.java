@@ -513,12 +513,9 @@ public class WebSocketResourceDispatcher {
                                 if (WebSocketUtil.hasStringType(param)) {
                                     bValue = CloneWithType.convert(param,
                                             StringUtils.fromString(stringAggregator.getAggregateString()));
-                                } else {
-                                    bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
-                                                    stringAggregator.getAggregateString()),
-                                            ValueCreator.createTypedescValue(param));
+                                    break;
                                 }
-                                break;
+                                // fall through
                             default:
                                 bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
                                         stringAggregator.getAggregateString()),
@@ -697,11 +694,9 @@ public class WebSocketResourceDispatcher {
                     case TypeTags.UNION_TAG:
                         if (hasByteArrayType(param)) {
                             bValue = CloneWithType.convert(param, ValueCreator.createArrayValue(byteArray));
-                        } else {
-                            bValue = FromJsonStringWithType.fromJsonStringWithType(getBString(byteArray),
-                                    ValueCreator.createTypedescValue(param));
+                            break;
                         }
-                        break;
+                        // fall through
                     default:
                         bValue = FromJsonStringWithType.fromJsonStringWithType(getBString(byteArray),
                                 ValueCreator.createTypedescValue(param));

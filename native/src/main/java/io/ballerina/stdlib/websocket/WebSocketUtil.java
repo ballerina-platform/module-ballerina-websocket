@@ -234,7 +234,8 @@ public class WebSocketUtil {
 
     public static boolean hasByteArrayType(Type targetType) {
         List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
-        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.ARRAY_TAG);
+        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.ARRAY_TAG
+                && member.toString().equals(WebSocketConstants.BYTE_ARRAY));
     }
 
     /**

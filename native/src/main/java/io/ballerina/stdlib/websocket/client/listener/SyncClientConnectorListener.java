@@ -93,12 +93,9 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         if (WebSocketUtil.hasStringType(targetType)) {
                             message = CloneWithType.convert(targetType,
                                     StringUtils.fromString(stringAggregator.getAggregateString()));
-                        } else {
-                            message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
-                                            stringAggregator.getAggregateString()),
-                                    ValueCreator.createTypedescValue(targetType));
+                            break;
                         }
-                        break;
+                        // fall through
                     default:
                         message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
                                         stringAggregator.getAggregateString()),
@@ -163,11 +160,9 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     case TypeTags.UNION_TAG:
                         if (WebSocketUtil.hasByteArrayType(targetType)) {
                             message = CloneWithType.convert(targetType, ValueCreator.createArrayValue(binMsg));
-                        } else {
-                            message = FromJsonStringWithType.fromJsonStringWithType(getBString(binMsg),
-                                    ValueCreator.createTypedescValue(targetType));
+                            break;
                         }
-                        break;
+                        // fall through
                     default:
                         message = FromJsonStringWithType.fromJsonStringWithType(getBString(binMsg),
                                 ValueCreator.createTypedescValue(targetType));
