@@ -30,7 +30,7 @@ service /basic/ws on new websocket:Listener(9090) {
 service isolated class WsService2 {
     *websocket:Service;
 
-    remote function onBinaryMessage(Coord data) returns Coord {
+    remote function onMessage(Coord data) returns Coord {
         return data;
     }
 }

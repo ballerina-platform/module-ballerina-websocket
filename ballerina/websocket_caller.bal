@@ -31,20 +31,20 @@ public isolated client class Caller {
     # Pushes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent
+    # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(anydata data) returns Error? {
-        return self.externWriteTextMessage(getString(data));
-    }
+    remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Pushes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
-    # + data - Data to be sent
+    # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeBinaryMessage(anydata data) returns Error? {
-        return self.externWriteBinaryMessage(getBinary(data));
-    }
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Writes messages to the connection. If an error occurs while sending the message to the connection, that message
     # will be lost.

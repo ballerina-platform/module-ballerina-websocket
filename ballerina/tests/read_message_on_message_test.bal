@@ -16,6 +16,29 @@
 
 import ballerina/test;
 
+public type Coord record {
+    int x;
+    int y;
+};
+
+json jsonVal = {x: 1, y: 2};
+xml xmlVal = xml `<book>The Lost World</book>`;
+Coord recordVal = {x: 1, y: 2};
+Coord[] recordArrVal = [{x: 1, y: 2}, {x: 3, y: 4}];
+json[] jsonArr = [{"name":"John","salary":100},{"name":"Jane","salary":200}];
+
+public type Employee record {
+    readonly string name;
+    int salary;
+};
+
+table<Employee> key(name) t = table [
+    { name: "John", salary: 100 },
+    { name: "Jane", salary: 200 }
+];
+
+string errorMessage = "data binding failed";
+
 listener Listener l94 = new(22080);
 
 service /onRecord on l94 {
@@ -731,24 +754,24 @@ public function testOnMessageBinaryDataBinding() returns Error? {
 @test:Config {}
 public function testBinaryDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22080/onBinary/");
-    check wsClient->writeBinaryMessage("Hello");
-    string data = check wsClient->readBinaryMessage();
+    check wsClient->writeMessage("Hello");
+    string data = check wsClient->readMessage();
     test:assertEquals(data, "Hello");
 }
 
 @test:Config {}
 public function testBinaryJsonDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22080/onBinary/");
-    check wsClient->writeBinaryMessage(jsonVal);
-    json data = check wsClient->readBinaryMessage();
+    check wsClient->writeMessage(jsonVal);
+    json data = check wsClient->readMessage();
     test:assertEquals(data, jsonVal);
 }
 
 @test:Config {}
 public function testBinaryXmlDataBinding() returns Error? {
     Client wsClient = check new("ws://localhost:22080/onBinary/");
-    check wsClient->writeBinaryMessage(xmlVal);
-    xml data = check wsClient->readBinaryMessage();
+    check wsClient->writeMessage(xmlVal);
+    xml data = check wsClient->readMessage();
     test:assertEquals(data, xmlVal);
 }
 

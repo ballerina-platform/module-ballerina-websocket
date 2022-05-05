@@ -72,12 +72,14 @@ public class WebSocketServiceValidator {
                 Utils.validateOnIdleTimeoutFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
             case PluginConstants.ON_TEXT_MESSAGE:
-            case PluginConstants.ON_BINARY_MESSAGE:
+                Utils.validateOnTextMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
+                break;
             case PluginConstants.ON_MESSAGE:
                 Utils.validateOnDataFunctions(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
             case PluginConstants.ON_PING_MESSAGE:
             case PluginConstants.ON_PONG_MESSAGE:
+            case PluginConstants.ON_BINARY_MESSAGE:
                 Utils.validateOnBinaryMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
             default:

@@ -68,18 +68,18 @@ public isolated client class Client {
     #
     # + data - Data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeTextMessage(anydata data) returns Error? {
-        return self.externWriteTextMessage(getString(data));
-    }
+    remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Writes binary data to the connection. If an error occurs while sending the binary message to the connection,
     # that message will be lost.
     #
-    # + data - Data to be sent
+    # + data - Binary data to be sent
     # + return  - A `websocket:Error` if an error occurs when sending
-    remote isolated function writeBinaryMessage(anydata data) returns Error? {
-        return self.externWriteBinaryMessage(getBinary(data));
-    }
+    remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
+    } external;
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
@@ -189,19 +189,17 @@ public isolated client class Client {
         'class: "io.ballerina.stdlib.websocket.client.SyncInitEndpoint"
     } external;
 
-    # Reads text messages in a synchronous manner.
+    # Reads text messages in a synchronous manner
     #
-    # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
-    remote isolated function readTextMessage(typedesc<anydata> targetType = <>) returns targetType|Error = @java:Method {
+    remote isolated function readTextMessage() returns string|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
     # Reads binary data in a synchronous manner.
     #
-    # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
     # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
-    remote isolated function readBinaryMessage(typedesc<anydata> targetType = <>) returns targetType|Error = @java:Method {
+    remote isolated function readBinaryMessage() returns byte[]|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
@@ -387,18 +385,6 @@ isolated function getClone(http:Cookie cookie, time:Utc createdTime, time:Utc la
     return new http:Cookie(cookie.name, cookie.value, options);
 }
 
-isolated function getString(anydata data) returns string {
-    string text = "";
-    if data is string {
-        text = data;
-    } else if data is xml {
-        text = data.toString();
-    } else {
-        text = data.toJsonString();
-    }
-    return text;
-}
-
 isolated function getSerializedData(anydata data) returns string|byte[] {
     if data is string {
         return data;
@@ -408,17 +394,6 @@ isolated function getSerializedData(anydata data) returns string|byte[] {
         return data;
     }
     return data.toJsonString();
-}
-
-isolated function getBinary(anydata data) returns byte[] {
-    if data is string {
-        return data.toBytes();
-    } else if data is xml {
-        return data.toString().toBytes();
-    } else if data is byte[] {
-        return data;
-    }
-    return data.toJsonString().toBytes();
 }
 
 const EQUALS = "=";

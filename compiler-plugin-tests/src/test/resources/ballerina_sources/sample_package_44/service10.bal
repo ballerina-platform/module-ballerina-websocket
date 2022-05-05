@@ -25,7 +25,7 @@ service /basic/ws on new websocket:Listener(9090) {
 service isolated class WsService10 {
     *websocket:Service;
 
-    remote function onBinaryMessage(readonly & int data) returns int? {
+    remote function onMessage(readonly & int data) returns int? {
         return data;
     }
 }

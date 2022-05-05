@@ -25,7 +25,7 @@ service /basic/ws on new websocket:Listener(9090) {
 service isolated class WsService7 {
     *websocket:Service;
 
-    remote function onBinaryMessage(boolean data) returns boolean {
+    remote function onMessage(boolean data) returns boolean {
         return data;
     }
 }

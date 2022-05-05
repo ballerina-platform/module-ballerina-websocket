@@ -11,7 +11,7 @@ service /basic/ws1 on hl {
 service isolated class WsService {
     *websocket:Service;
 
-    remote function onBinaryMessage(json data) returns json {
-         return data;
+    remote function onBinaryMessage(websocket:Caller caller) returns byte[]? {
+         return "hello".toBytes();
     }
 }
