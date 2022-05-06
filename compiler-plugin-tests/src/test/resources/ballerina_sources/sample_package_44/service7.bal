@@ -16,21 +16,16 @@
 
 import ballerina/websocket;
 
-public type Coord record {
-    int x;
-    int y;
-};
-
 service /basic/ws on new websocket:Listener(9090) {
    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
-       return new WsService2();
+       return new WsService7();
    }
 }
 
-service isolated class WsService2 {
+service isolated class WsService7 {
     *websocket:Service;
 
-    remote function onTextMessage(Coord data) returns Coord {
+    remote function onMessage(boolean data) returns boolean {
         return data;
     }
 }

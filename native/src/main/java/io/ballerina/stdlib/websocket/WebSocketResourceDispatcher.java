@@ -79,6 +79,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
 import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.INT_TAG;
@@ -86,6 +87,8 @@ import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
+import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
+import static io.ballerina.stdlib.websocket.WebSocketUtil.hasByteArrayType;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.MESSAGE_TYPE_BINARY;
@@ -452,7 +455,9 @@ public class WebSocketResourceDispatcher {
             balservice = (BObject) dispatchingService;
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
-                if (remoteFunc.getName().equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE)) {
+                String funcName = remoteFunc.getName();
+                if (funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
+                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
                     onTextMessageResource = remoteFunc;
                     break;
                 }
@@ -476,9 +481,7 @@ public class WebSocketResourceDispatcher {
                         boolean readOnly = false;
                         if (typeTag == INTERSECTION_TAG) {
                             List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
-                            if (memberTypes.size() > 2) {
-                                sendDataBindingError(webSocketConnection, "invalid param type '" + param.getName() +
-                                        "': only readonly intersection is allowed");
+                            if (invalidInputParams(webSocketConnection, param, memberTypes)) {
                                 return;
                             }
                             readOnly = true;
@@ -500,37 +503,31 @@ public class WebSocketResourceDispatcher {
                                 bValue = StringUtils.fromString(stringAggregator.getAggregateString());
                                 break;
                             case TypeTags.XML_TAG:
-                                Object bXml = XmlUtils.parse(stringAggregator.getAggregateString());
-                                if (readOnly) {
-                                    bXml = CloneReadOnly.cloneReadOnly(bXml);
-                                }
-                                bValue = bXml;
+                                bValue = XmlUtils.parse(stringAggregator.getAggregateString());
                                 break;
                             case TypeTags.RECORD_TYPE_TAG:
-                                Object record = CloneWithType.convert(param, JsonUtils.parse(
+                                bValue = CloneWithType.convert(param, JsonUtils.parse(
                                 stringAggregator.getAggregateString()));
-                                if (record instanceof BError) {
-                                    sendDataBindingError(webSocketConnection, ((BError) record).getMessage());
-                                    return;
-                                }
-                                if (readOnly) {
-                                    record = CloneReadOnly.cloneReadOnly(record);
-                                }
-                                bValue = record;
                                 break;
+                            case TypeTags.UNION_TAG:
+                                if (WebSocketUtil.hasStringType(param)) {
+                                    bValue = CloneWithType.convert(param,
+                                            StringUtils.fromString(stringAggregator.getAggregateString()));
+                                    break;
+                                }
+                                // fall through
                             default:
-                                Object value = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                                bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
                                         stringAggregator.getAggregateString()),
                                         ValueCreator.createTypedescValue(param));
-                                if (value instanceof BError) {
-                                    sendDataBindingError(webSocketConnection, ((BError) value).getMessage());
-                                    return;
-                                }
-                                if (readOnly) {
-                                    value = CloneReadOnly.cloneReadOnly(value);
-                                }
-                                bValue = value;
                                 break;
+                        }
+                        if (bValue instanceof BError) {
+                            sendDataBindingError(webSocketConnection, ((BError) bValue).getMessage());
+                            return;
+                        }
+                        if (readOnly) {
+                            bValue = CloneReadOnly.cloneReadOnly(bValue);
                         }
                         bValues[index++] = bValue;
                         bValues[index++] = true;
@@ -540,8 +537,8 @@ public class WebSocketResourceDispatcher {
                     return;
                 }
                 executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE),
-                        bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE,
+                        new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName()),
+                        bValues, connectionInfo, onTextMessageResource.getName(),
                         ModuleUtils.getOnTextMetaData());
                 stringAggregator.resetAggregateString();
             } else {
@@ -569,12 +566,13 @@ public class WebSocketResourceDispatcher {
             WebSocketService wsService = connectionInfo.getService();
             MethodType onBinaryMessageResource = null;
             BObject balservice;
-            BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
             Object dispatchingService = wsService.getWsService(connectionInfo.getWebSocketConnection().getChannelId());
             balservice = (BObject) dispatchingService;
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
-                if (remoteFunc.getName().equals(WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE)) {
+                String funcName = remoteFunc.getName();
+                if (funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE) ||
+                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
                     onBinaryMessageResource = remoteFunc;
                     break;
                 }
@@ -584,16 +582,12 @@ public class WebSocketResourceDispatcher {
                 return;
             }
             boolean finalFragment = binaryMessage.isFinalFragment();
-            Type[] paramDetails = onBinaryMessageResource.getParameterTypes();
-            Object[] bValues = new Object[paramDetails.length * 2];
             WebSocketConnectionInfo.ByteArrAggregator byteAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
             if (finalFragment) {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
-                createBvaluesForBarray(wsEndpoint, paramDetails, bValues, byteAggregator.getAggregateByteArr());
-                executeResource(wsService, balservice, new WebSocketResourceCallback(connectionInfo,
-                        WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE), bValues, connectionInfo,
-                        WebSocketConstants.RESOURCE_NAME_ON_BINARY_MESSAGE, ModuleUtils.getOnBinaryMetaData());
+                createBvaluesForBinary(onBinaryMessageResource, balservice, connectionInfo,
+                        byteAggregator.getAggregateByteArr(), webSocketConnection, wsService);
                 byteAggregator.resetAggregateByteArr();
             } else {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
@@ -651,6 +645,102 @@ public class WebSocketResourceDispatcher {
             //Observe error
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_PING, e.getMessage());
         }
+    }
+
+    private static void createBvaluesForBinary(MethodType onBinaryMessageResource, BObject balservice,
+                                               WebSocketConnectionInfo connectionInfo, byte[] byteArray,
+                                               WebSocketConnection webSocketConnection, WebSocketService wsService) {
+        BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
+        Type[] paramTypes = onBinaryMessageResource.getParameterTypes();
+        Object[] bValues = new Object[paramTypes.length * 2];
+        int index = 0;
+        try {
+            for (Type param : paramTypes) {
+                int typeName = param.getTag();
+                boolean readOnly = false;
+                typeName = getTypeName(param, typeName);
+                if (typeName == INTERSECTION_TAG) {
+                    List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
+                    if (invalidInputParams(webSocketConnection, param, memberTypes)) {
+                        return;
+                    }
+                    readOnly = true;
+                    for (Type type : memberTypes) {
+                        if (type.getTag() == TypeTags.READONLY_TAG) {
+                            continue;
+                        }
+                        param = type;
+                        typeName = getTypeName(param, type.getTag());
+                        break;
+                    }
+                }
+                Object bValue;
+                switch (typeName) {
+                    case OBJECT_TYPE_TAG:
+                        bValue = wsEndpoint;
+                        break;
+                    case BYTE_TAG:
+                        bValue = ValueCreator.createArrayValue(byteArray);
+                        break;
+                    case STRING_TAG:
+                        bValue = getBString(byteArray);
+                        break;
+                    case TypeTags.XML_TAG:
+                        bValue = XmlUtils.parse(getBString(byteArray));;
+                        break;
+                    case TypeTags.RECORD_TYPE_TAG:
+                        bValue = CloneWithType.convert(param, JsonUtils.parse(getBString(byteArray)));
+                        break;
+                    case TypeTags.UNION_TAG:
+                        if (hasByteArrayType(param)) {
+                            bValue = CloneWithType.convert(param, ValueCreator.createArrayValue(byteArray));
+                            break;
+                        }
+                        // fall through
+                    default:
+                        bValue = FromJsonStringWithType.fromJsonStringWithType(getBString(byteArray),
+                                ValueCreator.createTypedescValue(param));
+                        break;
+                }
+                if (bValue instanceof BError) {
+                    sendDataBindingError(webSocketConnection, ((BError) bValue).getMessage());
+                    return;
+                }
+                if (readOnly) {
+                    bValue = CloneReadOnly.cloneReadOnly(bValue);
+                }
+                bValues[index++] = bValue;
+                bValues[index++] = true;
+            }
+            executeResource(wsService, balservice, new WebSocketResourceCallback(connectionInfo,
+                            onBinaryMessageResource.getName()), bValues, connectionInfo,
+                    onBinaryMessageResource.getName(), ModuleUtils.getOnBinaryMetaData());
+        } catch (IllegalAccessException | BError e) {
+            if (e instanceof BError) {
+                sendDataBindingError(webSocketConnection, e.getMessage());
+                return;
+            }
+            observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_BINARY, e.getMessage());
+        }
+    }
+
+    private static int getTypeName(Type param, int typeName) {
+        if (typeName == ARRAY_TAG) {
+            if (param.toString().equals(WebSocketConstants.BYTE_ARRAY)) {
+                typeName = BYTE_TAG;
+            }
+        }
+        return typeName;
+    }
+
+    private static boolean invalidInputParams(WebSocketConnection webSocketConnection, Type param,
+                                              List<Type> memberTypes) {
+        if (memberTypes.size() > 2) {
+            sendDataBindingError(webSocketConnection, "invalid param type '" + param.getName() +
+                    "': only readonly intersection is allowed");
+            return true;
+        }
+        return false;
     }
 
     private static void createBvaluesForBarray(BObject wsEndpoint, Type[] paramTypes, Object[] bValues,

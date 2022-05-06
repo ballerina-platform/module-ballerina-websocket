@@ -25,7 +25,7 @@ service /basic/ws on new websocket:Listener(9090) {
 service isolated class WsService {
     *websocket:Service;
 
-    remote function onTextMessage(xml data) returns xml {
+    remote function onMessage(websocket:Caller caller, xml data) returns xml {
         return data;
     }
 }

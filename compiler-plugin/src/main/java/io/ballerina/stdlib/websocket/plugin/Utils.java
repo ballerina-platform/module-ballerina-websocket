@@ -107,6 +107,26 @@ public class Utils {
         validateOnDataReturnTypes(returnStatement, PluginConstants.ON_BINARY_MESSAGE, resourceNode, ctx);
     }
 
+    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                              FunctionDefinitionNode resourceNode) {
+        List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
+        if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+        } else {
+            for (ParameterSymbol inputParam : inputParams) {
+                String moduleId = getModuleId(inputParam);
+                String paramSignature = inputParam.typeDescriptor().signature();
+                if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
+                            resourceNode.location(), paramSignature);
+                }
+            }
+        }
+        TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
+        validateOnDataReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+    }
+
     public static void validateOnDataReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
             FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
@@ -219,8 +239,8 @@ public class Utils {
                 PluginConstants.ON_IDLE_TIMEOUT, resourceNode, ctx);
     }
 
-    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
-            FunctionDefinitionNode resourceNode) {
+    static void validateOnDataFunctions(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                        FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1) {
             ParameterSymbol inputParam = inputParams.get(0);
