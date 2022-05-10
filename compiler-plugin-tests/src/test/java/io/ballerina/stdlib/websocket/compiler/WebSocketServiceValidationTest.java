@@ -464,6 +464,15 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testOnMessageWithAnyData() {
+        Package currentPackage = loadPackage("sample_package_45");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
     public void testInitFunctionsInService() {
         Package currentPackage = loadPackage("sample_package_41");
         PackageCompilation compilation = currentPackage.getCompilation();
