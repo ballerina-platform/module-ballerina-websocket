@@ -256,7 +256,8 @@ public class WebSocketResourceDispatcher {
                                         index = createBvaluesForNillable(bValues, index);
                                         break;
                                     } else {
-                                        reportError(paramName);
+                                        reportQueryParamError(webSocketHandshaker, paramName);
+                                        return;
                                     }
                                 }
                                 bValues[index++] = StringUtils.fromString(String.valueOf((queryValueArr)
@@ -269,7 +270,8 @@ public class WebSocketResourceDispatcher {
                                         index = createBvaluesForNillable(bValues, index);
                                         break;
                                     } else {
-                                        reportError(paramName);
+                                        reportQueryParamError(webSocketHandshaker, paramName);
+                                        return;
                                     }
                                 }
                                 bValues[index++] = Long.parseLong(String.valueOf((queryValueArr)
@@ -282,7 +284,8 @@ public class WebSocketResourceDispatcher {
                                         index = createBvaluesForNillable(bValues, index);
                                         break;
                                     } else {
-                                        reportError(paramName);
+                                        reportQueryParamError(webSocketHandshaker, paramName);
+                                        return;
                                     }
                                 }
                                 bValues[index++] = Boolean.parseBoolean(String.valueOf((queryValueArr)
@@ -295,7 +298,8 @@ public class WebSocketResourceDispatcher {
                                         index = createBvaluesForNillable(bValues, index);
                                         break;
                                     } else {
-                                        reportError(paramName);
+                                        reportQueryParamError(webSocketHandshaker, paramName);
+                                        return;
                                     }
                                 }
                                 bValues[index++] = Double.parseDouble(String.valueOf((queryValueArr)
@@ -308,7 +312,8 @@ public class WebSocketResourceDispatcher {
                                         index = createBvaluesForNillable(bValues, index);
                                         break;
                                     } else {
-                                        reportError(paramName);
+                                        reportQueryParamError(webSocketHandshaker, paramName);
+                                        return;
                                     }
                                 }
                                 bValues[index++] = ValueCreator.createDecimalValue((String.valueOf((queryValueArr)
@@ -351,8 +356,9 @@ public class WebSocketResourceDispatcher {
         return index;
     }
 
-    private static void reportError(String paramName) throws WebSocketConnectorException {
-        throw new WebSocketConnectorException("No query param value found for '" + paramName + "'");
+    private static void reportQueryParamError(WebSocketHandshaker webSocketHandshaker, String paramName)
+            throws WebSocketConnectorException {
+        webSocketHandshaker.cancelHandshake(400, String.format("No query param value found for: %s", paramName));
     }
 
     public static BMap<BString, Object> getQueryParams(Object rawQueryString) throws WebSocketConnectorException {
