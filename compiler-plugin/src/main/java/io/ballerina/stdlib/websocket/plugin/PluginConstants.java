@@ -85,6 +85,8 @@ public class PluginConstants {
                 "WEBSOCKET_105"),
         INVALID_LISTENER_INIT_PARAMS("`websocket:ListenerConfiguration` not allowed with `http:Listener` "
                 + "as the `websocket:Listener` ", "WEBSOCKET_106"),
+        INVALID_INPUT_FOR_ON_MESSAGE("Invalid parameters `{0}` provided for onMessage remote "
+                + "function", "WEBSOCKET_108"),
         TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107");;
 
         private final String error;
