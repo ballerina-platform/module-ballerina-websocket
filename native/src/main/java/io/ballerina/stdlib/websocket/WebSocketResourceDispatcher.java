@@ -248,80 +248,22 @@ public class WebSocketResourceDispatcher {
                         Object queryValue = urlQueryParams.get(StringUtils.fromString(paramName));
                         QueryParam queryParam = allQueryParams.get(paramName);
                         BArray queryValueArr = (BArray) queryValue;
-                        String qParamTypeName = queryParam.getType().getName();
-                        switch (qParamTypeName) {
-                            case WebSocketConstants.PARAM_TYPE_STRING:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportQueryParamError(webSocketHandshaker, paramName);
-                                        return;
-                                    }
-                                }
-                                bValues[index++] = StringUtils.fromString(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_INT:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportQueryParamError(webSocketHandshaker, paramName);
-                                        return;
-                                    }
-                                }
-                                bValues[index++] = Long.parseLong(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_BOOLEAN:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportQueryParamError(webSocketHandshaker, paramName);
-                                        return;
-                                    }
-                                }
-                                bValues[index++] = Boolean.parseBoolean(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_FLOAT:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportQueryParamError(webSocketHandshaker, paramName);
-                                        return;
-                                    }
-                                }
-                                bValues[index++] = Double.parseDouble(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_DECIMAL:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportQueryParamError(webSocketHandshaker, paramName);
-                                        return;
-                                    }
-                                }
-                                bValues[index++] = ValueCreator.createDecimalValue((String.valueOf((queryValueArr)
-                                        .getBString(0).getValue())));
-                                bValues[index++] = true;
-                                break;
-                            default:
-                                break;
+                        Type qParamType = queryParam.getType();
+                        if (queryValue == null) {
+                            if (queryParam.isNilable()) {
+                                index = createBvaluesForNillable(bValues, index);
+                            } else {
+                                reportQueryParamError(webSocketHandshaker, paramName);
+                                return;
+                            }
+                        } else {
+                            if (qParamType.getTag() == STRING_TAG) {
+                                bValues[index++] = queryValueArr.getBString(0);
+                            } else {
+                                bValues[index++] = FromJsonStringWithType.fromJsonStringWithType(queryValueArr
+                                        .getBString(0), ValueCreator.createTypedescValue(qParamType));
+                            }
+                            bValues[index++] = true;
                         }
                     }
                 }
