@@ -124,6 +124,26 @@ public class Utils {
         validateOnDataReturnTypes(returnStatement, PluginConstants.ON_BINARY_MESSAGE, resourceNode, ctx);
     }
 
+    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                              FunctionDefinitionNode resourceNode) {
+        List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
+        if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+        } else {
+            for (ParameterSymbol inputParam : inputParams) {
+                String moduleId = getModuleId(inputParam);
+                String paramSignature = inputParam.typeDescriptor().signature();
+                if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
+                            resourceNode.location(), paramSignature);
+                }
+            }
+        }
+        TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
+        validateOnDataReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+    }
+
     public static void validateOnDataReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
             FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
@@ -236,8 +256,8 @@ public class Utils {
                 PluginConstants.ON_IDLE_TIMEOUT, resourceNode, ctx);
     }
 
-    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
-            FunctionDefinitionNode resourceNode) {
+    static void validateOnDataFunctions(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                        FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1) {
             ParameterSymbol inputParam = inputParams.get(0);
@@ -245,7 +265,7 @@ public class Utils {
             String paramSignature = inputParam.typeDescriptor().signature();
             if (!(isValidInput(getModuleId(inputParam), paramSignature, kind)) &&
                     inputParams.get(0).signature().contains(COLON + CALLER)) {
-                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE,
                         resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
             }
         } else {
@@ -254,7 +274,7 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 TypeDescKind kind = inputParam.typeDescriptor().typeKind();
                 if (isValidInput(moduleId, paramSignature, kind)) {
-                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE,
                             resourceNode.location(), paramSignature);
                 }
             }
@@ -269,7 +289,8 @@ public class Utils {
                 !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
                 !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
                 !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
-                !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION);
+                !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION) &&
+                !kind.equals(TypeDescKind.ANYDATA);
     }
 
     public static void validateOnTextReturnTypes(TypeSymbol returnTypeSymbol, String functionName,

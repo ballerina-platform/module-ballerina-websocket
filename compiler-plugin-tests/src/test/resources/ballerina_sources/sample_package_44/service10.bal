@@ -18,14 +18,14 @@ import ballerina/websocket;
 
 service /basic/ws on new websocket:Listener(9090) {
    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
-       return new WsService9();
+       return new WsService10();
    }
 }
 
-service isolated class WsService9 {
+service isolated class WsService10 {
     *websocket:Service;
 
-    remote function onTextMessage(readonly & Coord data) returns Coord {
+    remote function onMessage(readonly & int data) returns int? {
         return data;
     }
 }

@@ -49,7 +49,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
             "{" + LS + "\t\treturn new WsService();" + LS + "\t}" + LS;
     public static final String SERVICE_TEXT = LS + LS + "service class WsService {" + LS +
             "\t*websocket:Service;" + LS + LS +
-            "\tremote isolated function onTextMessage(websocket:Caller caller, string text) " +
+            "\tremote function onMessage(websocket:Caller caller, anydata data) " +
             "returns websocket:Error? {"  + LS +
             "\t}" + LS +
             "}";

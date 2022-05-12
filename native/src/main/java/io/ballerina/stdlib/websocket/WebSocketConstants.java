@@ -56,6 +56,7 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
     public static final String RESOURCE_NAME_ON_TEXT_MESSAGE = "onTextMessage";
     public static final String RESOURCE_NAME_ON_BINARY_MESSAGE = "onBinaryMessage";
+    public static final String RESOURCE_NAME_ON_MESSAGE = "onMessage";
     public static final String RESOURCE_NAME_ON_PING = "onPing";
     public static final String RESOURCE_NAME_ON_PONG = "onPong";
     public static final String RESOURCE_NAME_ON_CLOSE = "onClose";
@@ -121,6 +122,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
     public static final String HTTP_LISTENER = "httpListener";
 
+    public static final String BYTE_ARRAY = "byte[]";
     public static final String PARAM_TYPE_STRING = "string";
     public static final String PARAM_TYPE_BOOLEAN = "boolean";
     public static final String PARAM_TYPE_INT = "int";

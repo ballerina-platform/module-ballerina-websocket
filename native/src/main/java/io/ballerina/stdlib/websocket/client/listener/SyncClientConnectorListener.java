@@ -46,6 +46,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
+import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
+
 /**
  * SyncClientConnectorListener implements {@link WebSocketConnectorListener} interface directly.
  *
@@ -86,6 +89,13 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         message = CloneWithType.convert(targetType, JsonUtils.parse(
                                 stringAggregator.getAggregateString()));
                         break;
+                    case TypeTags.UNION_TAG:
+                        if (WebSocketUtil.hasStringType(targetType)) {
+                            message = CloneWithType.convert(targetType,
+                                    StringUtils.fromString(stringAggregator.getAggregateString()));
+                            break;
+                        }
+                        // fall through
                     default:
                         message = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
                                         stringAggregator.getAggregateString()),
@@ -131,7 +141,34 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
                 byte[] binMsg = byteArrAggregator.getAggregateByteArr();
                 byteArrAggregator.resetAggregateByteArr();
-                callback.complete(ValueCreator.createArrayValue(binMsg));
+                Object message;
+                int typeTag = targetType == null || targetType.toString().equals(WebSocketConstants.BYTE_ARRAY) ?
+                        TypeTags.BYTE_TAG : targetType.getTag();
+                switch (typeTag) {
+                    case BYTE_TAG:
+                        message = ValueCreator.createArrayValue(binMsg);
+                        break;
+                    case TypeTags.STRING_TAG:
+                        message = getBString(binMsg);
+                        break;
+                    case TypeTags.XML_TAG:
+                        message = XmlUtils.parse(getBString(binMsg));;
+                        break;
+                    case TypeTags.RECORD_TYPE_TAG:
+                        message = CloneWithType.convert(targetType, JsonUtils.parse(getBString(binMsg)));
+                        break;
+                    case TypeTags.UNION_TAG:
+                        if (WebSocketUtil.hasByteArrayType(targetType)) {
+                            message = CloneWithType.convert(targetType, ValueCreator.createArrayValue(binMsg));
+                            break;
+                        }
+                        // fall through
+                    default:
+                        message = FromJsonStringWithType.fromJsonStringWithType(getBString(binMsg),
+                                ValueCreator.createTypedescValue(targetType));
+                        break;
+                }
+                callback.complete(message);
                 futureCompleted.set(true);
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
