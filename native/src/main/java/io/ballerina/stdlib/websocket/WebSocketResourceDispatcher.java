@@ -248,75 +248,22 @@ public class WebSocketResourceDispatcher {
                         Object queryValue = urlQueryParams.get(StringUtils.fromString(paramName));
                         QueryParam queryParam = allQueryParams.get(paramName);
                         BArray queryValueArr = (BArray) queryValue;
-                        String qParamTypeName = queryParam.getType().getName();
-                        switch (qParamTypeName) {
-                            case WebSocketConstants.PARAM_TYPE_STRING:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportError(paramName);
-                                    }
-                                }
-                                bValues[index++] = StringUtils.fromString(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_INT:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportError(paramName);
-                                    }
-                                }
-                                bValues[index++] = Long.parseLong(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_BOOLEAN:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportError(paramName);
-                                    }
-                                }
-                                bValues[index++] = Boolean.parseBoolean(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_FLOAT:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportError(paramName);
-                                    }
-                                }
-                                bValues[index++] = Double.parseDouble(String.valueOf((queryValueArr)
-                                        .getBString(0).getValue()));
-                                bValues[index++] = true;
-                                break;
-                            case WebSocketConstants.PARAM_TYPE_DECIMAL:
-                                if (queryValue == null) {
-                                    if (queryParam.isNilable()) {
-                                        index = createBvaluesForNillable(bValues, index);
-                                        break;
-                                    } else {
-                                        reportError(paramName);
-                                    }
-                                }
-                                bValues[index++] = ValueCreator.createDecimalValue((String.valueOf((queryValueArr)
-                                        .getBString(0).getValue())));
-                                bValues[index++] = true;
-                                break;
-                            default:
-                                break;
+                        Type qParamType = queryParam.getType();
+                        if (queryValue == null) {
+                            if (queryParam.isNilable()) {
+                                index = createBvaluesForNillable(bValues, index);
+                            } else {
+                                reportQueryParamError(webSocketHandshaker, paramName);
+                                return;
+                            }
+                        } else {
+                            if (qParamType.getTag() == STRING_TAG) {
+                                bValues[index++] = queryValueArr.getBString(0);
+                            } else {
+                                bValues[index++] = FromJsonStringWithType.fromJsonStringWithType(queryValueArr
+                                        .getBString(0), ValueCreator.createTypedescValue(qParamType));
+                            }
+                            bValues[index++] = true;
                         }
                     }
                 }
@@ -351,8 +298,9 @@ public class WebSocketResourceDispatcher {
         return index;
     }
 
-    private static void reportError(String paramName) throws WebSocketConnectorException {
-        throw new WebSocketConnectorException("No query param value found for '" + paramName + "'");
+    private static void reportQueryParamError(WebSocketHandshaker webSocketHandshaker, String paramName)
+            throws WebSocketConnectorException {
+        webSocketHandshaker.cancelHandshake(400, String.format("No query param value found for: %s", paramName));
     }
 
     public static BMap<BString, Object> getQueryParams(Object rawQueryString) throws WebSocketConnectorException {
