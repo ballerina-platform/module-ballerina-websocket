@@ -485,7 +485,6 @@ public class WebSocketServiceValidationTest {
     public void testInitFunctionsInFirstService() {
         Package currentPackage = loadPackage("sample_package_42");
         PackageCompilation compilation = currentPackage.getCompilation();
-
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errorCount(), 0);
     }
