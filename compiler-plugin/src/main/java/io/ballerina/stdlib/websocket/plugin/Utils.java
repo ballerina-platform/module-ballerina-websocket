@@ -44,11 +44,11 @@ import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
-
 import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocumentChange;
 import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -373,7 +373,8 @@ public class Utils {
         return lineRange;
     }
 
-    public static List<DocumentEdit> getDocumentEdits(CodeActionExecutionContext codeActionExecutionContext, String text) {
+    public static List<DocumentEdit> getDocumentEdits(CodeActionExecutionContext codeActionExecutionContext,
+                                                      String text) {
         LineRange lineRange = Utils.getLineRange(codeActionExecutionContext);
 
         if (lineRange == null) {

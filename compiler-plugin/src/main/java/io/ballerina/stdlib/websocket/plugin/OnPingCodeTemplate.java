@@ -23,10 +23,15 @@ import io.ballerina.projects.plugins.codeaction.CodeActionContext;
 import io.ballerina.projects.plugins.codeaction.CodeActionExecutionContext;
 import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.projects.plugins.codeaction.DocumentEdit;
+
 import java.util.List;
 import java.util.Optional;
+
 import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
 
+/**
+ * Code action to add onPing remote function.
+ */
 public class OnPingCodeTemplate implements CodeAction {
 
     public static final String ON_PING_FUNCTION = LS + LS +
