@@ -63,7 +63,8 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
         HttpResourceArguments pathParams = new HttpResourceArguments();
         URI requestUri = createRequestUri(webSocketHandshaker);
         Map<String, Map<String, String>> matrixParams = new HashMap<>();
-        String uriWithoutMatrixParams = URIUtil.extractMatrixParams(requestUri.getRawPath(), matrixParams);
+        String uriWithoutMatrixParams = URIUtil.extractMatrixParams(requestUri.getRawPath(), matrixParams,
+                webSocketHandshaker.getHttpCarbonRequest());
         URI validatedUri = getValidatedURI(uriWithoutMatrixParams);
         String matchingBasePath = servicesRegistry
                 .findTheMostSpecificBasePath(validatedUri.getRawPath(), servicesRegistry.getServicesByBasePath(),
