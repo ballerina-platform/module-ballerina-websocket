@@ -13,7 +13,7 @@ distribution = "2201.0.4"
 path = "../native/build/libs/websocket-native-2.2.3.jar"
 
 [[platform.java11.dependency]]
-path = "./lib/http-native-2.2.2-20220526-181700-93ce609.jar"
+path = "./lib/http-native-2.2.2.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/mime-native-2.2.2.jar"
