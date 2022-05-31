@@ -1,11 +1,11 @@
-// Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 Inc. (//www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// //www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
@@ -16,18 +16,16 @@
 
 import ballerina/websocket;
 
-listener websocket:Listener hl = check new(21001);
-
 service /basic/ws on hl {
    resource isolated function get abc() returns websocket:Service|websocket:UpgradeError {
-       return new WsService();
+       return new WsService1();
    }
 }
 
-service isolated class WsService {
+service isolated class WsService1 {
     *websocket:Service;
 
-    remote function onTextMessage(websocket:Caller caller, int status) returns byte[]? {
-         return "hello".toBytes();
+    remote function onMessage(anydata data) returns websocket:Error? {
+
     }
 }

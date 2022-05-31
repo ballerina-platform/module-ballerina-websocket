@@ -1,4 +1,4 @@
-// Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -15,19 +15,26 @@
 // under the License.
 
 import ballerina/websocket;
+import ballerina/io;
 
-listener websocket:Listener hl = check new(21001);
-
-service /basic/ws on hl {
-   resource isolated function get abc() returns websocket:Service|websocket:UpgradeError {
-       return new WsService();
-   }
+service /shuttle on new websocket:Listener(9094) {
+    function init() {
+        io:println("this should print first");
+    }
+    resource function get . () returns websocket:Service|websocket:Error {
+        return new MyService();
+    }
 }
 
-service isolated class WsService {
+service class MyService {
     *websocket:Service;
 
-    remote function onTextMessage(websocket:Caller caller, int status) returns byte[]? {
-         return "hello".toBytes();
+    public function init() returns websocket:Error? {
+    }
+
+    remote function onOpen(websocket:Caller caller) {
+    }
+
+    remote function onTextMessage(websocket:Caller caller, string s) returns error? {
     }
 }

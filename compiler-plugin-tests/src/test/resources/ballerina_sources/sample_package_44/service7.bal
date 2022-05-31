@@ -16,18 +16,16 @@
 
 import ballerina/websocket;
 
-listener websocket:Listener hl = check new(21001);
-
-service /basic/ws on hl {
-   resource isolated function get abc() returns websocket:Service|websocket:UpgradeError {
-       return new WsService();
+service /basic/ws on new websocket:Listener(9090) {
+   resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
+       return new WsService7();
    }
 }
 
-service isolated class WsService {
+service isolated class WsService7 {
     *websocket:Service;
 
-    remote function onTextMessage(websocket:Caller caller, int status) returns byte[]? {
-         return "hello".toBytes();
+    remote function onMessage(boolean data) returns boolean {
+        return data;
     }
 }

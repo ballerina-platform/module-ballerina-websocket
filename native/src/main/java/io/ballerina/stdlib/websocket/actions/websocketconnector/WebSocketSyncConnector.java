@@ -17,7 +17,9 @@ package io.ballerina.stdlib.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
@@ -41,7 +43,8 @@ public class WebSocketSyncConnector {
         return null;
     }
 
-    private static void readContentFromConnection(BObject wsConnection, Future callback) throws IllegalAccessException {
+    private static void readContentFromConnection(BObject wsConnection, Future callback, Type... targetType)
+            throws IllegalAccessException {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
@@ -52,6 +55,9 @@ public class WebSocketSyncConnector {
                 WebSocketConstants.ANNOTATION_ATTR_READ_IDLE_TIMEOUT, 0);
         connectionInfo.getWebSocketConnection().addReadIdleStateHandler(readTimeoutInSeconds);
         connectorListener.setCallback(callback);
+        if (targetType.length > 0) {
+            connectorListener.setTargetType(targetType[0]);
+        }
         connectorListener.setFutureCompleted(new AtomicBoolean(false));
         connectionInfo.getWebSocketConnection().readNextFrame();
     }
@@ -67,10 +73,11 @@ public class WebSocketSyncConnector {
         return null;
     }
 
-    public static Object readMessage(Environment env, BObject wsConnection) {
+    public static Object readMessage(Environment env, BObject wsConnection, BTypedesc targetType) {
+        Type targetDataType = targetType.getDescribingType();
         final Future callback = env.markAsync();
         try {
-            readContentFromConnection(wsConnection, callback);
+            readContentFromConnection(wsConnection, callback, targetDataType);
         } catch (IllegalAccessException e) {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
