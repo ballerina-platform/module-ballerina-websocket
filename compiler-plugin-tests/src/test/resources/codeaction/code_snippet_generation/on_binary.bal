@@ -25,7 +25,7 @@ service  on new websocket:Listener(0) {
 service class WsService {
 	*websocket:Service;
 
-	remote function onOpen(websocket:Caller caller) returns websocket:Error? {
+	remote function onBinaryMessage(websocket:Caller caller, byte[] data) returns websocket:Error? {
 
 	}
 }

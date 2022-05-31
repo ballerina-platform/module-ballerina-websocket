@@ -25,7 +25,7 @@ service  on new websocket:Listener(0) {
 service class WsService {
 	*websocket:Service;
 
-	remote function onOpen(websocket:Caller caller) returns websocket:Error? {
+	remote function onClose(websocket:Caller caller, int statusCode, string reason) {
 
 	}
 }

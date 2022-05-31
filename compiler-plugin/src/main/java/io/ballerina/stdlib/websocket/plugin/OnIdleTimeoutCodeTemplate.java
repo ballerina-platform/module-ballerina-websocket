@@ -35,7 +35,7 @@ import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
 public class OnIdleTimeoutCodeTemplate implements CodeAction {
 
     public static final String ON_IDLE_TIMEOUT_FUNCTION = LS + LS +
-            "\tremote isolated function onIdleTimeout(websocket:Caller caller) " +
+            "\tremote function onIdleTimeout(websocket:Caller caller) " +
             "{"  + LS + LS +
             "\t}" + LS;
 

@@ -35,7 +35,7 @@ import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
 public class OnPongCodeTemplate implements CodeAction {
 
     public static final String ON_PONG_FUNCTION = LS + LS +
-            "\tremote isolated function onPong(websocket:Caller caller, byte[] data) " +
+            "\tremote function onPong(websocket:Caller caller, byte[] data) " +
             "{"  + LS + LS +
             "\t}" + LS;
 

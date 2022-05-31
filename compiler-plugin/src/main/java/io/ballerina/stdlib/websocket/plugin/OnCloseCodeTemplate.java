@@ -35,7 +35,7 @@ import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
 public class OnCloseCodeTemplate implements CodeAction {
 
     public static final String ON_CLOSE_FUNCTION = LS + LS +
-            "\tremote isolated function onClose(websocket:Caller caller, int statusCode, string reason) " +
+            "\tremote function onClose(websocket:Caller caller, int statusCode, string reason) " +
             "{"  + LS + LS +
             "\t}" + LS;
 

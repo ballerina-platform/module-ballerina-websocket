@@ -35,7 +35,7 @@ import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
 public class OnErrorCodeTemplate implements CodeAction {
 
     public static final String ON_ERROR_FUNCTION = LS + LS +
-            "\tremote isolated function onError(websocket:Caller caller, websocket:Error err) " +
+            "\tremote function onError(websocket:Caller caller, websocket:Error err) " +
             "returns websocket:Error? {"  + LS + LS +
             "\t}" + LS;
 

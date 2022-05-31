@@ -35,7 +35,7 @@ import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
 public class OnBinaryMessageCodeTemplate implements CodeAction {
 
     public static final String ON_BINARY_FUNCTION = LS + LS +
-            "\tremote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) " +
+            "\tremote function onBinaryMessage(websocket:Caller caller, byte[] data) " +
             "returns websocket:Error? {"  + LS + LS +
             "\t}" + LS;
 

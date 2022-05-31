@@ -34,7 +34,7 @@ import static io.ballerina.stdlib.websocket.plugin.AddWebSocketCodeTemplate.LS;
  */
 public class OnMessageCodeTemplate implements CodeAction  {
     public static final String ON_MESSAGE_FUNCTION = LS + LS +
-            "\tremote isolated function onMessage(websocket:Caller caller, string data) " +
+            "\tremote function onMessage(websocket:Caller caller, string data) " +
             "returns websocket:Error? {"  + LS + LS +
             "\t}" + LS;
 
