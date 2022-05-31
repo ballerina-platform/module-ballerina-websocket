@@ -51,6 +51,7 @@ public class WebSocketServiceValidator {
         AtomicBoolean hasOnError = new AtomicBoolean(false);
         AtomicBoolean hasOnClose = new AtomicBoolean(false);
         AtomicBoolean hasOnIdleTimeout = new AtomicBoolean(false);
+        AtomicBoolean hasOnData = new AtomicBoolean(false);
         ClassDefinitionNode classDefNode = (ClassDefinitionNode) ctx.node();
         classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
                 || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(methodNode -> {
@@ -71,12 +72,18 @@ public class WebSocketServiceValidator {
                     hasOnIdleTimeout.set(true);
                 } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_TEXT_MESSAGE)) {
                     hasOnText.set(true);
+                    hasOnData.set(true);
                 } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_PING_MESSAGE)) {
                     hasOnPing.set(true);
                 } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_PONG_MESSAGE)) {
                     hasOnPong.set(true);
                 } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_BINARY_MESSAGE)) {
                     hasOnBinary.set(true);
+                    hasOnData.set(true);
+                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_MESSAGE)) {
+                    hasOnBinary.set(true);
+                    hasOnText.set(true);
+                    hasOnData.set(true);
                 }
                 filterRemoteFunctions(functionDefinitionNode);
             } else if (qualifier.equals(Qualifier.RESOURCE.getValue())) {
@@ -106,6 +113,9 @@ public class WebSocketServiceValidator {
         }
         if (!hasOnError.get()) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_ERROR_GENERATION_HINT);
+        }
+        if (!hasOnData.get()) {
+            reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_MESSAGE_GENERATION_HINT);
         }
     }
 

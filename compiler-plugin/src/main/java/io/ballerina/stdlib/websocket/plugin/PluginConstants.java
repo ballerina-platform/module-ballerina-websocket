@@ -95,7 +95,8 @@ public class PluginConstants {
         ON_OPEN_GENERATION_HINT("Template generation for onOpen remote function", "WEBSOCKET_114"),
         ON_PING_GENERATION_HINT("Template generation for onPing remote function", "WEBSOCKET_115"),
         ON_PONG_GENERATION_HINT("Template generation for onPong remote function", "WEBSOCKET_116"),
-        ON_TEXT_GENERATION_HINT("Template generation for onTextMessage remote function", "WEBSOCKET_117");
+        ON_TEXT_GENERATION_HINT("Template generation for onTextMessage remote function", "WEBSOCKET_117"),
+        ON_MESSAGE_GENERATION_HINT("Template generation for onMessage remote function", "WEBSOCKET_118");
 
         private final String error;
         private final String errorCode;

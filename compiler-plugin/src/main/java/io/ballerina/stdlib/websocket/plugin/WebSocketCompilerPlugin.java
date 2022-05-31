@@ -37,5 +37,6 @@ public class WebSocketCompilerPlugin extends CompilerPlugin {
         compilerPluginContext.addCodeAction(new OnErrorCodeTemplate());
         compilerPluginContext.addCodeAction(new OnPingCodeTemplate());
         compilerPluginContext.addCodeAction(new OnPongCodeTemplate());
+        compilerPluginContext.addCodeAction(new OnMessageCodeTemplate());
     }
 }
