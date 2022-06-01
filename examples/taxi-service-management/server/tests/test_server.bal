@@ -20,7 +20,7 @@ import ballerina/websocket;
 @test:Config {}
 function testServer() returns websocket:Error? {
     websocket:Client wsClient = check new("ws://localhost:9091/taxi/Alice");
-    string serviceReply = check wsClient->readTextMessage();
+    string serviceReply = check wsClient->readMessage();
     test:assertEquals(serviceReply, "Hi Alice! Your location will be shared with the riders");
     websocket:Error? err = wsClient->close(statusCode = 1000, timeout = 10);
 }
