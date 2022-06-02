@@ -30,12 +30,14 @@ import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A class for validating websocket service.
  */
 public class WebSocketServiceValidator {
+    public static final String GENERIC_FUNCTION = "generic function";
     private SyntaxNodeAnalysisContext ctx;
 
     WebSocketServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
@@ -43,78 +45,54 @@ public class WebSocketServiceValidator {
     }
 
     public void validate() {
-        AtomicBoolean hasOnText = new AtomicBoolean(false);
-        AtomicBoolean hasOnBinary = new AtomicBoolean(false);
-        AtomicBoolean hasOnOpen = new AtomicBoolean(false);
-        AtomicBoolean hasOnPing = new AtomicBoolean(false);
-        AtomicBoolean hasOnPong = new AtomicBoolean(false);
-        AtomicBoolean hasOnError = new AtomicBoolean(false);
-        AtomicBoolean hasOnClose = new AtomicBoolean(false);
-        AtomicBoolean hasOnIdleTimeout = new AtomicBoolean(false);
-        AtomicBoolean hasOnData = new AtomicBoolean(false);
         ClassDefinitionNode classDefNode = (ClassDefinitionNode) ctx.node();
-        classDefNode.members().stream().filter(child -> child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
-                || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(methodNode -> {
-            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) methodNode;
+        Map<String, Boolean> functionSet = classDefNode.members().stream().filter(child ->
+                child.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION
+                || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).map(node -> {
+            FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
             NodeList<Token> qualifierList = functionDefinitionNode.qualifierList();
             if (qualifierList.isEmpty()) {
-                return;
+                return GENERIC_FUNCTION;
             }
             String qualifier = qualifierList.get(0).text();
             if (qualifier.equals(Qualifier.REMOTE.getValue())) {
-                if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_OPEN)) {
-                    hasOnOpen.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_CLOSE)) {
-                    hasOnClose.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_ERROR)) {
-                    hasOnError.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_IDLE_TIMEOUT)) {
-                    hasOnIdleTimeout.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_TEXT_MESSAGE)) {
-                    hasOnText.set(true);
-                    hasOnData.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_PING_MESSAGE)) {
-                    hasOnPing.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_PONG_MESSAGE)) {
-                    hasOnPong.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_BINARY_MESSAGE)) {
-                    hasOnBinary.set(true);
-                    hasOnData.set(true);
-                } else if (functionDefinitionNode.functionName().toString().equals(PluginConstants.ON_MESSAGE)) {
-                    hasOnBinary.set(true);
-                    hasOnText.set(true);
-                    hasOnData.set(true);
-                }
                 filterRemoteFunctions(functionDefinitionNode);
+                return functionDefinitionNode.functionName().toString();
             } else if (qualifier.equals(Qualifier.RESOURCE.getValue())) {
                 reportInvalidFunction(functionDefinitionNode);
             }
-        });
-        if (!hasOnText.get()) {
+            return GENERIC_FUNCTION;
+        }).collect(Collectors.toMap(node -> node, node -> true));
+
+        if (!functionSet.containsKey(PluginConstants.ON_TEXT_MESSAGE) &&
+                !functionSet.containsKey(PluginConstants.ON_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_TEXT_GENERATION_HINT);
         }
-        if (!hasOnBinary.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE) &&
+                !functionSet.containsKey(PluginConstants.ON_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_BINARY_GENERATION_HINT);
         }
-        if (!hasOnClose.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_CLOSE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_CLOSE_GENERATION_HINT);
         }
-        if (!hasOnOpen.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_OPEN)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_OPEN_GENERATION_HINT);
         }
-        if (!hasOnPing.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_PING_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_PING_GENERATION_HINT);
         }
-        if (!hasOnPong.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_PONG_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_PONG_GENERATION_HINT);
         }
-        if (!hasOnIdleTimeout.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_IDLE_TIMEOUT)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_IDLE_TIMEOUT_GENERATION_HINT);
         }
-        if (!hasOnError.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_ERROR)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_ERROR_GENERATION_HINT);
         }
-        if (!hasOnData.get()) {
+        if (!functionSet.containsKey(PluginConstants.ON_MESSAGE) &&
+                !functionSet.containsKey(PluginConstants.ON_TEXT_MESSAGE) &&
+                !functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_MESSAGE_GENERATION_HINT);
         }
     }
