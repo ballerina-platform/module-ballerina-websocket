@@ -35,7 +35,7 @@ public function main() returns error? {
                check wsClient->close();
                return;
            } else {
-               check wsClient->writeTextMessage(msg);
+               check wsClient->writeMessage(msg);
            }
        }
    }
@@ -45,7 +45,7 @@ public function main() returns error? {
    }
    worker readWorker returns error? {
        while true {
-           string textResp = check wsClient->readTextMessage();
+           string textResp = check wsClient->readMessage();
            io:println(textResp);
        }       
    }   

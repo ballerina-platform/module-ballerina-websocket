@@ -15,12 +15,12 @@ import ballerina/websocket;
 public function main() returns error? {
    websocket:Client wsClient = check new("ws://echo.websocket.org");
 
-   check wsClient->writeTextMessage("Text message");
+   check wsClient->writeMessage("Text message");
 
-   string textResp = check wsClient->readTextMessage();
+   string textResp = check wsClient->readMessage();
 }
 ```
-Similar to the above, this module has the `writeBinaryMessage` and `readBinaryMessage` functions to handle binary messages.
+Similar to the above, `writeMessage` and `readMessage` can be used to handle binary messages as well. This module also has some low-level APIs to handle `text` and `binary` messages such as `writeTextMessage`, `readTextMessage`, `writeBinaryMessage` and `readBinaryMessage` functions.
 A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive the `ping/pong` control frames.
 ```ballerina
 import ballerina/io;
@@ -28,7 +28,7 @@ import ballerina/websocket;
 
 public function main() returns error? {
    websocket:Client wsClient = check new("ws://echo.websocket.org", pingPongHandler = new clientPingPongCallbackService());
-   check wsClient->writeTextMessage("Text message");
+   check wsClient->writeMessage("Hello World!");
 }
 
 service class clientPingPongCallbackService {
@@ -57,7 +57,7 @@ service /ws on new websocket:Listener(21003) {
         
 service class WsService {
   *websocket:Service;
-  remote isolated function onTextMessage(websocket:Caller caller, string data) returns websocket:Error? {
+  remote isolated function onMessage(websocket:Caller caller, string data) returns websocket:Error? {
       check caller->writeTextMessage(data);
   }
 }              
@@ -67,9 +67,11 @@ service class WsService {
 
 **onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
 
-**onTextMessage**: The received text messages are dispatched to this remote method.
+**onMessage**: This remote function accepts both types of text and binary messages. This function accepts `anydata` as the function parameter as this remote function supports data binding.
 
-**onBinaryMessage**: The received binary messages are dispatched to this remote method.
+**onTextMessage**: The received text messages are dispatched to this remote method. Users are not allowed to have this remote functions along with the `onMessage` remote function.
+
+**onBinaryMessage**: The received binary messages are dispatched to this remote method. Users are not allowed to have this remote functions along with the `onMessage` remote function.
 
 **onPing and onPong**: The received ping and pong messages are dispatched to these remote methods respectively.
 
@@ -130,7 +132,7 @@ service /basic/ws on new websocket:Listener(9090) {
 }
 service class WsService {
     *websocket:Service;
-    remote function onTextMessage(websocket:Caller caller, string text) {
+    remote function onMessage(websocket:Caller caller, string text) {
         
     }
 }
