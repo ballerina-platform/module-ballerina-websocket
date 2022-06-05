@@ -87,7 +87,16 @@ public class PluginConstants {
                 + "as the `websocket:Listener` ", "WEBSOCKET_106"),
         INVALID_INPUT_FOR_ON_MESSAGE("Invalid parameters `{0}` provided for onMessage remote "
                 + "function", "WEBSOCKET_108"),
-        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107");;
+        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107"),
+        ON_BINARY_GENERATION_HINT("Template generation for binary remote function", "WEBSOCKET_110"),
+        ON_CLOSE_GENERATION_HINT("Template generation for onClose remote function", "WEBSOCKET_111"),
+        ON_ERROR_GENERATION_HINT("Template generation for onError remote function", "WEBSOCKET_112"),
+        ON_IDLE_TIMEOUT_GENERATION_HINT("Template generation for onIdletimeout remote function", "WEBSOCKET_113"),
+        ON_OPEN_GENERATION_HINT("Template generation for onOpen remote function", "WEBSOCKET_114"),
+        ON_PING_GENERATION_HINT("Template generation for onPing remote function", "WEBSOCKET_115"),
+        ON_PONG_GENERATION_HINT("Template generation for onPong remote function", "WEBSOCKET_116"),
+        ON_TEXT_GENERATION_HINT("Template generation for onTextMessage remote function", "WEBSOCKET_117"),
+        ON_MESSAGE_GENERATION_HINT("Template generation for onMessage remote function", "WEBSOCKET_118");
 
         private final String error;
         private final String errorCode;
