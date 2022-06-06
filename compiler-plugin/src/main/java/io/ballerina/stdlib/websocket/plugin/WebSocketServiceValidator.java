@@ -62,7 +62,7 @@ public class WebSocketServiceValidator {
                 reportInvalidFunction(functionDefinitionNode);
             }
             return GENERIC_FUNCTION;
-        }).collect(Collectors.toMap(node -> node, node -> true));
+        }).collect(Collectors.toMap(node -> node, node -> true, (node1, node2) -> node1));
 
         if (!functionSet.containsKey(PluginConstants.ON_TEXT_MESSAGE) &&
                 !functionSet.containsKey(PluginConstants.ON_MESSAGE)) {
