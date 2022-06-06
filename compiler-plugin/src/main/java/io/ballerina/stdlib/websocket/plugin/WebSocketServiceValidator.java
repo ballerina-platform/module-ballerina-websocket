@@ -64,6 +64,16 @@ public class WebSocketServiceValidator {
             return GENERIC_FUNCTION;
         }).collect(Collectors.toMap(node -> node, node -> true));
 
+        if (functionSet.containsKey(PluginConstants.ON_MESSAGE) &&
+                functionSet.containsKey(PluginConstants.ON_TEXT_MESSAGE)) {
+            Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS,
+                    classDefNode.location(), PluginConstants.ON_TEXT_MESSAGE);
+        }
+        if (functionSet.containsKey(PluginConstants.ON_MESSAGE) &&
+                        functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
+            Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS,
+                    classDefNode.location(), PluginConstants.ON_BINARY_MESSAGE);
+        }
         if (!functionSet.containsKey(PluginConstants.ON_TEXT_MESSAGE) &&
                 !functionSet.containsKey(PluginConstants.ON_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_TEXT_GENERATION_HINT);

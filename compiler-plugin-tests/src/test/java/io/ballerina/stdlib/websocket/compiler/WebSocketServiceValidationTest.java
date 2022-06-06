@@ -489,6 +489,18 @@ public class WebSocketServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errorCount(), 0);
     }
 
+    @Test
+    public void testOnMessageWithOnTextAndOnBinary() {
+        Package currentPackage = loadPackage("sample_package_54");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 2);
+        Diagnostic firstDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS);
+        Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
+        assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
