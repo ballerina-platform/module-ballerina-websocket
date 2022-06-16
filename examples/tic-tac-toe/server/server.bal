@@ -53,7 +53,7 @@ service class GameServer {
             return ;
         } else {
             string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_0: SIGN_X;
-            if (started) {
+            if started {
                 welcomeMsg = { "type": "state", "success" : true, "sign" : sign, "next" : next, squares: squares, winner: winner};
             } else {
                 welcomeMsg = { "type": "start", "success" : true, "sign" : sign, "next" : SIGN_X};
@@ -86,7 +86,7 @@ service class GameServer {
         };
         check broadcast(msg);
         string? calcWinner = calculateWinner();
-        if (calcWinner is string && calcWinner != "") {
+        if calcWinner is string && calcWinner != "" {
             check broadcast({"type": "end", "winner": calcWinner});
             winner = calcWinner;
         }
@@ -123,7 +123,7 @@ function calculateWinner() returns string? {
         int a = block[0];
         int b = block[1];
         int c = block[2];
-        if (squares[a] == squares[b] && squares[a] == squares[c]) {
+        if squares[a] == squares[b] && squares[a] == squares[c] {
             return squares[a];
         }
     }
