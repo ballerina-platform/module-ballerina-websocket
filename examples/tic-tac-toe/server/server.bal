@@ -43,7 +43,6 @@ service class GameServer {
     *websocket:Service;
 
     remote function onOpen(websocket:Caller caller) returns error? {
-        json welcomeMsg;
         if connectionsMap.length() >= 2 {
             check caller->writeMessage("Only two players are allowed");
             error? closedConnection = caller->close();
@@ -52,6 +51,7 @@ service class GameServer {
             }
             return ;
         } else {
+            json welcomeMsg;
             string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_0: SIGN_X;
             if started {
                 welcomeMsg = { "type": "state", "success" : true, "sign" : sign, "next" : next, squares: squares, winner: winner};
