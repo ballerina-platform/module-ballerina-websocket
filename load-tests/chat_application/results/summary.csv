@@ -139,3 +139,4 @@ WebSocket request-response Sampler,9396291,0,1,1,1,4,0,109,0.00%,12046.7,282.3,2
 WebSocket request-response Sampler,9022955,0,1,1,1,5,0,102,0.00%,11567.9,271.1,2.14,1655951647,50,10
 WebSocket request-response Sampler,9155032,0,1,1,1,4,0,59,0.00%,11737.4,275.1,2.17,1656126766,50,10
 WebSocket request-response Sampler,11916273,0,0,1,1,2,0,47,0.00%,15277.9,358.1,1.78,1656212547,50,10
+WebSocket request-response Sampler,9325767,0,1,1,1,4,0,55,0.00%,11956.3,280.2,2.07,1656298020,50,10
