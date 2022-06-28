@@ -20,11 +20,13 @@ import ballerina/websocket;
 const string USER_SIGN = "userSign";
 const string SIGN_X = "X";
 const string SIGN_O = "O";
+const string END = "O";
 map<websocket:Caller> connectionsMap = {};
 string[9] squares = [];
 boolean started = false;
 string next = "";
 string winner = "";
+
 type UserMove record {
     string 'type;
     int move;
@@ -37,6 +39,16 @@ type FirstMessage record {
     boolean success;
     string sign;
     string next;
+};
+
+type Winner record {
+    string 'type = "end";
+    string winner;
+};
+
+type PlayerLeft record {
+    string 'type = "playerLeft";
+    string player;
 };
 
 service /ws on new websocket:Listener(8000) {
@@ -84,8 +96,9 @@ service class GameServer {
         };
         check broadcast(msg);
         string? calcWinner = calculateWinner();
-        if calcWinner is string && calcWinner != "" {
-            check broadcast({"type": "end", "winner": calcWinner});
+        if calcWinner is string {
+            Winner winnerMessage = {winner: calcWinner};
+            check broadcast(winnerMessage);
             winner = calcWinner;
         }
     }
@@ -94,13 +107,13 @@ service class GameServer {
         lock {
             _ = connectionsMap.remove(check getUserSign(caller, USER_SIGN));
         }
-        json msg = {"type": "playerLeft" , "player": check getUserSign(caller, USER_SIGN)};
+        PlayerLeft msg = {player: check getUserSign(caller, USER_SIGN)};
         check broadcast(msg);
     }
 }
 
 // Function to perform the broadcasting of messages.
-function broadcast(string|json|UserMove message) returns error? {
+function broadcast(string|PlayerLeft|UserMove|Winner message) returns error? {
     foreach websocket:Caller con in connectionsMap {
         websocket:Error? err = con->writeMessage(message);
         if err is websocket:Error {
