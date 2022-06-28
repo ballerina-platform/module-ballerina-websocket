@@ -21,10 +21,10 @@ const string USER_SIGN = "userSign";
 const string SIGN_X = "X";
 const string SIGN_O = "O";
 
-map<websocket:Caller> connectionsMap = {};
-string[9] squares = [];
+final map<websocket:Caller> connectionsMap = {};
+final string[9] squares = [];
 boolean started = false;
-string next = "";
+final string next = "";
 string winner = "";
 
 type UserMove record {
