@@ -19,16 +19,35 @@ import ballerina/websocket;
 
 const string USER_SIGN = "userSign";
 const string SIGN_X = "X";
-const string SIGN_0 = "0";
+const string SIGN_O = "O";
+
 map<websocket:Caller> connectionsMap = {};
 string[9] squares = [];
 boolean started = false;
 string next = "";
 string winner = "";
-type Message record {
+
+type UserMove record {
     string 'type;
     int move;
     string next;
+    string player;
+};
+
+type FirstMessage record {
+    string 'type;
+    boolean success;
+    string sign;
+    string next;
+};
+
+type Winner record {
+    readonly "end" 'type = "end";
+    string winner;
+};
+
+type PlayerLeft record {
+    readonly "playerLeft" 'type = "playerLeft";
     string player;
 };
 
@@ -45,18 +64,14 @@ service class GameServer {
     remote function onOpen(websocket:Caller caller) returns error? {
         if connectionsMap.length() >= 2 {
             check caller->writeMessage("Only two players are allowed");
-            error? closedConnection = caller->close();
-            if closedConnection is error {
-                // do nothing
-            }
-            return ;
+            check caller->close();
         } else {
-            json welcomeMsg;
-            string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_0: SIGN_X;
+            FirstMessage welcomeMsg;
+            string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_O: SIGN_X;
             if started {
-                welcomeMsg = { "type": "state", "success" : true, "sign" : sign, "next" : next, squares: squares, winner: winner};
+                welcomeMsg = { 'type: "state", success : true, sign : sign, next : next, "squares": squares, "winner": winner};
             } else {
-                welcomeMsg = { "type": "start", "success" : true, "sign" : sign, "next" : SIGN_X};
+                welcomeMsg = { 'type: "start", success : true, sign : sign, next : SIGN_X};
             }
             caller.setAttribute(USER_SIGN, sign);
             check caller->writeMessage(welcomeMsg);
@@ -73,21 +88,17 @@ service class GameServer {
             started = true;
         }
 
-        if sign == SIGN_X {
-            next = SIGN_0;
-        } else {
-            next = SIGN_X;
-        }
-        Message msg = {
+        UserMove msg = {
             'type: "move",
             move: squareNumber,
-            next: next,
+            next: sign == SIGN_X ? SIGN_O: SIGN_X,
             player: sign
         };
         check broadcast(msg);
         string? calcWinner = calculateWinner();
-        if calcWinner is string && calcWinner != "" {
-            check broadcast({"type": "end", "winner": calcWinner});
+        if calcWinner is string {
+            Winner winnerMessage = {winner: calcWinner};
+            check broadcast(winnerMessage);
             winner = calcWinner;
         }
     }
@@ -96,13 +107,13 @@ service class GameServer {
         lock {
             _ = connectionsMap.remove(check getUserSign(caller, USER_SIGN));
         }
-        json msg = {"type": "playerLeft" , "player": check getUserSign(caller, USER_SIGN)};
+        PlayerLeft msg = {player: check getUserSign(caller, USER_SIGN)};
         check broadcast(msg);
     }
 }
 
 // Function to perform the broadcasting of messages.
-function broadcast(string|json|Message message) returns error? {
+function broadcast(string|PlayerLeft|UserMove|Winner message) returns error? {
     foreach websocket:Caller con in connectionsMap {
         websocket:Error? err = con->writeMessage(message);
         if err is websocket:Error {
