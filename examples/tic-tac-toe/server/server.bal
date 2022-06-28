@@ -21,8 +21,8 @@ const string USER_SIGN = "userSign";
 const string SIGN_X = "X";
 const string SIGN_O = "O";
 
-map<websocket:Caller> connectionsMap = {};
-string[9] squares = [];
+final map<websocket:Caller> connectionsMap = {};
+final string[9] squares = [];
 boolean started = false;
 string next = "";
 string winner = "";
@@ -88,10 +88,12 @@ service class GameServer {
             started = true;
         }
 
+        next = sign == SIGN_X ? SIGN_O: SIGN_X;
+
         UserMove msg = {
             'type: "move",
             move: squareNumber,
-            next: sign == SIGN_X ? SIGN_O: SIGN_X,
+            next,
             player: sign
         };
         check broadcast(msg);
