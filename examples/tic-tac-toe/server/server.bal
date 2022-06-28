@@ -19,7 +19,7 @@ import ballerina/websocket;
 
 const string USER_SIGN = "userSign";
 const string SIGN_X = "X";
-const string SIGN_0 = "0";
+const string SIGN_O = "O";
 map<websocket:Caller> connectionsMap = {};
 string[9] squares = [];
 boolean started = false;
@@ -52,7 +52,7 @@ service class GameServer {
             return ;
         } else {
             json welcomeMsg;
-            string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_0: SIGN_X;
+            string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_O: SIGN_X;
             if started {
                 welcomeMsg = { "type": "state", "success" : true, "sign" : sign, "next" : next, squares: squares, winner: winner};
             } else {
@@ -74,7 +74,7 @@ service class GameServer {
         }
 
         if sign == SIGN_X {
-            next = SIGN_0;
+            next = SIGN_O;
         } else {
             next = SIGN_X;
         }
