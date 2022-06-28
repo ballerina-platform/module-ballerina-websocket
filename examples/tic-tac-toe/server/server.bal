@@ -20,7 +20,7 @@ import ballerina/websocket;
 const string USER_SIGN = "userSign";
 const string SIGN_X = "X";
 const string SIGN_O = "O";
-const string END = "O";
+
 map<websocket:Caller> connectionsMap = {};
 string[9] squares = [];
 boolean started = false;
@@ -42,12 +42,12 @@ type FirstMessage record {
 };
 
 type Winner record {
-    string 'type = "end";
+    readonly "end" 'type = "end";
     string winner;
 };
 
 type PlayerLeft record {
-    string 'type = "playerLeft";
+    readonly "playerLeft" 'type = "playerLeft";
     string player;
 };
 
