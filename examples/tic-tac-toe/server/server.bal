@@ -25,11 +25,18 @@ string[9] squares = [];
 boolean started = false;
 string next = "";
 string winner = "";
-type Message record {
+type UserMove record {
     string 'type;
     int move;
     string next;
     string player;
+};
+
+type FirstMessage record {
+    string 'type;
+    boolean success;
+    string sign;
+    string next;
 };
 
 service /ws on new websocket:Listener(8000) {
@@ -45,17 +52,14 @@ service class GameServer {
     remote function onOpen(websocket:Caller caller) returns error? {
         if connectionsMap.length() >= 2 {
             check caller->writeMessage("Only two players are allowed");
-            error? closedConnection = caller->close();
-            if closedConnection is error {
-                // do nothing
-            }
+            check caller->close();
         } else {
-            json welcomeMsg;
+            FirstMessage welcomeMsg;
             string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_O: SIGN_X;
             if started {
-                welcomeMsg = { "type": "state", "success" : true, "sign" : sign, "next" : next, squares: squares, winner: winner};
+                welcomeMsg = { 'type: "state", success : true, sign : sign, next : next, "squares": squares, "winner": winner};
             } else {
-                welcomeMsg = { "type": "start", "success" : true, "sign" : sign, "next" : SIGN_X};
+                welcomeMsg = { 'type: "start", success : true, sign : sign, next : SIGN_X};
             }
             caller.setAttribute(USER_SIGN, sign);
             check caller->writeMessage(welcomeMsg);
@@ -72,7 +76,7 @@ service class GameServer {
             started = true;
         }
 
-        Message msg = {
+        UserMove msg = {
             'type: "move",
             move: squareNumber,
             next: sign == SIGN_X ? SIGN_O: SIGN_X,
@@ -96,7 +100,7 @@ service class GameServer {
 }
 
 // Function to perform the broadcasting of messages.
-function broadcast(string|json|Message message) returns error? {
+function broadcast(string|json|UserMove message) returns error? {
     foreach websocket:Caller con in connectionsMap {
         websocket:Error? err = con->writeMessage(message);
         if err is websocket:Error {
