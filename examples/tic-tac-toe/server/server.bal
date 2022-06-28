@@ -93,7 +93,7 @@ service class GameServer {
         UserMove msg = {
             'type: "move",
             move: squareNumber,
-            next: next,
+            next,
             player: sign
         };
         check broadcast(msg);
