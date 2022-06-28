@@ -49,7 +49,6 @@ service class GameServer {
             if closedConnection is error {
                 // do nothing
             }
-            return ;
         } else {
             json welcomeMsg;
             string sign = connectionsMap.hasKey(SIGN_X) ? SIGN_O: SIGN_X;
@@ -73,15 +72,10 @@ service class GameServer {
             started = true;
         }
 
-        if sign == SIGN_X {
-            next = SIGN_O;
-        } else {
-            next = SIGN_X;
-        }
         Message msg = {
             'type: "move",
             move: squareNumber,
-            next: next,
+            next: sign == SIGN_X ? SIGN_O: SIGN_X,
             player: sign
         };
         check broadcast(msg);
