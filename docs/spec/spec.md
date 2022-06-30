@@ -5,9 +5,8 @@ _Reviewers_: @shafreenAnfar
 _Created_: 2021/12/09  
 _Updated_: 2022/05/05  
 _Edition_: Swan Lake  
-_Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-library/issues/2165)  
 
-# Introduction
+## Introduction
 
 This is the specification for the WebSocket standard library of [Ballerina language](https://ballerina.io/), which provides WebSocket client-server functionalities.
 
@@ -17,7 +16,7 @@ If you have any feedback or suggestions about the library, start a discussion vi
 
 The conforming implementation of the specification is released and included in the distribution. Any deviation from the specification is considered a bug.
 
-# Contents
+## Contents
 1. [Overview](#1-overview)
 2. [Listener](#2-listener)
     * 2.1. [Listener Configurations](#21-listener-configurations)
