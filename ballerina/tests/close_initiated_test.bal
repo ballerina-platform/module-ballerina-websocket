@@ -20,9 +20,9 @@ import ballerina/lang.runtime;
 boolean callerInitiatedClose = false;
 
 service /basic2 on new Listener(9091) {
-   resource function get .() returns Service|Error {
-       return new closeService();
-   }
+    resource function get .() returns Service|Error {
+        return new closeService();
+    }
 }
 
 service class closeService {
@@ -37,23 +37,23 @@ service class closeService {
 
 @test:Config {}
 public function testCallerInitiatedClose() returns Error? {
-   Client wsClient = check new("ws://localhost:9091/basic2");
-   check wsClient->writeMessage({"Text": "message"});
-   json|Error resp = wsClient->readMessage();
-   if resp is json {
-       test:assertFail("Expected a connection closure error");
-   }
-   runtime:sleep(5);
-   test:assertTrue(callerInitiatedClose);
+    Client wsClient = check new("ws://localhost:9091/basic2");
+    check wsClient->writeMessage({"Text": "message"});
+    json|Error resp = wsClient->readMessage();
+    if resp is json {
+        test:assertFail("Expected a connection closure error");
+    }
+    runtime:sleep(5);
+    test:assertTrue(callerInitiatedClose);
 }
 
 @test:Config {}
 public function testClientInitiatedClose() returns Error? {
-   Client wsClient = check new("ws://localhost:9091/basic2");
-   check wsClient->close(timeout = 3);
-   boolean clientInitiatedClose = false;
-   if wsClient.isClosed() {
-       clientInitiatedClose = true;
-   }
-   test:assertTrue(clientInitiatedClose);
+    Client wsClient = check new("ws://localhost:9091/basic2");
+    check wsClient->close(timeout = 3);
+    boolean clientInitiatedClose = false;
+    if wsClient.isClosed() {
+        clientInitiatedClose = true;
+    }
+    test:assertTrue(clientInitiatedClose);
 }
