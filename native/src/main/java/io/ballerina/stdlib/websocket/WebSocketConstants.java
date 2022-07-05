@@ -102,6 +102,7 @@ public class WebSocketConstants {
     public static final BString INITIALIZED_BY_SERVICE = StringUtils.fromString("initializedByService");
     public static final String IS_SECURE = "secure";
     public static final BString LISTENER_IS_OPEN_FIELD = StringUtils.fromString("open");
+    public static final BString IS_CLOSED_FIELD = StringUtils.fromString("closed");
 
     // WebSocketClient struct field names
     public static final String HTTP_RESPONSE = "response";

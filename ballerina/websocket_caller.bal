@@ -23,6 +23,7 @@ public isolated client class Caller {
     private boolean open = false;
     private map<value:Cloneable> attributes = {};
     private boolean initializedByService = false;
+    private boolean closed = false;
 
     isolated function init() {
         // package private function to prevent object creation
@@ -173,6 +174,15 @@ public isolated client class Caller {
     public isolated function isOpen() returns boolean {
         lock {
             return self.open;
+        }
+    }
+
+    # Gives the status of the connection closure.
+    #
+    # + return - `true` if the connection closure is initiated
+    public isolated function isClosed() returns boolean {
+        lock {
+            return self.closed;
         }
     }
 }

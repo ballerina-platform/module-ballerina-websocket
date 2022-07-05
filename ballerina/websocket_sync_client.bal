@@ -28,6 +28,7 @@ public isolated client class Client {
     private string url = "";
     private ClientConfiguration & readonly config;
     private final PingPongService? pingPongService;
+    private boolean closed = false;
 
     # Initializes the synchronous client when called.
     #
@@ -179,6 +180,15 @@ public isolated client class Client {
     public isolated function isOpen() returns boolean {
         lock {
             return self.open;
+        }
+    }
+
+    # Gives the status of the connection closure.
+    #
+    # + return - `true` if the connection closure is initiated
+    public isolated function isClosed() returns boolean {
+        lock {
+            return self.closed;
         }
     }
 
