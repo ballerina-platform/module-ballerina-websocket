@@ -34,6 +34,18 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "constraint"
+version = "1.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "constraint", moduleName = "constraint"}
+]
+
+[[package]]
+org = "ballerina"
 name = "crypto"
 version = "2.2.2"
 dependencies = [
@@ -310,6 +322,7 @@ name = "websocket"
 version = "2.3.1"
 dependencies = [
 	{org = "ballerina", name = "auth"},
+	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
