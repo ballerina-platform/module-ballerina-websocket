@@ -18,7 +18,7 @@ import ballerina/lang.runtime as runtime;
 import ballerina/test;
 import ballerina/http;
 
-listener http:Listener hl = check new(21001);
+listener http:Listener hl = check new(21001, {httpVersion: "1.1"});
 listener Listener socketListener = new(hl);
 string output = "";
 string errorMsg = "";
