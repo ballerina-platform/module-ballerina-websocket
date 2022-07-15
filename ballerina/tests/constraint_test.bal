@@ -20,7 +20,7 @@ import ballerina/constraint;
 
 listener Listener l22003 = new(22003);
 
-public type Coord record {
+public type Cord record {
     @constraint:Int {
         minValue: 0
     }
@@ -70,7 +70,7 @@ service /onRecord on l22003 {
 
 service class WsServicel22004 {
     *Service;
-    remote isolated function onMessage(Caller caller, Coord data) returns Coord {
+    remote isolated function onMessage(Caller caller, Cord data) returns Cord {
         return data;
     }
 
@@ -102,7 +102,7 @@ public function testConstraintErrorString() returns Error? {
 public function testConstraintRecord() returns Error? {
     Client wsClient = check new("ws://localhost:22003/onRecord/");
     check wsClient->writeMessage(validRecord);
-    Coord data = check wsClient->readMessage();
+    Cord data = check wsClient->readMessage();
     test:assertEquals(data, validRecord);
 }
 
@@ -110,7 +110,7 @@ public function testConstraintRecord() returns Error? {
 public function testConstraintErrorRecord() returns Error? {
     Client wsClient = check new("ws://localhost:22003/onRecord/");
     check wsClient->writeMessage(invalidRecord);
-    Coord|Error data = wsClient->readMessage();
+    Cord|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
     if (data is PayloadValidationError) {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'minValue' constraint(s).\")");
