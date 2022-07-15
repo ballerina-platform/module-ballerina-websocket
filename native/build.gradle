@@ -34,6 +34,7 @@ dependencies {
 
     implementation group: 'io.ballerina.stdlib', name: 'io-native', version: "${stdlibIoVersion}"
     implementation group: 'io.ballerina.stdlib', name: 'http-native', version: "${stdlibHttpVersion}"
+    implementation group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}"
     implementation group: 'io.ballerina.stdlib', name: 'mime-native', version: "${stdlibMimeVersion}"
 
     implementation group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"

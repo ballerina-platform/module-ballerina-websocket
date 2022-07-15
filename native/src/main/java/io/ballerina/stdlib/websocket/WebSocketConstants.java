@@ -151,6 +151,7 @@ public class WebSocketConstants {
         SslError("SslError"),
         AuthzError("AuthzError"),
         AuthnError("AuthnError"),
+        PayloadValidationError("PayloadValidationError"),
         Error("Error");
 
         private String errorCode;

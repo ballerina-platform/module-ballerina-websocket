@@ -23,9 +23,12 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BTypedesc;
+import io.ballerina.stdlib.constraint.Constraints;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketBinaryMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketCloseMessage;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
@@ -38,14 +41,12 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 
@@ -57,7 +58,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
     private Future callback;
-    private Type targetType;
+    private BTypedesc targetType;
     private AtomicBoolean futureCompleted;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
 
@@ -70,6 +71,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
+        Type targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
         try {
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
@@ -104,7 +106,13 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 }
                 stringAggregator.resetAggregateString();
                 if (!futureCompleted.get()) {
-                    if (message instanceof BError) {
+                    Object validationResult = Constraints.validate(message, this.targetType);
+                    if (validationResult instanceof BError) {
+                        callback.complete(WebSocketUtil
+                                .createWebsocketErrorWithCause(String.format("data validation failed: %s", validationResult),
+                                        WebSocketConstants.ErrorCode.PayloadValidationError, (BError)validationResult));
+                        futureCompleted.set(true);
+                    } else if (message instanceof BError) {
                         callback.complete(WebSocketUtil
                                 .createWebsocketError(String.format("data binding failed: %s", message),
                                         WebSocketConstants.ErrorCode.Error));
@@ -133,6 +141,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
+        Type targetType = this.targetType.getDescribingType();
         try {
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
@@ -267,7 +276,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         this.callback = callback;
     }
 
-    public void setTargetType(Type targetType) {
+    public void setTargetType(BTypedesc targetType) {
         this.targetType = targetType;
     }
 

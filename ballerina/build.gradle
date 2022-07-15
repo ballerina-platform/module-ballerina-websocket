@@ -73,6 +73,7 @@ dependencies {
         transitive = false
     }
     externalJars(group: 'io.ballerina.stdlib', name: 'http-native', version: "${stdlibHttpVersion}")
+    externalJars(group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}")
     externalJars(group: 'io.netty', name: 'netty-common', version: "${nettyVersion}") {
         transitive = false
     }
@@ -106,12 +107,14 @@ task updateTomlFiles {
     doLast {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
         def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
+        def stdlibDependentConstraintNativeVersion = project.stdlibConstraintVersion
         def stdlibDependentNettyVersion = project.nettyVersion
 
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.mimenative.version@", stdlibDependentMimeNativeVersion)
         newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)
+        newConfig = newConfig.replace("@stdlib.constraintnative.version@", stdlibDependentConstraintNativeVersion)
         newConfig = newConfig.replace("@netty.version@", stdlibDependentNettyVersion)
         ballerinaTomlFile.text = newConfig
 
