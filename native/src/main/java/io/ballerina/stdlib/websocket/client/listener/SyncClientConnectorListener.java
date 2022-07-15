@@ -118,7 +118,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     } else if (this.targetType != null) {
                         Object validationResult = Constraints.validate(message, this.targetType);
                         if (validationResult instanceof BError) {
-                            callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
+                                callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
                                     String.format("data validation failed: %s", validationResult),
                                     WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult));
                         } else {
@@ -188,7 +188,22 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 ValueCreator.createTypedescValue(targetType));
                         break;
                 }
-                callback.complete(message);
+                if (message instanceof BError) {
+                    callback.complete(WebSocketUtil
+                            .createWebsocketError(String.format("data binding failed: %s", message),
+                                    WebSocketConstants.ErrorCode.Error));
+                } else if (this.targetType != null) {
+                    Object validationResult = Constraints.validate(message, this.targetType);
+                    if (validationResult instanceof BError) {
+                        callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
+                                String.format("data validation failed: %s", validationResult),
+                                WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult));
+                    } else {
+                        callback.complete(message);
+                    }
+                } else {
+                    callback.complete(message);
+                }
                 futureCompleted.set(true);
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
