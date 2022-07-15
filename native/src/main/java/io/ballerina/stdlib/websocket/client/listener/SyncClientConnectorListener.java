@@ -148,7 +148,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-        Type targetType = this.targetType.getDescribingType();
+        Type targetType = null;
+        if (this.targetType != null) {
+            targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
+        }
         try {
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
                     .createIfNullAndGetByteArrAggregator();
