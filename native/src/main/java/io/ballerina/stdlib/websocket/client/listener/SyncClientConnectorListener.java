@@ -73,7 +73,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-        Type targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
+        Type targetType = null;
+        if (this.targetType != null) {
+            targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
+        }
         try {
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
@@ -108,12 +111,14 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 }
                 stringAggregator.resetAggregateString();
                 if (!futureCompleted.get()) {
-                    Object validationResult = Constraints.validate(message, this.targetType);
-                    if (validationResult instanceof BError) {
-                        callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
-                                String.format("data validation failed: %s", validationResult),
-                                WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult));
-                        futureCompleted.set(true);
+                    if (this.targetType != null) {
+                        Object validationResult = Constraints.validate(message, this.targetType);
+                        if (validationResult instanceof BError) {
+                            callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
+                                    String.format("data validation failed: %s", validationResult),
+                                    WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult));
+                            futureCompleted.set(true);
+                        }
                     } else if (message instanceof BError) {
                         callback.complete(WebSocketUtil
                                 .createWebsocketError(String.format("data binding failed: %s", message),
