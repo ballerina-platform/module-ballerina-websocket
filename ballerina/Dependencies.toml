@@ -34,6 +34,18 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "constraint"
+version = "1.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "constraint", moduleName = "constraint"}
+]
+
+[[package]]
+org = "ballerina"
 name = "crypto"
 version = "2.2.2"
 dependencies = [
@@ -91,6 +103,9 @@ version = "1.2.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
+]
+modules = [
+	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]
@@ -266,6 +281,18 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "test"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "test", moduleName = "test"}
+]
+
+[[package]]
+org = "ballerina"
 name = "time"
 version = "2.2.2"
 dependencies = [
@@ -289,7 +316,9 @@ name = "websocket"
 version = "2.3.1"
 dependencies = [
 	{org = "ballerina", name = "auth"},
+	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "jwt"},
 	{org = "ballerina", name = "lang.array"},
@@ -297,6 +326,7 @@ dependencies = [
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "oauth2"},
 	{org = "ballerina", name = "regex"},
+	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"}
 ]
 modules = [
