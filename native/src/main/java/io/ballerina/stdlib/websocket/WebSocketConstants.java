@@ -48,6 +48,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeout");
     public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
+    public static final BString ANNOTATION_ATTR_VALIDATION_ENABLED = StringUtils.fromString("validation");
 
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final String LOG_MESSAGE = "{} {}";
@@ -83,6 +84,7 @@ public class WebSocketConstants {
     public static final String CALL_BACK_SERVICE = "callbackService";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
+    public static final BString ENABLE_VALIDATION_CONFIG = StringUtils.fromString("validation");
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");

@@ -27,11 +27,13 @@
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
 #   If this is not set or is negative or zero, the default frame size, which is 65536 will be used
 # + auth - Listener authentication configurations
+# + validation - Enable/disable constraint validation
 public type WSServiceConfig record {|
     string[] subProtocols = [];
     decimal idleTimeout = 0;
     int maxFrameSize = 65536;
     ListenerAuthConfig[] auth?;
+    boolean validation = true;
 |};
 
 # The annotation which is used to configure a WebSocket service.

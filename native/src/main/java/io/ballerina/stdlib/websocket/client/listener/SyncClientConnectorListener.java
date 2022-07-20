@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ENABLE_VALIDATION_CONFIG;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 
 /**
@@ -116,11 +117,18 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 .createWebsocketError(String.format("data binding failed: %s", message),
                                         WebSocketConstants.ErrorCode.Error));
                     } else if (this.targetType != null) {
-                        Object validationResult = Constraints.validate(message, this.targetType);
-                        if (validationResult instanceof BError) {
+                        boolean validationEnabled = connectionInfo.getWebSocketEndpoint().getMapValue(
+                                WebSocketConstants.CLIENT_ENDPOINT_CONFIG).getBooleanValue(ENABLE_VALIDATION_CONFIG);
+                        if (validationEnabled) {
+                            Object validationResult = Constraints.validate(message, this.targetType);
+                            if (validationResult instanceof BError) {
                                 callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
-                                    String.format("data validation failed: %s", validationResult),
-                                    WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult));
+                                        String.format("data validation failed: %s", validationResult),
+                                        WebSocketConstants.ErrorCode.PayloadValidationError,
+                                        (BError) validationResult));
+                            } else {
+                                callback.complete(message);
+                            }
                         } else {
                             callback.complete(message);
                         }

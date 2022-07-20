@@ -34,6 +34,7 @@ import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -43,6 +44,7 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BValue;
 import io.ballerina.runtime.observability.ObservabilityConstants;
 import io.ballerina.runtime.observability.ObserveUtils;
+import io.ballerina.stdlib.constraint.Constraints;
 import io.ballerina.stdlib.http.api.HttpConstants;
 import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.api.ValueCreatorUtils;
@@ -414,6 +416,7 @@ public class WebSocketResourceDispatcher {
                 webSocketConnection.readNextFrame();
                 return;
             }
+            boolean validationEnabled = (boolean) wsService.getBalService().getNativeData("validation");
             Type[] parameterTypes = onTextMessageResource.getParameterTypes();
             Object[] bValues = new Object[parameterTypes.length * 2];
 
@@ -425,7 +428,7 @@ public class WebSocketResourceDispatcher {
                 int index = 0;
                 try {
                     for (Type param : parameterTypes) {
-                        int typeTag = param.getTag();
+                        int typeTag = TypeUtils.getReferredType(param).getTag();
                         boolean readOnly = false;
                         if (typeTag == INTERSECTION_TAG) {
                             List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
@@ -476,6 +479,17 @@ public class WebSocketResourceDispatcher {
                         }
                         if (readOnly) {
                             bValue = CloneReadOnly.cloneReadOnly(bValue);
+                        }
+                        if (typeTag != OBJECT_TYPE_TAG && validationEnabled) {
+                            Object validationResult = Constraints.validate(bValue,
+                                    ValueCreator.createTypedescValue(param));
+                            if (validationResult instanceof BError) {
+                                BError validationErr = WebSocketUtil.createWebsocketErrorWithCause(
+                                        String.format("data validation failed: %s", validationResult),
+                                        WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult);
+                                dispatchOnError(connectionInfo, validationErr, true);
+                                return;
+                            }
                         }
                         bValues[index++] = bValue;
                         bValues[index++] = true;
@@ -599,12 +613,13 @@ public class WebSocketResourceDispatcher {
                                                WebSocketConnectionInfo connectionInfo, byte[] byteArray,
                                                WebSocketConnection webSocketConnection, WebSocketService wsService) {
         BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
+        boolean validationEnabled = (boolean) wsService.getBalService().getNativeData("validation");
         Type[] paramTypes = onBinaryMessageResource.getParameterTypes();
         Object[] bValues = new Object[paramTypes.length * 2];
         int index = 0;
         try {
             for (Type param : paramTypes) {
-                int typeName = param.getTag();
+                int typeName = TypeUtils.getReferredType(param).getTag();
                 boolean readOnly = false;
                 typeName = getTypeName(param, typeName);
                 if (typeName == INTERSECTION_TAG) {
@@ -656,6 +671,17 @@ public class WebSocketResourceDispatcher {
                 }
                 if (readOnly) {
                     bValue = CloneReadOnly.cloneReadOnly(bValue);
+                }
+                if (typeName != OBJECT_TYPE_TAG && validationEnabled) {
+                    Object validationResult = Constraints.validate(bValue,
+                            ValueCreator.createTypedescValue(param));
+                    if (validationResult instanceof BError) {
+                        BError validationErr = WebSocketUtil.createWebsocketErrorWithCause(
+                                String.format("data validation failed: %s", validationResult),
+                                WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult);
+                        dispatchOnError(connectionInfo, validationErr, true);
+                        return;
+                    }
                 }
                 bValues[index++] = bValue;
                 bValues[index++] = true;

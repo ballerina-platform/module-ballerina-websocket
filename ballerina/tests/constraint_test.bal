@@ -17,6 +17,10 @@
 import ballerina/test;
 import ballerina/io;
 import ballerina/constraint;
+import ballerina/lang.runtime;
+
+string errMessage1 = "no error";
+string errMessage2 = "no error";
 
 listener Listener l22003 = new(22003);
 
@@ -45,6 +49,11 @@ Coord1 invalidRecord = {x: 1, y: 2};
 }
 public type Data string;
 
+@constraint:String {
+    length: 20
+}
+public type Data2 string;
+
 service /onTextString on l22003 {
     resource function get .() returns Service|UpgradeError {
         return new WsServicel22003();
@@ -64,18 +73,84 @@ service class WsServicel22003 {
 
 service /onRecord on l22003 {
     resource function get .() returns Service|UpgradeError {
-        return new WsServicel22003();
+        return new WsServicel22004();
     }
 }
 
 service class WsServicel22004 {
     *Service;
-    remote isolated function onMessage(Caller caller, Cord data) returns Cord {
+    remote isolated function onMessage(Caller caller, Coord1 data) returns Cord {
         return data;
     }
 
     remote isolated function onError(error err) returns Error? {
-        io:println("server on error message");
+        io:println(err.message());
+    }
+}
+
+service /onServerValidation on l22003 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsServicel22005();
+    }
+}
+
+service class WsServicel22005 {
+    *Service;
+    remote isolated function onMessage(Caller caller, Data2 data) returns string {
+        return data;
+    }
+
+    remote function onError(error err) returns Error? {
+        errMessage1 = err.message();
+    }
+}
+
+@ServiceConfig {validation: false}
+service /onServerDisabledValidation on l22003 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsServicel22006();
+    }
+}
+
+service class WsServicel22006 {
+    *Service;
+    remote isolated function onMessage(Caller caller, Data2 data) returns string {
+        return data;
+    }
+
+    remote function onError(error err) returns Error? {
+        errMessage1 = err.message();
+    }
+}
+
+service /onServerBinaryValidation on l22003 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsServicel22007();
+    }
+}
+
+service class WsServicel22007 {
+    *Service;
+    remote isolated function onMessage(Caller caller, Data2 data) returns string {
+        return data;
+    }
+}
+
+@ServiceConfig {validation: false}
+service /onServerDisabledBinaryValidation on l22003 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsServicel22008();
+    }
+}
+
+service class WsServicel22008 {
+    *Service;
+    remote isolated function onMessage(Caller caller, Data2 data) returns string {
+        return data;
+    }
+
+    remote function onError(error err) returns Error? {
+        errMessage2 = err.message();
     }
 }
 
@@ -115,4 +190,52 @@ public function testConstraintErrorRecord() returns Error? {
     if (data is PayloadValidationError) {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'minValue' constraint(s).\")");
     } 
+}
+
+@test:Config {}
+public function testConstraintErrorRecordValidationFalse() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onRecord/", {validation: false});
+    check wsClient->writeMessage(invalidRecord);
+    Cord data = check wsClient->readMessage();
+    test:assertEquals(data, invalidRecord);
+}
+
+@test:Config {}
+public function testConstraintStringOnServer() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onServerValidation/");
+    check wsClient->writeMessage("Hello World Hello World");
+    runtime:sleep(1);
+    test:assertEquals(errMessage1, "Error: data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+}
+
+@test:Config {}
+public function testDisabledConstraintStringOnServer() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onServerDisabledValidation/");
+    check wsClient->writeMessage("Hello World Hello World");
+    string data = check wsClient->readMessage();
+    test:assertEquals(data, "Hello World Hello World");
+}
+
+@test:Config {}
+public function testErrorBinaryOnServer() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onServerBinaryValidation/");
+    check wsClient->writeMessage("Hello World Hello World".toBytes());
+    runtime:sleep(1);
+    test:assertEquals(errMessage1, "Error: data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+}
+
+@test:Config {}
+public function testBinaryOnServer() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onServerDisabledValidation/");
+    check wsClient->writeMessage("Hello World".toBytes());
+    string data = check wsClient->readMessage();
+    test:assertEquals(data, "Hello World");
+}
+
+@test:Config {}
+public function testBinaryOnServerConstraintDisabled() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onServerDisabledValidation/");
+    check wsClient->writeMessage("Hello World Hello World".toBytes());
+    string data = check wsClient->readMessage();
+    test:assertEquals(data, "Hello World Hello World");
 }
