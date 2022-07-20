@@ -201,11 +201,18 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                             .createWebsocketError(String.format("data binding failed: %s", message),
                                     WebSocketConstants.ErrorCode.Error));
                 } else if (this.targetType != null) {
-                    Object validationResult = Constraints.validate(message, this.targetType);
-                    if (validationResult instanceof BError) {
-                        callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
-                                String.format("data validation failed: %s", validationResult),
-                                WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult));
+                    boolean validationEnabled = connectionInfo.getWebSocketEndpoint().getMapValue(
+                            WebSocketConstants.CLIENT_ENDPOINT_CONFIG).getBooleanValue(ENABLE_VALIDATION_CONFIG);
+                    if (validationEnabled) {
+                        Object validationResult = Constraints.validate(message, this.targetType);
+                        if (validationResult instanceof BError) {
+                            callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
+                                    String.format("data validation failed: %s", validationResult),
+                                    WebSocketConstants.ErrorCode.PayloadValidationError,
+                                    (BError) validationResult));
+                        } else {
+                            callback.complete(message);
+                        }
                     } else {
                         callback.complete(message);
                     }

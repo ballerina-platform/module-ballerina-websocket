@@ -21,6 +21,7 @@ import ballerina/lang.runtime;
 
 string errMessage1 = "no error";
 string errMessage2 = "no error";
+string errMessage3 = "no error";
 
 listener Listener l22003 = new(22003);
 
@@ -134,6 +135,10 @@ service class WsServicel22007 {
     remote isolated function onMessage(Caller caller, Data2 data) returns string {
         return data;
     }
+
+    remote function onError(error err) returns Error? {
+        errMessage2 = err.message();
+    }
 }
 
 @ServiceConfig {validation: false}
@@ -151,6 +156,19 @@ service class WsServicel22008 {
 
     remote function onError(error err) returns Error? {
         errMessage2 = err.message();
+    }
+}
+
+service /onBinary on l22003 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsServicel22009();
+    }
+}
+
+service class WsServicel22009 {
+    *Service;
+    remote isolated function onMessage(Caller caller, byte[] data) returns byte[] {
+        return data;
     }
 }
 
@@ -221,7 +239,7 @@ public function testErrorBinaryOnServer() returns Error? {
     Client wsClient = check new("ws://localhost:22003/onServerBinaryValidation/");
     check wsClient->writeMessage("Hello World Hello World".toBytes());
     runtime:sleep(1);
-    test:assertEquals(errMessage1, "Error: data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+    test:assertEquals(errMessage2, "Error: data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
 }
 
 @test:Config {}
@@ -238,4 +256,31 @@ public function testBinaryOnServerConstraintDisabled() returns Error? {
     check wsClient->writeMessage("Hello World Hello World".toBytes());
     string data = check wsClient->readMessage();
     test:assertEquals(data, "Hello World Hello World");
+}
+
+@test:Config {}
+public function testReadBinaryConstraintDisabled() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onBinary/", {validation: false});
+    check wsClient->writeMessage("Hello World Hello World".toBytes());
+    Data2 data = check wsClient->readMessage();
+    test:assertEquals(data, "Hello World Hello World");
+}
+
+@test:Config {}
+public function testReadBinary() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onBinary/");
+    check wsClient->writeMessage("Hello World Hello Wo".toBytes());
+    Data2 data = check wsClient->readMessage();
+    test:assertEquals(data, "Hello World Hello Wo");
+}
+
+@test:Config {}
+public function testReadBinaryError() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onBinary/");
+    check wsClient->writeMessage("Hello World Hello World".toBytes());
+    Data2|Error data = wsClient->readMessage();
+    test:assertTrue(data is PayloadValidationError);
+    if (data is PayloadValidationError) {
+        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+    } 
 }
