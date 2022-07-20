@@ -73,7 +73,6 @@ public class WebSocketSyncConnector {
     }
 
     public static Object readMessage(Environment env, BObject wsConnection, BTypedesc targetType) {
-//        Type targetDataType = targetType.getDescribingType();
         final Future callback = env.markAsync();
         try {
             readContentFromConnection(wsConnection, callback, targetType);
