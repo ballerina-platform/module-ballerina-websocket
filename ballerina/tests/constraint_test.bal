@@ -21,7 +21,6 @@ import ballerina/lang.runtime;
 
 string errMessage1 = "no error";
 string errMessage2 = "no error";
-string errMessage3 = "no error";
 
 listener Listener l22003 = new(22003);
 
@@ -211,7 +210,7 @@ public function testConstraintErrorRecord() returns Error? {
 }
 
 @test:Config {}
-public function testConstraintErrorRecordValidationFalse() returns Error? {
+public function testConstraintInvalidRecordValidationFalse() returns Error? {
     Client wsClient = check new("ws://localhost:22003/onRecord/", {validation: false});
     check wsClient->writeMessage(invalidRecord);
     Cord data = check wsClient->readMessage();
