@@ -283,3 +283,27 @@ public function testReadBinaryError() returns Error? {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
     } 
 }
+
+// TODO: Enable this after this issue is fixed(https://github.com/ballerina-platform/ballerina-lang/issues/37050)
+@test:Config {enable: false}
+public function testReadTextUnion() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onTextString/");
+    check wsClient->writeMessage("Hello World Hello Wo");
+    Data2|int data = check wsClient->readMessage();
+    test:assertTrue(data is Data2);
+    if data is Data2 {
+        test:assertEquals(data, "Hello World Hello Wo");
+    }
+}
+
+// TODO: Enable this after this issue is fixed(https://github.com/ballerina-platform/ballerina-lang/issues/37050)
+@test:Config {enable: false}
+public function testReadTextUnionValidationError() returns Error? {
+    Client wsClient = check new("ws://localhost:22003/onTextString/");
+    check wsClient->writeMessage("Hello World Hello World");
+    Data2|int|Error data = check wsClient->readMessage();
+    test:assertTrue(data is PayloadValidationError);
+    if (data is PayloadValidationError) {
+        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+    } 
+}

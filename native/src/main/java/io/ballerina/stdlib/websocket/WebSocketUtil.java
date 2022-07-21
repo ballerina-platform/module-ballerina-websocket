@@ -342,9 +342,8 @@ public class WebSocketUtil {
 
     public static BError createWebsocketErrorWithCause(String message, WebSocketConstants.ErrorCode errorType,
                                                        BError cause) {
-        return ErrorCreator
-                .createError(ModuleUtils.getWebsocketModule(), errorType.errorCode(), StringUtils.fromString(message),
-                        cause, null);
+        return ErrorCreator.createError(ModuleUtils.getWebsocketModule(), errorType.errorCode(),
+                StringUtils.fromString(message), cause, null);
     }
 
     /**
