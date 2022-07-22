@@ -59,9 +59,5 @@ public type SslError distinct Error;
 # Represents an error, which occurred due to payload binding.
 public type PayloadBindingError distinct Error;
 
-type PayloadBindingListenerError PayloadBindingError;
-
 # Represents an error, which occurred due to payload constraint validation.
 public type PayloadValidationError distinct PayloadBindingError;
-
-type PayloadValidationClientError PayloadValidationError;
