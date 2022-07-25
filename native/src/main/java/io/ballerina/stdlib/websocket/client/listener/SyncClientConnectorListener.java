@@ -120,19 +120,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         boolean validationEnabled = connectionInfo.getWebSocketEndpoint()
                                 .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG)
                                 .getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
-                        if (validationEnabled) {
-                            Object validationResult = Constraints.validate(message, this.targetType);
-                            if (validationResult instanceof BError) {
-                                callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
-                                        String.format("data validation failed: %s", validationResult),
-                                        WebSocketConstants.ErrorCode.PayloadValidationError,
-                                        (BError) validationResult));
-                            } else {
-                                callback.complete(message);
-                            }
-                        } else {
-                            callback.complete(message);
-                        }
+                        validateConstraints(message, validationEnabled);
                     } else {
                         callback.complete(message);
                     }
@@ -153,6 +141,22 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
             }
             futureCompleted.set(true);
+        }
+    }
+
+    private void validateConstraints(Object message, boolean validationEnabled) {
+        if (validationEnabled) {
+            Object validationResult = Constraints.validate(message, this.targetType);
+            if (validationResult instanceof BError) {
+                callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
+                        String.format("data validation failed: %s", validationResult),
+                        WebSocketConstants.ErrorCode.PayloadValidationError,
+                        (BError) validationResult));
+            } else {
+                callback.complete(message);
+            }
+        } else {
+            callback.complete(message);
         }
     }
 
@@ -205,19 +209,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     boolean validationEnabled = connectionInfo.getWebSocketEndpoint()
                             .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG)
                             .getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
-                    if (validationEnabled) {
-                        Object validationResult = Constraints.validate(message, this.targetType);
-                        if (validationResult instanceof BError) {
-                            callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
-                                    String.format("data validation failed: %s", validationResult),
-                                    WebSocketConstants.ErrorCode.PayloadValidationError,
-                                    (BError) validationResult));
-                        } else {
-                            callback.complete(message);
-                        }
-                    } else {
-                        callback.complete(message);
-                    }
+                    validateConstraints(message, validationEnabled);
                 } else {
                     callback.complete(message);
                 }
