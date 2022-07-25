@@ -84,7 +84,7 @@ public class WebSocketConstants {
     public static final String CALL_BACK_SERVICE = "callbackService";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
-    public static final BString ENABLE_VALIDATION_CONFIG = StringUtils.fromString("validation");
+    public static final String CONSTRAINT_VALIDATION = "validation";
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");

@@ -87,6 +87,7 @@ import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.TypeTags.INT_TAG;
 import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
@@ -416,7 +417,7 @@ public class WebSocketResourceDispatcher {
                 webSocketConnection.readNextFrame();
                 return;
             }
-            boolean validationEnabled = (boolean) wsService.getBalService().getNativeData("validation");
+            boolean validationEnabled = (boolean) wsService.getBalService().getNativeData(CONSTRAINT_VALIDATION);
             Type[] parameterTypes = onTextMessageResource.getParameterTypes();
             Object[] bValues = new Object[parameterTypes.length * 2];
 
@@ -613,7 +614,7 @@ public class WebSocketResourceDispatcher {
                                                WebSocketConnectionInfo connectionInfo, byte[] byteArray,
                                                WebSocketConnection webSocketConnection, WebSocketService wsService) {
         BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
-        boolean validationEnabled = (boolean) wsService.getBalService().getNativeData("validation");
+        boolean validationEnabled = (boolean) wsService.getBalService().getNativeData(CONSTRAINT_VALIDATION);
         Type[] paramTypes = onBinaryMessageResource.getParameterTypes();
         Object[] bValues = new Object[paramTypes.length * 2];
         int index = 0;

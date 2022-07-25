@@ -185,7 +185,7 @@ public function testConstraintErrorString() returns Error? {
     check wsClient->writeMessage("recordVal1234567");
     Data|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
-    if (data is PayloadValidationError) {
+    if data is PayloadValidationError {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
     } 
 }
@@ -204,7 +204,7 @@ public function testConstraintErrorRecord() returns Error? {
     check wsClient->writeMessage(invalidRecord);
     Cord|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
-    if (data is PayloadValidationError) {
+    if data is PayloadValidationError {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'minValue' constraint(s).\")");
     } 
 }
@@ -279,7 +279,7 @@ public function testReadBinaryError() returns Error? {
     check wsClient->writeMessage("Hello World Hello World".toBytes());
     Data2|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
-    if (data is PayloadValidationError) {
+    if data is PayloadValidationError {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
     } 
 }
@@ -303,7 +303,7 @@ public function testReadTextUnionValidationError() returns Error? {
     check wsClient->writeMessage("Hello World Hello World");
     Data2|int|Error data = check wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
-    if (data is PayloadValidationError) {
+    if data is PayloadValidationError {
         test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
     } 
 }
