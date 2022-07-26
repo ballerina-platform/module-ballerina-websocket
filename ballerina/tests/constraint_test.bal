@@ -186,7 +186,7 @@ public function testConstraintErrorString() returns Error? {
     Data|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
     if data is PayloadValidationError {
-        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for '$:length' constraint(s).\")");
     } 
 }
 
@@ -205,7 +205,7 @@ public function testConstraintErrorRecord() returns Error? {
     Cord|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
     if data is PayloadValidationError {
-        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'minValue' constraint(s).\")");
+        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for '$.y:minValue' constraint(s).\")");
     } 
 }
 
@@ -222,7 +222,7 @@ public function testConstraintStringOnServer() returns Error? {
     Client wsClient = check new("ws://localhost:22003/onServerValidation/");
     check wsClient->writeMessage("Hello World Hello World");
     runtime:sleep(1);
-    test:assertEquals(errMessage1, "Error: data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+    test:assertEquals(errMessage1, "Error: data validation failed: error Error (\"Validation failed for '$:length' constraint(s).\")");
 }
 
 @test:Config {}
@@ -238,7 +238,7 @@ public function testErrorBinaryOnServer() returns Error? {
     Client wsClient = check new("ws://localhost:22003/onServerBinaryValidation/");
     check wsClient->writeMessage("Hello World Hello World".toBytes());
     runtime:sleep(1);
-    test:assertEquals(errMessage2, "Error: data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+    test:assertEquals(errMessage2, "Error: data validation failed: error Error (\"Validation failed for '$:length' constraint(s).\")");
 }
 
 @test:Config {}
@@ -280,7 +280,7 @@ public function testReadBinaryError() returns Error? {
     Data2|Error data = wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
     if data is PayloadValidationError {
-        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for '$:length' constraint(s).\")");
     } 
 }
 
@@ -304,6 +304,6 @@ public function testReadTextUnionValidationError() returns Error? {
     Data2|int|Error data = check wsClient->readMessage();
     test:assertTrue(data is PayloadValidationError);
     if data is PayloadValidationError {
-        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for 'length' constraint(s).\")");
+        test:assertEquals(data.message(), "data validation failed: error Error (\"Validation failed for '$:length' constraint(s).\")");
     } 
 }
