@@ -25,6 +25,12 @@ version = "2.4.0"
 path = "./lib/mime-native-2.4.0-20220725-195700-6ca85ae.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "constraint-native"
+version = "1.0.0"
+path = "./lib/constraint-native-2.4.0-20220725-195700-6ca85ae.jar"
+
+[[platform.java11.dependency]]
 path = "./lib/netty-common-4.1.77.Final.jar"
 
 [[platform.java11.dependency]]
