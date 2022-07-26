@@ -340,6 +340,12 @@ public class WebSocketUtil {
                         null, null);
     }
 
+    public static BError createWebsocketErrorWithCause(String message, WebSocketConstants.ErrorCode errorType,
+                                                       BError cause) {
+        return ErrorCreator.createError(ModuleUtils.getWebsocketModule(), errorType.errorCode(),
+                StringUtils.fromString(message), cause, null);
+    }
+
     /**
      * Reconnect when the WebSocket connection is lost while reading or initial handshake.
      *

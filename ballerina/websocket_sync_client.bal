@@ -46,7 +46,8 @@ public isolated client class Client {
             maxFrameSize: config.maxFrameSize,
             webSocketCompressionEnabled: config.webSocketCompressionEnabled,
             handShakeTimeout: config.handShakeTimeout,
-            retryConfig: config.retryConfig
+            retryConfig: config.retryConfig,
+            validation: config.validation
         };
         self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
@@ -275,6 +276,7 @@ public type ClientConfiguration record {|
 # + pingPongHandler - A service to handle the ping/pong frames.
 # Resources in this service gets called on the receipt of ping/pong frames from the server
 # + retryConfig - Retry-related configurations
+# + validation - Enable/disable constraint validation
 public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
@@ -288,6 +290,7 @@ public type CommonClientConfiguration record {|
     ClientAuthConfig auth?;
     PingPongService pingPongHandler?;
     WebSocketRetryConfig? retryConfig = ();
+    boolean validation = true;
 |};
 
 # Configures the SSL/TLS options to be used for WebSocket client.
@@ -319,6 +322,7 @@ type ClientInferredConfig record {|
     boolean webSocketCompressionEnabled;
     decimal handShakeTimeout;
     WebSocketRetryConfig? retryConfig;
+    boolean validation;
 |};
 
 # Adds cookies to the custom header.

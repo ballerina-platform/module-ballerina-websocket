@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- [Incorporate constraint validation](https://github.com/ballerina-platform/ballerina-standard-library/issues/3058)
+
+## [2201.1.1] - 2022-06-30
+
+### Added
 - [Add data binding support for WebSocket](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
 
 ### Fixed
