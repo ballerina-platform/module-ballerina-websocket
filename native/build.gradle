@@ -17,15 +17,15 @@
 
 plugins {
     id 'java'
-    id 'checkstyle'
-    id 'com.github.spotbugs'
+//    id 'checkstyle'
+//    id 'com.github.spotbugs'
 }
 
 description = 'Ballerina - Websocket Java Utils'
 
 dependencies {
-    checkstyle project(':checkstyle')
-    checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
+//    checkstyle project(':checkstyle')
+//    checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
 
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
@@ -56,36 +56,36 @@ test {
     }
 }
 
-checkstyle {
-    toolVersion '7.8.2'
-    configFile rootProject.file("build-config/checkstyle/build/checkstyle.xml")
-    configProperties = ["suppressionFile" : file("${rootDir}/build-config/checkstyle/build/suppressions.xml")]
-}
+//checkstyle {
+//    toolVersion '7.8.2'
+//    configFile rootProject.file("build-config/checkstyle/build/checkstyle.xml")
+//    configProperties = ["suppressionFile" : file("${rootDir}/build-config/checkstyle/build/suppressions.xml")]
+//}
 
-def excludePattern = '**/module-info.java'
-tasks.withType(Checkstyle) {
-    exclude excludePattern
-}
+//def excludePattern = '**/module-info.java'
+//tasks.withType(Checkstyle) {
+//    exclude excludePattern
+//}
 
-checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
+//checkstyleMain.dependsOn(":checkstyle:downloadCheckstyleRuleFiles")
 
-spotbugsMain {
-    effort "max"
-    reportLevel "low"
-    reportsDir = file("$project.buildDir/reports/spotbugs")
-    reports {
-        html.enabled true
-        text.enabled = true
-    }
-    def excludeFile = file('spotbugs-exclude.xml')
-    if(excludeFile.exists()) {
-        excludeFilter = excludeFile
-    }
-}
-
-spotbugsTest {
-    enabled = false
-}
+//spotbugsMain {
+//    effort "max"
+//    reportLevel "low"
+//    reportsDir = file("$project.buildDir/reports/spotbugs")
+//    reports {
+//        html.enabled true
+//        text.enabled = true
+//    }
+//    def excludeFile = file('spotbugs-exclude.xml')
+//    if(excludeFile.exists()) {
+//        excludeFilter = excludeFile
+//    }
+//}
+//
+//spotbugsTest {
+//    enabled = false
+//}
 
 
 compileJava {

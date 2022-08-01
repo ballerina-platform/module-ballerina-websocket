@@ -36,6 +36,8 @@ import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener
 
 import java.net.URI;
 
+import static java.lang.System.err;
+
 /**
  * Initialize the WebSocket Synchronous Client.
  *
@@ -45,6 +47,7 @@ public class SyncInitEndpoint {
     private static final String MAX_WAIT_INTERVAL = "maxWaitInterval";
     private static final String MAX_COUNT = "maxCount";
     private static final String BACK_OF_FACTOR = "backOffFactor";
+
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
         final Future balFuture = env.markAsync();
         try {
@@ -82,12 +85,22 @@ public class SyncInitEndpoint {
             WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture);
         } catch (Exception e) {
             if (e instanceof BError) {
+                err.println("Returned from BError");
+                err.println(e.getMessage());
+                err.println("Returned from BError");
                 balFuture.complete(e);
             } else {
+                err.println("Returned from Else BError");
+                err.println(e.getMessage());
+                err.println(e);
+                e.printStackTrace();
+                err.print(e.getCause());
+                err.println("Returned from Else BError");
                 balFuture.complete(WebSocketUtil
                         .getWebSocketError(e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
             }
         }
+        err.println("Returned null");
         return null;
     }
 
@@ -95,7 +108,10 @@ public class SyncInitEndpoint {
             WebSocketClientConnectorConfig clientConnectorConfig,
             String scheme) {
         clientConnectorConfig.setAutoRead(false); // Frames should be read only when client starts reading
-        clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
+        System.out.print(clientEndpointConfig);
+        if (clientEndpointConfig.getArrayValue(WebSocketConstants.ANNOTATION_ATTR_SUB_PROTOCOLS) != null) {
+            clientConnectorConfig.setSubProtocols(WebSocketUtil.findNegotiableSubProtocols(clientEndpointConfig));
+        }
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
         long handshakeTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(clientEndpointConfig,
                 WebSocketConstants.CLIENT_HANDSHAKE_TIMEOUT, 300);
