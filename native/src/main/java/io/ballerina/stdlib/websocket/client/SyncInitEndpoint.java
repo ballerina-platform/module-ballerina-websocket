@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.websocket.client;
 
+import static java.lang.System.err;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -33,10 +34,8 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
-
 import java.net.URI;
-
-import static java.lang.System.err;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Initialize the WebSocket Synchronous Client.
@@ -50,6 +49,7 @@ public class SyncInitEndpoint {
 
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
         final Future balFuture = env.markAsync();
+        AtomicBoolean callbackCompleted = new AtomicBoolean(false);
         try {
             @SuppressWarnings(WebSocketConstants.UNCHECKED) BMap<BString, Object> clientEndpointConfig = wsSyncClient
                     .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
@@ -63,6 +63,7 @@ public class SyncInitEndpoint {
             if (scheme == null) {
                 balFuture.complete(WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
                         null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                callbackCompleted.set(true);
                 return null;
             }
             populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
@@ -82,22 +83,26 @@ public class SyncInitEndpoint {
                     clientConnectorConfig.getMaxFrameSize());
             SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
-            WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture);
+            WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture, callbackCompleted);
         } catch (Exception e) {
             if (e instanceof BError) {
                 err.println("Returned from BError");
                 err.println(e.getMessage());
+                e.printStackTrace();
                 err.println("Returned from BError");
-                balFuture.complete(e);
+                if (!callbackCompleted.get()) {
+                    balFuture.complete(e);
+                    callbackCompleted.set(true);
+                }
             } else {
                 err.println("Returned from Else BError");
-                err.println(e.getMessage());
-                err.println(e);
                 e.printStackTrace();
-                err.print(e.getCause());
                 err.println("Returned from Else BError");
-                balFuture.complete(WebSocketUtil
-                        .getWebSocketError(e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                if (!callbackCompleted.get()) {
+                    balFuture.complete(WebSocketUtil
+                            .getWebSocketError(e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                    balFuture.complete(true);
+                }
             }
         }
         err.println("Returned null");

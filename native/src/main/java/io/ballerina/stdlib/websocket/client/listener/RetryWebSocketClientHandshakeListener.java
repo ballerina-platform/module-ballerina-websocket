@@ -29,6 +29,7 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.RetryContext;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,15 +47,18 @@ public class RetryWebSocketClientHandshakeListener implements ClientHandshakeLis
     private WebSocketConnectionInfo connectionInfo;
     private Future balFuture;
     private RetryContext retryConfig;
+    AtomicBoolean callbackCompleted;
     private static final Logger logger = LoggerFactory.getLogger(RetryWebSocketClientHandshakeListener.class);
 
     public RetryWebSocketClientHandshakeListener(BObject webSocketClient, WebSocketService wsService,
-                               SyncClientConnectorListener connectorListener, Future future, RetryContext retryConfig) {
+                                                 SyncClientConnectorListener connectorListener, Future future, RetryContext retryConfig,
+                                                 AtomicBoolean callbackCompleted) {
         this.webSocketClient = webSocketClient;
         this.wsService = wsService;
         this.connectorListener = connectorListener;
         this.balFuture = future;
         this.retryConfig = retryConfig;
+        this.callbackCompleted = callbackCompleted;
     }
 
     @Override
@@ -78,7 +82,7 @@ public class RetryWebSocketClientHandshakeListener implements ClientHandshakeLis
             webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(response));
         }
         setWebSocketOpenConnectionInfo(null, webSocketClient, wsService);
-        if (throwable instanceof IOException && WebSocketUtil.reconnect(connectionInfo, balFuture)) {
+        if (throwable instanceof IOException && WebSocketUtil.reconnect(connectionInfo, balFuture, callbackCompleted)) {
             return;
         }
         balFuture.complete(WebSocketUtil.createErrorByType(throwable));
