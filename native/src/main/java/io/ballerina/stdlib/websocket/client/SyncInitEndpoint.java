@@ -35,6 +35,7 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Initialize the WebSocket Synchronous Client.
@@ -45,8 +46,10 @@ public class SyncInitEndpoint {
     private static final String MAX_WAIT_INTERVAL = "maxWaitInterval";
     private static final String MAX_COUNT = "maxCount";
     private static final String BACK_OF_FACTOR = "backOffFactor";
+
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
         final Future balFuture = env.markAsync();
+        AtomicBoolean callbackCompleted = new AtomicBoolean(false);
         try {
             @SuppressWarnings(WebSocketConstants.UNCHECKED) BMap<BString, Object> clientEndpointConfig = wsSyncClient
                     .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
@@ -60,6 +63,7 @@ public class SyncInitEndpoint {
             if (scheme == null) {
                 balFuture.complete(WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
                         null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                callbackCompleted.set(true);
                 return null;
             }
             populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
@@ -79,13 +83,19 @@ public class SyncInitEndpoint {
                     clientConnectorConfig.getMaxFrameSize());
             SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
             wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
-            WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture);
+            WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture, callbackCompleted);
         } catch (Exception e) {
             if (e instanceof BError) {
-                balFuture.complete(e);
+                if (!callbackCompleted.get()) {
+                    balFuture.complete(e);
+                    callbackCompleted.set(true);
+                }
             } else {
-                balFuture.complete(WebSocketUtil
-                        .getWebSocketError(e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                if (!callbackCompleted.get()) {
+                    balFuture.complete(WebSocketUtil.getWebSocketError(
+                            e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                    balFuture.complete(true);
+                }
             }
         }
         return null;

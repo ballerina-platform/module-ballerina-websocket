@@ -242,7 +242,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
             if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
                 if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
-                        WebSocketUtil.reconnect(connectionInfo, callback)) {
+                        WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
                     return;
                 } else {
                     if (closeCode != WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE) {
@@ -273,7 +273,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
             if (callback != null && !futureCompleted.get()) {
                 BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
                 if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
-                        WebSocketUtil.reconnect(connectionInfo, callback)) {
+                        WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
                     return;
                 }
                 callback.complete(WebSocketUtil

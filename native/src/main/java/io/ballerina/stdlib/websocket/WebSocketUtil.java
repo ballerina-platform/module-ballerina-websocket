@@ -351,9 +351,11 @@ public class WebSocketUtil {
      *
      * @param connectionInfo - Information about the connection.
      * @param balFuture - Ballerina future to be completed.
+     * @param futureCompleted - Value to check whether the future has already completed.
      * @return If attempts reconnection, then return true.
      */
-    public static boolean reconnect(WebSocketConnectionInfo connectionInfo, Future balFuture) {
+    public static boolean reconnect(WebSocketConnectionInfo connectionInfo, Future balFuture,
+                                    AtomicBoolean futureCompleted) {
         BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
         RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
                 RETRY_CONFIG.toString());
@@ -370,7 +372,7 @@ public class WebSocketUtil {
             String time = formatter.format(date.getTime());
             logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
             createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
-            establishWebSocketConnection(webSocketClient, wsService, balFuture);
+            establishWebSocketConnection(webSocketClient, wsService, balFuture, futureCompleted);
             return true;
         }
         logger.debug(WebSocketConstants.LOG_MESSAGE, "Maximum retry attempts but couldn't connect to the server: ",
@@ -423,7 +425,8 @@ public class WebSocketUtil {
      * @param binMessage - The binary message that needs to be sent after a successful retry.
      */
     public static void establishWebSocketConnectionForWrite(BObject webSocketClient, Future balFuture,
-                                                 AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
+                                                            AtomicBoolean futureCompleted, String txtMessage,
+                                                            BArray binMessage) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
                 getNativeData(WebSocketConstants.CLIENT_LISTENER);
         WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.
@@ -443,13 +446,13 @@ public class WebSocketUtil {
 
     /**
      * Establish connection with the endpoint. This is used for read and initial handshake.
-     *
-     * @param webSocketClient - The WebSocket client.
+     *  @param webSocketClient - The WebSocket client.
      * @param wsService - the WebSocket service.
      * @param balFuture - Ballerina future to be completed.
+     * @param callbackCompleted - Value to check whether the future has already completed.
      */
     public static void establishWebSocketConnection(BObject webSocketClient, WebSocketService wsService,
-                                                    Future balFuture) {
+                                                    Future balFuture, AtomicBoolean callbackCompleted) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
                 getNativeData(WebSocketConstants.CLIENT_LISTENER);
         WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.
@@ -459,10 +462,11 @@ public class WebSocketUtil {
         if (WebSocketUtil.hasRetryConfig(webSocketClient)) {
             handshakeFuture.setClientHandshakeListener(new RetryWebSocketClientHandshakeListener(webSocketClient,
                     wsService, clientConnectorListener, balFuture,
-                    (RetryContext) webSocketClient.getNativeData(WebSocketConstants.RETRY_CONFIG.toString())));
+                    (RetryContext) webSocketClient.getNativeData(WebSocketConstants.RETRY_CONFIG.toString()),
+                    callbackCompleted));
         } else {
             handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(webSocketClient, wsService,
-                    clientConnectorListener, balFuture));
+                    clientConnectorListener, balFuture, callbackCompleted));
         }
     }
 
