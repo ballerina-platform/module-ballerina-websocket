@@ -70,7 +70,10 @@ public class RetryWebSocketClientHandshakeListener implements ClientHandshakeLis
         if (retryConfig.isFirstConnectionMadeSuccessfully()) {
             webSocketConnection.readNextFrame();
         } else {
-            balFuture.complete(null);
+            if (!callbackCompleted.get()) {
+                balFuture.complete(null);
+                callbackCompleted.set(true);
+            }
         }
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
         WebSocketUtil.adjustContextOnSuccess(retryConfig);
@@ -85,7 +88,10 @@ public class RetryWebSocketClientHandshakeListener implements ClientHandshakeLis
         if (throwable instanceof IOException && WebSocketUtil.reconnect(connectionInfo, balFuture, callbackCompleted)) {
             return;
         }
-        balFuture.complete(WebSocketUtil.createErrorByType(throwable));
+        if (!callbackCompleted.get()) {
+            balFuture.complete(WebSocketUtil.createErrorByType(throwable));
+            callbackCompleted.set(true);
+        }
     }
 
     private void setWebSocketOpenConnectionInfo(WebSocketConnection webSocketConnection,
