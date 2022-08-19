@@ -108,12 +108,18 @@ task updateTomlFiles {
         def stdlibDependentMimeNativeVersion = project.stdlibMimeVersion
         def stdlibDependentHttpNativeVersion = project.stdlibHttpVersion
         def stdlibDependentConstraintNativeVersion = project.stdlibConstraintVersion
+        def stdlibDependentMimeVersion = stripBallerinaExtensionVersion("${stdlibDependentMimeNativeVersion}")
+        def stdlibDependentHttpVersion = stripBallerinaExtensionVersion("${stdlibDependentHttpNativeVersion}")
+        def stdlibDependentConstraintVersion = stripBallerinaExtensionVersion("${stdlibDependentConstraintNativeVersion}")
         def stdlibDependentNettyVersion = project.nettyVersion
 
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@stdlib.mimenative.version@", stdlibDependentMimeNativeVersion)
+        newConfig = newConfig.replace("@mime.version@", stdlibDependentMimeVersion)
         newConfig = newConfig.replace("@stdlib.httpnative.version@", stdlibDependentHttpNativeVersion)
+        newConfig = newConfig.replace("@http.version@", stdlibDependentHttpVersion)
+        newConfig = newConfig.replace("@constraint.version@", stdlibDependentConstraintVersion)
         newConfig = newConfig.replace("@stdlib.constraintnative.version@", stdlibDependentConstraintNativeVersion)
         newConfig = newConfig.replace("@netty.version@", stdlibDependentNettyVersion)
         ballerinaTomlFile.text = newConfig
