@@ -290,7 +290,7 @@ public class Utils {
                 !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
                 !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
                 !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION) &&
-                !kind.equals(TypeDescKind.ANYDATA);
+                !kind.equals(TypeDescKind.ANYDATA) && !kind.equals(TypeDescKind.UNION);
     }
 
     public static void validateOnTextReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
