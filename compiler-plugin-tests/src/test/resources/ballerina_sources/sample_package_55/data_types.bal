@@ -6,6 +6,10 @@ public type Heartbeat record {
     string event?;
 };
 
+public type Unsubscribe record {
+    Subscribe subscribe;
+};
+
 public type Subscribe record {
     record  { Depth depth?; Ratecounter ratecounter?; Name name; Interval interval?; Snapshot snapshot?; Token token?;}  subscription?;
     string event;
