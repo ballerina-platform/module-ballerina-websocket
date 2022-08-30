@@ -69,19 +69,27 @@ public class WebSocketServerListener implements WebSocketConnectorListener {
         String matchingBasePath = servicesRegistry
                 .findTheMostSpecificBasePath(validatedUri.getRawPath(), servicesRegistry.getServicesByBasePath(),
                         servicesRegistry.getSortedServiceURIs());
+        if (matchingBasePath == null) {
+            sendNotFoundError(webSocketHandshaker, requestUri);
+            return;
+        }
         WebSocketServerService wsService = servicesRegistry.findMatching(matchingBasePath, pathParams,
                 webSocketHandshaker);
         if (wsService == null) {
-            String errMsg = "No service found to handle the service request";
-            webSocketHandshaker.cancelHandshake(404, errMsg);
-            WebSocketObservabilityUtil.observeError(WebSocketObservabilityConstants.ERROR_TYPE_CONNECTION,
-                    errMsg, requestUri.getPath(),
-                    WebSocketObservabilityConstants.CONTEXT_SERVER);
+            sendNotFoundError(webSocketHandshaker, requestUri);
             return;
         }
         setCarbonMessageProperties(pathParams, requestUri, validatedUri, webSocketHandshaker.getHttpCarbonRequest(),
                 matchingBasePath);
             WebSocketResourceDispatcher.dispatchUpgrade(webSocketHandshaker, wsService, connectionManager);
+    }
+
+    private void sendNotFoundError(WebSocketHandshaker webSocketHandshaker, URI requestUri) {
+        String errMsg = "No service found to handle the service request";
+        webSocketHandshaker.cancelHandshake(404, errMsg);
+        WebSocketObservabilityUtil.observeError(WebSocketObservabilityConstants.ERROR_TYPE_CONNECTION,
+                errMsg, requestUri.getPath(),
+                WebSocketObservabilityConstants.CONTEXT_SERVER);
     }
 
     private URI createRequestUri(WebSocketHandshaker webSocketHandshaker) {
