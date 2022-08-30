@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - [Incorporate constraint validation](https://github.com/ballerina-platform/ballerina-standard-library/issues/3058)
 
+### Fixed
+- [Fix server sending 500 status code when the client invokes it with an incorrect URL](https://github.com/ballerina-platform/ballerina-standard-library/issues/3296)
+
 ## [2201.1.1] - 2022-06-30
 
 ### Added
