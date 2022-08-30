@@ -17,9 +17,9 @@
 import ballerina/test;
 
 service /echo on new Listener(9092) {
-   resource function get .() returns Service|Error {
-       return new WsService9092();
-   }
+    resource function get .() returns Service|Error {
+        return new WsService9092();
+    }
 }
 
 service class WsService9092 {
@@ -34,6 +34,6 @@ public function testServiceNotFound() returns Error? {
     if wsClient is Error {
         test:assertEquals(wsClient.message(), "InvalidHandshakeError: Invalid handshake response getStatus: 404 Not Found");
     } else {
-        test:assertFail("Expected an service not found error");
+        test:assertFail("Expected a service not found error");
     }
 }
