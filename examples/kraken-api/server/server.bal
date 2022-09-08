@@ -119,49 +119,56 @@ function getUpdates() returns json {
 }
 
 function processReceivedMessage(Subscribe|Unsubscribe message, websocket:Caller caller) returns error? {
-    string event = <string>message?.event;
-    string[] pair = <string[]>message?.pair;
-    Subscribe subscription = <Subscribe>message;
-    string? nameVal = subscription?.subscription?.name;
-    Name name = <Name>nameVal;
-    if event is "subscribe" {
-        if pair.length() > 1 || pair[0] != "XBT/USD" {
-            SubscriptionStatus subscriptionStatus = {
-                subscritionStatusError: {
-                    errorMessage: "Only XBT/USD is supported for now",
-                    subscriptionStatusCommon: {
-                        channelID: <int>check caller.getAttribute(connId),
-                        channelName: name,
-                        event: "subscriptionStatus",
-                        pair: pair,
-                        status: errors,
-                        subscription: {
-                            depth: 42,
-                            name: book
+    if message is Subscribe {
+        string event = <string>message?.event;
+        string[] pair = <string[]>message?.pair;
+        Subscribe subscription = <Subscribe>message;
+        string? nameVal = subscription?.subscription?.name;
+        Name name = <Name>nameVal;
+        if event is "subscribe" {
+            if pair.length() > 1 || pair[0] != "XBT/USD" {
+                SubscriptionStatus subscriptionStatus = {
+                    subscritionStatusError: {
+                        errorMessage: "Only XBT/USD is supported for now",
+                        subscriptionStatusCommon: {
+                            channelID: <int>check caller.getAttribute(connId),
+                            channelName: name,
+                            event: "subscriptionStatus",
+                            pair: pair,
+                            status: errors,
+                            subscription: {
+                                depth: 42,
+                                name: book
+                            }
                         }
                     }
-                }
-            };
-            check caller->writeMessage(subscriptionStatus);
-            return;
-        } else {
-            SubscriptionStatus subscriptionStatus = {
-                subscriptionStatusSuccess: {
-                    subscriptionStatusCommon: {
-                        channelID: <int>check caller.getAttribute(connId),
-                        channelName: name,
-                        event: "subscriptionStatus",
-                        pair: pair,
-                        status: subscribed,
-                        subscription: {name: name}
+                };
+                check caller->writeMessage(subscriptionStatus);
+                return;
+            } else {
+                SubscriptionStatus subscriptionStatus = {
+                    subscriptionStatusSuccess: {
+                        subscriptionStatusCommon: {
+                            channelID: <int>check caller.getAttribute(connId),
+                            channelName: name,
+                            event: "subscriptionStatus",
+                            pair: pair,
+                            status: subscribed,
+                            subscription: {name: name}
+                        }
                     }
-                }
-            };
-            caller.setAttribute(hasSubscription, true);
-            check caller->writeMessage(subscriptionStatus);
-            future<(error?)> _ = start sendUpdates(caller);
+                };
+                caller.setAttribute(hasSubscription, true);
+                check caller->writeMessage(subscriptionStatus);
+                future<(error?)> _ = start sendUpdates(caller);
+            }
+
         }
     } else {
+        string[] pair = <string[]>message?.subscribe?.pair;
+        Subscribe subscription = <Subscribe>message?.subscribe;
+        string? nameVal = subscription?.subscription?.name;
+        Name name = <Name>nameVal;
         SubscriptionStatus unSubscriptionStatus = {
             subscriptionStatusSuccess: {
                 subscriptionStatusCommon: {
