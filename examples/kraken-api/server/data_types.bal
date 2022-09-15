@@ -119,3 +119,63 @@ public enum Status {
     unsubscribed,
     errors
 }
+
+public type Ask record {
+    decimal price;
+    int wholeLotVolume;
+    decimal lotVolume;
+};
+
+public type Bid record {
+    decimal price;
+    int wholeLotVolume;
+    decimal lotVolume;
+};
+
+public type Close record {
+    decimal price;
+    decimal lotVolume;
+};
+
+public type Volume record {
+    decimal today;
+    decimal last24Hours;
+};
+
+public type VolumeWeightedAvgPrice record {
+    decimal today;
+    decimal last24Hours;
+};
+
+public type NoOfTrades record {
+    decimal today;
+    decimal last24Hours;
+};
+
+public type LowPrice record {
+    decimal today;
+    decimal last24Hours;
+};
+
+public type HighPrice record {
+    decimal today;
+    decimal last24Hours;
+};
+
+public type OpenPrice record {
+    decimal today;
+    decimal last24Hours;
+};
+
+public type Ticker record {
+    int id;
+    Ask ask;
+    Bid bid;
+    Close close;
+    Volume volume;
+    VolumeWeightedAvgPrice volumeWeightedAvgPrice;
+    NoOfTrades noOfTrades;
+    LowPrice lowPrice;
+    HighPrice highPrice;
+    OpenPrice openPrice;
+};

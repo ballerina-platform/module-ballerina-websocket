@@ -70,52 +70,49 @@ function sendUpdates(websocket:Caller caller) returns error? {
     }
 }
 
-function getUpdates() returns json {
-    json usd = [ 340,
-        {
-            "a":[
-                random:createDecimal() * 10000,
-                6,
-                random:createDecimal()
-            ],
-            "b":[
-                random:createDecimal() * 10000,
-                0,
-                random:createDecimal()
-            ],
-            "c":[
-                random:createDecimal() * 40000,
-                random:createDecimal()
-            ],
-            "v":[
-                random:createDecimal() * 10000,
-                random:createDecimal() * 5000
-            ],
-            "p":[
-                random:createDecimal() * 40000,
-                random:createDecimal() * 40000
-            ],
-            "t":[
-                random:createDecimal() * 10000,
-                random:createDecimal() * 10000
-            ],
-            "l":[
-                random:createDecimal() * 10000,
-                random:createDecimal() * 10000
-            ],
-            "h":[
-                random:createDecimal() * 10000,
-                random:createDecimal() * 10000
-            ],
-            "o":[
-                random:createDecimal() * 10000,
-                random:createDecimal() * 10000
-            ]
+function getUpdates() returns Ticker {
+    Ticker ticker = {
+        id: 340,
+        ask: {
+            price: <decimal>random:createDecimal(),
+            wholeLotVolume: 6,
+            lotVolume: <decimal>random:createDecimal()
         },
-        "ticker",
-        "XBT/USD"
-        ];
-    return usd;
+        bid: {
+            price: <decimal>random:createDecimal() * 10000,
+            wholeLotVolume: 0,
+            lotVolume: <decimal>random:createDecimal()
+        },
+        close: {
+            price: <decimal>random:createDecimal() * 40000,
+            lotVolume: <decimal>random:createDecimal()
+        },
+        volume: {
+            today: <decimal>random:createDecimal() * 10000,
+            last24Hours: <decimal>random:createDecimal() * 5000
+        },
+        volumeWeightedAvgPrice: {
+            today: <decimal>random:createDecimal() * 10000,
+            last24Hours: <decimal>random:createDecimal() * 5000
+        },
+        noOfTrades: {
+            today: <decimal>random:createDecimal() * 10000,
+            last24Hours: <decimal>random:createDecimal() * 5000
+        },
+        lowPrice: {
+            today: <decimal>random:createDecimal() * 10000,
+            last24Hours: <decimal>random:createDecimal() * 5000
+        },
+        highPrice: {
+            today: <decimal>random:createDecimal() * 10000,
+            last24Hours: <decimal>random:createDecimal() * 5000
+        },
+        openPrice: {
+            today: <decimal>random:createDecimal() * 10000,
+            last24Hours: <decimal>random:createDecimal() * 5000
+        }
+    };
+    return ticker;
 }
 
 function processReceivedMessage(Subscribe|Unsubscribe message, websocket:Caller caller) returns error? {
