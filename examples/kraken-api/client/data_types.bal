@@ -14,12 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
+public type Heartbeat record {
+    string event?;
+};
+
 public type Unsubscribe record {
     Subscribe subscribe;
 };
 
 public type Subscribe record {
-    record  { Depth depth?; Ratecounter ratecounter?; Name name; Interval interval?; Snapshot snapshot?; Token token?;}  subscription?;
+    Subscription subscription?;
     string event;
     Pair pair?;
     Reqid reqid?;
@@ -46,7 +50,6 @@ public type Reqid int?;
 public type Depth int?;
 
 public type SystemStatus record {
-    # The ID of the connection
     int connectionID?;
     string event?;
     string 'version?;

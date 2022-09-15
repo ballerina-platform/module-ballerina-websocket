@@ -23,7 +23,7 @@ public type Unsubscribe record {
 };
 
 public type Subscribe record {
-    record  { Depth depth?; Ratecounter ratecounter?; Name name; Interval interval?; Snapshot snapshot?; Token token?;}  subscription?;
+    Subscription subscription?;
     string event;
     Pair pair?;
     Reqid reqid?;
@@ -50,7 +50,6 @@ public type Reqid int?;
 public type Depth int?;
 
 public type SystemStatus record {
-    # The ID of the connection
     int connectionID?;
     string event?;
     string 'version?;
