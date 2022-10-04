@@ -31,7 +31,7 @@ service class WsServiceSyncClose {
         Error? closeResp = caller->close(statusCode = 1000, reason = "Close the connection");
     }
 
-    remote isolated function onClose(Caller caller, string data) returns Error? {
+    remote isolated function onClose(Caller caller) returns Error? {
         check caller->close();
     }
 }
