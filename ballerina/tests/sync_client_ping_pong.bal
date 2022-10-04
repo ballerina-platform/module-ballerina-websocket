@@ -48,7 +48,7 @@ service class WsServiceSyncPingPong {
     }
 
     remote isolated function onClose(Caller caller, string data) returns Error? {
-        check caller->writeTextMessage(data);
+        check caller->close();
     }
 }
 
