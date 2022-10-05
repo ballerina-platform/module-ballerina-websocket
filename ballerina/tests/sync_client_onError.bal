@@ -31,10 +31,6 @@ service class WsServiceSyncError {
     remote isolated function onTextMessage(Caller caller, string data) returns Error? {
         check caller->writeTextMessage(data);
     }
-
-    remote isolated function onClose(Caller caller, string data) returns Error? {
-        check caller->writeTextMessage(data);
-    }
 }
 
 // Tests the corrupted frame error returned from readTextMessage
