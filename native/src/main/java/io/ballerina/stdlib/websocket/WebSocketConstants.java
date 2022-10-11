@@ -133,6 +133,7 @@ public class WebSocketConstants {
     public static final String PARAM_ANNOT_PREFIX = "$param$.";
     public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
     public static final String BALLERINA_HTTP_HEADER = ModuleUtils.getHttpPackageIdentifier() + COLON + ANN_NAME_HEADER;
+    public static final String PATH_PARAM_IDENTIFIER = "^";
 
     private WebSocketConstants() {
     }
