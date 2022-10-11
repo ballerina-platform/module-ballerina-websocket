@@ -18,8 +18,8 @@ path = "../native/build/libs/websocket-native-2.5.0-SNAPSHOT.jar"
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
-version = "2.5.0"
-path = "./lib/http-native-2.5.0-20221011-091200-ada2590.jar"
+version = "2.4.0"
+path = "./lib/http-native-2.4.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"

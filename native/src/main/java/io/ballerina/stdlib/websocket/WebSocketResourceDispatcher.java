@@ -138,7 +138,7 @@ public class WebSocketResourceDispatcher {
             }
             int i = 0;
             for (String resourceParam : resourceParams) {
-                if (resourceParam.equals("*")) {
+                if (resourceParam.equals(WebSocketConstants.PATH_PARAM_IDENTIFIER)) {
                     pathParamArr.add(subPaths[i]);
                 } else if (!resourceParam.equals(subPaths[i])) {
                     webSocketHandshaker.cancelHandshake(404, errMsg);
