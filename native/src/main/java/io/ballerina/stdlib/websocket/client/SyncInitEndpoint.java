@@ -94,7 +94,7 @@ public class SyncInitEndpoint {
                 if (!callbackCompleted.get()) {
                     balFuture.complete(WebSocketUtil.getWebSocketError(
                             e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
-                    balFuture.complete(true);
+                    callbackCompleted.set(true);
                 }
             }
         }
