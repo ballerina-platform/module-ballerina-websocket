@@ -17,11 +17,14 @@
  */
 package io.ballerina.stdlib.websocket;
 
+import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
@@ -38,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromByteArray;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromText;
@@ -75,6 +79,12 @@ public class WebSocketResourceCallback implements Callback {
             sendTextMessage((BString) result, promiseCombiner);
         } else if (result instanceof BArray) {
             sendBinaryMessage((BArray) result, promiseCombiner);
+        } else if (result instanceof BStream) {
+            BObject bObject = ((BStream) result).getIteratorObj();
+            ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
+                    connectionInfo, webSocketConnection);
+            runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
+                    null, returnStreamUnitCallBack, null, PredefinedTypes.TYPE_NULL);
         } else if (result == null) {
             webSocketConnection.readNextFrame();
         } else if (resource.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||

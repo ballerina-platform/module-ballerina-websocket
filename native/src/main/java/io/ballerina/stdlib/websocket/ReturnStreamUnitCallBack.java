@@ -36,7 +36,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
-
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromText;
@@ -67,12 +66,14 @@ public class ReturnStreamUnitCallBack implements Callback {
             String content;
             if (response instanceof BError) {
                 content = ((BError) response).getMessage();
+                webSocketConnection.terminateConnection(1011,
+                        String.format("streaming failed: %s", content));
             } else {
                 content = ((BMap) response).get(StringUtils.fromString("value")).toString();
+                sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
+                runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
+                        null, this, null, PredefinedTypes.TYPE_NULL);
             }
-            sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
-            runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
-                    null, this, null, PredefinedTypes.TYPE_NULL);
         } else {
             webSocketConnection.readNextFrame();
         }
