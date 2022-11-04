@@ -16,8 +16,6 @@
 
 import ballerina/test;
 
-string data = "";
-
 public type ChatMessage record {|
     string name = "";
     string message = "";
@@ -101,7 +99,7 @@ service class StreamErrorSvc {
 }
 
 @test:Config {}
-public function testString() returns Error? {
+public function testStreamString() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onStream/");
     string[] greets = ["Hi", "Hey", "GM"];
     check wsClient->writeMessage(greets);
