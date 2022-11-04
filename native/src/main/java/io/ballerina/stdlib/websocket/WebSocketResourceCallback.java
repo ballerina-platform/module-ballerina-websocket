@@ -75,15 +75,7 @@ public class WebSocketResourceCallback implements Callback {
             sendTextMessage((BString) result, promiseCombiner);
         } else if (result instanceof BArray) {
             sendBinaryMessage((BArray) result, promiseCombiner);
-        }
-//        else if (result instanceof BStream) {
-//            BObject bObject = ((BStream) result).getIteratorObj();
-//            ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
-//                    connectionInfo, webSocketConnection);
-//            runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
-//                    null, returnStreamUnitCallBack, null, PredefinedTypes.TYPE_NULL);
-//        }
-        else if (result == null) {
+        } else if (result == null) {
             webSocketConnection.readNextFrame();
         } else if (resource.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
                 resource.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
