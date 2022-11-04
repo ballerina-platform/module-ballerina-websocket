@@ -1,6 +1,6 @@
-// Copyright (c) 2022 WSO2 LLC. (//www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 LLC. (www.wso2.com) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,7 +31,7 @@ service /onStream on streamLis {
 
 service class StreamStringSvc {
     *Service;
-    remote function onMessage(Caller caller, json data) returns stream<string>|error {
+    remote function onMessage(Caller caller, json data) returns stream<string> {
       string[] greets = ["Hi Sam", "Hey Sam", "GM Sam"];
       return greets.toStream();
     }
@@ -45,7 +45,7 @@ service /onRecordStream on streamLis {
 
 service class StreamRecordSvc {
     *Service;
-    remote function onMessage(Caller caller, json data) returns stream<ChatMessage>|error {
+    remote function onMessage(Caller caller, json data) returns stream<ChatMessage> {
         ChatMessage mes1 = {name:"Sam", message:"Hi"};
         ChatMessage mes2 = {name:"Sam", message:"GM"};
         ChatMessage[] chatMsges = [mes1, mes2];
@@ -72,7 +72,7 @@ service /onIntStreamWithError on streamLis {
 
 service class StreamIntWithErrorSvc {
     *Service;
-    remote function onMessage(Caller caller, json data) returns stream<int, error?>|error {
+    remote function onMessage(Caller caller, json data) returns stream<int, error?> {
        EvenNumberGenerator evenGen = new();
        stream<int, error?> evenNumberStream = new(evenGen);
        return evenNumberStream;
@@ -94,7 +94,7 @@ service /onErrorStream on streamLis {
 
 service class StreamErrorSvc {
     *Service;
-    remote function onMessage(Caller caller, json data) returns stream<int, error?>|error {
+    remote function onMessage(Caller caller, json data) returns stream<int, error?> {
        ErrorGenerator errGen = new();
        stream<int, error?> errNumberStream = new(errGen);
        return errNumberStream;
@@ -109,7 +109,7 @@ service /onJsonStream on streamLis {
 
 service class StreamJsonSvc {
     *Service;
-    remote function onMessage(Caller caller, json data) returns stream<json, error?>|error {
+    remote function onMessage(Caller caller, json data) returns stream<json, error?> {
         json[] jsonMsges = [{"x": 1, "y": 2}, {"x": 4, "y": 5}];
         return jsonMsges.toStream();
     }
@@ -123,13 +123,13 @@ service /onJsonStreamOnOpen on streamLis {
 
 service class StreamJsonOpenSvc {
     *Service;
-    remote function onOpen(Caller caller) returns stream<json, error?>|error {
+    remote function onOpen(Caller caller) returns stream<json, error?> {
         json[] jsonMsges = [{"x": 1, "y": 2}, {"x": 4, "y": 5}];
         return jsonMsges.toStream();
     }
 }
 
-@test:Config {enable: false}
+@test:Config {}
 public function testStreamString() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onStream/");
     string[] greets = ["Hi", "Hey", "GM"];
@@ -142,7 +142,7 @@ public function testStreamString() returns Error? {
     test:assertEquals(data3, "GM Sam");
 }
 
-@test:Config {enable: false}
+@test:Config {}
 public function testRecord() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onRecordStream/");
     string[] greets = ["Hi", "Hey", "GM"];
@@ -153,7 +153,7 @@ public function testRecord() returns Error? {
     test:assertEquals(data2, {name:"Sam", message:"GM"});
 }
 
-@test:Config {enable: false}
+@test:Config {}
 public function testIntWithError() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onIntStreamWithError/");
     string[] greets = ["Hi", "Hey", "GM"];
@@ -164,7 +164,7 @@ public function testIntWithError() returns Error? {
     test:assertEquals(data2, 4);
 }
 
-@test:Config {enable: false}
+@test:Config {}
 public function testError() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onErrorStream/");
     string[] greets = ["Hi", "Hey", "GM"];
@@ -176,7 +176,7 @@ public function testError() returns Error? {
     }
 }
 
-@test:Config {enable: false}
+@test:Config {}
 public function testStreamJson() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onJsonStream/");
     string[] greets = ["Hi", "Hey", "GM"];
