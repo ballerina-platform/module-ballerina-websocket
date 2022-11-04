@@ -19,7 +19,6 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
-import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketWriteTimeOutListener;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
@@ -111,10 +110,6 @@ public class WebSocketConnector {
             release(byteBuf);
             release(lastSlice);
         }
-        return null;
-    }
-
-    public static Object writeStreamMessage(Environment env, BObject wsConnection, BStream text) {
         return null;
     }
 
