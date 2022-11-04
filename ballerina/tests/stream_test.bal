@@ -166,8 +166,6 @@ public function testError() returns Error? {
 public function testStreamJson() returns Error? {
     Client wsClient = check new("ws://localhost:21402/onJsonStream/");
     string[] greets = ["Hi", "Hey", "GM"];
-    json jj1 = {"x": 1, "y": 2};
-    json jj2 = {"x": 4, "y": 5};
     check wsClient->writeMessage(greets);
     json data = check wsClient->readMessage();
     test:assertEquals(data, {"x": 1, "y": 2});
