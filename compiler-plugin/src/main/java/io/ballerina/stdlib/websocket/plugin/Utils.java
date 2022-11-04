@@ -150,7 +150,8 @@ public class Utils {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE
                         && symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
-                        symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)) {
+                        symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
+                && !(symbol.typeKind() == TypeDescKind.STREAM)) {
                     repoteDiagnostics(functionName, resourceNode, ctx,
                             PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
