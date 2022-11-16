@@ -386,7 +386,7 @@ public class WebSocketResourceDispatcher {
                 webSocketEndpoint);
         try {
             executeResource(wsService, balService, new WebSocketResourceCallback(connectionInfo,
-                            WebSocketConstants.RESOURCE_NAME_ON_OPEN),
+                            WebSocketConstants.RESOURCE_NAME_ON_OPEN, wsService.getRuntime()),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_OPEN, ModuleUtils.getOnOpenMetaData());
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION,
@@ -500,9 +500,9 @@ public class WebSocketResourceDispatcher {
                     return;
                 }
                 executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName()),
-                        bValues, connectionInfo, onTextMessageResource.getName(),
-                        ModuleUtils.getOnTextMetaData());
+                        new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName(),
+                                wsService.getRuntime()), bValues, connectionInfo, onTextMessageResource.getName(),
+                                ModuleUtils.getOnTextMetaData());
                 stringAggregator.resetAggregateString();
             } else {
                 stringAggregator.appendAggregateString(textMessage.getText());
@@ -602,7 +602,7 @@ public class WebSocketResourceDispatcher {
             createBvaluesForBarray(connectionInfo.getWebSocketEndpoint(), paramTypes, bValues,
                     controlMessage.getByteArray());
             executeResource(wsService, balservice, new WebSocketResourceCallback(
-                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING),
+                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, wsService.getRuntime()),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, ModuleUtils.getOnPingMetaData());
         } catch (Exception e) {
             //Observe error
@@ -688,7 +688,7 @@ public class WebSocketResourceDispatcher {
                 bValues[index++] = true;
             }
             executeResource(wsService, balservice, new WebSocketResourceCallback(connectionInfo,
-                            onBinaryMessageResource.getName()), bValues, connectionInfo,
+                            onBinaryMessageResource.getName(), wsService.getRuntime()), bValues, connectionInfo,
                     onBinaryMessageResource.getName(), ModuleUtils.getOnBinaryMetaData());
         } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
@@ -775,7 +775,7 @@ public class WebSocketResourceDispatcher {
             createBvaluesForBarray(connectionInfo.getWebSocketEndpoint(), paramDetails, bValues,
                     controlMessage.getByteArray());
             executeResource(wsService, balservice, new WebSocketResourceCallback(
-                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG),
+                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, wsService.getRuntime()),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, ModuleUtils.getOnPongMetaData());
         } catch (Exception e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_PONG, e.getMessage());
