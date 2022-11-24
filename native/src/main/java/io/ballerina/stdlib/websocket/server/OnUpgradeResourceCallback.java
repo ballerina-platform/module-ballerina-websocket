@@ -19,6 +19,8 @@
 package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -61,7 +63,8 @@ public class OnUpgradeResourceCallback implements Callback {
         }
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
             HttpHeaders headers = null;
-            if (((BObject) result).getType().getFields().get(WebSocketConstants.CUSTOM_HEADERS.toString()) != null) {
+            ObjectType type = (ObjectType) TypeUtils.getReferredType(((BObject) result).getType());
+            if (type.getFields().get(WebSocketConstants.CUSTOM_HEADERS.toString()) != null) {
                 BMap<BString, BString> headersMap = (BMap) ((BObject) result).get(WebSocketConstants.CUSTOM_HEADERS);
                 headers = populateAndGetHttpHeaders(headersMap);
             }
