@@ -20,7 +20,9 @@
 package io.ballerina.stdlib.websocket.serviceendpoint;
 
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.websocket.ModuleUtils;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
@@ -37,7 +39,8 @@ public class Detach extends AbstractWebsocketNativeFunction {
     public static Object detach(BObject serviceEndpoint, BObject serviceObj) {
         WebSocketServicesRegistry webSocketServicesRegistry = getWebSocketServicesRegistry(serviceEndpoint);
         Type param;
-        MethodType[] resourceList = serviceObj.getType().getMethods();
+        ObjectType serviceObjType = (ObjectType) TypeUtils.getReferredType(serviceObj.getType());
+        MethodType[] resourceList = serviceObjType.getMethods();
         if (resourceList.length > 0 && (param = resourceList[0].getParameterTypes()[0]) != null) {
             String callerType = param.getQualifiedName();
             if (WEBSOCKET_CALLER_NAME.equals(callerType)) {

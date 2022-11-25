@@ -28,6 +28,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
@@ -1028,6 +1029,7 @@ public class WebSocketResourceDispatcher {
     }
 
     private static boolean isIsolated(BObject serviceObj, String remoteMethod) {
-        return serviceObj.getType().isIsolated() && serviceObj.getType().isIsolated(remoteMethod);
+        ObjectType serviceObjType = (ObjectType) TypeUtils.getReferredType(serviceObj.getType());
+        return serviceObjType.isIsolated() && serviceObjType.isIsolated(remoteMethod);
     }
 }
