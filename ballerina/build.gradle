@@ -98,9 +98,6 @@ dependencies {
     externalJars(group: 'io.netty', name: 'netty-handler-proxy', version: "${nettyVersion}") {
         transitive = false
     }
-    externalJars(group: 'org.testng', name: 'testng', version: "${testngVersion}") {
-        transitive = false
-    }
 }
 
 task updateTomlFiles {
