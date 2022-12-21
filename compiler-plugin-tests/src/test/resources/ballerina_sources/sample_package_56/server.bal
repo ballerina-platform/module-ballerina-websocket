@@ -18,7 +18,7 @@ import ballerina/websocket;
 
 listener websocket:Listener localListener = new(8080);
 service / on localListener {
-   resource function get .() returns websocket:Service|websocket:Error {
+   resource function get .() returns websocket:Service|error {
        return new WsService();
    }
 }
