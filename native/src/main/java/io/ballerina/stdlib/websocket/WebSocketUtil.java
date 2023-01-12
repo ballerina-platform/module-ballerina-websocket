@@ -230,8 +230,11 @@ public class WebSocketUtil {
     }
 
     public static boolean hasStringType(Type targetType) {
-        List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
-        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.STRING_TAG);
+        if (targetType instanceof UnionType) {
+            List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
+            return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.STRING_TAG);
+        }
+        return false;
     }
 
     public static boolean hasByteArrayType(Type targetType) {
