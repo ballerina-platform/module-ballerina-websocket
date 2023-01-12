@@ -29,3 +29,4 @@ jobs:
             native_image_options: ${{ inputs.native_image_options }}
             additional_ubuntu_build_flags: '-x :websocket-compiler-plugin-test:test'
             additional_windows_build_flags: '-x :websocket-compiler-plugin-test:test'
+            java_tool_options: '-Dfile.encoding=UTF8'
