@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- [Fix data binding failure when a union type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3909)
+
+## [2.5.0] - 2022-11-29
+
 ### Added
 - [Support returning streams from WebSocket services](https://github.com/ballerina-platform/ballerina-standard-library/issues/2909)
 
