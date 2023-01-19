@@ -41,4 +41,5 @@ public function testEnum() returns Error? {
     Client cl = check new("ws://localhost:8000");
     check cl->writeMessage(A);
     Point p = check cl->readMessage();
+    test:assertEquals(p, B);
 }
