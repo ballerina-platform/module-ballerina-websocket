@@ -232,7 +232,8 @@ public class WebSocketUtil {
     public static boolean hasStringType(Type targetType) {
         if (targetType instanceof UnionType) {
             List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
-            return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.STRING_TAG);
+            return memberTypes.stream().anyMatch(member -> member.getTag() ==
+                    TypeTags.STRING_TAG | member.getTag() == TypeTags.FINITE_TYPE_TAG);
         }
         return false;
     }
