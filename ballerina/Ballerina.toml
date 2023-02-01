@@ -19,13 +19,13 @@ path = "../native/build/libs/websocket-native-2.6.0-SNAPSHOT.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
 version = "2.6.0"
-path = "./lib/http-native-2.6.0-20230103-222200-7ece8c5.jar"
+path = "./lib/http-native-2.6.0-20230131-234600-6cfa49e.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "mime-native"
 version = "2.6.0"
-path = "./lib/mime-native-2.6.0-20230103-182900-902c334.jar"
+path = "./lib/mime-native-2.6.0-20230131-165100-e5555fe.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
