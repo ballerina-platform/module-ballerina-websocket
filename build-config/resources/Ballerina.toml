@@ -7,7 +7,7 @@ keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.2.0"
+distribution = "2201.4.0"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -34,27 +34,51 @@ version = "@constraint.version@"
 path = "./lib/constraint-native-@stdlib.constraintnative.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-common"
+version = "@netty.version@"
 path = "./lib/netty-common-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-buffer"
+version = "@netty.version@"
 path = "./lib/netty-buffer-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-transport"
+version = "@netty.version@"
 path = "./lib/netty-transport-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-resolver"
+version = "@netty.version@"
 path = "./lib/netty-resolver-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-handler"
+version = "@netty.version@"
 path = "./lib/netty-handler-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-codec-http"
+version = "@netty.version@"
 path = "./lib/netty-codec-http-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-codec"
+version = "@netty.version@"
 path = "./lib/netty-codec-@netty.version@.jar"
 
 [[platform.java11.dependency]]
+groupId = "io.netty"
+artifactId = "netty-handler-proxy"
+version = "@netty.version@"
 path = "./lib/netty-handler-proxy-@netty.version@.jar"
 
 [[platform.java11.dependency]]

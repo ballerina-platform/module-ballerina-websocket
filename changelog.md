@@ -5,6 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+- [Fix data binding failure when a union type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3909)
+- [Fix data binding failure when a enum type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3707)
+
+## [2.5.0] - 2022-11-29
+
+### Added
+- [Support returning streams from WebSocket services](https://github.com/ballerina-platform/ballerina-standard-library/issues/2909)
+
+### Changed
+- [API Docs Updated](https://github.com/ballerina-platform/ballerina-standard-library/issues/3463)
+
+### Fixed
+- [Fix client returning irrelevant error message when given an ip address as the url](https://github.com/ballerina-platform/ballerina-standard-library/issues/3534)
+
+## [2.4.0] - 2022-09-08
+
 ### Added
 - [Incorporate constraint validation](https://github.com/ballerina-platform/ballerina-standard-library/issues/3058)
 

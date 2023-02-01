@@ -150,7 +150,8 @@ public class WebSocketUpgradeServiceValidator {
                     if (!((symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.getName().get()
                             .equals(PluginConstants.SERVICE) && symbol.getModule().map(ModuleSymbol::id).get().orgName()
                             .equals(PluginConstants.ORG_NAME) && WebSocketConstants.PACKAGE_WEBSOCKET
-                            .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix())) || (
+                            .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix()) ||
+                            symbol.typeKind() == TypeDescKind.ERROR) || (
                             symbol.typeKind() == TypeDescKind.TYPE_REFERENCE &&
                                     ((TypeReferenceTypeSymbol) symbol).typeDescriptor().typeKind()
                                             == TypeDescKind.ERROR))) {

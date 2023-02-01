@@ -25,9 +25,11 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
@@ -228,8 +230,12 @@ public class WebSocketUtil {
     }
 
     public static boolean hasStringType(Type targetType) {
-        List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
-        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.STRING_TAG);
+        if (targetType instanceof UnionType) {
+            List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
+            return memberTypes.stream().anyMatch(member -> member.getTag() ==
+                    TypeTags.STRING_TAG | member.getTag() == TypeTags.FINITE_TYPE_TAG);
+        }
+        return false;
     }
 
     public static boolean hasByteArrayType(Type targetType) {
@@ -308,7 +314,8 @@ public class WebSocketUtil {
      */
     public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
         if (callbackService != null) {
-            Type param = (callbackService).getType().getMethods()[0].getParameterTypes()[0];
+            ObjectType objectType = (ObjectType) TypeUtils.getReferredType(callbackService.getType());
+            Type param = objectType.getMethods()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a PingPongService",

@@ -19,7 +19,9 @@
 package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -62,7 +64,8 @@ public class WebSocketServerService extends WebSocketService {
     }
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
-        return (BMap<BString, Object>) (service.getType()).getAnnotation(StringUtils.fromString(
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        return (BMap<BString, Object>) serviceType.getAnnotation(StringUtils.fromString(
                 ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
     }
 

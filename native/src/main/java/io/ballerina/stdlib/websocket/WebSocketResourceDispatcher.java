@@ -28,6 +28,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
@@ -138,7 +139,7 @@ public class WebSocketResourceDispatcher {
             }
             int i = 0;
             for (String resourceParam : resourceParams) {
-                if (resourceParam.equals("*")) {
+                if (resourceParam.equals(WebSocketConstants.PATH_PARAM_IDENTIFIER)) {
                     pathParamArr.add(subPaths[i]);
                 } else if (!resourceParam.equals(subPaths[i])) {
                     webSocketHandshaker.cancelHandshake(404, errMsg);
@@ -386,7 +387,7 @@ public class WebSocketResourceDispatcher {
                 webSocketEndpoint);
         try {
             executeResource(wsService, balService, new WebSocketResourceCallback(connectionInfo,
-                            WebSocketConstants.RESOURCE_NAME_ON_OPEN),
+                            WebSocketConstants.RESOURCE_NAME_ON_OPEN, wsService.getRuntime()),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_OPEN, ModuleUtils.getOnOpenMetaData());
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION,
@@ -500,9 +501,9 @@ public class WebSocketResourceDispatcher {
                     return;
                 }
                 executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName()),
-                        bValues, connectionInfo, onTextMessageResource.getName(),
-                        ModuleUtils.getOnTextMetaData());
+                        new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName(),
+                                wsService.getRuntime()), bValues, connectionInfo, onTextMessageResource.getName(),
+                                ModuleUtils.getOnTextMetaData());
                 stringAggregator.resetAggregateString();
             } else {
                 stringAggregator.appendAggregateString(textMessage.getText());
@@ -602,7 +603,7 @@ public class WebSocketResourceDispatcher {
             createBvaluesForBarray(connectionInfo.getWebSocketEndpoint(), paramTypes, bValues,
                     controlMessage.getByteArray());
             executeResource(wsService, balservice, new WebSocketResourceCallback(
-                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING),
+                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, wsService.getRuntime()),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, ModuleUtils.getOnPingMetaData());
         } catch (Exception e) {
             //Observe error
@@ -688,7 +689,7 @@ public class WebSocketResourceDispatcher {
                 bValues[index++] = true;
             }
             executeResource(wsService, balservice, new WebSocketResourceCallback(connectionInfo,
-                            onBinaryMessageResource.getName()), bValues, connectionInfo,
+                            onBinaryMessageResource.getName(), wsService.getRuntime()), bValues, connectionInfo,
                     onBinaryMessageResource.getName(), ModuleUtils.getOnBinaryMetaData());
         } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
@@ -775,7 +776,7 @@ public class WebSocketResourceDispatcher {
             createBvaluesForBarray(connectionInfo.getWebSocketEndpoint(), paramDetails, bValues,
                     controlMessage.getByteArray());
             executeResource(wsService, balservice, new WebSocketResourceCallback(
-                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG),
+                            connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, wsService.getRuntime()),
                     bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, ModuleUtils.getOnPongMetaData());
         } catch (Exception e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_PONG, e.getMessage());
@@ -1028,6 +1029,7 @@ public class WebSocketResourceDispatcher {
     }
 
     private static boolean isIsolated(BObject serviceObj, String remoteMethod) {
-        return serviceObj.getType().isIsolated() && serviceObj.getType().isIsolated(remoteMethod);
+        ObjectType serviceObjType = (ObjectType) TypeUtils.getReferredType(serviceObj.getType());
+        return serviceObjType.isIsolated() && serviceObjType.isIsolated(remoteMethod);
     }
 }
