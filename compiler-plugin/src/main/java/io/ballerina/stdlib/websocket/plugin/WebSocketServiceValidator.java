@@ -135,7 +135,7 @@ public class WebSocketServiceValidator {
                 Utils.validateOnBinaryMessageFunction(functionTypeSymbol, ctx, functionDefinitionNode);
                 break;
             default:
-                reportInvalidFunction(functionDefinitionNode);
+                // no need to validate
         }
     }
 

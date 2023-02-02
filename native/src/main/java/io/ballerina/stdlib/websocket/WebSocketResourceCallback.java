@@ -87,8 +87,10 @@ public class WebSocketResourceCallback implements Callback {
                     null, returnStreamUnitCallBack, null, PredefinedTypes.TYPE_NULL);
         } else if (result == null) {
             webSocketConnection.readNextFrame();
-        } else if (resource.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
-                resource.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
+        } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&
+                !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_CLOSE) &&
+                !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR) &&
+                !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT)) {
             sendTextMessage(StringUtils.fromString(result.toString()), promiseCombiner);
         } else {
             log.error("invalid return type");

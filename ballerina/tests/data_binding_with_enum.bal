@@ -22,7 +22,7 @@ enum Point {
     C
 }
 
-service on new Listener(8000) {
+service on new Listener(21400) {
     resource function get .() returns Service|Error {
         return new EnumService();
     }
@@ -38,7 +38,7 @@ service class EnumService {
 
 @test:Config {}
 public function testEnum() returns Error? {
-    Client cl = check new("ws://localhost:8000");
+    Client cl = check new("ws://localhost:21400");
     check cl->writeMessage(A);
     Point p = check cl->readMessage();
     test:assertEquals(p, B);
