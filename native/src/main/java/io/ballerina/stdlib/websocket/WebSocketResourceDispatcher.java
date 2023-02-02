@@ -80,6 +80,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
@@ -551,9 +552,10 @@ public class WebSocketResourceDispatcher {
         for (int i = 0; i < words.length; i++) {
             String word = words[i];
             if (i == 0) {
-                word = word.isEmpty() ? word : word.toLowerCase();
+                word = word.isEmpty() ? word : word.toLowerCase(Locale.ENGLISH);
             } else {
-                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
+                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1)
+                        .toLowerCase(Locale.ENGLISH);
             }
             builder.append(word);
         }

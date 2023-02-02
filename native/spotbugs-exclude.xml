@@ -22,6 +22,6 @@
     </Match>
     <Match>
         <Class name="io.ballerina.stdlib.websocket.WebSocketResourceDispatcher" />
-        <Bug pattern="BC_UNCONFIRMED_CAST" />
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
     </Match>
 </FindBugsFilter>
