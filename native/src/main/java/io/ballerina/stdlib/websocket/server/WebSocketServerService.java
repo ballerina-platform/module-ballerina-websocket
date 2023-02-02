@@ -43,7 +43,7 @@ public class WebSocketServerService extends WebSocketService {
     private int maxFrameSize = WebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
     private int idleTimeoutInSeconds = 0;
     private boolean enableValidation = true;
-    private String dispatchinkKey = null;
+    private String dispatchingKey = null;
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
@@ -58,7 +58,9 @@ public class WebSocketServerService extends WebSocketService {
                     WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
             enableValidation = configAnnotation.getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
-            dispatchinkKey = configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY).getValue();
+            if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY) != null) {
+                dispatchingKey = configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY).getValue();
+            }
         }
         service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_MAX_FRAME_SIZE.toString(), maxFrameSize);
         service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED.toString(), enableValidation);
@@ -92,8 +94,8 @@ public class WebSocketServerService extends WebSocketService {
         this.basePath = basePath;
     }
 
-    public String getDispatchinkKey() {
-        return dispatchinkKey;
+    public String getDispatchingKey() {
+        return dispatchingKey;
     }
 
     public String getBasePath() {

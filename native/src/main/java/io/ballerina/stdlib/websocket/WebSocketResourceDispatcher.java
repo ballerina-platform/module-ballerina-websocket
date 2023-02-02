@@ -403,7 +403,7 @@ public class WebSocketResourceDispatcher {
             WebSocketService wsService = connectionInfo.getService();
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
-            String dispatchingKey = ((WebSocketServerService) wsService).getDispatchinkKey();
+            String dispatchingKey = ((WebSocketServerService) wsService).getDispatchingKey();
             String methodName;
             methodName = getCustomRemoteMethodName(textMessage, webSocketConnection, stringAggregator,
                     dispatchingKey);
