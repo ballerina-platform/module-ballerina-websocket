@@ -123,7 +123,7 @@ service class LotOfUnderscoreService {
     }
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testPingMessage() returns Error? {
     Client cl = check new("ws://localhost:21401");
     check cl->writeMessage({"event": "ping"});
@@ -131,7 +131,7 @@ public function testPingMessage() returns Error? {
     test:assertEquals(resp, {"event": "pong"});
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testSubscribeMessage() returns Error? {
     Client cl = check new("ws://localhost:21401/subscribe");
     check cl->writeMessage({"event": "subscribe", "pair": ["XBT/USD", "XBT/EUR"], "subscription": {"name": "ticker"}});
@@ -142,7 +142,7 @@ public function testSubscribeMessage() returns Error? {
     test:assertEquals(resp2, {"event": "heartbeat"});
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testDispatchingToDefaultRemoteMethod() returns Error? {
     Client cl = check new("ws://localhost:21401/onMessage");
     check cl->writeMessage({"event": "heartbeat"});
@@ -151,7 +151,7 @@ public function testDispatchingToDefaultRemoteMethod() returns Error? {
     test:assertEquals(resp2, {"event": "heartbeat"});
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testDispatchingToNone() returns Error? {
     Client cl = check new("ws://localhost:21401/noRemoteMethod");
     check cl->writeMessage({"event": "heartbeat"});
@@ -160,7 +160,7 @@ public function testDispatchingToNone() returns Error? {
     test:assertEquals(resp2, {"event": "onMessages"});
 }
 
-@test:Config {enable:false}
+@test:Config {}
 public function testDatabindingFailure() returns Error? {
     Client cl = check new("ws://localhost:21401/dataBindingFailure");
     check cl->writeMessage({"event": "Messages"});
@@ -172,7 +172,7 @@ public function testDatabindingFailure() returns Error? {
     }
 }
 
-@test:Config {enable: false}
+@test:Config {}
 public function testUnderscore() returns Error? {
     Client cl = check new("ws://localhost:21401/underscore");
     check cl->writeMessage({"type": "_ping"});
