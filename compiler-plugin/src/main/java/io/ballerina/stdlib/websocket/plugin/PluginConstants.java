@@ -41,6 +41,7 @@ public class PluginConstants {
     static final String RESOURCE_KEY_WORD = "resource";
     static final String HTTP_REQUEST = "http:Request";
     static final String LISTENER_IDENTIFIER = "Listener";
+    static final String DISPATCHER_ANNOTATION = "dispatcherKey";
 
     /**
      * Compilation Errors of WebSocket module.

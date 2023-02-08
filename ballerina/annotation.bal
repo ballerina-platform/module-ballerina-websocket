@@ -28,12 +28,14 @@
 #   If this is not set or is negative or zero, the default frame size, which is 65536 will be used
 # + auth - Listener authentication configurations
 # + validation - Enable/disable constraint validation
+# + dispatcherKey - The key which is going to be used for dispatching to custom remote functions.
 public type WSServiceConfig record {|
     string[] subProtocols = [];
     decimal idleTimeout = 0;
     int maxFrameSize = 65536;
     ListenerAuthConfig[] auth?;
     boolean validation = true;
+    string dispatcherKey?;
 |};
 
 # The annotation which is used to configure a WebSocket service.

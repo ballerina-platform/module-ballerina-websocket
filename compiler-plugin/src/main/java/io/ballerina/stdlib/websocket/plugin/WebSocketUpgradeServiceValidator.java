@@ -56,7 +56,7 @@ public class WebSocketUpgradeServiceValidator {
         this.modulePrefix = modulePrefix;
     }
 
-    void validate() {
+    void validate(boolean customDispatchingEnabled) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
         boolean hasRemoteService = serviceDeclarationNode.members().stream().anyMatch(child ->
                 child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION);
@@ -93,6 +93,9 @@ public class WebSocketUpgradeServiceValidator {
         });
         if (resourceNode != null) {
             validateResourceReturnTypes(resourceNode);
+            if (customDispatchingEnabled) {
+                return;
+            }
             ReturnStatementNodeVisitor returnStatementNodeVisitor = new ReturnStatementNodeVisitor();
             resourceNode.accept(returnStatementNodeVisitor);
             for (ReturnStatementNode returnStatementNode : returnStatementNodeVisitor.getReturnStatementNodes()) {

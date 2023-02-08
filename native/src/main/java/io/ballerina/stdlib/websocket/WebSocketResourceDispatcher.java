@@ -70,6 +70,7 @@ import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.langlib.value.CloneReadOnly;
 import org.ballerinalang.langlib.value.CloneWithType;
+import org.ballerinalang.langlib.value.FromJsonString;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
@@ -400,6 +402,12 @@ public class WebSocketResourceDispatcher {
         try {
             WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
             WebSocketService wsService = connectionInfo.getService();
+            WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
+                    .createIfNullAndGetStringAggregator();
+            String dispatchingKey = ((WebSocketServerService) wsService).getDispatchingKey();
+            String methodName;
+            methodName = getCustomRemoteMethodName(textMessage, webSocketConnection, stringAggregator,
+                    dispatchingKey);
             MethodType onTextMessageResource = null;
             BObject balservice;
             BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
@@ -408,13 +416,15 @@ public class WebSocketResourceDispatcher {
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
                 String funcName = remoteFunc.getName();
-                if (funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
+                if (funcName.equals(methodName) ||
+                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
                         funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
                     onTextMessageResource = remoteFunc;
                     break;
                 }
             }
             if (onTextMessageResource == null) {
+                stringAggregator.resetAggregateString();
                 webSocketConnection.readNextFrame();
                 return;
             }
@@ -423,10 +433,11 @@ public class WebSocketResourceDispatcher {
             Object[] bValues = new Object[parameterTypes.length * 2];
 
             boolean finalFragment = textMessage.isFinalFragment();
-            WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
-                    .createIfNullAndGetStringAggregator();
             if (finalFragment) {
-                stringAggregator.appendAggregateString(textMessage.getText());
+                if (null == dispatchingKey) {
+                    // If the dispatching key is there, appending is already done.
+                    stringAggregator.appendAggregateString(textMessage.getText());
+                }
                 int index = 0;
                 try {
                     for (Type param : parameterTypes) {
@@ -512,6 +523,43 @@ public class WebSocketResourceDispatcher {
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
         }
+    }
+
+    private static String getCustomRemoteMethodName(WebSocketTextMessage textMessage,
+             WebSocketConnection webSocketConnection, WebSocketConnectionInfo.StringAggregator stringAggregator,
+             String dispatchingKey) {
+        String methodName = null;
+        if (null != dispatchingKey) {
+            boolean finalFragment = textMessage.isFinalFragment();
+            if (finalFragment) {
+                stringAggregator.appendAggregateString(textMessage.getText());
+            } else {
+                stringAggregator.appendAggregateString(textMessage.getText());
+                webSocketConnection.readNextFrame();
+            }
+            BString dispatchingValue = ((BMap) FromJsonString.fromJsonString(StringUtils
+                    .fromString(stringAggregator.getAggregateString())))
+                    .getStringValue(StringUtils.fromString(dispatchingKey));
+            methodName = createCustomRemoteFunction(dispatchingValue.getValue());
+        }
+        return methodName;
+    }
+
+    private static String createCustomRemoteFunction(String dispatchingValue) {
+        dispatchingValue = "on " + dispatchingValue;
+        StringBuilder builder = new StringBuilder();
+        String[] words = dispatchingValue.split("[\\W_]+");
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (i == 0) {
+                word = word.isEmpty() ? word : word.toLowerCase(Locale.ENGLISH);
+            } else {
+                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1)
+                        .toLowerCase(Locale.ENGLISH);
+            }
+            builder.append(word);
+        }
+        return builder.toString();
     }
 
     private static void sendDataBindingError(WebSocketConnection webSocketConnection, String errorMessage) {

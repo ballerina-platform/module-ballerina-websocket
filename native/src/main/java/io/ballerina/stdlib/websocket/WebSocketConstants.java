@@ -49,6 +49,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
     public static final BString ANNOTATION_ATTR_VALIDATION_ENABLED = StringUtils.fromString("validation");
+    public static final BString ANNOTATION_ATTR_DISPATCHER_KEY = StringUtils.fromString("dispatcherKey");
 
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final String LOG_MESSAGE = "{} {}";

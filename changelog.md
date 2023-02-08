@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- [Implement dispatching to custom remote functions](https://github.com/ballerina-platform/ballerina-standard-library/issues/3670)
+
 ### Fixed
 - [Fix data binding failure when a union type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3909)
 - [Fix data binding failure when a enum type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3707)

@@ -30,6 +30,7 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_KEY;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED;
 
 /**
@@ -42,6 +43,7 @@ public class WebSocketServerService extends WebSocketService {
     private int maxFrameSize = WebSocketConstants.DEFAULT_MAX_FRAME_SIZE;
     private int idleTimeoutInSeconds = 0;
     private boolean enableValidation = true;
+    private String dispatchingKey = null;
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
@@ -56,6 +58,9 @@ public class WebSocketServerService extends WebSocketService {
                     WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
             enableValidation = configAnnotation.getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
+            if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY) != null) {
+                dispatchingKey = configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY).getValue();
+            }
         }
         service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_MAX_FRAME_SIZE.toString(), maxFrameSize);
         service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED.toString(), enableValidation);
@@ -87,6 +92,10 @@ public class WebSocketServerService extends WebSocketService {
     public void setBasePathToServiceObj(String basePath) {
         service.addNativeData(WebSocketConstants.NATIVE_DATA_BASE_PATH, basePath);
         this.basePath = basePath;
+    }
+
+    public String getDispatchingKey() {
+        return dispatchingKey;
     }
 
     public String getBasePath() {
