@@ -85,7 +85,6 @@ public class WebSocketSyncConnector {
             return WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
         }
-        System.out.println("Return null");
         return null;
     }
 
