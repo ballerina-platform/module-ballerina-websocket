@@ -46,6 +46,11 @@ public class WebSocketSyncConnector {
             throws IllegalAccessException {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
+        if (!connectionInfo.getWebSocketConnection().isOpen()) {
+            callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
+                            WebSocketConstants.ErrorCode.ConnectionClosureError));
+            return;
+        }
         SyncClientConnectorListener connectorListener = (SyncClientConnectorListener) wsConnection
                 .getNativeData(WebSocketConstants.CLIENT_LISTENER);
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
