@@ -102,9 +102,6 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
 ]
-modules = [
-	{org = "ballerina", packageName = "io", moduleName = "io"}
-]
 
 [[package]]
 org = "ballerina"
@@ -188,9 +185,6 @@ name = "lang.runtime"
 version = "0.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
-]
-modules = [
-	{org = "ballerina", packageName = "lang.runtime", moduleName = "lang.runtime"}
 ]
 
 [[package]]
@@ -328,11 +322,9 @@ version = "2.6.0"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "jwt"},
 	{org = "ballerina", name = "lang.array"},
-	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "oauth2"},
