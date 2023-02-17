@@ -5,7 +5,7 @@ Ballerina Websocket Library
   [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-websocket/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-websocket)
   [![Trivy](https://github.com/ballerina-platform/module-ballerina-websocket/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/actions/workflows/trivy-scan.yml)
   [![GraalVM Check](https://github.com/ballerina-platform/module-ballerina-websocket/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/actions/workflows/build-with-bal-test-native.yml)
-  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-websocket.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/commits/master)
+  [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-websocket.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/commits/main)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/websocket.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fwebsocket)
 
 This library provides an implementation for connecting and interacting with WebSocket endpoints over the network.
