@@ -214,5 +214,6 @@ public class WebSocketResourceCallback implements Callback {
         WebSocketUtil.closeDuringUnexpectedCondition(webSocketConnection);
         observeError(connectionInfo, WebSocketObservabilityConstants.ERROR_TYPE_RESOURCE_INVOCATION, resource,
                 error.getMessage());
+        System.exit(1);
     }
 }
