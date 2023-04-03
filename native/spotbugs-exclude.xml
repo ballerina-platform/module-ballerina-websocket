@@ -24,4 +24,8 @@
         <Class name="io.ballerina.stdlib.websocket.WebSocketResourceDispatcher" />
         <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE" />
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.websocket.WebSocketResourceCallback"/>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
 </FindBugsFilter>
