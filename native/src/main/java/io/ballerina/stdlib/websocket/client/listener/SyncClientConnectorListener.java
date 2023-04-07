@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.utils.ValueUtils;
 import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
@@ -41,7 +42,6 @@ import io.ballerina.stdlib.websocket.WebSocketResourceDispatcher;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
-import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,12 +94,12 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         message = XmlUtils.parse(stringAggregator.getAggregateString());
                         break;
                     case TypeTags.RECORD_TYPE_TAG:
-                        message = CloneWithType.convert(targetType, JsonUtils.parse(
+                        message = cloneWithType(targetType, JsonUtils.parse(
                                 stringAggregator.getAggregateString()));
                         break;
                     case TypeTags.UNION_TAG:
                         if (WebSocketUtil.hasStringType(targetType)) {
-                            message = CloneWithType.convert(targetType,
+                            message = cloneWithType(targetType,
                                     StringUtils.fromString(stringAggregator.getAggregateString()));
                             break;
                         }
@@ -188,11 +188,11 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         message = XmlUtils.parse(getBString(binMsg));;
                         break;
                     case TypeTags.RECORD_TYPE_TAG:
-                        message = CloneWithType.convert(targetType, JsonUtils.parse(getBString(binMsg)));
+                        message = cloneWithType(targetType, JsonUtils.parse(getBString(binMsg)));
                         break;
                     case TypeTags.UNION_TAG:
                         if (WebSocketUtil.hasByteArrayType(targetType)) {
-                            message = CloneWithType.convert(targetType, ValueCreator.createArrayValue(binMsg));
+                            message = cloneWithType(targetType, ValueCreator.createArrayValue(binMsg));
                             break;
                         }
                         // fall through
@@ -317,5 +317,13 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     public void setFutureCompleted(AtomicBoolean futureCompleted) {
         this.futureCompleted = futureCompleted;
+    }
+
+    private Object cloneWithType(Type targetType, Object value) {
+        try {
+            return ValueUtils.convert(value, targetType);
+        } catch (BError e) {
+            return e;
+        }
     }
 }
