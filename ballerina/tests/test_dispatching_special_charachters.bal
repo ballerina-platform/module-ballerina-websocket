@@ -33,7 +33,7 @@ service class WsService21104 {
 
 @test:Config {}
 public function testSpecialCharachter() returns Error? {
-    Client wsClient = check new("ws://localhost:21104/on\-Text-String/");
+    Client wsClient = check new("ws://localhost:21104/on-Text-String/");
     check wsClient->writeTextMessage("Hi");
     string data = check wsClient->readTextMessage();
     test:assertEquals(data, "Hi");
