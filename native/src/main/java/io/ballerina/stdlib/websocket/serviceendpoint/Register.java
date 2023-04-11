@@ -33,6 +33,10 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.ballerina.stdlib.websocket.server.WebSocketServicesRegistry;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Register a service to the listener.
  *
@@ -62,7 +66,9 @@ public class Register extends AbstractWebsocketNativeFunction {
 
     private static String getBasePath(Object serviceName) {
         if (serviceName instanceof BArray) {
-            String basePath = String.join(WebSocketConstants.BACK_SLASH, ((BArray) serviceName).getStringArray());
+            List<String> strings = Arrays.stream(((BArray) serviceName).getStringArray()).map(
+                    HttpUtil::unescapeAndEncodeValue).collect(Collectors.toList());
+            String basePath = String.join(WebSocketConstants.BACK_SLASH, strings);
             return HttpUtil.sanitizeBasePath(basePath);
         } else if (serviceName instanceof BString) {
             String basePath = ((BString) serviceName).getValue();
