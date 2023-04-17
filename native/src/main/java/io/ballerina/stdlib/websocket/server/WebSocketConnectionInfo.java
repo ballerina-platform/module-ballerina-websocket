@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.websocket.server;
 
+import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
@@ -25,6 +26,8 @@ import io.ballerina.stdlib.websocket.WebSocketService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class has WebSocket connection info for both the client and the server. Includes details
@@ -37,6 +40,7 @@ public class WebSocketConnectionInfo {
     private final WebSocketConnection webSocketConnection;
     private StringAggregator stringAggregator = null;
     private ByteArrAggregator byteArrAggregator = null;
+    private List<Future> callbacks = new ArrayList<>();
 
     /**
      * @param webSocketService    can be the WebSocketServerService or WebSocketService
@@ -128,5 +132,13 @@ public class WebSocketConnectionInfo {
         public void resetAggregateByteArr() {
             this.aggregateArr = new ByteArrayOutputStream();
         }
+    }
+
+    public void addCallback(Future callback) {
+        callbacks.add(callback);
+    }
+
+    public List<Future> getCallbacks() {
+        return callbacks;
     }
 }

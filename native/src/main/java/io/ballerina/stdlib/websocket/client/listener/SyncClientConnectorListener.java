@@ -125,6 +125,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         callback.complete(message);
                     }
                     futureCompleted.set(true);
+                    connectionInfo.getCallbacks().remove(callback);
                 }
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
@@ -300,6 +301,12 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onClose(WebSocketConnection webSocketConnection) {
         WebSocketObservabilityUtil.observeClose(connectionInfo);
+        if (connectionInfo.getCallbacks().size() > 0) {
+            connectionInfo.getCallbacks().forEach(callback -> {
+                callback.complete(WebSocketUtil.createWebsocketError("Connection closed",
+                                WebSocketConstants.ErrorCode.ConnectionClosureError));
+            });
+        }
         try {
             WebSocketUtil.setListenerOpenField(connectionInfo);
         } catch (IllegalAccessException e) {
