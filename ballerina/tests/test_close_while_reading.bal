@@ -18,7 +18,8 @@ import ballerina/io;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-service /textstring on new Listener(6091) {
+listener Listener l6191 = new(6091);
+service /textstring on l6191 {
     resource function get .() returns ParallelReadService {
         return new ParallelReadService();
     }
@@ -29,6 +30,19 @@ service class ParallelReadService {
     *Service;
     remote function onClose(Caller caller) returns error? {
         io:println(string `Connection ${caller.getConnectionId()} closed`);
+    }
+}
+
+service /serverClose on l6191 {
+    resource function get .() returns ServerCloseService {
+        return new ServerCloseService();
+    }
+}
+
+service class ServerCloseService {
+    *Service;
+    remote function onMessage(Caller caller, string text) returns error? {
+        check caller->close();
     }
 }
 
@@ -44,6 +58,21 @@ public function testParallelClosure() returns Error? {
         } 
     }
     // wait for the worker to start and block in the read operation.
-    runtime:sleep(5);
-    error? err =  ws->close(timeout = 3); // close the connection during the communication
+    runtime:sleep(2);
+    error? err =  ws->close(); // close the connection during the communication
+}
+
+@test:Config {}
+public function testParallelServerInitiatedClosure() returns Error? {
+    Client ws = check new ("ws://localhost:6091/serverClose");
+
+    worker name returns error? {
+        while true {
+            json data = check ws->readMessage();
+        }
+    }
+    // wait for the worker to start and the server will close the connection from the server side.
+    json request = {'type: "start"};
+    runtime:sleep(2);
+    check ws->writeMessage(request);
 }
