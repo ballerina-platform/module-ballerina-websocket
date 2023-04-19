@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 - [Fix dispatching failure when a `-` is used in the service path](https://github.com/ballerina-platform/ballerina-standard-library/issues/4320)
+- [Fix the hanging issue when closing the connection while reading the message](https://github.com/ballerina-platform/ballerina-standard-library/issues/3962)
 
 ## [2.6.0] - 2023-02-27
 

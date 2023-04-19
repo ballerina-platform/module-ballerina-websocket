@@ -136,6 +136,8 @@ public class WebSocketConstants {
     public static final String BALLERINA_HTTP_HEADER = ModuleUtils.getHttpPackageIdentifier() + COLON + ANN_NAME_HEADER;
     public static final String PATH_PARAM_IDENTIFIER = "^";
     public static final String STREAMING_NEXT_FUNCTION = "next";
+    public static final String CONNECTION_CLOSED = "Connection closed";
+    public static final String STATUS_CODE = "Status code:";
 
     private WebSocketConstants() {
     }

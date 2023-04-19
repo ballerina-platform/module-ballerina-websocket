@@ -125,6 +125,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         callback.complete(message);
                     }
                     futureCompleted.set(true);
+                    connectionInfo.getCallbacks().remove(callback);
                 }
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
@@ -214,6 +215,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                     callback.complete(message);
                 }
                 futureCompleted.set(true);
+                connectionInfo.getCallbacks().remove(callback);
                 connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
             } else {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
@@ -235,31 +237,39 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
         try {
             if (callback != null && !futureCompleted.get()) {
-            int closeCode = webSocketCloseMessage.getCloseCode();
-            String closeReason = webSocketCloseMessage.getCloseReason() == null ||
-                    webSocketCloseMessage.getCloseReason().equals("") ?
-                    "Connection closed: Status code: " + closeCode :
-                    webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
-            if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
-                if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
-                        WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
-                    return;
-                } else {
-                    if (closeCode != WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE) {
-                        logger.debug(WebSocketConstants.LOG_MESSAGE, "Reconnect attempt not made because of " +
-                                "close initiated by the server: ", connectionInfo.getWebSocketEndpoint()
-                                .getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
+                int closeCode = webSocketCloseMessage.getCloseCode();
+                String closeReason = webSocketCloseMessage.getCloseReason() == null ||
+                        webSocketCloseMessage.getCloseReason().equals("") ?
+                        String.format("%s %s %d", WebSocketConstants.CONNECTION_CLOSED,
+                                WebSocketConstants.STATUS_CODE, closeCode) :
+                        String.format("%s: %s %d", webSocketCloseMessage.getCloseReason(),
+                                WebSocketConstants.STATUS_CODE, closeCode);
+                if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
+                    if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
+                            WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
+                        return;
+                    } else {
+                        if (closeCode != WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE) {
+                            logger.debug(WebSocketConstants.LOG_MESSAGE, "Reconnect attempt not made because of " +
+                                    "close initiated by the server: ", connectionInfo.getWebSocketEndpoint()
+                                    .getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
+                        }
                     }
                 }
-            }
-            if (!futureCompleted.get()) {
-                callback.complete(WebSocketUtil
-                        .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
-                futureCompleted.set(true);
-            }
-            WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
-            wsConnection.removeReadIdleStateHandler();
-            WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
+                if (!futureCompleted.get()) {
+                    callback.complete(WebSocketUtil
+                            .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
+                    futureCompleted.set(true);
+                }
+                WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
+                wsConnection.removeReadIdleStateHandler();
+                WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
+                if (connectionInfo.getCallbacks().size() > 0) {
+                    connectionInfo.getCallbacks().forEach(callback -> {
+                        callback.complete(WebSocketUtil.createWebsocketError(WebSocketConstants.CONNECTION_CLOSED,
+                                WebSocketConstants.ErrorCode.ConnectionClosureError));
+                    });
+                }
             }
         } catch (IllegalAccessException e) {
             callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
@@ -300,6 +310,12 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     @Override
     public void onClose(WebSocketConnection webSocketConnection) {
         WebSocketObservabilityUtil.observeClose(connectionInfo);
+        if (connectionInfo.getCallbacks().size() > 0) {
+            connectionInfo.getCallbacks().forEach(callback -> {
+                callback.complete(WebSocketUtil.createWebsocketError(WebSocketConstants.CONNECTION_CLOSED,
+                                WebSocketConstants.ErrorCode.ConnectionClosureError));
+            });
+        }
         try {
             WebSocketUtil.setListenerOpenField(connectionInfo);
         } catch (IllegalAccessException e) {
