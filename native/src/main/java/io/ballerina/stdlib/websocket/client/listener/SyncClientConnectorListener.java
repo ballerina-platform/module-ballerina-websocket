@@ -240,8 +240,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 int closeCode = webSocketCloseMessage.getCloseCode();
                 String closeReason = webSocketCloseMessage.getCloseReason() == null ||
                         webSocketCloseMessage.getCloseReason().equals("") ?
-                        "Connection closed: Status code: " + closeCode :
-                        webSocketCloseMessage.getCloseReason() + ": Status code: " + closeCode;
+                        String.format("%s %s %d", WebSocketConstants.CONNECTION_CLOSED,
+                                WebSocketConstants.STATUS_CODE, closeCode) :
+                        String.format("%s: %s %d", webSocketCloseMessage.getCloseReason(),
+                                WebSocketConstants.STATUS_CODE, closeCode);
                 if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
                     if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
                             WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
@@ -264,7 +266,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
                 if (connectionInfo.getCallbacks().size() > 0) {
                     connectionInfo.getCallbacks().forEach(callback -> {
-                        callback.complete(WebSocketUtil.createWebsocketError("Connection closed",
+                        callback.complete(WebSocketUtil.createWebsocketError(WebSocketConstants.CONNECTION_CLOSED,
                                 WebSocketConstants.ErrorCode.ConnectionClosureError));
                     });
                 }
@@ -310,7 +312,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         WebSocketObservabilityUtil.observeClose(connectionInfo);
         if (connectionInfo.getCallbacks().size() > 0) {
             connectionInfo.getCallbacks().forEach(callback -> {
-                callback.complete(WebSocketUtil.createWebsocketError("Connection closed",
+                callback.complete(WebSocketUtil.createWebsocketError(WebSocketConstants.CONNECTION_CLOSED,
                                 WebSocketConstants.ErrorCode.ConnectionClosureError));
             });
         }

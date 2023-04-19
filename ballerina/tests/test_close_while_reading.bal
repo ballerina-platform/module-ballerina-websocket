@@ -28,7 +28,7 @@ service /textstring on l6191 {
 // Does not send any data to the client.
 service class ParallelReadService {
     *Service;
-    remote function onClose(Caller caller) returns error? {
+    remote function onClose(Caller caller) {
         io:println(string `Connection ${caller.getConnectionId()} closed`);
     }
 }
