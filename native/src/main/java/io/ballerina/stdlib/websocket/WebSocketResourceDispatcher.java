@@ -36,6 +36,7 @@ import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.utils.ValueUtils;
 import io.ballerina.runtime.api.utils.XmlUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -69,7 +70,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.CorruptedFrameException;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.ballerinalang.langlib.value.CloneReadOnly;
-import org.ballerinalang.langlib.value.CloneWithType;
 import org.ballerinalang.langlib.value.FromJsonString;
 import org.ballerinalang.langlib.value.FromJsonStringWithType;
 import org.slf4j.Logger;
@@ -474,13 +474,13 @@ public class WebSocketResourceDispatcher {
                                 bValue = XmlUtils.parse(stringAggregator.getAggregateString());
                                 break;
                             case TypeTags.RECORD_TYPE_TAG:
-                                bValue = CloneWithType.convert(param, JsonUtils.parse(
-                                stringAggregator.getAggregateString()));
+                                bValue = ValueUtils.convert(JsonUtils.parse(stringAggregator.getAggregateString()),
+                                        param);
                                 break;
                             case TypeTags.UNION_TAG:
                                 if (WebSocketUtil.hasStringType(param)) {
-                                    bValue = CloneWithType.convert(param,
-                                            StringUtils.fromString(stringAggregator.getAggregateString()));
+                                    bValue = ValueUtils.convert(
+                                            StringUtils.fromString(stringAggregator.getAggregateString()), param);
                                     break;
                                 }
                                 // fall through
@@ -706,11 +706,11 @@ public class WebSocketResourceDispatcher {
                         bValue = XmlUtils.parse(getBString(byteArray));;
                         break;
                     case TypeTags.RECORD_TYPE_TAG:
-                        bValue = CloneWithType.convert(param, JsonUtils.parse(getBString(byteArray)));
+                        bValue = ValueUtils.convert(JsonUtils.parse(getBString(byteArray)), param);
                         break;
                     case TypeTags.UNION_TAG:
                         if (hasByteArrayType(param)) {
-                            bValue = CloneWithType.convert(param, ValueCreator.createArrayValue(byteArray));
+                            bValue = ValueUtils.convert(ValueCreator.createArrayValue(byteArray), param);
                             break;
                         }
                         // fall through
