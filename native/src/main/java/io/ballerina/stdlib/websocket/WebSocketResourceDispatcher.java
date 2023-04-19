@@ -78,10 +78,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
@@ -121,7 +123,9 @@ public class WebSocketResourceDispatcher {
             WebSocketConnectionManager connectionManager) {
         ResourceMethodType resourceFunction = ((ServiceType) wsService.getBalService().getType())
                 .getResourceMethods()[0];
-        String[] resourceParams = resourceFunction.getResourcePath();
+        String[] resourcePath = resourceFunction.getResourcePath();
+        List<String> resourceParams = Arrays.stream(resourcePath).map(
+                HttpUtil::unescapeAndEncodeValue).collect(Collectors.toList());
 
         BObject inRequest = ValueCreatorUtils.createRequestObject();
         BObject inRequestEntity = ValueCreatorUtils.createEntityObject();
@@ -134,8 +138,8 @@ public class WebSocketResourceDispatcher {
             subPath = sanitizeSubPath(subPath).substring(1);
             subPaths = subPath.split(WebSocketConstants.BACK_SLASH);
         }
-        if (!resourceParams[0].equals(".")) {
-            if (resourceParams.length != subPaths.length) {
+        if (!resourceParams.get(0).equals(".")) {
+            if (resourceParams.size() != subPaths.length) {
                 webSocketHandshaker.cancelHandshake(404, errMsg);
                 return;
             }
