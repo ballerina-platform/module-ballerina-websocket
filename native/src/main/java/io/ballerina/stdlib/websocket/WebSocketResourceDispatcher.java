@@ -420,11 +420,13 @@ public class WebSocketResourceDispatcher {
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
                 String funcName = remoteFunc.getName();
-                if (funcName.equals(methodName) ||
-                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
-                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
+                if (funcName.equals(methodName)) {
                     onTextMessageResource = remoteFunc;
                     break;
+                }
+                if (funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
+                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
+                    onTextMessageResource = remoteFunc;
                 }
             }
             if (onTextMessageResource == null) {
