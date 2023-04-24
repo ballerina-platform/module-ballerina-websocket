@@ -1,5 +1,12 @@
 # Taxi Management Service
 
+[![Star on Github](https://img.shields.io/badge/-Star%20on%20Github-blue?style=social&logo=github)](https://github.com/ballerina-platform/module-ballerina-websocket)
+
+Authors: @shafreenAnfar @Bhashinee 
+Reviewers: @shafreenAnfar 
+Created: 2021/11/01 
+Updated: 2021/12/16 
+
 ## Overview
 
 This example shows how to use the Ballerina WebSocket package to implement a simple taxi service management application. This is certainly a simplified representation of a real-life implementation created for demonstration purposes.
