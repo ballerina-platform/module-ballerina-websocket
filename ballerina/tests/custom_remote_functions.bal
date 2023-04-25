@@ -123,6 +123,24 @@ service class LotOfUnderscoreService {
     }
 }
 
+@ServiceConfig {dispatcherKey: "type"}
+service /onMessageWithCustom on customDispatchingLis {
+    resource function get .() returns Service|Error {
+        return new OnMessageService();
+    }
+}
+
+service class OnMessageService {
+    *Service;
+    remote function onMessage(Caller caller, json data) returns Error? {
+        check caller->writeMessage({"type": "onMessage"});
+    }
+
+    remote function onConnectionInit(Caller caller, string text) returns Error? {
+        check caller->writeMessage({"type": "onConnectionInit"});
+    }
+}
+
 @test:Config {}
 public function testPingMessage() returns Error? {
     Client cl = check new("ws://localhost:21401");
@@ -186,4 +204,12 @@ public function testUnderscoresAndSpaces() returns Error? {
     check cl->writeMessage({"type": "this_ping message"});
     json resp = check cl->readMessage();
     test:assertEquals(resp, {"event": "onMessages"});
+}
+
+@test:Config {}
+public function testOnMessageAtTheBeginning() returns Error? {
+    Client cl = check new("ws://localhost:21401/onMessageWithCustom");
+    check cl->writeMessage({'type: "connection_init"});
+    json resp = check cl->readMessage();
+    test:assertEquals(resp, {"type": "onConnectionInit"});
 }
