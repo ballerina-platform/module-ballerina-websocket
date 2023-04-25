@@ -2,10 +2,10 @@
 
 [![Star on Github](https://img.shields.io/badge/-Star%20on%20Github-blue?style=social&logo=github)](https://github.com/ballerina-platform/module-ballerina-websocket)
 
-Authors: @shafreenAnfar @Bhashinee 
-Reviewers: @shafreenAnfar 
-Created: 2021/11/01 
-Updated: 2021/12/16 
+_Authors_: @shafreenAnfar @Bhashinee   
+_Reviewers_: @shafreenAnfar   
+_Created_: 2021/11/01   
+_Updated_: 2021/12/16 
 
 ## Overview
 
