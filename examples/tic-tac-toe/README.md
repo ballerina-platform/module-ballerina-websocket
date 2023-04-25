@@ -1,5 +1,12 @@
 # Tic Tac Toe - A multiplayer game
 
+[![Star on Github](https://img.shields.io/badge/-Star%20on%20Github-blue?style=social&logo=github)](https://github.com/ballerina-platform/module-ballerina-websocket)
+
+_Authors_: @shafreenAnfar @Bhashinee   
+_Reviewers_: @shafreenAnfar   
+_Created_: 2022/06/16   
+_Updated_: 2022/06/16 
+
 ## Overview
 
 This application shows how to use the Ballerina WebSocket package to implement a multiplayer game. In this example, we have chosen to implement the famous Tic Tac Toe which is a game in which two players take turns in drawing either an 'O' or an 'X' in one square of a grid consisting of nine squares. 

@@ -1,5 +1,12 @@
 # Chat Application
 
+[![Star on Github](https://img.shields.io/badge/-Star%20on%20Github-blue?style=social&logo=github)](https://github.com/ballerina-platform/module-ballerina-websocket)
+
+_Authors_: @shafreenAnfar @Bhashinee   
+_Reviewers_: @shafreenAnfar   
+_Created_: 2021/07/29   
+_Updated_: 2021/08/16 
+
 ## Overview
 
 This application shows how to use the Ballerina WebSocket package to implement a simple chat application.
