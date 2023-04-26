@@ -17,6 +17,7 @@ package io.ballerina.stdlib.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -116,7 +117,7 @@ public class WebSocketConnector {
     public static void setWriteTimeoutHandler(BObject wsConnection, Future balFuture,
                                                AtomicBoolean textCallbackCompleted, 
                                                WebSocketConnectionInfo connectionInfo) throws IllegalAccessException {
-        if (wsConnection.getType().getName().equals(SYNC_CLIENT)) {
+        if (TypeUtils.getType(wsConnection).getName().equals(SYNC_CLIENT)) {
             long writeTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(
                     connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
                     WebSocketConstants.CLIENT_WRITE_TIMEOUT, 0);
@@ -217,7 +218,7 @@ public class WebSocketConnector {
 
     public static void removeWriteTimeoutHandler(BObject wsConnection, WebSocketConnectionInfo connectionInfo)
             throws IllegalAccessException {
-        if (wsConnection.getType().getName().equals(SYNC_CLIENT)) {
+        if (TypeUtils.getType(wsConnection).getName().equals(SYNC_CLIENT)) {
             connectionInfo.getWebSocketConnection().removeWriteIdleStateHandler();
         }
     }

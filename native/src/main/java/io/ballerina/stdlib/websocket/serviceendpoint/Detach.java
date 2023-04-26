@@ -39,7 +39,7 @@ public class Detach extends AbstractWebsocketNativeFunction {
     public static Object detach(BObject serviceEndpoint, BObject serviceObj) {
         WebSocketServicesRegistry webSocketServicesRegistry = getWebSocketServicesRegistry(serviceEndpoint);
         Type param;
-        ObjectType serviceObjType = (ObjectType) TypeUtils.getReferredType(serviceObj.getType());
+        ObjectType serviceObjType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(serviceObj));
         MethodType[] resourceList = serviceObjType.getMethods();
         if (resourceList.length > 0 && (param = resourceList[0].getParameterTypes()[0]) != null) {
             String callerType = param.getQualifiedName();

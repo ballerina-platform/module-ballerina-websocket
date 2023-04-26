@@ -155,7 +155,7 @@ public class WebSocketUtil {
                     balFuture.complete(null);
                     pingCallbackCompleted.set(true);
                 }
-                if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
+                if (TypeUtils.getType(connectionInfo.getWebSocketEndpoint()).getName().equals(SYNC_CLIENT)) {
                     connectionInfo.getWebSocketConnection().readNextFrame();
                 }
             }
@@ -314,7 +314,7 @@ public class WebSocketUtil {
      */
     public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
         if (callbackService != null) {
-            ObjectType objectType = (ObjectType) TypeUtils.getReferredType(callbackService.getType());
+            ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(callbackService));
             Type param = objectType.getMethods()[0].getParameterTypes()[0];
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {

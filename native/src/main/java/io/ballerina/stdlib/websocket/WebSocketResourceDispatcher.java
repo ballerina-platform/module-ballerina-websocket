@@ -121,7 +121,7 @@ public class WebSocketResourceDispatcher {
 
     public static void dispatchUpgrade(WebSocketHandshaker webSocketHandshaker, WebSocketServerService wsService,
             WebSocketConnectionManager connectionManager) {
-        ResourceMethodType resourceFunction = ((ServiceType) wsService.getBalService().getType())
+        ResourceMethodType resourceFunction = ((ServiceType) TypeUtils.getType(wsService.getBalService()))
                 .getResourceMethods()[0];
         String[] resourcePath = resourceFunction.getResourcePath();
         List<String> resourceParams = Arrays.stream(resourcePath).map(

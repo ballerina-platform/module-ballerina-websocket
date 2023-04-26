@@ -49,7 +49,7 @@ public class WebSocketService {
     }
 
     private void populateResourcesMap(BObject service) {
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         for (MethodType resource : serviceType.getMethods()) {
             resourcesMap.put(resource.getName(), resource);
         }

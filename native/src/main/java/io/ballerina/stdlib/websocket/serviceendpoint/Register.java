@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
@@ -49,7 +50,7 @@ public class Register extends AbstractWebsocketNativeFunction {
         Runtime runtime = env.getRuntime();
         String basePath = getBasePath(serviceName);
 
-        MethodType[] resourceList = ((ServiceType) service.getType()).getResourceMethods();
+        MethodType[] resourceList = ((ServiceType) TypeUtils.getType(service)).getResourceMethods();
         ResourceMethodType resource = (ResourceMethodType) resourceList[0];
         resource.getAccessor();
 
