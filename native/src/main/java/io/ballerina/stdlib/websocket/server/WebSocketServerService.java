@@ -69,7 +69,7 @@ public class WebSocketServerService extends WebSocketService {
     }
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
-        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(service.getType());
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         return (BMap<BString, Object>) serviceType.getAnnotation(StringUtils.fromString(
                 ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
     }

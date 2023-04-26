@@ -63,7 +63,7 @@ public class OnUpgradeResourceCallback implements Callback {
         }
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
             HttpHeaders headers = null;
-            ObjectType type = (ObjectType) TypeUtils.getReferredType(((BObject) result).getType());
+            ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(result));
             if (type.getFields().get(WebSocketConstants.CUSTOM_HEADERS.toString()) != null) {
                 BMap<BString, BString> headersMap = (BMap) ((BObject) result).get(WebSocketConstants.CUSTOM_HEADERS);
                 headers = populateAndGetHttpHeaders(headersMap);
