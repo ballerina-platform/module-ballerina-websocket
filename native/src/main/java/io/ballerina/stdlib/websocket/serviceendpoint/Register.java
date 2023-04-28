@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
@@ -32,6 +33,10 @@ import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.ballerina.stdlib.websocket.server.WebSocketServicesRegistry;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Register a service to the listener.
@@ -45,7 +50,7 @@ public class Register extends AbstractWebsocketNativeFunction {
         Runtime runtime = env.getRuntime();
         String basePath = getBasePath(serviceName);
 
-        MethodType[] resourceList = ((ServiceType) service.getType()).getResourceMethods();
+        MethodType[] resourceList = ((ServiceType) TypeUtils.getType(service)).getResourceMethods();
         ResourceMethodType resource = (ResourceMethodType) resourceList[0];
         resource.getAccessor();
 
@@ -62,7 +67,9 @@ public class Register extends AbstractWebsocketNativeFunction {
 
     private static String getBasePath(Object serviceName) {
         if (serviceName instanceof BArray) {
-            String basePath = String.join(WebSocketConstants.BACK_SLASH, ((BArray) serviceName).getStringArray());
+            List<String> strings = Arrays.stream(((BArray) serviceName).getStringArray()).map(
+                    HttpUtil::unescapeAndEncodeValue).collect(Collectors.toList());
+            String basePath = String.join(WebSocketConstants.BACK_SLASH, strings);
             return HttpUtil.sanitizeBasePath(basePath);
         } else if (serviceName instanceof BString) {
             String basePath = ((BString) serviceName).getValue();

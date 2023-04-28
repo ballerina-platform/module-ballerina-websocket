@@ -29,16 +29,15 @@ dependencies {
 
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
-    implementation group: 'org.ballerinalang', name: 'ballerina-core', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'value', version: "${ballerinaLangVersion}"
 
     implementation group: 'io.ballerina.stdlib', name: 'io-native', version: "${stdlibIoVersion}"
     implementation group: 'io.ballerina.stdlib', name: 'http-native', version: "${stdlibHttpVersion}"
+    implementation group: 'io.ballerina.stdlib', name: 'constraint-native', version: "${stdlibConstraintVersion}"
     implementation group: 'io.ballerina.stdlib', name: 'mime-native', version: "${stdlibMimeVersion}"
 
     implementation group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
-    implementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
 
     // Transport related dependencies
     implementation group: 'io.netty', name: 'netty-handler-proxy', version:"${nettyVersion}"

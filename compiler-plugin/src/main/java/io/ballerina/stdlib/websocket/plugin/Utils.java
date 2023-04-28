@@ -22,12 +22,21 @@ import io.ballerina.compiler.api.symbols.ParameterSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.projects.plugins.codeaction.CodeActionArgument;
+import io.ballerina.projects.plugins.codeaction.CodeActionContext;
+import io.ballerina.projects.plugins.codeaction.CodeActionExecutionContext;
+import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
+import io.ballerina.projects.plugins.codeaction.DocumentEdit;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
@@ -35,8 +44,15 @@ import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import io.ballerina.tools.text.LinePosition;
 import io.ballerina.tools.text.LineRange;
+import io.ballerina.tools.text.TextDocument;
+import io.ballerina.tools.text.TextDocumentChange;
+import io.ballerina.tools.text.TextEdit;
+import io.ballerina.tools.text.TextRange;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.COLON;
 
@@ -54,6 +70,7 @@ public class Utils {
     public static final String ERROR = "Error";
     public static final String GENERIC_ERROR = "error";
     public static final String OPTIONAL = "?";
+    public static final String NODE_LOCATION = "node.location";
 
     public static String getPrefix(SyntaxNodeAnalysisContext ctx) {
         ModulePartNode modulePartNode = ctx.syntaxTree().rootNode();
@@ -107,13 +124,34 @@ public class Utils {
         validateOnDataReturnTypes(returnStatement, PluginConstants.ON_BINARY_MESSAGE, resourceNode, ctx);
     }
 
+    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                              FunctionDefinitionNode resourceNode) {
+        List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
+        if (inputParams.size() == 1 && !inputParams.get(0).typeDescriptor().signature().equals(STRING)) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                    resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+        } else {
+            for (ParameterSymbol inputParam : inputParams) {
+                String moduleId = getModuleId(inputParam);
+                String paramSignature = inputParam.typeDescriptor().signature();
+                if (!paramSignature.equals(STRING) && !paramSignature.equals(moduleId + COLON + CALLER)) {
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
+                            resourceNode.location(), paramSignature);
+                }
+            }
+        }
+        TypeSymbol returnStatement = functionTypeSymbol.returnTypeDescriptor().get();
+        validateOnDataReturnTypes(returnStatement, PluginConstants.ON_TEXT_MESSAGE, resourceNode, ctx);
+    }
+
     public static void validateOnDataReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
             FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
                 if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE
                         && symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL) && !(
-                        symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)) {
+                        symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
+                && !(symbol.typeKind() == TypeDescKind.STREAM)) {
                     repoteDiagnostics(functionName, resourceNode, ctx,
                             PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
@@ -219,8 +257,8 @@ public class Utils {
                 PluginConstants.ON_IDLE_TIMEOUT, resourceNode, ctx);
     }
 
-    static void validateOnTextMessageFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
-            FunctionDefinitionNode resourceNode) {
+    static void validateOnDataFunctions(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
+                                        FunctionDefinitionNode resourceNode) {
         List<ParameterSymbol> inputParams = functionTypeSymbol.params().get();
         if (inputParams.size() == 1) {
             ParameterSymbol inputParam = inputParams.get(0);
@@ -228,7 +266,7 @@ public class Utils {
             String paramSignature = inputParam.typeDescriptor().signature();
             if (!(isValidInput(getModuleId(inputParam), paramSignature, kind)) &&
                     inputParams.get(0).signature().contains(COLON + CALLER)) {
-                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS,
+                reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE,
                         resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
             }
         } else {
@@ -237,7 +275,7 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 TypeDescKind kind = inputParam.typeDescriptor().typeKind();
                 if (isValidInput(moduleId, paramSignature, kind)) {
-                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT,
+                    reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE,
                             resourceNode.location(), paramSignature);
                 }
             }
@@ -252,7 +290,8 @@ public class Utils {
                 !kind.equals(TypeDescKind.TYPE_REFERENCE) &&
                 !kind.equals(TypeDescKind.ARRAY) && !kind.equals(TypeDescKind.BOOLEAN) &&
                 !kind.equals(TypeDescKind.INT) && !kind.equals(TypeDescKind.DECIMAL) &&
-                !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION);
+                !kind.equals(TypeDescKind.FLOAT) && !kind.equals(TypeDescKind.INTERSECTION) &&
+                !kind.equals(TypeDescKind.ANYDATA) && !kind.equals(TypeDescKind.UNION);
     }
 
     public static void validateOnTextReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
@@ -312,5 +351,71 @@ public class Utils {
 
     public static boolean equals(String actual, String expected) {
         return actual.compareTo(expected) == 0;
+    }
+
+    public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {
+        if (lineRange == null) {
+            return null;
+        }
+
+        TextDocument textDocument = syntaxTree.textDocument();
+        int start = textDocument.textPositionFrom(lineRange.startLine());
+        int end = textDocument.textPositionFrom(lineRange.endLine());
+        return ((ModulePartNode) syntaxTree.rootNode()).findNode(TextRange.from(start, end - start), true);
+    }
+
+    public static LineRange getLineRange(CodeActionExecutionContext codeActionExecutionContext) {
+        LineRange lineRange = null;
+        for (CodeActionArgument argument : codeActionExecutionContext.arguments()) {
+            if (Utils.NODE_LOCATION.equals(argument.key())) {
+                lineRange = argument.valueAs(LineRange.class);
+            }
+        }
+        return lineRange;
+    }
+
+    public static List<DocumentEdit> getDocumentEdits(CodeActionExecutionContext codeActionExecutionContext,
+                                                      String text) {
+        LineRange lineRange = Utils.getLineRange(codeActionExecutionContext);
+
+        if (lineRange == null) {
+            return Collections.emptyList();
+        }
+
+        SyntaxTree syntaxTree = codeActionExecutionContext.currentDocument().syntaxTree();
+        NonTerminalNode node = Utils.findNode(syntaxTree, lineRange);
+        if (!(node instanceof ClassDefinitionNode)) {
+            return Collections.emptyList();
+        }
+
+        ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) node;
+
+        List<TextEdit> textEdits = new ArrayList<>();
+        TextRange onTextMessageTextRange;
+        if (classDefinitionNode.members().isEmpty()) {
+            onTextMessageTextRange = TextRange.from(classDefinitionNode.openBrace().textRange().endOffset(),
+                    classDefinitionNode.closeBrace().textRange().startOffset() -
+                            classDefinitionNode.openBrace().textRange().endOffset());
+        } else {
+            Node lastMember = classDefinitionNode.members().get(classDefinitionNode.members().size() - 1);
+            onTextMessageTextRange = TextRange.from(lastMember.textRange().endOffset(),
+                    classDefinitionNode.closeBrace().textRange().startOffset() -
+                            lastMember.textRange().endOffset());
+        }
+        textEdits.add(TextEdit.from(onTextMessageTextRange, text));
+        TextDocumentChange change = TextDocumentChange.from(textEdits.toArray(new TextEdit[0]));
+        return Collections.singletonList(new DocumentEdit(codeActionExecutionContext.fileUri(),
+                SyntaxTree.from(syntaxTree, change)));
+    }
+
+
+    public static Optional<CodeActionInfo> getCodeActionInfo(CodeActionContext codeActionContext, String codeAction) {
+        Diagnostic diagnostic = codeActionContext.diagnostic();
+        if (diagnostic.location() == null) {
+            return Optional.empty();
+        }
+        CodeActionArgument locationArg = CodeActionArgument.from(Utils.NODE_LOCATION,
+                diagnostic.location().lineRange());
+        return Optional.of(CodeActionInfo.from(codeAction, List.of(locationArg)));
     }
 }

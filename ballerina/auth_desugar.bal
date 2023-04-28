@@ -149,7 +149,7 @@ isolated function authenticateWithJwtValidatorConfig(JwtValidatorConfigWithScope
         return authn;
     } else {
         panic error("Unsupported record type found.");
-    }
+  }
 }
 
 isolated function authenticateWithOAuth2IntrospectionConfig(OAuth2IntrospectionConfigWithScopes config, string header)

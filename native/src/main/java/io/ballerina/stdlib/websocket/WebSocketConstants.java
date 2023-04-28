@@ -48,6 +48,8 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeout");
     public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
+    public static final BString ANNOTATION_ATTR_VALIDATION_ENABLED = StringUtils.fromString("validation");
+    public static final BString ANNOTATION_ATTR_DISPATCHER_KEY = StringUtils.fromString("dispatcherKey");
 
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final String LOG_MESSAGE = "{} {}";
@@ -56,6 +58,7 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
     public static final String RESOURCE_NAME_ON_TEXT_MESSAGE = "onTextMessage";
     public static final String RESOURCE_NAME_ON_BINARY_MESSAGE = "onBinaryMessage";
+    public static final String RESOURCE_NAME_ON_MESSAGE = "onMessage";
     public static final String RESOURCE_NAME_ON_PING = "onPing";
     public static final String RESOURCE_NAME_ON_PONG = "onPong";
     public static final String RESOURCE_NAME_ON_CLOSE = "onClose";
@@ -82,6 +85,7 @@ public class WebSocketConstants {
     public static final String CALL_BACK_SERVICE = "callbackService";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
+    public static final String CONSTRAINT_VALIDATION = "validation";
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
@@ -121,6 +125,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
     public static final String HTTP_LISTENER = "httpListener";
 
+    public static final String BYTE_ARRAY = "byte[]";
     public static final String PARAM_TYPE_STRING = "string";
     public static final String PARAM_TYPE_BOOLEAN = "boolean";
     public static final String PARAM_TYPE_INT = "int";
@@ -129,6 +134,10 @@ public class WebSocketConstants {
     public static final String PARAM_ANNOT_PREFIX = "$param$.";
     public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
     public static final String BALLERINA_HTTP_HEADER = ModuleUtils.getHttpPackageIdentifier() + COLON + ANN_NAME_HEADER;
+    public static final String PATH_PARAM_IDENTIFIER = "^";
+    public static final String STREAMING_NEXT_FUNCTION = "next";
+    public static final String CONNECTION_CLOSED = "Connection closed";
+    public static final String STATUS_CODE = "Status code:";
 
     private WebSocketConstants() {
     }
@@ -149,6 +158,7 @@ public class WebSocketConstants {
         SslError("SslError"),
         AuthzError("AuthzError"),
         AuthnError("AuthnError"),
+        PayloadValidationError("PayloadValidationError"),
         Error("Error");
 
         private String errorCode;

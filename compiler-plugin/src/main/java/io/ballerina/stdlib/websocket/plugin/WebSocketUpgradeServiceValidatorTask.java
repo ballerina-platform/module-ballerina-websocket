@@ -18,6 +18,8 @@
 
 package io.ballerina.stdlib.websocket.plugin;
 
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -25,8 +27,11 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
@@ -42,6 +47,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
 
 /**
@@ -58,6 +64,8 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             }
         }
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
+        boolean disptacherAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel());
 
         String modulePrefix = Utils.getPrefix(ctx);
         Optional<Symbol> serviceDeclarationSymbol = ctx.semanticModel().symbol(serviceDeclarationNode);
@@ -69,11 +77,37 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                     ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor(ctx);
                     serviceDeclarationNode.syntaxTree().rootNode().accept(visitor);
                     validateListenerArguments(ctx, visitor);
-                    validateService(ctx, modulePrefix);
+                    validateService(ctx, modulePrefix, disptacherAnnotation);
                     return;
                 }
             }
         }
+    }
+
+    private boolean isDispatcherKeyAnnotation(AnnotationNode annotation, SemanticModel semanticModel) {
+        Optional<Symbol> symbolOpt = semanticModel.symbol(annotation);
+        if (symbolOpt.isEmpty()) {
+            return false;
+        }
+
+        Symbol symbol = symbolOpt.get();
+        if (!(symbol instanceof AnnotationSymbol)) {
+            return false;
+        }
+
+        return annotation.annotValue().toString().contains(DISPATCHER_ANNOTATION);
+    }
+
+    private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
+                                                  SemanticModel semanticModel) {
+        Optional<MetadataNode> metadata = serviceNode.metadata();
+        if (metadata.isEmpty()) {
+            return false;
+        }
+        MetadataNode metaData = metadata.get();
+        NodeList<AnnotationNode> annotations = metaData.annotations();
+        return annotations.stream()
+                .anyMatch(ann -> isDispatcherKeyAnnotation(ann, semanticModel));
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {
@@ -135,10 +169,10 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                 && Utils.equals(moduleSymbol.id().orgName(), ORG_NAME);
     }
 
-    private void validateService(SyntaxNodeAnalysisContext ctx, String modulePrefix) {
+    private void validateService(SyntaxNodeAnalysisContext ctx, String modulePrefix, boolean disptacherAnnotation) {
         WebSocketUpgradeServiceValidator wsServiceValidator;
         wsServiceValidator = new WebSocketUpgradeServiceValidator(ctx,
                 modulePrefix + SyntaxKind.COLON_TOKEN.stringValue());
-        wsServiceValidator.validate();
+        wsServiceValidator.validate(disptacherAnnotation);
     }
 }

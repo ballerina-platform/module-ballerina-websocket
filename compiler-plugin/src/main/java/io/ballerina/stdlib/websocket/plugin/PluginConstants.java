@@ -34,12 +34,14 @@ public class PluginConstants {
     static final String ON_IDLE_TIMEOUT = "onIdleTimeout";
     static final String ON_TEXT_MESSAGE = "onTextMessage";
     static final String ON_BINARY_MESSAGE = "onBinaryMessage";
+    static final String ON_MESSAGE = "onMessage";
     static final String ON_PING_MESSAGE = "onPing";
     static final String ON_PONG_MESSAGE = "onPong";
     static final String REMOTE_KEY_WORD = "remote";
     static final String RESOURCE_KEY_WORD = "resource";
     static final String HTTP_REQUEST = "http:Request";
     static final String LISTENER_IDENTIFIER = "Listener";
+    static final String DISPATCHER_ANNOTATION = "dispatcherKey";
 
     /**
      * Compilation Errors of WebSocket module.
@@ -73,6 +75,8 @@ public class PluginConstants {
                 + "remote function. `byte[]` is the mandatory parameter", "WEBSOCKET_214"),
         INVALID_INPUT_FOR_ON_BINARY("Invalid parameters `{0}` provided for onBinaryMessage remote function",
                 "WEBSOCKET_215"),
+        INVALID_REMOTE_FUNCTIONS("Cannot have `{0}` with `onMessage` remote function",
+                "WEBSOCKET_216"),
         INVALID_RESOURCE_ERROR("There should be only one `get` resource for the service",
                 "WEBSOCKET_101"),
         MORE_THAN_ONE_RESOURCE_PARAM_ERROR("There should be only http:Request as a parameter",
@@ -84,7 +88,18 @@ public class PluginConstants {
                 "WEBSOCKET_105"),
         INVALID_LISTENER_INIT_PARAMS("`websocket:ListenerConfiguration` not allowed with `http:Listener` "
                 + "as the `websocket:Listener` ", "WEBSOCKET_106"),
-        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107");;
+        INVALID_INPUT_FOR_ON_MESSAGE("Invalid parameters `{0}` provided for onMessage remote "
+                + "function", "WEBSOCKET_108"),
+        TEMPLATE_CODE_GENERATION_HINT("Template generation for empty service", "WEBSOCKET_107"),
+        ON_BINARY_GENERATION_HINT("Template generation for binary remote function", "WEBSOCKET_110"),
+        ON_CLOSE_GENERATION_HINT("Template generation for onClose remote function", "WEBSOCKET_111"),
+        ON_ERROR_GENERATION_HINT("Template generation for onError remote function", "WEBSOCKET_112"),
+        ON_IDLE_TIMEOUT_GENERATION_HINT("Template generation for onIdletimeout remote function", "WEBSOCKET_113"),
+        ON_OPEN_GENERATION_HINT("Template generation for onOpen remote function", "WEBSOCKET_114"),
+        ON_PING_GENERATION_HINT("Template generation for onPing remote function", "WEBSOCKET_115"),
+        ON_PONG_GENERATION_HINT("Template generation for onPong remote function", "WEBSOCKET_116"),
+        ON_TEXT_GENERATION_HINT("Template generation for onTextMessage remote function", "WEBSOCKET_117"),
+        ON_MESSAGE_GENERATION_HINT("Template generation for onMessage remote function", "WEBSOCKET_118");
 
         private final String error;
         private final String errorCode;

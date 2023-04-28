@@ -55,3 +55,9 @@ public type AuthzError distinct Error;
 
 # Raised when the SSL handshake fails.
 public type SslError distinct Error;
+
+# Represents an error, which occurred due to payload binding.
+public type PayloadBindingError distinct Error;
+
+# Represents an error, which occurred due to payload constraint validation.
+public type PayloadValidationError distinct PayloadBindingError;

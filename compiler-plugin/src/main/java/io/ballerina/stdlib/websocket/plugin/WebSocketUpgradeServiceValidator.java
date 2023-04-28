@@ -30,9 +30,11 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.NewExpressionNode;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.ReturnStatementNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
@@ -40,8 +42,6 @@ import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.List;
-
-import static io.ballerina.stdlib.websocket.plugin.PluginConstants.REMOTE_KEY_WORD;
 
 /**
  * Class to validate WebSocket services.
@@ -56,7 +56,7 @@ public class WebSocketUpgradeServiceValidator {
         this.modulePrefix = modulePrefix;
     }
 
-    void validate() {
+    void validate(boolean customDispatchingEnabled) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
         boolean hasRemoteService = serviceDeclarationNode.members().stream().anyMatch(child ->
                 child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION);
@@ -79,16 +79,23 @@ public class WebSocketUpgradeServiceValidator {
                 || child.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION).forEach(node -> {
             FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
             String functionName = functionDefinitionNode.functionName().toString().split(" ")[0];
+            NodeList<Token> qualifierList = functionDefinitionNode.qualifierList();
+            if (qualifierList.isEmpty()) {
+                return;
+            }
             if (functionName.compareTo(WebSocketConstants.GET) == 0
                     && functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
                 resourceNode = functionDefinitionNode;
-            } else if (functionDefinitionNode.qualifierList().get(0).text().equals(REMOTE_KEY_WORD)
+            } else if (qualifierList.get(0).text().equals(Qualifier.REMOTE.getValue())
                     || functionDefinitionNode.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
                 reportInvalidFunction(functionDefinitionNode);
             }
         });
         if (resourceNode != null) {
             validateResourceReturnTypes(resourceNode);
+            if (customDispatchingEnabled) {
+                return;
+            }
             ReturnStatementNodeVisitor returnStatementNodeVisitor = new ReturnStatementNodeVisitor();
             resourceNode.accept(returnStatementNodeVisitor);
             for (ReturnStatementNode returnStatementNode : returnStatementNodeVisitor.getReturnStatementNodes()) {
@@ -146,7 +153,8 @@ public class WebSocketUpgradeServiceValidator {
                     if (!((symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.getName().get()
                             .equals(PluginConstants.SERVICE) && symbol.getModule().map(ModuleSymbol::id).get().orgName()
                             .equals(PluginConstants.ORG_NAME) && WebSocketConstants.PACKAGE_WEBSOCKET
-                            .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix())) || (
+                            .equals(symbol.getModule().map(ModuleSymbol::id).get().modulePrefix()) ||
+                            symbol.typeKind() == TypeDescKind.ERROR) || (
                             symbol.typeKind() == TypeDescKind.TYPE_REFERENCE &&
                                     ((TypeReferenceTypeSymbol) symbol).typeDescriptor().typeKind()
                                             == TypeDescKind.ERROR))) {

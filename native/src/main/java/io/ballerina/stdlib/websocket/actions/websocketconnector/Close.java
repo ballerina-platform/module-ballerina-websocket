@@ -55,6 +55,7 @@ public class Close {
             List<BError> errors = new ArrayList<>(1);
             ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                     connectionInfo, countDownLatch);
+            connectionInfo.getWebSocketConnection().readNextFrame();
             waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
             closeFuture.channel().close().addListener(future -> {
                 WebSocketUtil.setListenerOpenField(connectionInfo);

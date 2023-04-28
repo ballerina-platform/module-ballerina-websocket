@@ -3,53 +3,54 @@
 _Owners_: @shafreenAnfar @bhashinee  
 _Reviewers_: @shafreenAnfar  
 _Created_: 2021/12/09  
-_Updated_: 2022/02/18  
+_Updated_: 2022/12/08  
 _Edition_: Swan Lake  
-_Issue_: [#2165](https://github.com/ballerina-platform/ballerina-standard-library/issues/2165)
 
-# Introduction
+## Introduction
 
 This is the specification for the WebSocket standard library of [Ballerina language](https://ballerina.io/), which provides WebSocket client-server functionalities.
 
 The WebSocket library specification has evolved and may continue to evolve in the future. The released versions of the specification can be found under the relevant GitHub tag.
 
-If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Slack channel](https://ballerina.io/community/). Based on the outcome of the discussion, the specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal, which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
+If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Discord server](https://discord.gg/ballerinalang). Based on the outcome of the discussion, the specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal, which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
 
 The conforming implementation of the specification is released and included in the distribution. Any deviation from the specification is considered a bug.
 
-# Contents
+## Contents
 1. [Overview](#1-overview)
 2. [Listener](#2-listener)
-   * 2.1. [Listener Configurations](#21-listener-configurations)
-   * 2.2. [Initialization](#22-initialization)
+    * 2.1. [Listener Configurations](#21-listener-configurations)
+    * 2.2. [Initialization](#22-initialization)
 3. [Service Types](#3-service-types)
-   * 3.1. [UpgradeService](#31-upgradeservice)
-     * 3.1.1. [UpgradeService Configurations](#311-upgradeservice-configurations)
-   * 3.2. [WebSocket Service](#32-websocket-service)
-     * 3.2.1. [Remote methods associated with WebSocket Service](#321-remote-methods-associated-with-websocket-service)
-       * [onOpen](#onopen)
-       * [onTextMessage](#ontextmessage)
-       * [onBinaryMessage](#onbinarymessage)
-       * [onPing and onPong](#onping-and-onpong)
-       * [onIdleTimeout](#onidletimeout)
-       * [onClose](#onclose)
-       * [onError](#onerror)
+    * 3.1. [UpgradeService](#31-upgradeservice)
+        * 3.1.1. [UpgradeService Configurations](#311-upgradeservice-configurations)
+    * 3.2. [WebSocket Service](#32-websocket-service)
+        * 3.2.1. [Remote methods associated with WebSocket Service](#321-remote-methods-associated-with-websocket-service)
+            * [onOpen](#onopen)
+            * [onTextMessage](#ontextmessage)
+            * [onBinaryMessage](#onbinarymessage)
+            * [onMessage](#onmessage)
+            * [onPing and onPong](#onping-and-onpong)
+            * [onIdleTimeout](#onidletimeout)
+            * [onClose](#onclose)
+            * [onError](#onerror)
+        * 3.2.2. [Dispatching to custom remote methods](#322-dispatching-to-custom-remote-methods)
 4. [Client](#4-client)
-   * 4.1. [Client Configurations](#41-client-configurations)
-   * 4.2. [Initialization](#42-initialization)
-   * 4.3. [Send and receive messages using the Client](#43-send-and-receive-messages-using-the-client)
-     * [writeTextMessage](#writetextmessage)
-     * [writeBinaryMessage](#writebinarymessage)
-     * [readTextMessage](#readtextmessage)
-     * [readBinaryMessage](#readbinarymessage)
-     * [readMessage](#readmessage)
-     * [close](#close)
-     * [ping](#ping)
-     * [pong](#pong)
-     * [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
+    * 4.1. [Client Configurations](#41-client-configurations)
+    * 4.2. [Initialization](#42-initialization)
+    * 4.3. [Send and receive messages using the Client](#43-send-and-receive-messages-using-the-client)
+        * [writeTextMessage](#writetextmessage)
+        * [writeBinaryMessage](#writebinarymessage)
+        * [readTextMessage](#readtextmessage)
+        * [readBinaryMessage](#readbinarymessage)
+        * [readMessage](#readmessage)
+        * [close](#close)
+        * [ping](#ping)
+        * [pong](#pong)
+        * [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
-   * 5.1. [SSL/TLS](#51-ssl-tls)
-   * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
+    * 5.1. [SSL/TLS](#51-ssl-tls)
+    * 5.2. [Authentication and Authorization](#52-authentication-and-authorization)
 6. [Samples](#6-samples)
 
 ## 1. [Overview](#1-overview)
@@ -232,7 +233,7 @@ public type WSServiceConfig record {|
 
 ### 3.2. [WebSocket Service](#32-websocket-service)
 
-Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote functions that do not have any configs. Receiving messages will get dispatched to the relevant remote function. Each remote function is explained below.
+Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote methods that do not have any configs. Receiving messages will get dispatched to the relevant remote method. Each remote method is explained below.
 
 ```ballerina
 service /ws on new websocket:Listener(21003) {
@@ -257,13 +258,13 @@ As soon as the WebSocket handshake is completed and the connection is establishe
 
 ```ballerina
 remote function onOpen(websocket:Caller caller) returns error? {
-    io:println("Opened a WebSocket connection"`);
+    io:println("Opened a WebSocket connection");
 }
 ```
 
 ##### [onTextMessage](#ontextmessage)
 
-The received text messages are dispatched to this remote method. Data binding support is provided to accept the text messages as `anydata`.
+The received text messages are dispatched to this remote method.
 
 ```ballerina
 remote isolated function onTextMessage(websocket:Caller caller, string text) returns websocket:Error? {
@@ -280,6 +281,30 @@ remote isolated function onBinaryMessage(websocket:Caller caller, byte[] data) r
     io:println(data);
 }
 ```
+
+##### [onMessage](#onmessage)
+
+The received messages are dispatched to this remote method. Data binding support is provided to accept the messages as `anydata`.
+
+```ballerina
+remote isolated function onMessage(websocket:Caller caller, json data) returns websocket:Error? {
+    io:println(data);
+}
+```
+
+Data deserialization for text messages happens similar to the following,
+
+- If the contextually-expected data type is string, received data will be directly presented to the API without doing any deserialization.
+- If the contextually-expected data type is xml, received text data will be deserialized to xml.
+- All the other data types are treated as json and received text data will be deserialized to json.
+
+Data deserialization for binary messages happens similar to the following,
+
+- If the contextually-expected data type is byte[], received data will be directly presented to the API without doing any deserialization.
+- If the contextually-expected data type is xml, received binary data will be first converted to the string representation of the byte[] and then deserialized to xml.
+- All the other data types are treated as json and received binary data will be first converted to the string representation of the byte[] and then will be deserialized to json.
+
+If the data binding fails, the connection will get terminated by sending a close frame with the 1003 error code(1003 indicates that an endpoint is terminating the connection because it has received a type of data it cannot accept ) and will print an error log at the listener side.
 
 ##### [onPing and onPong](#onping-and-onpong)
 
@@ -301,7 +326,7 @@ remote function onPong(websocket:Caller caller, byte[] data) {
 This remote method is dispatched when the idle timeout is reached. The idleTimeout has to be configured either in the WebSocket service or the client configuration.
 
 ```ballerina
-remote function onIdleTimeout(websocket:Client caller) {
+remote function onIdleTimeout(websocket:Caller caller) {
     io:println("Connection timed out");
 }
 ```
@@ -325,6 +350,38 @@ remote function onError(websocket:Caller caller, error err) {
     io:println(err.message());
 }
 ```
+
+#### 3.2.2. [Dispatching to custom remote methods](#322-dispatching-to-custom-remote-methods)
+
+The WebSocket service also supports dispatching messages to custom remote functions based on the message type(declared by a field in the received message) with the end goal of generating meaningful Async APIs. 
+
+For example, if the message is `{"event": "heartbeat"}` it will get dispatched to `onHeartbeat` remote function if the user has defined such a method. 
+
+**Dispatching rules**
+
+1. The user can configure the field name(key) to identify the messages and the allowed values as message types.
+
+The `dispatcherKey` is used to identify the event type of the incoming message by its value. 
+
+Ex:
+incoming message = ` {"event": "heartbeat"}`
+dispatcherKey = "event"
+event/message type = "heartbeat"
+dispatching to remote function = "onHeartbeat"
+
+```ballerina
+@websocket:ServiceConfig {
+    dispatcherKey: "event"
+}
+service / on new websocket:Listener(9090) {}
+```
+
+2. Naming of the remote function.
+
+- If there are spaces and underscores between message types, those will be removed and made camel case("un subscribe" -> "onUnSubscribe").
+- The 'on' word is added as the predecessor and the remote function name is in the camel case("heartbeat" -> "onHeartbeat").
+
+3. If an unmatching message type receives where a matching remote function is not implemented in the WebSocket service by the user, it gets dispatched to the default `onMessage` remote function if it is implemented. Or else it will get ignored.
 
 ## 4. [Client](#4-client)
 
@@ -381,7 +438,7 @@ public isolated function init(string url, *ClientConfiguration config) returns E
 
 #### [writeTextMessage](#writetextmessage)
 
-`writeTextMessage` API can be used to send a text message. It takes in the message to be sent as subtypes of `anydata` and returns an error if an error occurs while sending the text message to the connection.
+`writeTextMessage` API can be used to send a text message. It takes in the message to be sent as a `string` and returns an error if an error occurs while sending the text message to the connection.
 
 ```ballerina
 # Writes text messages to the connection. If an error occurs while sending the text message to the connection, that message
@@ -392,7 +449,7 @@ public isolated function init(string url, *ClientConfiguration config) returns E
 #
 # + data - Data to be sent.
 # + return  - A `websocket:Error` if an error occurs when sending
-remote isolated function writeTextMessage(anydata data) returns Error? {}
+remote isolated function writeTextMessage(string data) returns Error? {}
 ```
 
 #### [writeBinaryMessage](#writebinarymessage)
@@ -411,9 +468,29 @@ remote isolated function writeTextMessage(anydata data) returns Error? {}
 remote isolated function writeBinaryMessage(byte[] data) returns Error? {}
 ```
 
+#### [writeMessage](#writemessage)
+
+`writeMessage` API can be used to send messages. It takes in the message to be sent as subtypes of `anydata` and returns an error if an error occurs while sending the message to the connection.
+The input data is internally converted to relevant frame type as follows,
+
+* subtypes of string, xml, json - write out using text frames
+* byte[] - write out using binary frames
+
+```ballerina
+# Writes messages to the connection. If an error occurs while sending the message to the connection, that message
+# will be lost.
+# ```ballerina
+# check wsClient->writeMessage({x: 1, y: 2});
+# ```
+#
+# + data - Data to be sent
+# + return  - A `websocket:Error` if an error occurs when sending
+remote isolated function writeMessage(anydata data) returns Error? {
+```
+
 #### [readTextMessage](#readtextmessage)
 
-`readTextMessage` API can be used to receive a text message. It returns the complete text message as one of subtypes of `anydata` or else an error if an error occurs while reading the messages. The contextually-expected data type is inferred from the LHS variable type.
+`readTextMessage` API can be used to receive a text message. It returns the complete text message as a `string` or else an error if an error occurs while reading the messages.
 
 ```ballerina
 # Reads text messages in a synchronous manner
@@ -441,7 +518,8 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 
 #### [readMessage](#readmessage)
 
-`readMessage` API can be used to receive a message without prior knowledge of message type. It returns a `string` if a text message is received, `byte[]` if a binary message is received or else an error if an error occurs while reading the messages.
+`readMessage` API can be used to receive a message without prior knowledge of message type. `anydata` type is supported by this API.
+The contextually-expected data type is inferred from the LHS variable type. If there is an error when converting the expected data type or else any other error occurs while reading the messages, the respective error will be returned from the API 
 
 ```ballerina
 # Reads data from the WebSocket connection
@@ -456,10 +534,23 @@ remote isolated function readBinaryMessage() returns byte[]|Error {}
 # }
 #```
 #
-# + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
-#            if an error occurs when receiving
-remote isolated function readMessage() returns string|byte[]|Error {}
+# + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
+# + return - The data sent by the server or a `websocket:Error` if an error occurs when receiving
+remote isolated function readMessage(typedesc<anydata> targetType = <>) returns targetType|Error
 ```
+When the receiving data are of the text frame type, data will be deserialized to the expected data type. If the incoming data is of binary frames, and if the LHS type is some other data type apart from byte[], incoming data will first be converted to the string representation of the binary data and then be converted to the expected data type.
+
+Data deserialization for text messages happens similar to the following,
+
+- If the contextually-expected data type is string, received data will be directly presented to the API without doing any deserialization.
+- If the contextually-expected data type is xml, received text data will be deserialized to xml.
+- All the other data types are treated as json and received text data will be deserialized to json.
+
+Data deserialization for binary messages happens similar to the following,
+
+- If the contextually-expected data type is byte[], received data will be directly presented to the API without doing any deserialization.
+- If the contextually-expected data type is xml, received binary data will be first converted to the string representation of the byte[] and then deserialized to xml.
+- All the other data types are treated as json and received binary data will be first converted to the string representation of the byte[] and then will be deserialized to json.
 
 #### [close](#close)
 
@@ -515,7 +606,7 @@ remote isolated function pong(byte[] data) returns Error? {}
 
 #### [onPing and onPong remote methods](#onping-and-onpong-remote-methods)
 
-To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote functions respectively.
+To receive ping/pong messages, users have to register a `websocket:PingPongService` when creating the client. If the service is registered, receiving ping/pong messages will get dispatched to the `onPing` and `onPong` remote methods respectively.
 ```ballerina
 service class PingPongService {
    *websocket:PingPongService;
@@ -530,7 +621,7 @@ service class PingPongService {
 
 websocket:Client wsClient = check new ("ws://localhost:21020", {pingPongHandler : new PingPongService()});
 ```
-If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote function, or else can be done using the `pong` API of websocket:Caller. If the user hasn't implemented the `onPing` remote function, `pong` will be sent automatically.
+If the user has implemented `onPing` on their service, it's user's responsibility to send the `pong` frame. It can be done simply by returning the data from the remote method, or else can be done using the `pong` API of websocket:Caller. If the user hasn't implemented the `onPing` remote method, `pong` will be sent automatically.
 
 ## 5. [Securing the WebSocket Connections](#5-securing-the-websocket-connections)
 

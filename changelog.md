@@ -4,9 +4,46 @@ This file contains all the notable changes done to the Ballerina WebSocket packa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- [Fix dispatching failure when a `-` is used in the service path](https://github.com/ballerina-platform/ballerina-standard-library/issues/4320)
+- [Fix the hanging issue when closing the connection while reading the message](https://github.com/ballerina-platform/ballerina-standard-library/issues/3962)
+- [Fix the dispatching issue when custom dispatching has `onMessage`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4355)
+
+## [2.6.0] - 2023-02-27
+
+### Added
+- [Implement dispatching to custom remote functions](https://github.com/ballerina-platform/ballerina-standard-library/issues/3670)
+
+### Fixed
+- [Fix data binding failure when a union type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3909)
+- [Fix data binding failure when a enum type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3707)
+- [Fix hanging issue of readMessage when it is called after connection closure](https://github.com/ballerina-platform/ballerina-standard-library/issues/3962)
+
+## [2.5.0] - 2022-11-29
+
+### Added
+- [Support returning streams from WebSocket services](https://github.com/ballerina-platform/ballerina-standard-library/issues/2909)
+
+### Changed
+- [API Docs Updated](https://github.com/ballerina-platform/ballerina-standard-library/issues/3463)
+
+### Fixed
+- [Fix client returning irrelevant error message when given an ip address as the url](https://github.com/ballerina-platform/ballerina-standard-library/issues/3534)
+
+## [2.4.0] - 2022-09-08
+
+### Added
+- [Incorporate constraint validation](https://github.com/ballerina-platform/ballerina-standard-library/issues/3058)
+
+### Fixed
+- [Fix server sending 500 status code when the client invokes it with an incorrect URL](https://github.com/ballerina-platform/ballerina-standard-library/issues/3296)
+
+## [2201.1.1] - 2022-06-30
 
 ### Added
 - [Add data binding support for WebSocket](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
+
+### Fixed
+- [Fix the client connection closure issue](https://github.com/ballerina-platform/ballerina-standard-library/issues/2836)
 
 ## [2.2.1] - 2022-03-02
 
