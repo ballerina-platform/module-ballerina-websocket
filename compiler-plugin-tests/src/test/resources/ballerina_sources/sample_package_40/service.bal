@@ -9,10 +9,10 @@ service /basic/ws on new websocket:Listener(9090) {
 service isolated class WsService {
     *websocket:Service;
 
-    remote function onBinaryMessage(websocket:Caller caller, readonly & byte[] data) {
+    remote function onBinaryMessage(readonly & websocket:Caller caller, readonly & byte[] data) {
     }
 
-    remote function onPing(readonly & websocket:Caller caller, readonly & byte[] data) {
+    remote function onPing(websocket:Caller caller, readonly & byte[] data) {
     }
 
     remote function onPong(websocket:Caller caller, readonly & byte[] data) {
