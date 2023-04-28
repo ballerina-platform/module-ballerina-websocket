@@ -27,7 +27,6 @@ ext.stdlibMimeVersion = project.stdlibMimeVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibRegexVersion = project.stdlibRegexVersion
 ext.stdlibAuthVersion = project.stdlibAuthVersion
 ext.stdlibJwtVersion = project.stdlibJwtVersion
 ext.stdlibOAuth2Version = project.stdlibOAuth2Version
@@ -113,7 +112,6 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:auth-ballerina:${stdlibAuthVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:cache-ballerina:${stdlibCacheVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:regex-ballerina:${stdlibRegexVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:time-ballerina:${stdlibTimeVersion}"
