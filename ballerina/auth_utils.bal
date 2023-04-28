@@ -18,7 +18,6 @@ import ballerina/auth;
 import ballerina/jwt;
 import ballerina/log;
 import ballerina/oauth2;
-import ballerina/regex;
 
 // Call relevant auth handling function based on the provided configurations
 isolated function initClientAuth(ClientConfiguration config) returns AuthError? {
@@ -84,7 +83,7 @@ isolated function setAuthHeader(ClientConfiguration clientConfig, string authSch
 
 // Extract the scheme from `string` header.
 isolated function extractScheme(string header) returns string {
-    return regex:split(header, " ")[0];
+    return re`\s`.split(header)[0];
 }
 
 // Logs and prepares the `error` as an `websocket:AuthError`.
