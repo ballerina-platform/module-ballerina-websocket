@@ -17,7 +17,7 @@
 import ballerina/test;
 import ballerina/io;
 
-listener Listener onErrorListener = new(21402);
+listener Listener onErrorListener = new(21403);
 
 service on onErrorListener {
     resource function get .() returns Service|Error {
@@ -39,7 +39,7 @@ service class ServiceWithOnError {
 
 @test:Config {}
 public function testBindingFailureWithOnError() returns Error? {
-    Client cl = check new("ws://localhost:21402");
+    Client cl = check new("ws://localhost:21403");
     check cl->writeMessage("event".toBytes());
     json resp = check cl->readMessage();
     test:assertEquals(resp, {"event": "onError"});
