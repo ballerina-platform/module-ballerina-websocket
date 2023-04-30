@@ -4,9 +4,12 @@ This file contains all the notable changes done to the Ballerina WebSocket packa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Fixed
 - [Fix dispatching failure when a `-` is used in the service path](https://github.com/ballerina-platform/ballerina-standard-library/issues/4320)
 - [Fix the hanging issue when closing the connection while reading the message](https://github.com/ballerina-platform/ballerina-standard-library/issues/3962)
 - [Fix the dispatching issue when custom dispatching has `onMessage`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4355)
+- [Dispatch `onError` remote function when there is a data binding failure](https://github.com/ballerina-platform/ballerina-standard-library/issues/4403)
 
 ## [2.6.0] - 2023-02-27
 
