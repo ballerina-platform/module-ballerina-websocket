@@ -83,16 +83,34 @@ service class NoRemoteFunctionService {
 
 @ServiceConfig {dispatcherKey: "event"}
 service /dataBindingFailure on customDispatchingLis {
- resource function get .() returns Service|Error {
-     return new DataBindingFailureService();
- }
+    resource function get .() returns Service|Error {
+        return new DataBindingFailureService();
+    }
 }
 
 service class DataBindingFailureService {
- *Service;
- remote function onMessages(Caller caller, byte[] data) returns Error? {
-     check caller->writeMessage({"event": "onMessages"});
- }
+    *Service;
+    remote function onMessages(Caller caller, byte[] data) returns Error? {
+        check caller->writeMessage({"event": "onMessages"});
+    }
+}
+
+@ServiceConfig {dispatcherKey: "event"}
+service /onerror on customDispatchingLis {
+    resource function get .() returns Service|Error {
+        return new OnErrorService();
+    }
+}
+
+service class OnErrorService {
+    *Service;
+    remote function onMessages(Caller caller, byte[] data) returns Error? {
+        check caller->writeMessage({"event": "onMessages"});
+    }
+
+    remote function onError(Caller caller, error err) returns Error? {
+        check caller->writeMessage({"event": "onError"});
+    }
 }
 
 @ServiceConfig {dispatcherKey: "type"}
@@ -188,6 +206,14 @@ public function testDatabindingFailure() returns Error? {
     } else {
         test:assertFail("Expected a binding error");
     }
+}
+
+@test:Config {}
+public function testDatabindingFailureWithOnError() returns Error? {
+    Client cl = check new("ws://localhost:21401/onerror");
+    check cl->writeMessage({"event": "Messages"});
+    json resp2 = check cl->readMessage();
+    test:assertEquals(resp2, {"event": "onError"});
 }
 
 @test:Config {}

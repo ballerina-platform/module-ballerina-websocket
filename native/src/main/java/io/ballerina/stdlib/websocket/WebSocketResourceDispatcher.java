@@ -429,6 +429,8 @@ public class WebSocketResourceDispatcher {
                     onTextMessageResource = remoteFunc;
                 }
             }
+            boolean hasOnError = Arrays.stream(remoteFunctions).anyMatch(remoteFunc -> remoteFunc.getName()
+                    .equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR));
             if (onTextMessageResource == null) {
                 stringAggregator.resetAggregateString();
                 webSocketConnection.readNextFrame();
@@ -493,7 +495,7 @@ public class WebSocketResourceDispatcher {
                                 break;
                         }
                         if (bValue instanceof BError) {
-                            sendDataBindingError(webSocketConnection, ((BError) bValue).getMessage());
+                            handleDataBindingError(connectionInfo, hasOnError, (BError) bValue);
                             return;
                         }
                         if (readOnly) {
@@ -514,7 +516,7 @@ public class WebSocketResourceDispatcher {
                         bValues[index++] = true;
                     }
                 } catch (BError error) {
-                    sendDataBindingError(webSocketConnection, error.getMessage());
+                    handleDataBindingError(connectionInfo, hasOnError, error);
                     return;
                 }
                 executeResource(wsService, balservice,
@@ -528,6 +530,15 @@ public class WebSocketResourceDispatcher {
             }
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
+        }
+    }
+
+    private static void handleDataBindingError(WebSocketConnectionInfo connectionInfo,
+                                               boolean hasOnError, BError bValue) throws IllegalAccessException {
+        if (hasOnError) {
+            dispatchOnError(connectionInfo, bValue, true);
+        } else {
+            sendDataBindingError(connectionInfo.getWebSocketConnection(), bValue.getMessage());
         }
     }
 
@@ -595,6 +606,8 @@ public class WebSocketResourceDispatcher {
                     break;
                 }
             }
+            boolean hasOnError = Arrays.stream(remoteFunctions).anyMatch(remoteFunc -> remoteFunc.getName()
+                    .equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR));
             if (onBinaryMessageResource == null) {
                 webSocketConnection.readNextFrame();
                 return;
@@ -605,7 +618,7 @@ public class WebSocketResourceDispatcher {
             if (finalFragment) {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
                 createBvaluesForBinary(onBinaryMessageResource, balservice, connectionInfo,
-                        byteAggregator.getAggregateByteArr(), webSocketConnection, wsService);
+                        byteAggregator.getAggregateByteArr(), webSocketConnection, wsService, hasOnError);
                 byteAggregator.resetAggregateByteArr();
             } else {
                 byteAggregator.appendAggregateArr(binaryMessage.getByteArray());
@@ -667,7 +680,8 @@ public class WebSocketResourceDispatcher {
 
     private static void createBvaluesForBinary(MethodType onBinaryMessageResource, BObject balservice,
                                                WebSocketConnectionInfo connectionInfo, byte[] byteArray,
-                                               WebSocketConnection webSocketConnection, WebSocketService wsService) {
+                                               WebSocketConnection webSocketConnection, WebSocketService wsService,
+                                               boolean hasOnError) throws IllegalAccessException {
         BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
         boolean validationEnabled = (boolean) wsService.getBalService().getNativeData(CONSTRAINT_VALIDATION);
         Type[] paramTypes = onBinaryMessageResource.getParameterTypes();
@@ -722,7 +736,7 @@ public class WebSocketResourceDispatcher {
                         break;
                 }
                 if (bValue instanceof BError) {
-                    sendDataBindingError(webSocketConnection, ((BError) bValue).getMessage());
+                    handleDataBindingError(connectionInfo, hasOnError, (BError) bValue);
                     return;
                 }
                 if (readOnly) {
@@ -747,7 +761,7 @@ public class WebSocketResourceDispatcher {
                     onBinaryMessageResource.getName(), ModuleUtils.getOnBinaryMetaData());
         } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
-                sendDataBindingError(webSocketConnection, e.getMessage());
+                handleDataBindingError(connectionInfo, hasOnError, (BError) e);
                 return;
             }
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_BINARY, e.getMessage());
