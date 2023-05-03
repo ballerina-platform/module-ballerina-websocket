@@ -522,7 +522,19 @@ public class WebSocketServiceValidationTest {
         Package currentPackage = loadPackage("sample_package_57");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+    }
+
+    @Test
+    public void testRemoteFunctionsContradictingReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_58");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 5);
+        Diagnostic firstDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE);
+        Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
+        assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.CONTRADICTING_RETURN_TYPES);
     }
 
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {

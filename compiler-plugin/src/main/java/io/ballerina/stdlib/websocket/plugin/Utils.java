@@ -116,7 +116,7 @@ public class Utils {
                         (inputParam.typeDescriptor().typeKind() == TypeDescKind.INTERSECTION &&
                                 paramSignature.contains(BYTE_ARRAY)))) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY,
-                            resourceNode.location(), resourceNode.location(), paramSignature);
+                            resourceNode.location(), paramSignature);
                 }
             }
         }
@@ -156,10 +156,28 @@ public class Utils {
                             PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
             }
+            validateContradictingReturnTypes(returnTypeSymbol, functionName, resourceNode, ctx);
         } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !(returnTypeSymbol.typeKind()
                 == TypeDescKind.ARRAY) && !(returnTypeSymbol.typeKind() == TypeDescKind.STRING)) {
             repoteDiagnostics(functionName, resourceNode, ctx,
                     PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, returnTypeSymbol.signature());
+        }
+    }
+
+    public static void validateContradictingReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
+                                                 FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
+        boolean hasStreamType = false;
+        boolean hasOtherType = false;
+        for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
+            if (symbol.typeKind() == TypeDescKind.STREAM) {
+                hasStreamType = true;
+            } else if (symbol.typeKind() != TypeDescKind.ERROR) {
+                hasOtherType = true;
+            }
+        }
+        if (hasStreamType && hasOtherType) {
+            repoteDiagnostics(functionName, resourceNode, ctx,
+                    PluginConstants.CompilationErrors.CONTRADICTING_RETURN_TYPES, returnTypeSymbol.signature());
         }
     }
 
@@ -267,7 +285,8 @@ public class Utils {
             if (!(isValidInput(getModuleId(inputParam), paramSignature, kind)) &&
                     inputParams.get(0).signature().contains(COLON + CALLER)) {
                 reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE,
-                        resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
+                        resourceNode.location(), resourceNode.functionName(),
+                        inputParams.get(0).typeDescriptor().signature());
             }
         } else {
             for (ParameterSymbol inputParam : inputParams) {
@@ -276,7 +295,7 @@ public class Utils {
                 TypeDescKind kind = inputParam.typeDescriptor().typeKind();
                 if (isValidInput(moduleId, paramSignature, kind)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE,
-                            resourceNode.location(), paramSignature);
+                            resourceNode.location(), resourceNode.functionName(), paramSignature);
                 }
             }
         }
@@ -303,6 +322,7 @@ public class Utils {
                             PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
             }
+            validateContradictingReturnTypes(returnTypeSymbol, functionName, resourceNode, ctx);
         } else if (validateReturnType(returnTypeSymbol)) {
             repoteDiagnostics(functionName, resourceNode, ctx,
                     PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, returnTypeSymbol.signature());
