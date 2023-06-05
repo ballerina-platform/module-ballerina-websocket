@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.8.0] - 2023-06-01
+
 ### Fixed
 - [Dispatch `onError` remote function when there is a data binding failure](https://github.com/ballerina-platform/ballerina-standard-library/issues/4403)
 
