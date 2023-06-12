@@ -537,6 +537,16 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.CONTRADICTING_RETURN_TYPES);
     }
 
+    @Test
+    public void testDispatcherKeyAbsentWhileDispatcherStreamIdPresent() {
+        Package currentPackage = loadPackage("sample_package_60");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.
+                DISPATCHER_STREAM_ID_PRESENT_WITHOUT_DISPATCHER_KEY);
+    }
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),

@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_ANNOTATION;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_STREAM_ID_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
 
 /**
@@ -64,8 +65,15 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             }
         }
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
-        boolean disptacherAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
-                ctx.semanticModel());
+        boolean dispatcherAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel(), DISPATCHER_ANNOTATION);
+        boolean dispatcherStreamIdAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel(), DISPATCHER_STREAM_ID_ANNOTATION);
+        if (!dispatcherAnnotation && dispatcherStreamIdAnnotation) {
+            Utils.reportDiagnostics(ctx,
+                    PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_PRESENT_WITHOUT_DISPATCHER_KEY,
+                    serviceDeclarationNode.location());
+        }
 
         String modulePrefix = Utils.getPrefix(ctx);
         Optional<Symbol> serviceDeclarationSymbol = ctx.semanticModel().symbol(serviceDeclarationNode);
@@ -77,14 +85,15 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                     ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor(ctx);
                     serviceDeclarationNode.syntaxTree().rootNode().accept(visitor);
                     validateListenerArguments(ctx, visitor);
-                    validateService(ctx, modulePrefix, disptacherAnnotation);
+                    validateService(ctx, modulePrefix, dispatcherAnnotation);
                     return;
                 }
             }
         }
     }
 
-    private boolean isDispatcherKeyAnnotation(AnnotationNode annotation, SemanticModel semanticModel) {
+    private boolean isDispatcherKeyAnnotation(AnnotationNode annotation, SemanticModel semanticModel,
+                                              String annotationField) {
         Optional<Symbol> symbolOpt = semanticModel.symbol(annotation);
         if (symbolOpt.isEmpty()) {
             return false;
@@ -95,11 +104,11 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             return false;
         }
 
-        return annotation.annotValue().toString().contains(DISPATCHER_ANNOTATION);
+        return annotation.annotValue().toString().contains(annotationField);
     }
 
     private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
-                                                  SemanticModel semanticModel) {
+                                                  SemanticModel semanticModel, String annotationField) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         if (metadata.isEmpty()) {
             return false;
@@ -107,7 +116,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         MetadataNode metaData = metadata.get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
-                .anyMatch(ann -> isDispatcherKeyAnnotation(ann, semanticModel));
+                .anyMatch(ann -> isDispatcherKeyAnnotation(ann, semanticModel, annotationField));
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {

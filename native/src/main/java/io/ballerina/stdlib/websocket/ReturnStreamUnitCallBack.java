@@ -51,26 +51,50 @@ public class ReturnStreamUnitCallBack implements Callback {
     private final BObject bObject;
     private final WebSocketConnectionInfo connectionInfo;
     private final WebSocketConnection webSocketConnection;
+    private final String disptacherStreamId;
+    private final String dispatcherStreamIdValue;
 
     ReturnStreamUnitCallBack(BObject bObject, Runtime runtime, WebSocketConnectionInfo connectionInfo,
-                             WebSocketConnection webSocketConnection) {
+                             WebSocketConnection webSocketConnection, String dispatcherStreamId,
+                             String dispatcherStreamIdValue) {
         this.bObject = bObject;
         this.runtime = runtime;
         this.connectionInfo = connectionInfo;
         this.webSocketConnection = webSocketConnection;
+        this.disptacherStreamId = dispatcherStreamId;
+        this.dispatcherStreamIdValue = dispatcherStreamIdValue;
     }
 
     @Override
     public void notifySuccess(Object response) {
         if (response != null) {
             PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
-            String content;
+            String content = null;
             if (response instanceof BError) {
                 content = ((BError) response).getMessage();
                 webSocketConnection.terminateConnection(1011,
                         String.format("streaming failed: %s", content));
             } else {
-                content = ((BMap) response).get(StringUtils.fromString("value")).toString();
+                if (disptacherStreamId != null && dispatcherStreamIdValue != null && response != null &&
+                        response instanceof BMap) {
+                    Object outputObject = ((BMap) response).get(StringUtils.fromString("value"));
+                    BMap outputMap = (BMap) outputObject;
+                    boolean dispatchingStreamIdPresent = outputMap
+                            .containsKey(StringUtils.fromString(disptacherStreamId));
+                    if (dispatchingStreamIdPresent) {
+                        outputMap.put(StringUtils.fromString(disptacherStreamId),
+                                StringUtils.fromString(dispatcherStreamIdValue));
+                        content = outputMap.toString();
+                    } else {
+                        dispatchOnError(connectionInfo, new Throwable("Response type must contain dispatcherStreamId"),
+                                true);
+                    }
+
+                } else {
+                    content = ((BMap) response).get(StringUtils.fromString("value")).toString();
+
+                }
+
                 sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
                 runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
                         null, this, null, PredefinedTypes.TYPE_NULL);

@@ -31,6 +31,7 @@ import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_KEY;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_STREAM_ID;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED;
 
 /**
@@ -44,6 +45,7 @@ public class WebSocketServerService extends WebSocketService {
     private int idleTimeoutInSeconds = 0;
     private boolean enableValidation = true;
     private String dispatchingKey = null;
+    private String dispatchingStreamId = null;
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
@@ -60,6 +62,9 @@ public class WebSocketServerService extends WebSocketService {
             enableValidation = configAnnotation.getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
             if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY) != null) {
                 dispatchingKey = configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY).getValue();
+            }
+            if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_STREAM_ID) != null) {
+                dispatchingStreamId = configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_STREAM_ID).getValue();
             }
         }
         service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_MAX_FRAME_SIZE.toString(), maxFrameSize);
@@ -96,6 +101,10 @@ public class WebSocketServerService extends WebSocketService {
 
     public String getDispatchingKey() {
         return dispatchingKey;
+    }
+
+    public String getDispatchingStreamId() {
+        return dispatchingStreamId;
     }
 
     public String getBasePath() {

@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
@@ -59,13 +60,18 @@ public class WebSocketResourceCallback implements Callback {
     private final String resource;
     private final Runtime runtime;
     private static final Logger log = LoggerFactory.getLogger(WebSocketResourceCallback.class);
+    private final String dispatcherStreamId;
+    private final String dispatcherStreamIdValue;
 
-    WebSocketResourceCallback(WebSocketConnectionInfo webSocketConnectionInfo, String resource, Runtime runtime)
+    WebSocketResourceCallback(WebSocketConnectionInfo webSocketConnectionInfo, String resource, Runtime runtime,
+                              String dispatcherStreamId, String dispatcherStreamIdValue)
             throws IllegalAccessException {
         this.runtime = runtime;
         this.connectionInfo = webSocketConnectionInfo;
         this.webSocketConnection = connectionInfo.getWebSocketConnection();
         this.resource = resource;
+        this.dispatcherStreamId = dispatcherStreamId;
+        this.dispatcherStreamIdValue = dispatcherStreamIdValue;
     }
 
     @Override
@@ -81,8 +87,14 @@ public class WebSocketResourceCallback implements Callback {
             sendBinaryMessage((BArray) result, promiseCombiner);
         } else if (result instanceof BStream) {
             BObject bObject = ((BStream) result).getIteratorObj();
-            ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
-                    connectionInfo, webSocketConnection);
+            ReturnStreamUnitCallBack returnStreamUnitCallBack;
+            if (dispatcherStreamId != null && dispatcherStreamIdValue != null) {
+                returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
+                        connectionInfo, webSocketConnection, dispatcherStreamId, dispatcherStreamIdValue);
+            } else {
+                returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
+                        connectionInfo, webSocketConnection, null, null);
+            }
             runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
                     null, returnStreamUnitCallBack, null, PredefinedTypes.TYPE_NULL);
         } else if (result == null) {
@@ -91,7 +103,23 @@ public class WebSocketResourceCallback implements Callback {
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_CLOSE) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT)) {
-            sendTextMessage(StringUtils.fromString(result.toString()), promiseCombiner);
+            if (dispatcherStreamId != null && dispatcherStreamIdValue != null && result != null &&
+                    result instanceof BMap) {
+                BMap output = (BMap) result;
+                boolean dispatchingStreamIdPresent = output
+                            .containsKey(StringUtils.fromString(dispatcherStreamId));
+                if (dispatchingStreamIdPresent) {
+                        output.put(StringUtils.fromString(dispatcherStreamId),
+                                StringUtils.fromString(dispatcherStreamIdValue));
+                        sendTextMessage(StringUtils.fromString(output.toString()), promiseCombiner);
+                } else {
+                    dispatchOnError(connectionInfo, new Throwable("Response type must contain dispatcherStreamId"),
+                            true);
+                }
+
+            } else {
+                sendTextMessage(StringUtils.fromString(result.toString()), promiseCombiner);
+            }
         } else {
             log.error("invalid return type");
         }
