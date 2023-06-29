@@ -28,4 +28,7 @@
         <Class name="io.ballerina.stdlib.websocket.WebSocketResourceCallback"/>
         <Bug pattern="DM_EXIT"/>
     </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>

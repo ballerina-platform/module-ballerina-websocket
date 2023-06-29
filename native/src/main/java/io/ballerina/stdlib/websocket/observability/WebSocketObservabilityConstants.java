@@ -57,6 +57,6 @@ public class WebSocketObservabilityConstants {
 
     static final String UNKNOWN = "unknown";
 
-    private WebSocketObservabilityConstants(){
+    private WebSocketObservabilityConstants() {
     }
 }
