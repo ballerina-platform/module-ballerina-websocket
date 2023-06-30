@@ -103,7 +103,7 @@ public class WebSocketResourceCallback implements Callback {
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_CLOSE) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT)) {
-            if (dispatcherStreamId != null && dispatcherStreamIdValue != null && result != null &&
+            if (dispatcherStreamId != null && dispatcherStreamIdValue != null &&
                     result instanceof BMap) {
                 BMap output = (BMap) result;
                 boolean dispatchingStreamIdPresent = output

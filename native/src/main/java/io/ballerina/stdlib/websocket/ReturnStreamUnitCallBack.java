@@ -75,7 +75,7 @@ public class ReturnStreamUnitCallBack implements Callback {
                 webSocketConnection.terminateConnection(1011,
                         String.format("streaming failed: %s", content));
             } else {
-                if (disptacherStreamId != null && dispatcherStreamIdValue != null && response != null &&
+                if (disptacherStreamId != null && dispatcherStreamIdValue != null &&
                         response instanceof BMap) {
                     Object outputObject = ((BMap) response).get(StringUtils.fromString("value"));
                     BMap outputMap = (BMap) outputObject;
