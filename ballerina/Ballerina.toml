@@ -16,25 +16,25 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
 version = "2.9.0"
-path = "../native/build/libs/websocket-native-2.9.0-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.9.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
 version = "2.9.0"
-path = "./lib/http-native-2.9.0-20230621-065800-bb69fb5.jar"
+path = "./lib/http-native-2.9.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "mime-native"
 version = "2.8.0"
-path = "./lib/mime-native-2.8.0-20230620-205000-a1e0453.jar"
+path = "./lib/mime-native-2.8.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "1.3.0"
-path = "./lib/constraint-native-1.3.0-20230620-195700-ca941bc.jar"
+path = "./lib/constraint-native-1.3.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.netty"
@@ -85,5 +85,5 @@ version = "4.1.94.Final"
 path = "./lib/netty-handler-proxy-4.1.94.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.9.0-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.9.0.jar"
 scope = "testOnly"
