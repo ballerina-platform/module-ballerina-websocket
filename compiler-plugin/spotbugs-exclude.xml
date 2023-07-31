@@ -16,4 +16,9 @@
   ~ under the License.
   -->
 <FindBugsFilter>
+    <Match>
+        <Class name="io.ballerina.stdlib.websocket.plugin.ReturnStatementNodeVisitor" />
+        <Method name="getReturnStatementNodes" />
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
 </FindBugsFilter>
