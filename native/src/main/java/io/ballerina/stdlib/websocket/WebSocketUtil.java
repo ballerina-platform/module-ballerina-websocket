@@ -501,7 +501,7 @@ public class WebSocketUtil {
     /**
      * Calculate the waiting time.
      *
-     * @param interval- Interval to wait before trying to reconnect.
+     * @param interval - Interval to wait before trying to reconnect.
      * @param maxInterval - Maximum interval to wait before trying to reconnect.
      * @param backOfFactor - The rate of increase of to reconnect delay.
      * @param reconnectAttempts - The number of reconnecting attempts.
