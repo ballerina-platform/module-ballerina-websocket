@@ -50,6 +50,7 @@ import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -63,7 +64,6 @@ public class Utils {
 
     public static final String PREFIX = "ballerina/websocket:";
     public static final String CALLER = "Caller";
-    public static final String CLIENT = "Client";
     public static final String BYTE_ARRAY = "byte[]";
     public static final String STRING = "string";
     public static final String INT = "int";
@@ -317,13 +317,13 @@ public class Utils {
                                                  FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
-                if (validateReturnType(symbol)) {
+                if (isInvalidReturnType(symbol)) {
                     repoteDiagnostics(functionName, resourceNode, ctx,
                             PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
             }
             validateContradictingReturnTypes(returnTypeSymbol, functionName, resourceNode, ctx);
-        } else if (validateReturnType(returnTypeSymbol)) {
+        } else if (isInvalidReturnType(returnTypeSymbol)) {
             repoteDiagnostics(functionName, resourceNode, ctx,
                     PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, returnTypeSymbol.signature());
         }
@@ -337,13 +337,13 @@ public class Utils {
                 functionName);
     }
 
-    private static boolean validateReturnType(TypeSymbol symbol) {
-        return !(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE)
-                && (symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL)
-                && !(symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
-                && !(symbol.typeKind() == TypeDescKind.INT) && !(symbol.typeKind() == TypeDescKind.BOOLEAN)
-                && !(symbol.typeKind() == TypeDescKind.DECIMAL) && !(symbol.typeKind() == TypeDescKind.JSON)
-                && !(symbol.typeKind() == TypeDescKind.XML) && !(symbol.typeKind() == TypeDescKind.FLOAT);
+    private static boolean isInvalidReturnType(TypeSymbol symbol) {
+        List<TypeDescKind> validReturnTypes = Arrays.asList(TypeDescKind.ERROR, TypeDescKind.TYPE_REFERENCE,
+                                                            TypeDescKind.STREAM, TypeDescKind.NIL, TypeDescKind.STRING,
+                                                            TypeDescKind.ARRAY, TypeDescKind.INT, TypeDescKind.BOOLEAN,
+                                                            TypeDescKind.DECIMAL, TypeDescKind.JSON, TypeDescKind.XML,
+                                                            TypeDescKind.FLOAT);
+        return !validReturnTypes.contains(symbol.typeKind());
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {
