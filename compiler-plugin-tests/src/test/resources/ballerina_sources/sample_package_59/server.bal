@@ -16,17 +16,20 @@
 
 import ballerina/websocket;
 
-service /chat on new websocket:Listener(9090) {
+type ErrorMessage record {
+    string message;
+    int code;
+};
 
-    resource function get .() returns websocket:Service {
-        return new ChatService();
+service /onStream on new websocket:Listener(9090) {
+    resource function get .() returns websocket:Service|websocket:UpgradeError {
+        return new StreamStringSvc();
     }
 }
 
-service class ChatService {
+service class StreamStringSvc {
     *websocket:Service;
-    remote function onPing(websocket:Caller caller, string chatMessage) returns error? {
-        check caller->writeMessage("Hello!, How are you?");
+    isolated remote function onSubscribeMesssage(string data) returns stream<ErrorMessage> {
+        return [].toStream();
     }
 }
-

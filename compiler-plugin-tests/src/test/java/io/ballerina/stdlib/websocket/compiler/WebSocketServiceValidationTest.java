@@ -537,6 +537,14 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.CONTRADICTING_RETURN_TYPES);
     }
 
+    @Test
+    public void testReturnStreamContainingErrorSubstringInSignature() {
+        Package currentPackage = loadPackage("sample_package_59");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),

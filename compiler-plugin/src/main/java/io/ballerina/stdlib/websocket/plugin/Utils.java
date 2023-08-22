@@ -63,7 +63,6 @@ public class Utils {
 
     public static final String PREFIX = "ballerina/websocket:";
     public static final String CALLER = "Caller";
-    public static final String CLIENT = "Client";
     public static final String BYTE_ARRAY = "byte[]";
     public static final String STRING = "string";
     public static final String INT = "int";
@@ -339,7 +338,7 @@ public class Utils {
 
     private static boolean validateReturnType(TypeSymbol symbol) {
         return !(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE)
-                && (symbol.signature().contains(ERROR)) && !(symbol.typeKind() == TypeDescKind.NIL)
+                && !(symbol.typeKind() == TypeDescKind.STREAM) && !(symbol.typeKind() == TypeDescKind.NIL)
                 && !(symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
                 && !(symbol.typeKind() == TypeDescKind.INT) && !(symbol.typeKind() == TypeDescKind.BOOLEAN)
                 && !(symbol.typeKind() == TypeDescKind.DECIMAL) && !(symbol.typeKind() == TypeDescKind.JSON)
