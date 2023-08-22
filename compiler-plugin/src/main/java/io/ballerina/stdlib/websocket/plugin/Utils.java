@@ -50,6 +50,7 @@ import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -337,12 +338,10 @@ public class Utils {
     }
 
     private static boolean validateReturnType(TypeSymbol symbol) {
-        return !(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE)
-                && !(symbol.typeKind() == TypeDescKind.STREAM) && !(symbol.typeKind() == TypeDescKind.NIL)
-                && !(symbol.typeKind() == TypeDescKind.STRING) && !(symbol.typeKind() == TypeDescKind.ARRAY)
-                && !(symbol.typeKind() == TypeDescKind.INT) && !(symbol.typeKind() == TypeDescKind.BOOLEAN)
-                && !(symbol.typeKind() == TypeDescKind.DECIMAL) && !(symbol.typeKind() == TypeDescKind.JSON)
-                && !(symbol.typeKind() == TypeDescKind.XML) && !(symbol.typeKind() == TypeDescKind.FLOAT);
+        TypeDescKind[] validReturnTypes = {TypeDescKind.ERROR, TypeDescKind.TYPE_REFERENCE, TypeDescKind.STREAM,
+                TypeDescKind.NIL, TypeDescKind.STRING, TypeDescKind.ARRAY, TypeDescKind.INT, TypeDescKind.BOOLEAN,
+                TypeDescKind.DECIMAL, TypeDescKind.JSON, TypeDescKind.XML, TypeDescKind.FLOAT};
+        return !Arrays.asList(validReturnTypes).contains(symbol.typeKind());
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {
