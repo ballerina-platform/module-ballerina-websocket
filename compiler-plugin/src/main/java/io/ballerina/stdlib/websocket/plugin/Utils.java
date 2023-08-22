@@ -317,13 +317,13 @@ public class Utils {
                                                  FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
-                if (validateReturnType(symbol)) {
+                if (isInvalidReturnType(symbol)) {
                     repoteDiagnostics(functionName, resourceNode, ctx,
                             PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, symbol.signature());
                 }
             }
             validateContradictingReturnTypes(returnTypeSymbol, functionName, resourceNode, ctx);
-        } else if (validateReturnType(returnTypeSymbol)) {
+        } else if (isInvalidReturnType(returnTypeSymbol)) {
             repoteDiagnostics(functionName, resourceNode, ctx,
                     PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA, returnTypeSymbol.signature());
         }
@@ -337,11 +337,13 @@ public class Utils {
                 functionName);
     }
 
-    private static boolean validateReturnType(TypeSymbol symbol) {
-        TypeDescKind[] validReturnTypes = {TypeDescKind.ERROR, TypeDescKind.TYPE_REFERENCE, TypeDescKind.STREAM,
-                TypeDescKind.NIL, TypeDescKind.STRING, TypeDescKind.ARRAY, TypeDescKind.INT, TypeDescKind.BOOLEAN,
-                TypeDescKind.DECIMAL, TypeDescKind.JSON, TypeDescKind.XML, TypeDescKind.FLOAT};
-        return !Arrays.asList(validReturnTypes).contains(symbol.typeKind());
+    private static boolean isInvalidReturnType(TypeSymbol symbol) {
+        List<TypeDescKind> validReturnTypes = Arrays.asList(TypeDescKind.ERROR, TypeDescKind.TYPE_REFERENCE,
+                                                            TypeDescKind.STREAM, TypeDescKind.NIL, TypeDescKind.STRING,
+                                                            TypeDescKind.ARRAY, TypeDescKind.INT, TypeDescKind.BOOLEAN,
+                                                            TypeDescKind.DECIMAL, TypeDescKind.JSON, TypeDescKind.XML,
+                                                            TypeDescKind.FLOAT);
+        return !validReturnTypes.contains(symbol.typeKind());
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {
