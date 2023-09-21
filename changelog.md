@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.10.0] - 2023-09-15
+
 ### Fixed
 - [Fix Compilation Error for Stream Type With "Error" Substring in Signature](https://github.com/ballerina-platform/ballerina-standard-library/issues/4518)
 
