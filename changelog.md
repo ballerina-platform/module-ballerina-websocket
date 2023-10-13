@@ -4,6 +4,8 @@ This file contains all the notable changes done to the Ballerina WebSocket packa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- [Address netty vulnerability: CVE-2023-4586](https://github.com/ballerina-platform/ballerina-standard-library/issues/4908)
 
 ## [2.8.1] - 2023-06-30
 - [Address netty vulnerability](https://github.com/ballerina-platform/ballerina-standard-library/issues/4599)
