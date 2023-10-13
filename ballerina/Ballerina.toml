@@ -16,13 +16,13 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
 version = "2.10.1"
-path = "../native/build/libs/websocket-native-2.10.1-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.10.1.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
 version = "2.10.3"
-path = "./lib/http-native-2.10.3-20231011-163800-7c8069a.jar"
+path = "./lib/http-native-2.10.3.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -85,5 +85,5 @@ version = "4.1.100.Final"
 path = "./lib/netty-handler-proxy-4.1.100.Final.jar"
 
 [[platform.java17.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.10.1-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.10.1.jar"
 scope = "testOnly"
