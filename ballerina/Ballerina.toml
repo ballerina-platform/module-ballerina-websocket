@@ -13,7 +13,7 @@ distribution = "2201.2.0"
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
 version = "2.4.1"
-path = "../native/build/libs/websocket-native-2.4.1-SNAPSHOT.jar"
+path = "../native/build/libs/websocket-native-2.4.1.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -58,5 +58,5 @@ path = "./lib/netty-codec-4.1.100.Final.jar"
 path = "./lib/netty-handler-proxy-4.1.100.Final.jar"
 
 [[platform.java11.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.4.1-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.4.1.jar"
 scope = "testOnly"
