@@ -8,13 +8,13 @@ Ballerina Websocket Library
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-websocket.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/commits/main)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/websocket.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fwebsocket)
 
-This library provides an implementation for connecting and interacting with WebSocket endpoints over the network.
+The WebSocket library facilitates connecting and interacting with WebSocket endpoints over the network, providing robust support for both client and server-side communication.
 
-### Client
+## Client
 
-The `websocket:Client` can be used to read/write text/binary messages synchronously.
+The `websocket:Client`` allows for synchronous reading/writing of text and binary messages.
 
-A simple client code to handle text messages as follows.
+#### Example: Text Message Handling
 ```ballerina
 import ballerina/websocket;
 
@@ -27,6 +27,9 @@ public function main() returns error? {
 }
 ```
 Similar to the above, this module has the `writeBinaryMessage` and `readBinaryMessage` functions to handle binary messages.
+
+#### Example: Handling Ping/Pong Frames
+
 A callback service with the two `onPing` and `onPong` remote functions can be registered at the initialization of the client to receive the `ping/pong` control frames.
 ```ballerina
 import ballerina/io;
@@ -52,8 +55,7 @@ service class clientPingPongCallbackService {
 
 ### Listener
 
-On the listener-side, an initial WebSocket upgrade service can be attached to the `websocket:Listener` to handle upgrade requests. It has a single `get` resource, which takes in an `http:Request` optionally. The `get` resource returns a `websocket:Service` to which incoming messages get dispatched after a successful WebSocket connection upgrade. This resource can be used to intercept the initial HTTP upgrade with custom headers or to cancel the WebSocket upgrade by returning an error.
-The returning `websocket:Service` has a fixed set of remote methods.
+In the listener-side, a WebSocket upgrade service can be initially attached to the `websocket:Listener` to handle upgrade requests. It contains a single `get` resource, which optionally accepts an `http:Request`. This resource returns a `websocket:Service`, to which incoming messages are dispatched after a successful WebSocket connection upgrade. Additionally, this resource can be utilized to intercept the initial HTTP upgrade with custom headers or to reject the WebSocket upgrade by returning an error. The returned `websocket:Service` must implement a specific set of remote methods.
 
 ```ballerina
 service /ws on new websocket:Listener(21003) {
@@ -69,21 +71,15 @@ service class WsService {
 }              
 ```
 
-#### Remote methods associated with `websocket:Service`
+#### Remote methods in `websocket:Service`
 
-**onOpen**: As soon as the WebSocket handshake is completed and the connection is established, the `onOpen` remote method is dispatched.
-
-**onTextMessage**: The received text messages are dispatched to this remote method.
-
-**onBinaryMessage**: The received binary messages are dispatched to this remote method.
-
-**onPing and onPong**: The received ping and pong messages are dispatched to these remote methods respectively.
-
-**onIdleTimeout**: This remote method is dispatched when the idle timeout is reached. The `idleTimeout` has to be configured either in the WebSocket service or the client configuration.
-
-**onClose**: This remote method is dispatched when a close frame with a `statusCode` and a reason is received.
-
-**onError**: This remote method is dispatched when an error occurs in the WebSocket connection. This will always be preceded by a connection closure with an appropriate close frame.
+- **onOpen**: Invoked upon WebSocket connection establishment.
+- **onTextMessage**: Invoked upon receiving a text message.
+- **onBinaryMessage**: Invoked upon receiving a binary message.
+- **onPing** and **onPong**: Invoked upon receiving ping and pong frames, respectively.
+- **onIdleTimeout**: Invoked when the idle timeout is reached.
+- **onClose**: Invoked upon receiving a close frame.
+- **onError**: Invoked when an error occurs in the WebSocket connection.
 
 ### Control messages
 
