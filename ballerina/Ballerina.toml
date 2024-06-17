@@ -1,13 +1,13 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "2.10.2"
+version = "2.11.0"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.8.0"
+distribution = "2201.9.0"
 
 [platform.java17]
 graalvmCompatible = true
@@ -15,8 +15,8 @@ graalvmCompatible = true
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
-version = "2.10.2"
-path = "../native/build/libs/websocket-native-2.10.2-SNAPSHOT.jar"
+version = "2.11.0"
+path = "../native/build/libs/websocket-native-2.11.0.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -33,8 +33,8 @@ path = "./lib/mime-native-2.9.0.jar"
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
-version = "1.4.0"
-path = "./lib/constraint-native-1.4.0.jar"
+version = "1.5.0"
+path = "./lib/constraint-native-1.5.0.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.netty"
@@ -85,5 +85,5 @@ version = "4.1.108.Final"
 path = "./lib/netty-handler-proxy-4.1.108.Final.jar"
 
 [[platform.java17.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.10.2-SNAPSHOT.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.11.0.jar"
 scope = "testOnly"
