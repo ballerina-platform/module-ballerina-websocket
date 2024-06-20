@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+- [Implement custom error remote functions for onXXXError](https://github.com/ballerina-platform/ballerina-library/issues/6625)
+
 ## [2.10.0] - 2023-09-15
 
 ### Fixed
