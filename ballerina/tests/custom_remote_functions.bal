@@ -123,17 +123,14 @@ service /oncustomerror on customDispatchingLis {
 service class OnCustomErrorService {
     *Service;
     remote function onMessages(Caller caller, byte[] data) returns Error? {
-        io:println("On messages");
         check caller->writeMessage({"event": "onMessages"});
     }
 
     remote function onMessage(Caller caller, string data) returns Error? {
-        io:println(data);
         check caller->writeMessage({"event": "onMessage"});
     }
 
     remote function onMessagesError(Caller caller, error err) returns Error? {
-        io:println("on custom error");
         check caller->writeMessage({"event": "onCustomError"});
     }
 }
@@ -247,7 +244,6 @@ public function testDatabindingFailureWithCustomOnError() returns Error? {
     check cl->writeMessage({"event": "Messages"});
     json resp2 = check cl->readMessage();
     test:assertEquals(resp2, {"event": "onCustomError"});
-    io:println("Writing the event123 message");
     check cl->writeMessage({"event123": "Messages"});
     json resp3 = check cl->readMessage();
     test:assertEquals(resp3, {"event": "onMessage"});

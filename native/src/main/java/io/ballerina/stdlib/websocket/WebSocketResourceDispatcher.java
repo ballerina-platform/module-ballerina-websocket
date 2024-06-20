@@ -408,18 +408,21 @@ public class WebSocketResourceDispatcher {
             WebSocketService wsService = connectionInfo.getService();
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
+            stringAggregator.appendAggregateString(textMessage.getText());
+            boolean finalFragment = textMessage.isFinalFragment();
+            if (!finalFragment) {
+                webSocketConnection.readNextFrame();
+                return;
+            }
             String dispatchingKey = ((WebSocketServerService) wsService).getDispatchingKey();
-            String methodName = getCustomRemoteMethodName(textMessage, webSocketConnection, stringAggregator,
-                    dispatchingKey);
+            String customRemoteMethodName = getCustomRemoteMethodName(dispatchingKey, stringAggregator);
             MethodType onTextMessageResource = null;
-            BObject balservice;
             BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
             Object dispatchingService = wsService.getWsService(connectionInfo.getWebSocketConnection().getChannelId());
-            balservice = (BObject) dispatchingService;
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
                 String funcName = remoteFunc.getName();
-                if (funcName.equals(methodName)) {
+                if (funcName.equals(customRemoteMethodName)) {
                     onTextMessageResource = remoteFunc;
                     break;
                 }
@@ -432,8 +435,8 @@ public class WebSocketResourceDispatcher {
                     .equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR));
             String errorMethodName = null;
             boolean hasOnCustomError = false;
-            if (methodName != null) {
-                errorMethodName = methodName + "Error";
+            if (customRemoteMethodName != null) {
+                errorMethodName = customRemoteMethodName + "Error";
                 hasOnCustomError = hasCustomErrorRemoteFunction(remoteFunctions, errorMethodName);
             }
             if (onTextMessageResource == null) {
@@ -445,100 +448,96 @@ public class WebSocketResourceDispatcher {
             Type[] parameterTypes = onTextMessageResource.getParameterTypes();
             Object[] bValues = new Object[parameterTypes.length * 2];
 
-            boolean finalFragment = textMessage.isFinalFragment();
-            if (finalFragment) {
-                if (null == dispatchingKey) {
-                    // If the dispatching key is there, appending is already done.
-                    stringAggregator.appendAggregateString(textMessage.getText());
-                }
-                int index = 0;
-                try {
-                    for (Type param : parameterTypes) {
-                        int typeTag = TypeUtils.getReferredType(param).getTag();
-                        boolean readOnly = false;
-                        if (typeTag == INTERSECTION_TAG) {
-                            List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
-                            if (invalidInputParams(webSocketConnection, param, memberTypes)) {
-                                return;
-                            }
-                            readOnly = true;
-                            for (Type type : memberTypes) {
-                                if (type.getTag() == TypeTags.READONLY_TAG) {
-                                    continue;
-                                }
-                                param = type;
-                                typeTag = type.getTag();
-                                break;
-                            }
+            int index = 0;
+            try {
+                for (Type param : parameterTypes) {
+                    int typeTag = TypeUtils.getReferredType(param).getTag();
+                    boolean readOnly = false;
+                    if (typeTag == INTERSECTION_TAG) {
+                        List<Type> memberTypes = ((IntersectionType) param).getConstituentTypes();
+                        if (invalidInputParams(webSocketConnection, param, memberTypes)) {
+                            return;
                         }
-                        Object bValue;
-                        switch (typeTag) {
-                            case OBJECT_TYPE_TAG:
-                                bValue = wsEndpoint;
-                                break;
-                            case STRING_TAG:
-                                bValue = StringUtils.fromString(stringAggregator.getAggregateString());
-                                break;
-                            case TypeTags.XML_TAG:
-                                bValue = XmlUtils.parse(stringAggregator.getAggregateString());
-                                break;
-                            case TypeTags.RECORD_TYPE_TAG:
-                                bValue = ValueUtils.convert(JsonUtils.parse(stringAggregator.getAggregateString()),
-                                        param);
-                                break;
-                            case TypeTags.UNION_TAG:
-                                if (WebSocketUtil.hasStringType(param)) {
-                                    bValue = ValueUtils.convert(
-                                            StringUtils.fromString(stringAggregator.getAggregateString()), param);
-                                    break;
-                                }
-                                // fall through
-                            default:
-                                bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
-                                        stringAggregator.getAggregateString()),
-                                        ValueCreator.createTypedescValue(param));
-                                break;
+                        readOnly = true;
+                        for (Type type : memberTypes) {
+                            if (type.getTag() == TypeTags.READONLY_TAG) {
+                                continue;
+                            }
+                            param = type;
+                            typeTag = type.getTag();
+                            break;
                         }
-                        if (bValue instanceof BError bError) {
-                            handleError(connectionInfo, bError, hasOnCustomError, errorMethodName, hasOnError);
+                    }
+                    Object bValue = getBvaluesForTextMessage(param, typeTag, wsEndpoint, stringAggregator);
+                    if (bValue instanceof BError bError) {
+                        handleError(connectionInfo, bError, hasOnCustomError, errorMethodName, hasOnError);
+                        stringAggregator.resetAggregateString();
+                        return;
+                    }
+                    if (readOnly) {
+                        bValue = CloneReadOnly.cloneReadOnly(bValue);
+                    }
+                    if (typeTag != OBJECT_TYPE_TAG && validationEnabled) {
+                        Object validationResult = Constraints.validate(bValue,
+                                ValueCreator.createTypedescValue(param));
+                        if (validationResult instanceof BError) {
+                            BError validationErr = WebSocketUtil.createWebsocketErrorWithCause(
+                                    String.format("data validation failed: %s", validationResult),
+                                    WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult);
+                            dispatchOnError(connectionInfo, validationErr, true);
                             stringAggregator.resetAggregateString();
                             return;
                         }
-                        if (readOnly) {
-                            bValue = CloneReadOnly.cloneReadOnly(bValue);
-                        }
-                        if (typeTag != OBJECT_TYPE_TAG && validationEnabled) {
-                            Object validationResult = Constraints.validate(bValue,
-                                    ValueCreator.createTypedescValue(param));
-                            if (validationResult instanceof BError) {
-                                BError validationErr = WebSocketUtil.createWebsocketErrorWithCause(
-                                        String.format("data validation failed: %s", validationResult),
-                                        WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult);
-                                dispatchOnError(connectionInfo, validationErr, true);
-                                stringAggregator.resetAggregateString();
-                                return;
-                            }
-                        }
-                        bValues[index++] = bValue;
-                        bValues[index++] = true;
                     }
-                } catch (BError error) {
-                    handleError(connectionInfo, error, hasOnCustomError, errorMethodName, hasOnError);
-                    stringAggregator.resetAggregateString();
-                    return;
+                    bValues[index++] = bValue;
+                    bValues[index++] = true;
                 }
-                executeResource(wsService, balservice,
-                        new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName(),
-                                wsService.getRuntime()), bValues, connectionInfo, onTextMessageResource.getName(),
-                                ModuleUtils.getOnTextMetaData());
+            } catch (BError error) {
+                handleError(connectionInfo, error, hasOnCustomError, errorMethodName, hasOnError);
                 stringAggregator.resetAggregateString();
-            } else {
-                stringAggregator.appendAggregateString(textMessage.getText());
-                webSocketConnection.readNextFrame();
+                return;
             }
+            executeResource(wsService, (BObject) dispatchingService,
+                    new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName(),
+                            wsService.getRuntime()), bValues, connectionInfo, onTextMessageResource.getName(),
+                            ModuleUtils.getOnTextMetaData());
+            stringAggregator.resetAggregateString();
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
         }
+    }
+
+    private static Object getBvaluesForTextMessage(Type param, int typeTag, BObject wsEndpoint,
+                                                   WebSocketConnectionInfo.StringAggregator stringAggregator) {
+        Object bValue;
+        switch (typeTag) {
+            case OBJECT_TYPE_TAG:
+                bValue = wsEndpoint;
+                break;
+            case STRING_TAG:
+                bValue = StringUtils.fromString(stringAggregator.getAggregateString());
+                break;
+            case TypeTags.XML_TAG:
+                bValue = XmlUtils.parse(stringAggregator.getAggregateString());
+                break;
+            case TypeTags.RECORD_TYPE_TAG:
+                bValue = ValueUtils.convert(JsonUtils.parse(stringAggregator.getAggregateString()),
+                        param);
+                break;
+            case TypeTags.UNION_TAG:
+                if (WebSocketUtil.hasStringType(param)) {
+                    bValue = ValueUtils.convert(
+                            StringUtils.fromString(stringAggregator.getAggregateString()), param);
+                    break;
+                }
+                // fall through
+            default:
+                bValue = FromJsonStringWithType.fromJsonStringWithType(StringUtils.fromString(
+                        stringAggregator.getAggregateString()),
+                        ValueCreator.createTypedescValue(param));
+                break;
+        }
+        return bValue;
     }
 
     private static boolean hasCustomErrorRemoteFunction(MethodType[] remoteFunctions, String errorMethodName) {
@@ -568,25 +567,17 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    private static String getCustomRemoteMethodName(WebSocketTextMessage textMessage,
-             WebSocketConnection webSocketConnection, WebSocketConnectionInfo.StringAggregator stringAggregator,
-             String dispatchingKey) {
+    private static String getCustomRemoteMethodName(String dispatchingKey,
+                                                    WebSocketConnectionInfo.StringAggregator stringAggregator) {
         if (null == dispatchingKey) {
             return null;
-        }
-        boolean finalFragment = textMessage.isFinalFragment();
-        if (finalFragment) {
-            stringAggregator.appendAggregateString(textMessage.getText());
-        } else {
-            stringAggregator.appendAggregateString(textMessage.getText());
-            webSocketConnection.readNextFrame();
         }
         try {
             BString dispatchingValue = ((BMap) FromJsonString.fromJsonString(StringUtils
                     .fromString(stringAggregator.getAggregateString())))
                     .getStringValue(StringUtils.fromString(dispatchingKey));
             return createCustomRemoteFunction(dispatchingValue.getValue());
-        // If any error occurs while retrieving the dispatching value, the default method(onMessage)
+        // If any runtime error occurs while retrieving the dispatching value, the default method(onMessage)
         // name will be used.
         } catch (RuntimeException e) {
             return null;
