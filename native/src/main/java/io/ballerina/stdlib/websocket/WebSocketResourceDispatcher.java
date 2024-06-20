@@ -409,8 +409,7 @@ public class WebSocketResourceDispatcher {
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
                     .createIfNullAndGetStringAggregator();
             String dispatchingKey = ((WebSocketServerService) wsService).getDispatchingKey();
-            String methodName;
-            methodName = getCustomRemoteMethodName(textMessage, webSocketConnection, stringAggregator,
+            String methodName = getCustomRemoteMethodName(textMessage, webSocketConnection, stringAggregator,
                     dispatchingKey);
             MethodType onTextMessageResource = null;
             BObject balservice;
@@ -431,6 +430,12 @@ public class WebSocketResourceDispatcher {
             }
             boolean hasOnError = Arrays.stream(remoteFunctions).anyMatch(remoteFunc -> remoteFunc.getName()
                     .equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR));
+            String errorMethodName = null;
+            boolean hasOnCustomError = false;
+            if (methodName != null) {
+                errorMethodName = methodName + "Error";
+                hasOnCustomError = hasCustomErrorRemoteFunction(remoteFunctions, errorMethodName);
+            }
             if (onTextMessageResource == null) {
                 stringAggregator.resetAggregateString();
                 webSocketConnection.readNextFrame();
@@ -494,8 +499,9 @@ public class WebSocketResourceDispatcher {
                                         ValueCreator.createTypedescValue(param));
                                 break;
                         }
-                        if (bValue instanceof BError) {
-                            handleDataBindingError(connectionInfo, hasOnError, (BError) bValue);
+                        if (bValue instanceof BError bError) {
+                            handleError(connectionInfo, bError, hasOnCustomError, errorMethodName, hasOnError);
+                            stringAggregator.resetAggregateString();
                             return;
                         }
                         if (readOnly) {
@@ -509,6 +515,7 @@ public class WebSocketResourceDispatcher {
                                         String.format("data validation failed: %s", validationResult),
                                         WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult);
                                 dispatchOnError(connectionInfo, validationErr, true);
+                                stringAggregator.resetAggregateString();
                                 return;
                             }
                         }
@@ -516,7 +523,8 @@ public class WebSocketResourceDispatcher {
                         bValues[index++] = true;
                     }
                 } catch (BError error) {
-                    handleDataBindingError(connectionInfo, hasOnError, error);
+                    handleError(connectionInfo, error, hasOnCustomError, errorMethodName, hasOnError);
+                    stringAggregator.resetAggregateString();
                     return;
                 }
                 executeResource(wsService, balservice,
@@ -533,6 +541,24 @@ public class WebSocketResourceDispatcher {
         }
     }
 
+    private static boolean hasCustomErrorRemoteFunction(MethodType[] remoteFunctions, String errorMethodName) {
+        for (MethodType remoteFunc : remoteFunctions) {
+            if (remoteFunc.getName().equals(errorMethodName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void handleError(WebSocketConnectionInfo connectionInfo, BError error, boolean hasOnCustomError,
+                                    String errorMethodName, boolean hasOnError) throws IllegalAccessException {
+        if (hasOnCustomError) {
+            dispatchOnCustomError(connectionInfo, error, errorMethodName);
+        } else {
+            handleDataBindingError(connectionInfo, hasOnError, error);
+        }
+    }
+
     private static void handleDataBindingError(WebSocketConnectionInfo connectionInfo,
                                                boolean hasOnError, BError bValue) throws IllegalAccessException {
         if (hasOnError) {
@@ -545,21 +571,26 @@ public class WebSocketResourceDispatcher {
     private static String getCustomRemoteMethodName(WebSocketTextMessage textMessage,
              WebSocketConnection webSocketConnection, WebSocketConnectionInfo.StringAggregator stringAggregator,
              String dispatchingKey) {
-        String methodName = null;
-        if (null != dispatchingKey) {
-            boolean finalFragment = textMessage.isFinalFragment();
-            if (finalFragment) {
-                stringAggregator.appendAggregateString(textMessage.getText());
-            } else {
-                stringAggregator.appendAggregateString(textMessage.getText());
-                webSocketConnection.readNextFrame();
-            }
+        if (null == dispatchingKey) {
+            return null;
+        }
+        boolean finalFragment = textMessage.isFinalFragment();
+        if (finalFragment) {
+            stringAggregator.appendAggregateString(textMessage.getText());
+        } else {
+            stringAggregator.appendAggregateString(textMessage.getText());
+            webSocketConnection.readNextFrame();
+        }
+        try {
             BString dispatchingValue = ((BMap) FromJsonString.fromJsonString(StringUtils
                     .fromString(stringAggregator.getAggregateString())))
                     .getStringValue(StringUtils.fromString(dispatchingKey));
-            methodName = createCustomRemoteFunction(dispatchingValue.getValue());
+            return createCustomRemoteFunction(dispatchingValue.getValue());
+        // If any error occurs while retrieving the dispatching value, the default method(onMessage)
+        // name will be used.
+        } catch (RuntimeException e) {
+            return null;
         }
-        return methodName;
     }
 
     private static String createCustomRemoteFunction(String dispatchingValue) {
@@ -960,14 +991,8 @@ public class WebSocketResourceDispatcher {
                 dispatchingService = webSocketService
                         .getWsService(connectionInfo.getWebSocketConnection().getChannelId());
                 balservice = (BObject) dispatchingService;
-                MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService)
-                        .getType())).getMethods();
-                for (MethodType remoteFunc : remoteFunctions) {
-                    if (remoteFunc.getName().equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR)) {
-                        onErrorResource = remoteFunc;
-                        break;
-                    }
-                }
+                onErrorResource = getErrorMethod((BValue) dispatchingService,
+                        WebSocketConstants.RESOURCE_NAME_ON_ERROR);
             } catch (IllegalAccessException ex) {
                 connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
             }
@@ -980,6 +1005,59 @@ public class WebSocketResourceDispatcher {
         Type[] paramDetails = onErrorResource.getParameterTypes();
         Object[] bValues = new Object[paramDetails.length * 2];
 
+        getErrorBValues(connectionInfo, throwable, paramDetails, bValues);
+        Callback onErrorCallback = getOnErrorCallback(connectionInfo);
+        executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo,
+                WebSocketConstants.RESOURCE_NAME_ON_ERROR, ModuleUtils.getOnErrorMetaData());
+    }
+
+    public static void dispatchOnCustomError(WebSocketConnectionInfo connectionInfo, Throwable throwable,
+                                             String errorMethodName) {
+        try {
+            WebSocketUtil.setListenerOpenField(connectionInfo);
+            WebSocketService webSocketService = connectionInfo.getService();
+            Object dispatchingService = webSocketService
+                    .getWsService(connectionInfo.getWebSocketConnection().getChannelId());
+            BObject balservice = (BObject) dispatchingService;
+            MethodType onErrorRemoteFunction = getErrorMethod((BValue) dispatchingService,
+                    errorMethodName);
+            Type[] paramDetails = onErrorRemoteFunction.getParameterTypes();
+            Object[] bValues = new Object[paramDetails.length * 2];
+
+            getErrorBValues(connectionInfo, throwable, paramDetails, bValues);
+            Callback onErrorCallback = getOnErrorCallback(connectionInfo);
+            executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo,
+                    errorMethodName, ModuleUtils.getOnErrorMetaData());
+        } catch (IllegalAccessException e) {
+            connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
+        }
+    }
+
+    private static Callback getOnErrorCallback(WebSocketConnectionInfo connectionInfo) {
+        return new Callback() {
+            @Override
+            public void notifySuccess(Object result) {
+                try {
+                    WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
+                    if (webSocketConnection.isOpen()) {
+                        webSocketConnection.readNextFrame();
+                    }
+                } catch (IllegalAccessException e) {
+                    observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
+                }
+            }
+
+            @Override
+            public void notifyFailure(BError error) {
+                error.printStackTrace();
+                observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION, WebSocketConstants.RESOURCE_NAME_ON_ERROR,
+                        error.getMessage());
+            }
+        };
+    }
+
+    private static void getErrorBValues(WebSocketConnectionInfo connectionInfo, Throwable throwable,
+                                        Type[] paramDetails, Object[] bValues) {
         int index = 0;
         for (Type param : paramDetails) {
             int typeName = param.getTag();
@@ -996,21 +1074,16 @@ public class WebSocketResourceDispatcher {
                 break;
             }
         }
-        Callback onErrorCallback = new Callback() {
-            @Override
-            public void notifySuccess(Object result) {
-                // Do nothing.
-            }
+    }
 
-            @Override
-            public void notifyFailure(BError error) {
-                error.printStackTrace();
-                observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION, WebSocketConstants.RESOURCE_NAME_ON_ERROR,
-                        error.getMessage());
+    private static MethodType getErrorMethod(BValue dispatchingService, String onErrorFunctionName) {
+        MethodType[] remoteFunctions = ((ServiceType) (dispatchingService.getType())).getMethods();
+        for (MethodType remoteFunc : remoteFunctions) {
+            if (remoteFunc.getName().equals(onErrorFunctionName)) {
+                return remoteFunc;
             }
-        };
-        executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo,
-                WebSocketConstants.RESOURCE_NAME_ON_ERROR, ModuleUtils.getOnErrorMetaData());
+        }
+        return null;
     }
 
     private static boolean isUnexpectedError(Throwable throwable) {
