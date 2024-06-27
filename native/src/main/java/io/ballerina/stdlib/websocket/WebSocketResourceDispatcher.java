@@ -83,6 +83,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
@@ -415,14 +416,14 @@ public class WebSocketResourceDispatcher {
                 return;
             }
             String dispatchingKey = ((WebSocketServerService) wsService).getDispatchingKey();
-            String customRemoteMethodName = getCustomRemoteMethodName(dispatchingKey, stringAggregator);
+            Optional<String> customRemoteMethodName = getCustomRemoteMethodName(dispatchingKey, stringAggregator);
             MethodType onTextMessageResource = null;
             BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
             Object dispatchingService = wsService.getWsService(connectionInfo.getWebSocketConnection().getChannelId());
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
                 String funcName = remoteFunc.getName();
-                if (funcName.equals(customRemoteMethodName)) {
+                if (customRemoteMethodName.isPresent() && funcName.equals(customRemoteMethodName.get())) {
                     onTextMessageResource = remoteFunc;
                     break;
                 }
@@ -435,8 +436,8 @@ public class WebSocketResourceDispatcher {
                     .equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR));
             String errorMethodName = null;
             boolean hasOnCustomError = false;
-            if (customRemoteMethodName != null) {
-                errorMethodName = customRemoteMethodName + "Error";
+            if (customRemoteMethodName.isPresent()) {
+                errorMethodName = customRemoteMethodName.get() + "Error";
                 hasOnCustomError = hasCustomErrorRemoteFunction(remoteFunctions, errorMethodName);
             }
             if (onTextMessageResource == null) {
@@ -567,21 +568,20 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    private static String getCustomRemoteMethodName(String dispatchingKey,
-                                                    WebSocketConnectionInfo.StringAggregator stringAggregator) {
-        if (null == dispatchingKey) {
-            return null;
-        }
-        try {
-            BString dispatchingValue = ((BMap) FromJsonString.fromJsonString(StringUtils
-                    .fromString(stringAggregator.getAggregateString())))
-                    .getStringValue(StringUtils.fromString(dispatchingKey));
-            return createCustomRemoteFunction(dispatchingValue.getValue());
-        // If any runtime error occurs while retrieving the dispatching value, the default method(onMessage)
-        // name will be used.
-        } catch (RuntimeException e) {
-            return null;
-        }
+    private static Optional<String> getCustomRemoteMethodName(String dispatchingKey,
+                                                              WebSocketConnectionInfo.StringAggregator
+                                                                      stringAggregator) {
+        return Optional.ofNullable(dispatchingKey)
+                .flatMap(key -> {
+                    try {
+                        BString dispatchingValue = ((BMap) FromJsonString.fromJsonString(
+                                StringUtils.fromString(stringAggregator.getAggregateString())))
+                                .getStringValue(StringUtils.fromString(dispatchingKey));
+                        return Optional.of(createCustomRemoteFunction(dispatchingValue.getValue()));
+                    } catch (RuntimeException e) {
+                        return Optional.empty();
+                    }
+                });
     }
 
     private static String createCustomRemoteFunction(String dispatchingValue) {
