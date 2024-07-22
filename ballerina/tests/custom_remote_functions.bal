@@ -113,6 +113,28 @@ service class OnErrorService {
     }
 }
 
+@ServiceConfig {dispatcherKey: "event"}
+service /oncustomerror on customDispatchingLis {
+    resource function get .() returns Service|Error {
+        return new OnCustomErrorService();
+    }
+}
+
+service class OnCustomErrorService {
+    *Service;
+    remote function onMessages(Caller caller, byte[] data) returns Error? {
+        check caller->writeMessage({"event": "onMessages"});
+    }
+
+    remote function onMessage(Caller caller, string data) returns Error? {
+        check caller->writeMessage({"event": "onMessage"});
+    }
+
+    remote function onMessagesError(Caller caller, error err) returns Error? {
+        check caller->writeMessage({"event": "onCustomError"});
+    }
+}
+
 @ServiceConfig {dispatcherKey: "type"}
 service /underscore on customDispatchingLis {
     resource function get .() returns Service|Error {
@@ -214,6 +236,17 @@ public function testDatabindingFailureWithOnError() returns Error? {
     check cl->writeMessage({"event": "Messages"});
     json resp2 = check cl->readMessage();
     test:assertEquals(resp2, {"event": "onError"});
+}
+
+@test:Config {}
+public function testDatabindingFailureWithCustomOnError() returns Error? {
+    Client cl = check new("ws://localhost:21401/oncustomerror");
+    check cl->writeMessage({"event": "Messages"});
+    json resp2 = check cl->readMessage();
+    test:assertEquals(resp2, {"event": "onCustomError"});
+    check cl->writeMessage({"event123": "Messages"});
+    json resp3 = check cl->readMessage();
+    test:assertEquals(resp3, {"event": "onMessage"});
 }
 
 @test:Config {}
