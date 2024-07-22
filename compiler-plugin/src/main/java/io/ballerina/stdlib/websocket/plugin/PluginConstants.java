@@ -103,7 +103,7 @@ public class PluginConstants {
         ON_MESSAGE_GENERATION_HINT("Template generation for onMessage remote function", "WEBSOCKET_118"),
         CONTRADICTING_RETURN_TYPES("Contradicting return types provided for `{0}` remote function, cannot contain" +
                 " stream type with other types", "WEBSOCKET_119"),
-        DISPATCHER_STREAM_ID_WITHOUT_KEY("dispatcherStreamId annotation is used without dispatcherKey annotation",
+        DISPATCHER_STREAM_ID_WITHOUT_KEY("The `dispatcherStreamId` annotation is used without `dispatcherKey` annotation",
                 "WEBSOCKET_120");
 
         private final String error;

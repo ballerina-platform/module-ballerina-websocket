@@ -29,7 +29,7 @@
 # + auth - Listener authentication configurations
 # + validation - Enable/disable constraint validation
 # + dispatcherKey - The key which is going to be used for dispatching to custom remote functions.
-# + dispatcherStreamId - The ID which is going to be used to distinguish .
+# + dispatcherStreamId - The identifier used to distinguish between requests and their corresponding responses in a multiplexing scenario.
 public type WSServiceConfig record {|
     string[] subProtocols = [];
     decimal idleTimeout = 0;
