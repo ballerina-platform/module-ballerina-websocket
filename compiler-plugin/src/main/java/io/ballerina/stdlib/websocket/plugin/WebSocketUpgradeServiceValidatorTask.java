@@ -48,7 +48,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_ANNOTATION;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_STREAM_ID_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
+import static io.ballerina.stdlib.websocket.plugin.Utils.reportDiagnostics;
 
 /**
  * Validates a Ballerina WebSocket Upgrade Service.
@@ -64,8 +66,14 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             }
         }
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
-        boolean disptacherAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
-                ctx.semanticModel());
+        boolean disptacherKeyAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel(), DISPATCHER_ANNOTATION);
+        boolean disptacherStreamIdAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel(), DISPATCHER_STREAM_ID_ANNOTATION);
+        if (disptacherStreamIdAnnotation && !disptacherKeyAnnotation) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY,
+                    serviceDeclarationNode.location());
+        }
 
         String modulePrefix = Utils.getPrefix(ctx);
         Optional<Symbol> serviceDeclarationSymbol = ctx.semanticModel().symbol(serviceDeclarationNode);
@@ -77,14 +85,15 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                     ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor(ctx);
                     serviceDeclarationNode.syntaxTree().rootNode().accept(visitor);
                     validateListenerArguments(ctx, visitor);
-                    validateService(ctx, modulePrefix, disptacherAnnotation);
+                    validateService(ctx, modulePrefix, disptacherKeyAnnotation);
                     return;
                 }
             }
         }
     }
 
-    private boolean isDispatcherKeyAnnotation(AnnotationNode annotation, SemanticModel semanticModel) {
+    private boolean isAnnotationPresent(AnnotationNode annotation, SemanticModel semanticModel,
+                                              String annotationName) {
         Optional<Symbol> symbolOpt = semanticModel.symbol(annotation);
         if (symbolOpt.isEmpty()) {
             return false;
@@ -95,11 +104,11 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             return false;
         }
 
-        return annotation.annotValue().toString().contains(DISPATCHER_ANNOTATION);
+        return annotation.annotValue().toString().contains(annotationName);
     }
 
     private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
-                                                  SemanticModel semanticModel) {
+                                                  SemanticModel semanticModel, String annotationName) {
         Optional<MetadataNode> metadata = serviceNode.metadata();
         if (metadata.isEmpty()) {
             return false;
@@ -107,7 +116,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         MetadataNode metaData = metadata.get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
-                .anyMatch(ann -> isDispatcherKeyAnnotation(ann, semanticModel));
+                .anyMatch(ann -> isAnnotationPresent(ann, semanticModel, annotationName));
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {
@@ -158,7 +167,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             if (secondArgSyntaxKind != null && !(firstArgSyntaxKind == SyntaxKind.NUMERIC_LITERAL && (
                     secondArgSyntaxKind == SyntaxKind.SIMPLE_NAME_REFERENCE
                             || secondArgSyntaxKind == SyntaxKind.MAPPING_CONSTRUCTOR))) {
-                Utils.reportDiagnostics(context, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS,
+                reportDiagnostics(context, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS,
                         location, WebSocketConstants.PACKAGE_WEBSOCKET);
             }
         }

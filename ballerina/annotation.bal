@@ -29,6 +29,7 @@
 # + auth - Listener authentication configurations
 # + validation - Enable/disable constraint validation
 # + dispatcherKey - The key which is going to be used for dispatching to custom remote functions.
+# + dispatcherStreamId - The ID which is going to be used to distinguish .
 public type WSServiceConfig record {|
     string[] subProtocols = [];
     decimal idleTimeout = 0;
@@ -36,6 +37,7 @@ public type WSServiceConfig record {|
     ListenerAuthConfig[] auth?;
     boolean validation = true;
     string dispatcherKey?;
+    string dispatcherStreamId?;
 |};
 
 # The annotation which is used to configure a WebSocket service.

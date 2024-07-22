@@ -42,6 +42,7 @@ public class PluginConstants {
     static final String HTTP_REQUEST = "http:Request";
     static final String LISTENER_IDENTIFIER = "Listener";
     static final String DISPATCHER_ANNOTATION = "dispatcherKey";
+    static final String DISPATCHER_STREAM_ID_ANNOTATION = "dispatcherStreamId";
 
     /**
      * Compilation Errors of WebSocket module.
@@ -101,7 +102,9 @@ public class PluginConstants {
         ON_TEXT_GENERATION_HINT("Template generation for onTextMessage remote function", "WEBSOCKET_117"),
         ON_MESSAGE_GENERATION_HINT("Template generation for onMessage remote function", "WEBSOCKET_118"),
         CONTRADICTING_RETURN_TYPES("Contradicting return types provided for `{0}` remote function, cannot contain" +
-                " stream type with other types", "WEBSOCKET_119");
+                " stream type with other types", "WEBSOCKET_119"),
+        DISPATCHER_STREAM_ID_WITHOUT_KEY("dispatcherStreamId annotation is used without dispatcherKey annotation",
+                "WEBSOCKET_120");
 
         private final String error;
         private final String errorCode;
