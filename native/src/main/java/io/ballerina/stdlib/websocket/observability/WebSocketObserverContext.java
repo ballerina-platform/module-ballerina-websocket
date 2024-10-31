@@ -30,9 +30,9 @@ import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 
 public class WebSocketObserverContext extends ObserverContext {
 
+    private static final String PROTOCOL = "ws";
     private String connectionId = WebSocketObservabilityConstants.UNKNOWN;
     private String servicePathOrClientUrl = WebSocketObservabilityConstants.UNKNOWN;
-    private static final String PROTOCOL = "ws";
 
     WebSocketObserverContext() {
         setObjectName(ObservabilityConstants.SERVER_CONNECTOR_WEBSOCKET);
