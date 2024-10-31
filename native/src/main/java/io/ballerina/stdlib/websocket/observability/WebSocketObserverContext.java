@@ -32,6 +32,7 @@ public class WebSocketObserverContext extends ObserverContext {
 
     private String connectionId = WebSocketObservabilityConstants.UNKNOWN;
     private String servicePathOrClientUrl = WebSocketObservabilityConstants.UNKNOWN;
+    private static final String protocol = "ws";
 
     WebSocketObserverContext() {
         setObjectName(ObservabilityConstants.SERVER_CONNECTOR_WEBSOCKET);
@@ -54,6 +55,7 @@ public class WebSocketObserverContext extends ObserverContext {
         String clientOrServerContext = WebSocketObservabilityUtil.getClientOrServerContext(connectionInfo);
         addTag(WebSocketObservabilityConstants.TAG_CONTEXT, clientOrServerContext);
         addTag(WebSocketObservabilityConstants.TAG_SERVICE, servicePathOrClientUrl);
+        addTag(ObservabilityConstants.TAG_KEY_PROTOCOL, protocol);
     }
 
     String getConnectionId() {
