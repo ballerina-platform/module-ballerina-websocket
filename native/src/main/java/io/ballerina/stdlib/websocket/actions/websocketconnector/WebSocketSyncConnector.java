@@ -16,14 +16,15 @@
 package io.ballerina.stdlib.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BTypedesc;
+import io.ballerina.stdlib.websocket.ModuleUtils;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -32,18 +33,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WebSocketSyncConnector {
 
     public static Object readTextMessage(Environment env, BObject wsConnection) {
-        final Future callback = env.markAsync();
-        try {
-            readContentFromConnection(wsConnection, callback);
-        } catch (IllegalAccessException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
-        }
-        return null;
+        return env.yieldAndRun(() -> {
+            final CompletableFuture<Object> callback = new CompletableFuture<>();
+            try {
+                readContentFromConnection(wsConnection, callback);
+                return ModuleUtils.getResult(callback);
+            } catch (IllegalAccessException e) {
+                return WebSocketUtil
+                        .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
+            }
+        });
     }
 
-    private static void readContentFromConnection(BObject wsConnection, Future callback, BTypedesc... targetType)
-            throws IllegalAccessException {
+    private static void readContentFromConnection(BObject wsConnection, CompletableFuture<Object> callback,
+                                                  BTypedesc... targetType) throws IllegalAccessException {
         WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                 .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
         connectionInfo.addCallback(callback);
@@ -68,25 +71,29 @@ public class WebSocketSyncConnector {
     }
 
     public static Object readBinaryMessage(Environment env, BObject wsConnection) {
-        final Future callback = env.markAsync();
-        try {
-            readContentFromConnection(wsConnection, callback);
-        } catch (IllegalAccessException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
-        }
-        return null;
+        return env.yieldAndRun(() -> {
+            final CompletableFuture<Object> callback = new CompletableFuture<>();
+            try {
+                readContentFromConnection(wsConnection, callback);
+                return ModuleUtils.getResult(callback);
+            } catch (IllegalAccessException e) {
+                return WebSocketUtil
+                        .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
+            }
+        });
     }
 
     public static Object readMessage(Environment env, BObject wsConnection, BTypedesc targetType) {
-        final Future callback = env.markAsync();
-        try {
-            readContentFromConnection(wsConnection, callback, targetType);
-        } catch (IllegalAccessException e) {
-            return WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
-        }
-        return null;
+        return env.yieldAndRun(() -> {
+            final CompletableFuture<Object> callback = new CompletableFuture<>();
+            try {
+                readContentFromConnection(wsConnection, callback, targetType);
+                return ModuleUtils.getResult(callback);
+            } catch (IllegalAccessException e) {
+                return WebSocketUtil
+                        .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError);
+            }
+        });
     }
 
     private WebSocketSyncConnector() {}

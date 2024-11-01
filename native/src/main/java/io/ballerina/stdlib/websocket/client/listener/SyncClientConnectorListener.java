@@ -17,7 +17,6 @@
  */
 package io.ballerina.stdlib.websocket.client.listener;
 
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
@@ -47,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
@@ -60,7 +60,7 @@ import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
-    private Future callback;
+    private CompletableFuture<Object> callback;
     private BTypedesc targetType;
     private AtomicBoolean futureCompleted;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
@@ -323,7 +323,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         }
     }
 
-    public void setCallback(Future callback) {
+    public void setCallback(CompletableFuture<Object> callback) {
         this.callback = callback;
     }
 

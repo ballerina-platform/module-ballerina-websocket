@@ -17,9 +17,7 @@
  */
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -52,7 +50,7 @@ import static io.ballerina.stdlib.websocket.observability.WebSocketObservability
 /**
  * Callback impl for web socket.
  */
-public class WebSocketResourceCallback implements Callback {
+public final class WebSocketResourceCallback implements Handler {
 
     private final WebSocketConnection webSocketConnection;
     private final WebSocketConnectionInfo connectionInfo;
@@ -83,8 +81,15 @@ public class WebSocketResourceCallback implements Callback {
             BObject bObject = ((BStream) result).getIteratorObj();
             ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
                     connectionInfo, webSocketConnection);
-            runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
-                    null, returnStreamUnitCallBack, null, PredefinedTypes.TYPE_NULL);
+            Thread.startVirtualThread(() -> {
+                try {
+                    Object res = runtime.startIsolatedWorker(bObject, STREAMING_NEXT_FUNCTION, null,
+                            null, null).get();
+                    returnStreamUnitCallBack.notifySuccess(res);
+                } catch (BError bError) {
+                    returnStreamUnitCallBack.notifyFailure(bError);
+                }
+            });
         } else if (result == null) {
             webSocketConnection.readNextFrame();
         } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&

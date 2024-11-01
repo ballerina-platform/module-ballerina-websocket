@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.websocket.server;
 
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
@@ -34,7 +33,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 /**
  * The onUpgrade resource callback.
  */
-public class OnUpgradeResourceCallback implements Callback {
+public class OnUpgradeResourceCallback {
     private final WebSocketHandshaker webSocketHandshaker;
     private final WebSocketServerService wsService;
     private final WebSocketConnectionManager connectionManager;
@@ -46,7 +45,6 @@ public class OnUpgradeResourceCallback implements Callback {
         this.connectionManager = connectionManager;
     }
 
-    @Override
     public void notifySuccess(Object result) {
         if (result instanceof BError) {
             BError error = (BError) result;
@@ -75,7 +73,6 @@ public class OnUpgradeResourceCallback implements Callback {
         }
     }
 
-    @Override
     public void notifyFailure(BError error) {
         // These checks are added to release the failure path since there is an authn/authz failure and responded
         // with 401/403 internally.
