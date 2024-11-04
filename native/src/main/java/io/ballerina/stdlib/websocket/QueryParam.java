@@ -25,7 +25,7 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorE
 /**
  * Represents an inbound request query parameter details.
  */
-public class QueryParam {
+public final class QueryParam {
 
     private final int typeTag;
     private final boolean nilable;

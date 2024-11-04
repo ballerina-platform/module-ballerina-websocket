@@ -31,7 +31,7 @@ import io.ballerina.runtime.api.values.BString;
  *
  * @since 0.995
  */
-public class WebSocketException extends RuntimeException {
+public final class WebSocketException extends RuntimeException {
     private final String message;
     private BError wsError;
 

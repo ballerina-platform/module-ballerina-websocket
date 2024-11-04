@@ -20,6 +20,9 @@ package io.ballerina.stdlib.websocket;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+
+import java.util.concurrent.CompletableFuture;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.BALLERINA_ORG;
@@ -119,5 +122,13 @@ public class ModuleUtils {
 
     public static StrandMetadata getOnUpgradeMetaData() {
         return onUpgradeMetaData;
+    }
+
+    public static Object getResult(CompletableFuture<Object> balFuture) {
+        try {
+            return balFuture.get();
+        } catch (Throwable throwable) {
+            throw ErrorCreator.createError(throwable);
+        }
     }
 }

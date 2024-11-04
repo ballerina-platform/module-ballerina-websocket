@@ -18,9 +18,7 @@
 
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -45,7 +43,7 @@ import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocket
 /**
  * Call back class registered for returning streams.
  */
-public class ReturnStreamUnitCallBack implements Callback {
+public class ReturnStreamUnitCallBack implements Handler {
 
     private final Runtime runtime;
     private final BObject bObject;
@@ -72,8 +70,15 @@ public class ReturnStreamUnitCallBack implements Callback {
             } else {
                 content = ((BMap) response).get(StringUtils.fromString("value")).toString();
                 sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
-                runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
-                        null, this, null, PredefinedTypes.TYPE_NULL);
+                Thread.startVirtualThread(() -> {
+                    try {
+                        Object result = runtime.startIsolatedWorker(bObject, STREAMING_NEXT_FUNCTION, null,
+                                null, null).get();
+                        this.notifySuccess(result);
+                    } catch (BError bError) {
+                        this.notifyFailure(bError);
+                    }
+                });
             }
         } else {
             webSocketConnection.readNextFrame();
