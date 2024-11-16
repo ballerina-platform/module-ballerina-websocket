@@ -18,6 +18,7 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -38,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
@@ -82,9 +84,10 @@ public final class WebSocketResourceCallback implements Handler {
             ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
                     connectionInfo, webSocketConnection);
             Thread.startVirtualThread(() -> {
+                Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
+                StrandMetadata strandMetadata = new StrandMetadata(true, properties);
                 try {
-                    Object res = runtime.startIsolatedWorker(bObject, STREAMING_NEXT_FUNCTION, null,
-                            null, null).get();
+                    Object res = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
                     returnStreamUnitCallBack.notifySuccess(res);
                 } catch (BError bError) {
                     returnStreamUnitCallBack.notifyFailure(bError);
