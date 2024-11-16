@@ -18,9 +18,7 @@
 
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.TypeTags;
-import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
@@ -29,9 +27,11 @@ import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Parameter;
+import io.ballerina.runtime.api.types.PredefinedTypes;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
@@ -86,13 +86,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.ballerina.runtime.api.TypeTags.ARRAY_TAG;
-import static io.ballerina.runtime.api.TypeTags.BYTE_TAG;
-import static io.ballerina.runtime.api.TypeTags.ERROR_TAG;
-import static io.ballerina.runtime.api.TypeTags.INTERSECTION_TAG;
-import static io.ballerina.runtime.api.TypeTags.INT_TAG;
-import static io.ballerina.runtime.api.TypeTags.OBJECT_TYPE_TAG;
-import static io.ballerina.runtime.api.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.ARRAY_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.BYTE_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.ERROR_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.INTERSECTION_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.INT_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.OBJECT_TYPE_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.STRING_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.NULL_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
@@ -285,14 +286,9 @@ public class WebSocketResourceDispatcher {
                 connectionManager);
         Thread.startVirtualThread(() -> {
             Object result;
+            StrandMetadata strandMetadata = new StrandMetadata(isIsolated(balservice, function), properties);
             try {
-                if (isIsolated(balservice, function)) {
-                    result = wsService.getRuntime().startIsolatedWorker(balservice, function, null,
-                            ModuleUtils.getOnUpgradeMetaData(), properties, bValues).get();
-                } else {
-                    result = wsService.getRuntime().startNonIsolatedWorker(balservice, function, null,
-                            ModuleUtils.getOnUpgradeMetaData(), properties, bValues).get();
-                }
+                result = wsService.getRuntime().callMethod(balservice, function, strandMetadata, bValues);
                 handler.notifySuccess(result);
             } catch (BError bError) {
                 handler.notifyFailure(bError);
@@ -344,7 +340,7 @@ public class WebSocketResourceDispatcher {
                 throw new WebSocketConnectorException("Invalid query param type '" + parameterType.getName());
             }
             for (Type type : memberTypes) {
-                if (type.getTag() == TypeTags.NULL_TAG) {
+                if (type.getTag() == NULL_TAG) {
                     continue;
                 }
                 QueryParam queryParam = new QueryParam(type,  true);
@@ -389,7 +385,7 @@ public class WebSocketResourceDispatcher {
         try {
             executeResource(wsService, balService, new WebSocketResourceCallback(connectionInfo,
                             WebSocketConstants.RESOURCE_NAME_ON_OPEN, wsService.getRuntime()),
-                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_OPEN, ModuleUtils.getOnOpenMetaData());
+                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_OPEN);
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_RESOURCE_INVOCATION,
                     WebSocketConstants.RESOURCE_NAME_ON_OPEN, e.getMessage());
@@ -494,8 +490,7 @@ public class WebSocketResourceDispatcher {
             }
             executeResource(wsService, (BObject) dispatchingService,
                     new WebSocketResourceCallback(connectionInfo, onTextMessageResource.getName(),
-                            wsService.getRuntime()), bValues, connectionInfo, onTextMessageResource.getName(),
-                            ModuleUtils.getOnTextMetaData());
+                            wsService.getRuntime()), bValues, connectionInfo, onTextMessageResource.getName());
             stringAggregator.resetAggregateString();
         } catch (IllegalAccessException e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
@@ -687,7 +682,7 @@ public class WebSocketResourceDispatcher {
                     controlMessage.getByteArray());
             executeResource(wsService, balservice, new WebSocketResourceCallback(
                             connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, wsService.getRuntime()),
-                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING, ModuleUtils.getOnPingMetaData());
+                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PING);
         } catch (Exception e) {
             //Observe error
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_PING, e.getMessage());
@@ -774,7 +769,7 @@ public class WebSocketResourceDispatcher {
             }
             executeResource(wsService, balservice, new WebSocketResourceCallback(connectionInfo,
                             onBinaryMessageResource.getName(), wsService.getRuntime()), bValues, connectionInfo,
-                    onBinaryMessageResource.getName(), ModuleUtils.getOnBinaryMetaData());
+                    onBinaryMessageResource.getName());
         } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
                 handleDataBindingError(connectionInfo, hasOnError, (BError) e);
@@ -858,7 +853,7 @@ public class WebSocketResourceDispatcher {
                     controlMessage.getByteArray());
             executeResource(wsService, balservice, new WebSocketResourceCallback(
                             connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, wsService.getRuntime()),
-                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG, ModuleUtils.getOnPongMetaData());
+                    bValues, connectionInfo, WebSocketConstants.RESOURCE_NAME_ON_PONG);
         } catch (Exception e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_PONG, e.getMessage());
         }
@@ -932,7 +927,7 @@ public class WebSocketResourceDispatcher {
                 }
             };
             executeResource(wsService, balservice, onCloseCallback, bValues, connectionInfo,
-                    WebSocketConstants.RESOURCE_NAME_ON_CLOSE, ModuleUtils.getOnCloseMetaData());
+                    WebSocketConstants.RESOURCE_NAME_ON_CLOSE);
         } catch (Exception e) {
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_CLOSE, e.getMessage());
         }
@@ -987,7 +982,7 @@ public class WebSocketResourceDispatcher {
         getErrorBValues(connectionInfo, throwable, paramDetails, bValues);
         Handler onErrorCallback = getOnErrorCallback(connectionInfo);
         executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo,
-                WebSocketConstants.RESOURCE_NAME_ON_ERROR, ModuleUtils.getOnErrorMetaData());
+                WebSocketConstants.RESOURCE_NAME_ON_ERROR);
     }
 
     public static void dispatchOnCustomError(WebSocketConnectionInfo connectionInfo, Throwable throwable,
@@ -1006,7 +1001,7 @@ public class WebSocketResourceDispatcher {
             getErrorBValues(connectionInfo, throwable, paramDetails, bValues);
             Handler onErrorCallback = getOnErrorCallback(connectionInfo);
             executeResource(webSocketService, balservice, onErrorCallback, bValues, connectionInfo,
-                    errorMethodName, ModuleUtils.getOnErrorMetaData());
+                    errorMethodName);
         } catch (IllegalAccessException e) {
             connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
         }
@@ -1102,7 +1097,7 @@ public class WebSocketResourceDispatcher {
                 }
             };
             executeResource(wsService, balservice, onIdleTimeoutCallback, bValues, connectionInfo,
-                    WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT, ModuleUtils.getOnTimeoutMetaData());
+                    WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT);
         } catch (Exception e) {
             log.error("Error on idle timeout", e);
             observeError(connectionInfo, ERROR_TYPE_MESSAGE_RECEIVED, MESSAGE_TYPE_TEXT, e.getMessage());
@@ -1121,30 +1116,17 @@ public class WebSocketResourceDispatcher {
     }
 
     private static void executeResource(WebSocketService wsService, BObject balservice, Handler callback,
-            Object[] bValues, WebSocketConnectionInfo connectionInfo, String resource, StrandMetadata metaData) {
+            Object[] bValues, WebSocketConnectionInfo connectionInfo, String resource) {
         Thread.startVirtualThread(() -> {
             Object result;
             try {
+                Map<String, Object> properties = ModuleUtils.getProperties(resource);
                 if (ObserveUtils.isTracingEnabled()) {
-                    Map<String, Object> properties = new HashMap<>();
                     WebSocketObserverContext observerContext = new WebSocketObserverContext(connectionInfo);
                     properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-                    if (isIsolated(balservice, resource)) {
-                        result = wsService.getRuntime().startIsolatedWorker(balservice, resource, null, metaData,
-                                properties, bValues).get();
-                    } else {
-                        result = wsService.getRuntime().startNonIsolatedWorker(balservice, resource, null, metaData,
-                                properties, bValues).get();
-                    }
-                } else {
-                    if (isIsolated(balservice, resource)) {
-                        result = wsService.getRuntime().startIsolatedWorker(balservice, resource, null, metaData,
-                                null, bValues).get();
-                    } else {
-                        result = wsService.getRuntime().startNonIsolatedWorker(balservice, resource, null, metaData,
-                                null, bValues).get();
-                    }
                 }
+                StrandMetadata strandMetadata = new StrandMetadata(isIsolated(balservice, resource), properties);
+                result = wsService.getRuntime().callMethod(balservice, resource, strandMetadata, bValues);
                 callback.notifySuccess(result);
                 WebSocketObservabilityUtil.observeResourceInvocation(connectionInfo, resource);
             } catch (BError bError) {

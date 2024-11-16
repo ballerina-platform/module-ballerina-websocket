@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -34,6 +35,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
+
+import java.util.Map;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
@@ -71,9 +74,10 @@ public class ReturnStreamUnitCallBack implements Handler {
                 content = ((BMap) response).get(StringUtils.fromString("value")).toString();
                 sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
                 Thread.startVirtualThread(() -> {
+                    Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
+                    StrandMetadata strandMetadata = new StrandMetadata(true, properties);
                     try {
-                        Object result = runtime.startIsolatedWorker(bObject, STREAMING_NEXT_FUNCTION, null,
-                                null, null).get();
+                        Object result = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
                         this.notifySuccess(result);
                     } catch (BError bError) {
                         this.notifyFailure(bError);
