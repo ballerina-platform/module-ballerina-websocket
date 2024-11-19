@@ -42,3 +42,6 @@ target
 # Ballerina
 velocity.log*
 *Ballerina.lock
+
+# Cache directory created by the trivy scan
+.cache/
