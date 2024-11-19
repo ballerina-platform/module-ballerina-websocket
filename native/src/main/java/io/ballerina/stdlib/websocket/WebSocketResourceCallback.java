@@ -17,9 +17,8 @@
  */
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -40,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
@@ -52,7 +52,7 @@ import static io.ballerina.stdlib.websocket.observability.WebSocketObservability
 /**
  * Callback impl for web socket.
  */
-public class WebSocketResourceCallback implements Callback {
+public final class WebSocketResourceCallback implements Handler {
 
     private final WebSocketConnection webSocketConnection;
     private final WebSocketConnectionInfo connectionInfo;
@@ -83,8 +83,16 @@ public class WebSocketResourceCallback implements Callback {
             BObject bObject = ((BStream) result).getIteratorObj();
             ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
                     connectionInfo, webSocketConnection);
-            runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
-                    null, returnStreamUnitCallBack, null, PredefinedTypes.TYPE_NULL);
+            Thread.startVirtualThread(() -> {
+                Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
+                StrandMetadata strandMetadata = new StrandMetadata(true, properties);
+                try {
+                    Object res = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
+                    returnStreamUnitCallBack.notifySuccess(res);
+                } catch (BError bError) {
+                    returnStreamUnitCallBack.notifyFailure(bError);
+                }
+            });
         } else if (result == null) {
             webSocketConnection.readNextFrame();
         } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&

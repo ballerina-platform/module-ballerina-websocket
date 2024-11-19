@@ -17,12 +17,12 @@
 package io.ballerina.stdlib.websocket.actions.websocketconnector;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
+import io.ballerina.stdlib.websocket.ModuleUtils;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -45,37 +46,39 @@ public class Close {
 
     public static Object externClose(Environment env, BObject wsConnection, long statusCode, BString reason,
             BDecimal timeoutInSecs) {
-        Future balFuture = env.markAsync();
-        WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
-                .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
-        WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
-                WebSocketConstants.RESOURCE_NAME_CLOSE);
-        try {
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            List<BError> errors = new ArrayList<>(1);
-            ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
-                    connectionInfo, countDownLatch);
-            connectionInfo.getWebSocketConnection().readNextFrame();
-            waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
-            closeFuture.channel().close().addListener(future -> {
-                WebSocketUtil.setListenerOpenField(connectionInfo);
-                if (errors.isEmpty()) {
-                    balFuture.complete(null);
-                } else {
-                    balFuture.complete(errors.get(errors.size() - 1));
-                }
-            });
-            WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_CLOSE,
-                    connectionInfo);
-        } catch (Exception e) {
-            log.error("Error occurred when closing the connection", e);
-            WebSocketObservabilityUtil.observeError(WebSocketObservabilityUtil.getConnectionInfo(wsConnection),
-                    WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
-                    WebSocketObservabilityConstants.MESSAGE_TYPE_CLOSE,
-                    e.getMessage());
-            balFuture.complete(WebSocketUtil.createErrorByType(e));
-        }
-        return null;
+        return env.yieldAndRun(() -> {
+            CompletableFuture<Object> balFuture = new CompletableFuture<>();
+            WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
+                    .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
+            WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
+                    WebSocketConstants.RESOURCE_NAME_CLOSE);
+            try {
+                CountDownLatch countDownLatch = new CountDownLatch(1);
+                List<BError> errors = new ArrayList<>(1);
+                ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
+                        connectionInfo, countDownLatch);
+                connectionInfo.getWebSocketConnection().readNextFrame();
+                waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
+                closeFuture.channel().close().addListener(future -> {
+                    WebSocketUtil.setListenerOpenField(connectionInfo);
+                    if (errors.isEmpty()) {
+                        balFuture.complete(null);
+                    } else {
+                        balFuture.complete(errors.getLast());
+                    }
+                });
+                WebSocketObservabilityUtil.observeSend(WebSocketObservabilityConstants.MESSAGE_TYPE_CLOSE,
+                        connectionInfo);
+            } catch (Exception e) {
+                log.error("Error occurred when closing the connection", e);
+                WebSocketObservabilityUtil.observeError(WebSocketObservabilityUtil.getConnectionInfo(wsConnection),
+                        WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_SENT,
+                        WebSocketObservabilityConstants.MESSAGE_TYPE_CLOSE,
+                        e.getMessage());
+                balFuture.complete(WebSocketUtil.createErrorByType(e));
+            }
+            return ModuleUtils.getResult(balFuture);
+        });
     }
 
     private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,

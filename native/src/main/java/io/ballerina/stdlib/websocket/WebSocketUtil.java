@@ -19,14 +19,13 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -70,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -123,9 +123,9 @@ public class WebSocketUtil {
         webSocketClient.set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, webSocketConnection.isOpen());
     }
 
-    public static void handleWebSocketCallback(Future balFuture,
-            ChannelFuture webSocketChannelFuture, Logger log,
-                WebSocketConnectionInfo connectionInfo, AtomicBoolean futureCompleted) {
+    public static void handleWebSocketCallback(CompletableFuture<Object> balFuture,
+                                               ChannelFuture webSocketChannelFuture, Logger log,
+                                               WebSocketConnectionInfo connectionInfo, AtomicBoolean futureCompleted) {
         webSocketChannelFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
@@ -142,7 +142,7 @@ public class WebSocketUtil {
         });
     }
 
-    public static void handlePingWebSocketCallback(Future balFuture,
+    public static void handlePingWebSocketCallback(CompletableFuture<Object> balFuture,
                         ChannelFuture webSocketChannelFuture, Logger log,
                         WebSocketConnectionInfo connectionInfo, AtomicBoolean pingCallbackCompleted) {
         webSocketChannelFuture.addListener(future -> {
@@ -162,7 +162,8 @@ public class WebSocketUtil {
         });
     }
 
-    public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo, Future balFuture,
+    public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo,
+                                                    CompletableFuture<Object> balFuture,
             Throwable error, AtomicBoolean futureCompleted) {
         if (!futureCompleted.get()) {
             balFuture.complete(WebSocketUtil.createErrorByType(error));
@@ -315,7 +316,7 @@ public class WebSocketUtil {
     public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
         if (callbackService != null) {
             ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(callbackService));
-            Type param = objectType.getMethods()[0].getParameterTypes()[0];
+            Type param = objectType.getMethods()[0].getParameters()[0].type;
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a PingPongService",
@@ -361,7 +362,7 @@ public class WebSocketUtil {
      * @param futureCompleted - Value to check whether the future has already completed.
      * @return If attempts reconnection, then return true.
      */
-    public static boolean reconnect(WebSocketConnectionInfo connectionInfo, Future balFuture,
+    public static boolean reconnect(WebSocketConnectionInfo connectionInfo, CompletableFuture<Object> balFuture,
                                     AtomicBoolean futureCompleted) {
         BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
         RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
@@ -397,7 +398,7 @@ public class WebSocketUtil {
      * @param binMessage - The binary message that needs to be sent after a successful retry.
      * @return If attempts reconnection, then return true.
      */
-    public static boolean reconnectForWrite(WebSocketConnectionInfo connectionInfo, Future balFuture,
+    public static boolean reconnectForWrite(WebSocketConnectionInfo connectionInfo, CompletableFuture<Object> balFuture,
                                             AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
         BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
         RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
@@ -431,7 +432,8 @@ public class WebSocketUtil {
      * @param txtMessage - The text message that needs to be sent after a successful retry.
      * @param binMessage - The binary message that needs to be sent after a successful retry.
      */
-    public static void establishWebSocketConnectionForWrite(BObject webSocketClient, Future balFuture,
+    public static void establishWebSocketConnectionForWrite(BObject webSocketClient,
+                                                            CompletableFuture<Object> balFuture,
                                                             AtomicBoolean futureCompleted, String txtMessage,
                                                             BArray binMessage) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
@@ -459,7 +461,8 @@ public class WebSocketUtil {
      * @param callbackCompleted - Value to check whether the future has already completed.
      */
     public static void establishWebSocketConnection(BObject webSocketClient, WebSocketService wsService,
-                                                    Future balFuture, AtomicBoolean callbackCompleted) {
+                                                    CompletableFuture<Object> balFuture,
+                                                    AtomicBoolean callbackCompleted) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
                 getNativeData(WebSocketConstants.CLIENT_LISTENER);
         WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.

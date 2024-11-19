@@ -18,10 +18,10 @@
 
 package io.ballerina.stdlib.websocket.actions.websocketconnector;
 
-import io.ballerina.runtime.api.Future;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketWriteTimeOutListener;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,10 +29,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class WriteTimeOutListener implements WebSocketWriteTimeOutListener {
 
-    private Future balFuture;
+    private CompletableFuture<Object> balFuture;
     private AtomicBoolean futureCompleted;
 
-    public WriteTimeOutListener(Future balFuture, AtomicBoolean futureCompleted) {
+    public WriteTimeOutListener(CompletableFuture<Object> balFuture, AtomicBoolean futureCompleted) {
         this.balFuture = balFuture;
         this.futureCompleted = futureCompleted;
     }

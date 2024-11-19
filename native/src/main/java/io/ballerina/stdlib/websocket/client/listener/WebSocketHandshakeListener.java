@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.websocket.client.listener;
 
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.websocket.ClientHandshakeListener;
@@ -30,6 +29,7 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -43,11 +43,11 @@ public class WebSocketHandshakeListener implements ClientHandshakeListener {
     private final SyncClientConnectorListener connectorListener;
     private final BObject webSocketClient;
     private WebSocketConnectionInfo connectionInfo;
-    private final Future balFuture;
+    private final CompletableFuture<Object> balFuture;
     AtomicBoolean callbackCompleted;
 
     public WebSocketHandshakeListener(BObject webSocketClient, WebSocketService wsService,
-                                      SyncClientConnectorListener connectorListener, Future future,
+                                      SyncClientConnectorListener connectorListener, CompletableFuture<Object> future,
                                       AtomicBoolean callbackCompleted) {
         this.webSocketClient = webSocketClient;
         this.wsService = wsService;

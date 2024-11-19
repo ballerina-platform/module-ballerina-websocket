@@ -17,7 +17,6 @@
  */
 package io.ballerina.stdlib.websocket.client.listener;
 
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.websocket.ClientHandshakeListener;
@@ -41,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.release;
@@ -53,13 +53,13 @@ public class RetryWriteTextHandshakeListener implements ClientHandshakeListener 
     private final BObject clientEndpoint;
     private final SyncClientConnectorListener connectorListener;
     private WebSocketConnectionInfo connectionInfo;
-    private final Future balFuture;
+    private final CompletableFuture<Object> balFuture;
     private AtomicBoolean textCallbackCompleted;
     private static final Logger logger = LoggerFactory.getLogger(RetryWriteTextHandshakeListener.class);
 
     public RetryWriteTextHandshakeListener(String message, BObject clientEndpoint,
-                                           SyncClientConnectorListener connectorListener, Future balFuture,
-                                           AtomicBoolean textCallbackCompleted) {
+                                           SyncClientConnectorListener connectorListener,
+                                           CompletableFuture<Object> balFuture, AtomicBoolean textCallbackCompleted) {
         this.message = message;
         this.clientEndpoint = clientEndpoint;
         this.connectorListener = connectorListener;

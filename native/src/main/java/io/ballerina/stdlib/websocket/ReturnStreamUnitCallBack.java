@@ -18,9 +18,8 @@
 
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -37,6 +36,8 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.PromiseCombiner;
 
+import java.util.Map;
+
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromText;
@@ -45,7 +46,7 @@ import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocket
 /**
  * Call back class registered for returning streams.
  */
-public class ReturnStreamUnitCallBack implements Callback {
+public class ReturnStreamUnitCallBack implements Handler {
 
     private final Runtime runtime;
     private final BObject bObject;
@@ -72,8 +73,16 @@ public class ReturnStreamUnitCallBack implements Callback {
             } else {
                 content = ((BMap) response).get(StringUtils.fromString("value")).toString();
                 sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
-                runtime.invokeMethodAsyncConcurrently(bObject, STREAMING_NEXT_FUNCTION, null,
-                        null, this, null, PredefinedTypes.TYPE_NULL);
+                Thread.startVirtualThread(() -> {
+                    Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
+                    StrandMetadata strandMetadata = new StrandMetadata(true, properties);
+                    try {
+                        Object result = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
+                        this.notifySuccess(result);
+                    } catch (BError bError) {
+                        this.notifyFailure(bError);
+                    }
+                });
             }
         } else {
             webSocketConnection.readNextFrame();
