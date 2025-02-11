@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- [Address Netty security vulnerabilities: `CVE-2025-24970` and `CVE-2025-25193`](https://github.com/ballerina-platform/ballerina-library/issues/7571)
+
+## [2.13.0] - 2025-02-07
+
+### Fixed
+
 - [Address CVE-2024-47535 vulnerability](https://github.com/ballerina-platform/ballerina-library/issues/7358)
 
 ## [2.12.0] - 2024-08-20
