@@ -1,18 +1,18 @@
-// Copyright (c) 2025 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org).
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License.
-// You may obtain a copy of the License at
+//  WSO2 LLC. licenses this file to you under the Apache License,
+//  Version 2.0 (the "License"); you may not use this file except
+//  in compliance with the License.
+//  You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied. See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import ballerina/test;
 
@@ -130,7 +130,7 @@ public function testNormalClosure() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "Connection closed Status code: 1000");
     }
 }
@@ -143,7 +143,7 @@ public function testGoingAway() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "Connection closed Status code: 1001");
     }
 }
@@ -156,7 +156,7 @@ public function testUnsupportedData() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "Endpoint received unsupported frame: Status code: 1003");
     }
 }
@@ -169,7 +169,7 @@ public function testInvalidPayload() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "Payload does not match the expected format or encoding: Status code: 1007");
     }
 }
@@ -182,7 +182,7 @@ public function testPolicyViolation() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "Received message violates its policy: Status code: 1008");
     }
 }
@@ -195,7 +195,7 @@ public function testMessageTooBig() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "The received message exceeds the allowed size limit: Status code: 1009");
     }
 }
@@ -208,7 +208,7 @@ public function testInternalServerError() returns Error? {
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
-    if (res is Error) {
+    if res is Error {
         test:assertEquals(res.message(), "Internal server error occurred: Status code: 1011");
     }
 }
