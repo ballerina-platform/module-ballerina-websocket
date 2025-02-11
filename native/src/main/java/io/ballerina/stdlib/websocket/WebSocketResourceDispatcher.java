@@ -1127,12 +1127,34 @@ public class WebSocketResourceDispatcher {
                 }
                 StrandMetadata strandMetadata = new StrandMetadata(isIsolated(balservice, resource), properties);
                 result = wsService.getRuntime().callMethod(balservice, resource, strandMetadata, bValues);
+                if (isCloseFrameRecord(result)) {
+                    @SuppressWarnings(WebSocketConstants.UNCHECKED)
+                    BMap<BString, Object> closeFrameRecord = (BMap<BString, Object>) result;
+                    long status = ((BObject) closeFrameRecord.get(WebSocketConstants.CLOSE_FRAME_STATUS))
+                            .getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE);
+                    BString reason = closeFrameRecord.containsKey(WebSocketConstants.CLOSE_FRAME_REASON) ?
+                            (BString) closeFrameRecord.get(WebSocketConstants.CLOSE_FRAME_REASON)
+                            : StringUtils.fromString("");
+                    result = wsService.getRuntime().callMethod(
+                            connectionInfo.getWebSocketEndpoint(), WebSocketConstants.RESOURCE_NAME_CLOSE,
+                            strandMetadata, status, reason);
+                }
                 callback.notifySuccess(result);
                 WebSocketObservabilityUtil.observeResourceInvocation(connectionInfo, resource);
             } catch (BError bError) {
                 callback.notifyFailure(bError);
             }
         });
+    }
+
+    @SuppressWarnings(WebSocketConstants.UNCHECKED)
+    private static boolean isCloseFrameRecord(Object obj) {
+        if (obj instanceof BMap) {
+            BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
+            return bMap.containsKey(WebSocketConstants.CLOSE_FRAME_STATUS) &&
+                    bMap.get(WebSocketConstants.CLOSE_FRAME_STATUS) instanceof BObject;
+        }
+        return false;
     }
 
     private static boolean isIsolated(BObject serviceObj, String remoteMethod) {
