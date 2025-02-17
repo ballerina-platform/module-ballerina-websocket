@@ -1132,7 +1132,7 @@ public class WebSocketResourceDispatcher {
                     BMap<BString, Object> closeFrameRecord = (BMap<BString, Object>) result;
                     long status = closeFrameRecord.getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE);
                     BString reason = closeFrameRecord.containsKey(WebSocketConstants.CLOSE_FRAME_REASON) ?
-                            (BString) closeFrameRecord.get(WebSocketConstants.CLOSE_FRAME_REASON)
+                            closeFrameRecord.getStringValue(WebSocketConstants.CLOSE_FRAME_REASON)
                             : StringUtils.fromString("");
                     result = wsService.getRuntime().callMethod(
                             connectionInfo.getWebSocketEndpoint(), WebSocketConstants.RESOURCE_NAME_CLOSE,
