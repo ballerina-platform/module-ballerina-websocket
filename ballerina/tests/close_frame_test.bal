@@ -23,6 +23,7 @@ listener Listener l105 = new (22084);
 listener Listener l106 = new (22085);
 listener Listener l107 = new (22086);
 listener Listener l108 = new (22087);
+listener Listener l109 = new (22088);
 
 service /onCloseFrame on l102 {
     resource function get .() returns Service|UpgradeError {
@@ -63,6 +64,12 @@ service /onCloseFrame on l107 {
 service /onCloseFrame on l108 {
     resource function get .() returns Service|UpgradeError {
         return new WsService108();
+    }
+}
+
+service /onCloseFrame on l109 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService109();
     }
 }
 
@@ -119,6 +126,14 @@ service class WsService108 {
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
         return INTERNAL_SERVER_ERROR;
+    }
+}
+
+service class WsService109 {
+    *Service;
+
+    remote function onMessage(Caller caller, string data) returns CloseFrame {
+        return {status: 3555, reason: "Custom close frame message"};
     }
 }
 
@@ -210,5 +225,18 @@ public function testInternalServerError() returns Error? {
     test:assertTrue(res is Error);
     if res is Error {
         test:assertEquals(res.message(), "Internal server error occurred: Status code: 1011");
+    }
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testCustomCloseFrame() returns Error? {
+    Client wsClient = check new ("ws://localhost:22088/onCloseFrame");
+    check wsClient->writeMessage("Hi");
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), "Custom close frame message: Status code: 3555");
     }
 }

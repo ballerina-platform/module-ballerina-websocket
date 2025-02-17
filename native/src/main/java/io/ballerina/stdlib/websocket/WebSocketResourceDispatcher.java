@@ -1130,8 +1130,7 @@ public class WebSocketResourceDispatcher {
                 if (isCloseFrameRecord(result)) {
                     @SuppressWarnings(WebSocketConstants.UNCHECKED)
                     BMap<BString, Object> closeFrameRecord = (BMap<BString, Object>) result;
-                    long status = ((BObject) closeFrameRecord.get(WebSocketConstants.CLOSE_FRAME_STATUS))
-                            .getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE);
+                    long status = closeFrameRecord.getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE);
                     BString reason = closeFrameRecord.containsKey(WebSocketConstants.CLOSE_FRAME_REASON) ?
                             (BString) closeFrameRecord.get(WebSocketConstants.CLOSE_FRAME_REASON)
                             : StringUtils.fromString("");
@@ -1151,8 +1150,8 @@ public class WebSocketResourceDispatcher {
     private static boolean isCloseFrameRecord(Object obj) {
         if (obj instanceof BMap) {
             BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
-            return bMap.containsKey(WebSocketConstants.CLOSE_FRAME_STATUS) &&
-                    bMap.get(WebSocketConstants.CLOSE_FRAME_STATUS) instanceof BObject;
+            return bMap.containsKey(WebSocketConstants.CLOSE_FRAME_TYPE) &&
+                    bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE) instanceof BObject;
         }
         return false;
     }
