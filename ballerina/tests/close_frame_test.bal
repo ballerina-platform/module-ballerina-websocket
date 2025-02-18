@@ -25,6 +25,7 @@ listener Listener l107 = new (22087);
 listener Listener l108 = new (22088);
 listener Listener l109 = new (22089);
 listener Listener l110 = new (22090);
+listener Listener l111 = new (22091);
 
 service /onCloseFrame on l102 {
     resource function get .() returns Service|UpgradeError {
@@ -77,6 +78,16 @@ service /onCloseFrame on l109 {
 service /onCloseFrame on l110 {
     resource function get .() returns Service|UpgradeError {
         return new WsService110();
+    }
+}
+
+@ServiceConfig {
+    dispatcherKey: "event",
+    dispatcherStreamId: "id"
+}
+service /onCloseFrame on l111 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService111();
     }
 }
 
@@ -149,6 +160,14 @@ service class WsService110 {
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
         return {status: 3555, reason: "Custom close frame message"};
+    }
+}
+
+service class WsService111 {
+    *Service;
+
+    remote function onHeartbeat(Caller caller, string data) returns CloseFrame {
+        return NORMAL_CLOSURE;
     }
 }
 
@@ -266,5 +285,18 @@ public function testCustomCloseFrame() returns Error? {
     test:assertTrue(res is Error);
     if res is Error {
         test:assertEquals(res.message(), "Custom close frame message: Status code: 3555");
+    }
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testCustomDispatcher() returns Error? {
+    Client wsClient = check new ("ws://localhost:22091/onCloseFrame");
+    check wsClient->writeMessage({"event": "heartbeat", "id": "1"});
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), "Connection closed Status code: 1000");
     }
 }
