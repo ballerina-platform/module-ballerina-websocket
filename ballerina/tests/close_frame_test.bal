@@ -16,14 +16,15 @@
 
 import ballerina/test;
 
-listener Listener l102 = new (22081);
-listener Listener l103 = new (22082);
-listener Listener l104 = new (22083);
-listener Listener l105 = new (22084);
-listener Listener l106 = new (22085);
-listener Listener l107 = new (22086);
-listener Listener l108 = new (22087);
-listener Listener l109 = new (22088);
+listener Listener l102 = new (22082);
+listener Listener l103 = new (22083);
+listener Listener l104 = new (22084);
+listener Listener l105 = new (22085);
+listener Listener l106 = new (22086);
+listener Listener l107 = new (22087);
+listener Listener l108 = new (22088);
+listener Listener l109 = new (22089);
+listener Listener l110 = new (22090);
 
 service /onCloseFrame on l102 {
     resource function get .() returns Service|UpgradeError {
@@ -73,6 +74,12 @@ service /onCloseFrame on l109 {
     }
 }
 
+service /onCloseFrame on l110 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService110();
+    }
+}
+
 service class WsService102 {
     *Service;
 
@@ -93,7 +100,7 @@ service class WsService104 {
     *Service;
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
-        return UNSUPPORTED_DATA;
+        return PROTOCOL_ERROR;
     }
 }
 
@@ -101,7 +108,7 @@ service class WsService105 {
     *Service;
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
-        return INVALID_PAYLOAD;
+        return UNSUPPORTED_DATA;
     }
 }
 
@@ -109,7 +116,7 @@ service class WsService106 {
     *Service;
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
-        return POLICY_VIOLATION;
+        return INVALID_PAYLOAD;
     }
 }
 
@@ -117,7 +124,7 @@ service class WsService107 {
     *Service;
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
-        return MESSAGE_TOO_BIG;
+        return POLICY_VIOLATION;
     }
 }
 
@@ -125,11 +132,19 @@ service class WsService108 {
     *Service;
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
-        return INTERNAL_SERVER_ERROR;
+        return MESSAGE_TOO_BIG;
     }
 }
 
 service class WsService109 {
+    *Service;
+
+    remote function onMessage(Caller caller, string data) returns CloseFrame {
+        return INTERNAL_SERVER_ERROR;
+    }
+}
+
+service class WsService110 {
     *Service;
 
     remote function onMessage(Caller caller, string data) returns CloseFrame {
@@ -141,7 +156,7 @@ service class WsService109 {
     groups: ["closeFrame"]
 }
 public function testNormalClosure() returns Error? {
-    Client wsClient = check new ("ws://localhost:22081/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22082/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -154,7 +169,7 @@ public function testNormalClosure() returns Error? {
     groups: ["closeFrame"]
 }
 public function testGoingAway() returns Error? {
-    Client wsClient = check new ("ws://localhost:22082/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22083/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -166,8 +181,21 @@ public function testGoingAway() returns Error? {
 @test:Config {
     groups: ["closeFrame"]
 }
+public function testProtocolError() returns Error? {
+    Client wsClient = check new ("ws://localhost:22084/onCloseFrame");
+    check wsClient->writeMessage("Hi");
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), "Connection closed due to protocol error: Status code: 1002");
+    }
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
 public function testUnsupportedData() returns Error? {
-    Client wsClient = check new ("ws://localhost:22083/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22085/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -180,7 +208,7 @@ public function testUnsupportedData() returns Error? {
     groups: ["closeFrame"]
 }
 public function testInvalidPayload() returns Error? {
-    Client wsClient = check new ("ws://localhost:22084/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22086/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -193,7 +221,7 @@ public function testInvalidPayload() returns Error? {
     groups: ["closeFrame"]
 }
 public function testPolicyViolation() returns Error? {
-    Client wsClient = check new ("ws://localhost:22085/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22087/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -206,7 +234,7 @@ public function testPolicyViolation() returns Error? {
     groups: ["closeFrame"]
 }
 public function testMessageTooBig() returns Error? {
-    Client wsClient = check new ("ws://localhost:22086/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22088/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -219,7 +247,7 @@ public function testMessageTooBig() returns Error? {
     groups: ["closeFrame"]
 }
 public function testInternalServerError() returns Error? {
-    Client wsClient = check new ("ws://localhost:22087/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22089/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
@@ -232,7 +260,7 @@ public function testInternalServerError() returns Error? {
     groups: ["closeFrame"]
 }
 public function testCustomCloseFrame() returns Error? {
-    Client wsClient = check new ("ws://localhost:22088/onCloseFrame");
+    Client wsClient = check new ("ws://localhost:22090/onCloseFrame");
     check wsClient->writeMessage("Hi");
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);

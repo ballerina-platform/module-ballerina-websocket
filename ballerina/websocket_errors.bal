@@ -24,7 +24,7 @@ public type InvalidHandshakeError distinct Error;
 public type PayloadTooLargeError distinct Error;
 
 # Raised when the other side breaks the protocol.
-public type ProtocolError distinct Error;
+public type CorruptedFrameError distinct Error;
 
 # Raised during connection failures.
 public type ConnectionError distinct Error;
@@ -33,7 +33,7 @@ public type ConnectionError distinct Error;
 public type ConnectionClosureError distinct ConnectionError;
 
 # Raised when an out of order/invalid continuation frame is received.
-public type InvalidContinuationFrameError distinct ProtocolError;
+public type InvalidContinuationFrameError distinct CorruptedFrameError;
 
 # Raised when the WebSocket upgrade is not accepted.
 public type UpgradeError distinct Error;

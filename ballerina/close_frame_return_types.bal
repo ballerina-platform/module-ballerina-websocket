@@ -46,12 +46,12 @@ public type GoingAway record {|
     readonly 1001 status = 1001;
 |};
 
-// public type ProtocolError record {|
-//     *CloseFrameBase;
-//     readonly PredefinedCloseFrameType 'type = PREDEFINED_CLOSE_FRAME;
-//     readonly 1002 status = 1002;
-//     string reason = "Connection closed due to protocol error";
-// |};
+public type ProtocolError record {|
+    *CloseFrameBase;
+    readonly PredefinedCloseFrameType 'type = PREDEFINED_CLOSE_FRAME;
+    readonly 1002 status = 1002;
+    string reason = "Connection closed due to protocol error";
+|};
 
 public type UnsupportedData record {|
     *CloseFrameBase;
@@ -90,12 +90,12 @@ public type InternalServerError record {|
 
 public final readonly & NormalClosure NORMAL_CLOSURE = {};
 public final readonly & GoingAway GOING_AWAY = {};
-// public final readonly & ProtocolError PROTOCOL_ERROR = {};
+public final readonly & ProtocolError PROTOCOL_ERROR = {};
 public final readonly & UnsupportedData UNSUPPORTED_DATA = {};
 public final readonly & InvalidPayload INVALID_PAYLOAD = {};
 public final readonly & PolicyViolation POLICY_VIOLATION = {};
 public final readonly & MessageTooBig MESSAGE_TOO_BIG = {};
 public final readonly & InternalServerError INTERNAL_SERVER_ERROR = {};
 
-public type CloseFrame NormalClosure|GoingAway|UnsupportedData|InvalidPayload|
+public type CloseFrame NormalClosure|GoingAway|ProtocolError|UnsupportedData|InvalidPayload|
                         PolicyViolation|MessageTooBig|InternalServerError|CustomCloseFrame;

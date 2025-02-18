@@ -155,7 +155,7 @@ public class WebSocketConstants {
         ConnectionClosureError("ConnectionClosureError"),
         InvalidHandshakeError("InvalidHandshakeError"),
         PayloadTooLargeError("PayloadTooLargeError"),
-        ProtocolError("ProtocolError"),
+        CorruptedFrameError("CorruptedFrameError"),
         ConnectionError("ConnectionError"),
         InvalidContinuationFrameError("InvalidContinuationFrameError"),
         HandshakeTimedOut("HandshakeTimedOut"),
