@@ -36,6 +36,7 @@ The conforming implementation of the specification is released and included in t
             * [onError](#onerror)
         * 3.2.2. [Dispatching custom remote methods](#322-dispatching-custom-remote-methods)
           * [Dispatching custom error remote methods](#Dispatching custom error remote methods)
+        * 3.2.3. [Return types](#323-return-types)
 4. [Client](#4-client)
     * 4.1. [Client Configurations](#41-client-configurations)
     * 4.2. [Initialization](#42-initialization)
@@ -396,6 +397,47 @@ dispatching error remote function = "onHeartbeatError"
 - The 'on' word is added as the predecessor and the remote function name is in the camel case("heartbeat" -> "onHeartbeat").
 
 3. If an unmatching message type receives where a matching remote function is not implemented in the WebSocket service by the user, it gets dispatched to the default `onMessage` remote function if it is implemented. Or else it will get ignored.
+
+#### 3.2.3. [Return types](#323-return-types)
+
+The resource method supports `records`, `string`, `int`, `boolean`, `decimal`, `float` ,`json`, `xml` and `websocket:CloseFrame` as return types.
+Whenever user returns a particular output, that will result in an websocket response to the caller who initiated the call. Therefore, user does not necessarily depend on the `websocket:Caller` and its remote methods to proceed with the response.
+
+```ballerina
+remote isolated function onMessage(string data) returns User|string|int|boolean|decimal|float|json|xml|websocket:CloseFrame {
+}
+```
+
+##### 3.2.3.1. Close Frame Records
+
+The `CloseFrame` Records represent WebSocket close frames. When a service returns a close frame record, the WebSocket module will automatically send the corresponding close frame and terminate the connection.
+
+Following is the `websocket:NormalClosure` definition. Likewise, some predefined close frame records are provided.
+
+```ballerina
+public type NormalClosure record {|
+    *CloseFrameBase;
+    readonly PredefinedCloseFrameType 'type = PREDEFINED_CLOSE_FRAME;
+    readonly 1000 status = 1000;
+|};
+
+remote isolated function onMessage(string data) returns websocket:CloseFrame {
+    websocket:NormalClosure normalClosure = {status: 1000, reason: "Normal Closure"};
+    return normalClosure;
+}
+```
+
+Custom Close Frame records enable users to define close frames with any status code and reason within the range of 1000–4999.
+
+```ballerina
+public type InvalidUserCloseFrame record {|
+    *websocket:CustomCloseFrame;
+|};
+
+remote isolated function onMessage(string data) returns InvalidUserCloseFrame {
+    return {status: 4444, reason: "Invalid User"};
+}
+```
 
 ## 4. [Client](#4-client)
 
