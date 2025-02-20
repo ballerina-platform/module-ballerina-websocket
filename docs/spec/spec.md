@@ -398,7 +398,7 @@ dispatching error remote function = "onHeartbeatError"
 
 3. If an unmatching message type receives where a matching remote function is not implemented in the WebSocket service by the user, it gets dispatched to the default `onMessage` remote function if it is implemented. Or else it will get ignored.
 
-#### 3.2.3. [Return types](#323-return-types)
+#### 3.2.3. Return types
 
 The resource method supports `records`, `string`, `int`, `boolean`, `decimal`, `float` ,`json`, `xml` and `websocket:CloseFrame` as return types.
 Whenever user returns a particular output, that will result in an websocket response to the caller who initiated the call. Therefore, user does not necessarily depend on the `websocket:Caller` and its remote methods to proceed with the response.
@@ -422,7 +422,7 @@ public type NormalClosure record {|
 |};
 
 remote isolated function onMessage(string data) returns websocket:CloseFrame {
-    websocket:NormalClosure normalClosure = {status: 1000, reason: "Normal Closure"};
+    websocket:NormalClosure normalClosure = {reason: "Normal Closure"};
     return normalClosure;
 }
 ```
