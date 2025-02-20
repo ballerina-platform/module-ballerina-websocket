@@ -171,6 +171,14 @@ service class WsService111 {
     }
 }
 
+public function getErrorMessage(CloseFrame closeFrame) returns string {
+    string? reason = closeFrame.reason;
+    if reason is string {
+        return reason + ": Status code: " + closeFrame.status.toString();
+    }
+    return "Connection closed Status code: " + closeFrame.status.toString();
+}
+
 @test:Config {
     groups: ["closeFrame"]
 }
@@ -180,7 +188,7 @@ public function testNormalClosure() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Connection closed Status code: 1000");
+        test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
 }
 
@@ -193,7 +201,7 @@ public function testGoingAway() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Connection closed Status code: 1001");
+        test:assertEquals(res.message(), getErrorMessage(GOING_AWAY));
     }
 }
 
@@ -206,7 +214,7 @@ public function testProtocolError() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Connection closed due to protocol error: Status code: 1002");
+        test:assertEquals(res.message(), getErrorMessage(PROTOCOL_ERROR));
     }
 }
 
@@ -219,7 +227,7 @@ public function testUnsupportedData() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Endpoint received unsupported frame: Status code: 1003");
+        test:assertEquals(res.message(), getErrorMessage(UNSUPPORTED_DATA));
     }
 }
 
@@ -232,7 +240,7 @@ public function testInvalidPayload() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Payload does not match the expected format or encoding: Status code: 1007");
+        test:assertEquals(res.message(), getErrorMessage(INVALID_PAYLOAD));
     }
 }
 
@@ -245,7 +253,7 @@ public function testPolicyViolation() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Received message violates its policy: Status code: 1008");
+        test:assertEquals(res.message(), getErrorMessage(POLICY_VIOLATION));
     }
 }
 
@@ -258,7 +266,7 @@ public function testMessageTooBig() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "The received message exceeds the allowed size limit: Status code: 1009");
+        test:assertEquals(res.message(), getErrorMessage(MESSAGE_TOO_BIG));
     }
 }
 
@@ -271,7 +279,7 @@ public function testInternalServerError() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Internal server error occurred: Status code: 1011");
+        test:assertEquals(res.message(), getErrorMessage(INTERNAL_SERVER_ERROR));
     }
 }
 
@@ -297,6 +305,6 @@ public function testCustomDispatcher() returns Error? {
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
-        test:assertEquals(res.message(), "Connection closed Status code: 1000");
+        test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
 }
