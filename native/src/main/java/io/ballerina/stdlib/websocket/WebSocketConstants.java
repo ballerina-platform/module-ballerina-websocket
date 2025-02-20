@@ -143,6 +143,8 @@ public class WebSocketConstants {
     public static final BString CLOSE_FRAME_TYPE = StringUtils.fromString("type");
     public static final BString CLOSE_FRAME_STATUS_CODE = StringUtils.fromString("status");
     public static final BString CLOSE_FRAME_REASON = StringUtils.fromString("reason");
+    public static final String PREDEFINED_CLOSE_FRAME_TYPE = "websocket:PredefinedCloseFrameType";
+    public static final String CUSTOM_CLOSE_FRAME_TYPE = "websocket:CustomCloseFrameType";
 
     private WebSocketConstants() {
     }
