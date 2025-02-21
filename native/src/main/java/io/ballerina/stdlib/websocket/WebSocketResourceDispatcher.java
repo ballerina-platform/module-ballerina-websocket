@@ -1150,7 +1150,8 @@ public class WebSocketResourceDispatcher {
     private static boolean isCloseFrameRecord(Object obj) {
         if (obj instanceof BMap) {
             BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
-            if (bMap.containsKey(WebSocketConstants.CLOSE_FRAME_STATUS_CODE)) {
+            if (bMap.containsKey(WebSocketConstants.CLOSE_FRAME_TYPE) &&
+                    bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE) instanceof BObject) {
                 String objectType = ((BObject) bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE))
                         .getOriginalType().toString();
                 return objectType.equals(WebSocketConstants.PREDEFINED_CLOSE_FRAME_TYPE) ||
