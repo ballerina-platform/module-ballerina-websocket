@@ -1152,8 +1152,7 @@ public class WebSocketResourceDispatcher {
             BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
             if (bMap.containsKey(WebSocketConstants.CLOSE_FRAME_TYPE) &&
                     bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE) instanceof BObject) {
-                String objectType = ((BObject) bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE))
-                        .getOriginalType().toString();
+                String objectType = TypeUtils.getType(bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE)).toString();
                 return objectType.equals(WebSocketConstants.PREDEFINED_CLOSE_FRAME_TYPE) ||
                         objectType.equals(WebSocketConstants.CUSTOM_CLOSE_FRAME_TYPE);
             }
