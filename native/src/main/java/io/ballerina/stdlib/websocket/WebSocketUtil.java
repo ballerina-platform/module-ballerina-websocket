@@ -263,7 +263,7 @@ public class WebSocketUtil {
             if (status == WebSocketCloseStatus.MESSAGE_TOO_BIG) {
                 errorCode = WebSocketConstants.ErrorCode.PayloadTooLargeError.errorCode();
             } else {
-                errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.CorruptedFrameError.errorCode();
             }
         } else if (throwable instanceof SSLException) {
             cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.SslError.errorCode(),
@@ -281,7 +281,7 @@ public class WebSocketUtil {
         } else if (throwable instanceof TooLongFrameException) {
             errorCode = WebSocketConstants.ErrorCode.PayloadTooLargeError.errorCode();
         } else if (throwable instanceof CodecException) {
-            errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.CorruptedFrameError.errorCode();
         } else if (throwable instanceof WebSocketHandshakeException) {
             errorCode = WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode();
         } else if (throwable instanceof IOException) {
