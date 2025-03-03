@@ -1,13 +1,13 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "2.13.1"
+version = "2.14.0"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.11.0"
+distribution = "2201.12.0"
 
 [platform.java21]
 graalvmCompatible = true
@@ -15,14 +15,14 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
-version = "2.13.1"
-path = "../native/build/libs/websocket-native-2.13.1.jar"
+version = "2.14.0"
+path = "../native/build/libs/websocket-native-2.14.0-SNAPSHOT.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
-version = "2.13.1"
-path = "./lib/http-native-2.13.1.jar"
+version = "2.14.0"
+path = "./lib/http-native-2.14.0-20250226-085300-8348bec.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -85,5 +85,5 @@ version = "4.1.118.Final"
 path = "./lib/netty-handler-proxy-4.1.118.Final.jar"
 
 [[platform.java21.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.13.1.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.14.0-SNAPSHOT.jar"
 scope = "testOnly"
