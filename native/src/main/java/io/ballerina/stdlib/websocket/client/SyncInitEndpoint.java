@@ -78,7 +78,7 @@ public class SyncInitEndpoint {
                     populateRetryConnectorConfig(retryConfig, retryConnectorConfig);
                     wsSyncClient.addNativeData(WebSocketConstants.RETRY_CONFIG.toString(), retryConnectorConfig);
                 }
-                WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(
+                WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnectorWithSSL(
                         clientConnectorConfig);
                 wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
                 wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
