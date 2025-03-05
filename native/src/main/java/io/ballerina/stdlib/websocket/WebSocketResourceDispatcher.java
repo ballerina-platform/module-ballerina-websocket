@@ -1127,37 +1127,12 @@ public class WebSocketResourceDispatcher {
                 }
                 StrandMetadata strandMetadata = new StrandMetadata(isIsolated(balservice, resource), properties);
                 result = wsService.getRuntime().callMethod(balservice, resource, strandMetadata, bValues);
-                if (isCloseFrameRecord(result)) {
-                    @SuppressWarnings(WebSocketConstants.UNCHECKED)
-                    BMap<BString, Object> closeFrameRecord = (BMap<BString, Object>) result;
-                    long status = closeFrameRecord.getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE);
-                    BString reason = closeFrameRecord.containsKey(WebSocketConstants.CLOSE_FRAME_REASON) ?
-                            closeFrameRecord.getStringValue(WebSocketConstants.CLOSE_FRAME_REASON)
-                            : StringUtils.fromString("");
-                    result = wsService.getRuntime().callMethod(
-                            connectionInfo.getWebSocketEndpoint(), WebSocketConstants.RESOURCE_NAME_CLOSE,
-                            strandMetadata, status, reason);
-                }
                 callback.notifySuccess(result);
                 WebSocketObservabilityUtil.observeResourceInvocation(connectionInfo, resource);
             } catch (BError bError) {
                 callback.notifyFailure(bError);
             }
         });
-    }
-
-    @SuppressWarnings(WebSocketConstants.UNCHECKED)
-    private static boolean isCloseFrameRecord(Object obj) {
-        if (obj instanceof BMap) {
-            BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
-            if (bMap.containsKey(WebSocketConstants.CLOSE_FRAME_TYPE) &&
-                    bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE) instanceof BObject) {
-                String objectType = TypeUtils.getType(bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE)).toString();
-                return objectType.equals(WebSocketConstants.PREDEFINED_CLOSE_FRAME_TYPE) ||
-                        objectType.equals(WebSocketConstants.CUSTOM_CLOSE_FRAME_TYPE);
-            }
-        }
-        return false;
     }
 
     private static boolean isIsolated(BObject serviceObj, String remoteMethod) {

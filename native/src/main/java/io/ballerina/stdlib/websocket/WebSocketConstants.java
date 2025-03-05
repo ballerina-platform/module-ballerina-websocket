@@ -145,6 +145,7 @@ public class WebSocketConstants {
     public static final BString CLOSE_FRAME_REASON = StringUtils.fromString("reason");
     public static final String PREDEFINED_CLOSE_FRAME_TYPE = PACKAGE_WEBSOCKET + COLON + "PredefinedCloseFrameType";
     public static final String CUSTOM_CLOSE_FRAME_TYPE = PACKAGE_WEBSOCKET + COLON + "CustomCloseFrameType";
+    public static final int CLOSE_FRAME_DEFAULT_TIMEOUT = 60;
 
     private WebSocketConstants() {
     }
