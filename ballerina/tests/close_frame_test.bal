@@ -14,6 +14,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
+import ballerina/lang.runtime;
 import ballerina/test;
 
 listener Listener l102 = new (22082);
@@ -190,6 +191,8 @@ public function testNormalClosure() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
+    runtime:sleep(1);
+    test:assertTrue(wsClient.isOpen() == false);
 }
 
 @test:Config {
