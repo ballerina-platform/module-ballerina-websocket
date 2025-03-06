@@ -77,7 +77,7 @@ public final class WebSocketResourceCallback implements Handler {
     }
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED)
-    private static boolean isCloseFrameRecord(Object obj) {
+    public static boolean isCloseFrameRecord(Object obj) {
         if (obj instanceof BMap) {
             BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
             if (bMap.containsKey(WebSocketConstants.CLOSE_FRAME_TYPE) &&
@@ -116,7 +116,7 @@ public final class WebSocketResourceCallback implements Handler {
                 }
             });
         } else if (isCloseFrameRecord(result)) {
-            sendCloseFrame(result);
+            sendCloseFrame(result, connectionInfo);
         } else if (result == null) {
             webSocketConnection.readNextFrame();
         } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&
@@ -129,7 +129,7 @@ public final class WebSocketResourceCallback implements Handler {
         }
     }
 
-    private void sendCloseFrame(Object result) {
+    public static void sendCloseFrame(Object result, WebSocketConnectionInfo connectionInfo) {
         @SuppressWarnings(WebSocketConstants.UNCHECKED)
         BMap<BString, Object> closeFrameRecord = (BMap<BString, Object>) result;
         int statusCode = closeFrameRecord.getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE).intValue();
