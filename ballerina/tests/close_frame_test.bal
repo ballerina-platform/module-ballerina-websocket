@@ -17,6 +17,10 @@
 import ballerina/lang.runtime;
 import ballerina/test;
 
+type Heartbeat record {|
+    string event;
+|};
+
 listener Listener l102 = new (22082);
 listener Listener l103 = new (22083);
 listener Listener l104 = new (22084);
@@ -27,6 +31,9 @@ listener Listener l108 = new (22088);
 listener Listener l109 = new (22089);
 listener Listener l110 = new (22090);
 listener Listener l111 = new (22091);
+listener Listener l112 = new (22092);
+listener Listener l113 = new (22093);
+listener Listener l114 = new (22094);
 
 service /onCloseFrame on l102 {
     resource function get .() returns Service|UpgradeError {
@@ -83,12 +90,35 @@ service /onCloseFrame on l110 {
 }
 
 @ServiceConfig {
-    dispatcherKey: "event",
-    dispatcherStreamId: "id"
+    dispatcherKey: "event"
 }
 service /onCloseFrame on l111 {
     resource function get .() returns Service|UpgradeError {
         return new WsService111();
+    }
+}
+
+service /onCloseFrame on l112 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService112();
+    }
+}
+
+@ServiceConfig {
+    dispatcherKey: "event"
+}
+service /onCloseFrame on l113 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService113();
+    }
+}
+
+@ServiceConfig {
+    idleTimeout: 5
+}
+service /onCloseFrame on l114 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService114();
     }
 }
 
@@ -167,7 +197,39 @@ service class WsService110 {
 service class WsService111 {
     *Service;
 
-    remote function onHeartbeat(Caller caller, string data) returns CloseFrame {
+    remote function onHeartbeat(Heartbeat data) returns CloseFrame {
+        return NORMAL_CLOSURE;
+    }
+}
+
+service class WsService112 {
+    *Service;
+
+    remote function onMessage(int data) {
+        return;
+    }
+
+    remote function onError(error 'error) returns InvalidPayload {
+        return INVALID_PAYLOAD;
+    }
+}
+
+service class WsService113 {
+    *Service;
+
+    remote function onHeartbeat(int data) {
+        return;
+    }
+
+    remote function onHeartbeatError(error 'error) returns InvalidPayload {
+        return INVALID_PAYLOAD;
+    }
+}
+
+service class WsService114 {
+    *Service;
+
+    remote function onIdleTimeout() returns NormalClosure {
         return NORMAL_CLOSURE;
     }
 }
@@ -304,10 +366,54 @@ public function testCustomCloseFrame() returns Error? {
 }
 public function testCustomDispatcher() returns Error? {
     Client wsClient = check new ("ws://localhost:22091/onCloseFrame");
-    check wsClient->writeMessage({"event": "heartbeat", "id": "1"});
+    check wsClient->writeMessage({"event": "heartbeat"});
     anydata|Error res = wsClient->readMessage();
     test:assertTrue(res is Error);
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testOnErrorDispatcher() returns Error? {
+    Client wsClient = check new ("ws://localhost:22092/onCloseFrame");
+    check wsClient->writeMessage("hi");
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), getErrorMessage(INVALID_PAYLOAD));
+    }
+    runtime:sleep(1);
+    test:assertTrue(wsClient.isOpen() == false);
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testOnCustomErrorDispatcher() returns Error? {
+    Client wsClient = check new ("ws://localhost:22093/onCloseFrame");
+    check wsClient->writeMessage({"event": "heartbeat", "name": "Hi"});
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), getErrorMessage(INVALID_PAYLOAD));
+    }
+    runtime:sleep(1);
+    test:assertTrue(wsClient.isOpen() == false);
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testOnIdleTimeout() returns Error? {
+    Client wsClient = check new ("ws://localhost:22094/onCloseFrame");
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
+    }
+    runtime:sleep(1);
+    test:assertTrue(wsClient.isOpen() == false);
 }
