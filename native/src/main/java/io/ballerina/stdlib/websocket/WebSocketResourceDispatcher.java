@@ -1091,7 +1091,9 @@ public class WebSocketResourceDispatcher {
             Handler onIdleTimeoutCallback = new Handler() {
                 @Override
                 public void notifySuccess(Object result) {
-                    // Do nothing.
+                    if (isCloseFrameRecord(result)) {
+                        sendCloseFrame(result, connectionInfo);
+                    }
                 }
 
                 @Override
