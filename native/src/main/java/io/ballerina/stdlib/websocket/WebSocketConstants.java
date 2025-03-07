@@ -139,6 +139,14 @@ public class WebSocketConstants {
     public static final String CONNECTION_CLOSED = "Connection closed";
     public static final String STATUS_CODE = "Status code:";
 
+    // Close Frame Records
+    public static final BString CLOSE_FRAME_TYPE = StringUtils.fromString("type");
+    public static final BString CLOSE_FRAME_STATUS_CODE = StringUtils.fromString("status");
+    public static final BString CLOSE_FRAME_REASON = StringUtils.fromString("reason");
+    public static final String PREDEFINED_CLOSE_FRAME_TYPE = PACKAGE_WEBSOCKET + COLON + "PredefinedCloseFrameType";
+    public static final String CUSTOM_CLOSE_FRAME_TYPE = PACKAGE_WEBSOCKET + COLON + "CustomCloseFrameType";
+    public static final int CLOSE_FRAME_DEFAULT_TIMEOUT = 60;
+
     private WebSocketConstants() {
     }
 
@@ -150,7 +158,7 @@ public class WebSocketConstants {
         ConnectionClosureError("ConnectionClosureError"),
         InvalidHandshakeError("InvalidHandshakeError"),
         PayloadTooLargeError("PayloadTooLargeError"),
-        ProtocolError("ProtocolError"),
+        CorruptedFrameError("CorruptedFrameError"),
         ConnectionError("ConnectionError"),
         InvalidContinuationFrameError("InvalidContinuationFrameError"),
         HandshakeTimedOut("HandshakeTimedOut"),
