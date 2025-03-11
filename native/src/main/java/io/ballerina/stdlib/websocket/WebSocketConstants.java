@@ -60,7 +60,9 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_ON_BINARY_MESSAGE = "onBinaryMessage";
     public static final String RESOURCE_NAME_ON_MESSAGE = "onMessage";
     public static final String RESOURCE_NAME_ON_PING = "onPing";
+    public static final String RESOURCE_NAME_ON_PING_MESSAGE = "onPingMessage";
     public static final String RESOURCE_NAME_ON_PONG = "onPong";
+    public static final String RESOURCE_NAME_ON_PONG_MESSAGE = "onPongMessage";
     public static final String RESOURCE_NAME_ON_CLOSE = "onClose";
     public static final String RESOURCE_NAME_ON_IDLE_TIMEOUT = "onIdleTimeout";
     public static final String RESOURCE_NAME_ON_ERROR = "onError";

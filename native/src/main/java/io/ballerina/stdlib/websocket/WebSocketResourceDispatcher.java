@@ -576,6 +576,15 @@ public class WebSocketResourceDispatcher {
     }
 
     private static String createCustomRemoteFunction(String dispatchingValue) {
+        // Handle special dispatching values
+        // ping -> onPingMessage
+        // pong -> onPongMessage
+        if (dispatchingValue.equalsIgnoreCase(WebSocketConstants.RESOURCE_NAME_PING)) {
+            return WebSocketConstants.RESOURCE_NAME_ON_PING_MESSAGE;
+        }
+        if (dispatchingValue.equalsIgnoreCase(WebSocketConstants.RESOURCE_NAME_PONG)) {
+            return WebSocketConstants.RESOURCE_NAME_ON_PONG_MESSAGE;
+        }
         dispatchingValue = "on " + dispatchingValue;
         StringBuilder builder = new StringBuilder();
         String[] words = dispatchingValue.split("[\\W_]+");
