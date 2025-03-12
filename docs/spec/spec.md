@@ -401,7 +401,7 @@ dispatching error remote function = "onHeartbeatError"
 #### 3.2.3. Return types
 
 The remote methods support `record`, `string`, `int`, `boolean`, `decimal`, `float` ,`json`, `xml`, and `websocket:CloseFrame` as return types.
-Whenever user returns a particular output, that will result in an websocket response to the caller who initiated the call. Therefore, user does not necessarily depend on the `websocket:Caller` and its remote methods to proceed with the response.
+When a value is returned, a WebSocket response is sent to the caller who initiated the call. Therefore, user does not necessarily depend on the `websocket:Caller` and its remote methods to proceed with the response.
 
 ```ballerina
 remote isolated function onMessage(string data) returns User|string|int|boolean|decimal|float|json|xml|websocket:CloseFrame {
