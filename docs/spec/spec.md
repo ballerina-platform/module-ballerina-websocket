@@ -410,7 +410,7 @@ remote isolated function onMessage(string data) returns User|string|int|boolean|
 
 ##### 3.2.3.1. Close Frame Records
 
-The `CloseFrame` Records represent WebSocket close frames. When a service returns a close frame record, the WebSocket module will automatically send the corresponding close frame and terminate the connection.
+The `websocket:CloseFrame` record represents a WebSocket close frame. When a `CloseFrame` is returned from a WebSocket service, a `CloseFrame` is sent to the client and the connection will be terminated.
 
 Following is the `websocket:NormalClosure` definition. Likewise, some predefined close frame records are provided.
 
