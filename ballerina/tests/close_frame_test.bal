@@ -17,6 +17,8 @@
 import ballerina/lang.runtime;
 import ballerina/test;
 
+const decimal sleepingInterval = 1;
+
 type Heartbeat record {|
     string event;
 |};
@@ -242,6 +244,11 @@ public function getErrorMessage(CloseFrame closeFrame) returns string {
     return "Connection closed Status code: " + closeFrame.status.toString();
 }
 
+public function isConnectionClosed(Client wsClient) returns boolean {
+    runtime:sleep(sleepingInterval);
+    return !wsClient.isOpen();
+}
+
 @test:Config {
     groups: ["closeFrame"]
 }
@@ -253,8 +260,7 @@ public function testNormalClosure() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
-    runtime:sleep(1);
-    test:assertTrue(wsClient.isOpen() == false);
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -268,6 +274,7 @@ public function testGoingAway() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(GOING_AWAY));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -281,6 +288,7 @@ public function testProtocolError() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(PROTOCOL_ERROR));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -294,6 +302,7 @@ public function testUnsupportedData() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(UNSUPPORTED_DATA));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -307,6 +316,7 @@ public function testInvalidPayload() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(INVALID_PAYLOAD));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -320,6 +330,7 @@ public function testPolicyViolation() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(POLICY_VIOLATION));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -333,6 +344,7 @@ public function testMessageTooBig() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(MESSAGE_TOO_BIG));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -346,6 +358,7 @@ public function testInternalServerError() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(INTERNAL_SERVER_ERROR));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -359,6 +372,7 @@ public function testCustomCloseFrame() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), "Custom close frame message: Status code: 3555");
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -372,6 +386,7 @@ public function testCustomDispatcher() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -385,8 +400,7 @@ public function testOnErrorDispatcher() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(INVALID_PAYLOAD));
     }
-    runtime:sleep(1);
-    test:assertTrue(wsClient.isOpen() == false);
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -400,8 +414,7 @@ public function testOnCustomErrorDispatcher() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(INVALID_PAYLOAD));
     }
-    runtime:sleep(1);
-    test:assertTrue(wsClient.isOpen() == false);
+    test:assertTrue(isConnectionClosed(wsClient));
 }
 
 @test:Config {
@@ -414,6 +427,5 @@ public function testOnIdleTimeout() returns Error? {
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
     }
-    runtime:sleep(1);
-    test:assertTrue(wsClient.isOpen() == false);
+    test:assertTrue(isConnectionClosed(wsClient));
 }
