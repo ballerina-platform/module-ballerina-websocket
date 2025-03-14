@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- [Implement websocket close frame support](https://github.com/ballerina-platform/ballerina-library/issues/7578)
+
 ### Changed
 
 - [Move SSL context creation to the client initialization](https://github.com/ballerina-platform/ballerina-library/issues/1798)
