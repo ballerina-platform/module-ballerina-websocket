@@ -400,8 +400,8 @@ dispatching error remote function = "onHeartbeatError"
 
 #### 3.2.3. Return types
 
-The resource method supports `records`, `string`, `int`, `boolean`, `decimal`, `float` ,`json`, `xml` and `websocket:CloseFrame` as return types.
-Whenever user returns a particular output, that will result in an websocket response to the caller who initiated the call. Therefore, user does not necessarily depend on the `websocket:Caller` and its remote methods to proceed with the response.
+The remote methods support `record`, `string`, `int`, `boolean`, `decimal`, `float` ,`json`, `xml`, and `websocket:CloseFrame` as return types.
+When a value is returned, a WebSocket response is sent to the caller who initiated the call. Therefore, user does not necessarily depend on the `websocket:Caller` and its remote methods to proceed with the response.
 
 ```ballerina
 remote isolated function onMessage(string data) returns User|string|int|boolean|decimal|float|json|xml|websocket:CloseFrame {
@@ -410,7 +410,7 @@ remote isolated function onMessage(string data) returns User|string|int|boolean|
 
 ##### 3.2.3.1. Close Frame Records
 
-The `CloseFrame` Records represent WebSocket close frames. When a service returns a close frame record, the WebSocket module will automatically send the corresponding close frame and terminate the connection.
+The `websocket:CloseFrame` record represents a WebSocket close frame. When a `CloseFrame` is returned from a WebSocket service, a `CloseFrame` is sent to the client and the connection will be terminated.
 
 Following is the `websocket:NormalClosure` definition. Likewise, some predefined close frame records are provided.
 
