@@ -19,6 +19,7 @@ package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.concurrent.StrandMetadata;
+import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -47,6 +48,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.CLOSE_FRAME_DEFAULT_TIMEOUT;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.PACKAGE_WEBSOCKET;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.Close.initiateConnectionClosure;
@@ -82,9 +84,12 @@ public final class WebSocketResourceCallback implements Handler {
             BMap<BString, Object> bMap = (BMap<BString, Object>) obj;
             if (bMap.containsKey(WebSocketConstants.CLOSE_FRAME_TYPE) &&
                     bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE) instanceof BObject) {
-                String objectType = TypeUtils.getType(bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE)).toString();
-                return objectType.equals(WebSocketConstants.PREDEFINED_CLOSE_FRAME_TYPE) ||
-                        objectType.equals(WebSocketConstants.CUSTOM_CLOSE_FRAME_TYPE);
+                Type objectType = TypeUtils.getType(bMap.get(WebSocketConstants.CLOSE_FRAME_TYPE));
+                String objectName = objectType.getName();
+                String objectPackage = objectType.getPackage().getName();
+                return objectPackage.equals(PACKAGE_WEBSOCKET) &&
+                        (objectName.equals(WebSocketConstants.PREDEFINED_CLOSE_FRAME_TYPE) ||
+                                objectName.equals(WebSocketConstants.CUSTOM_CLOSE_FRAME_TYPE));
             }
         }
         return false;
