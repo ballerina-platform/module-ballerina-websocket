@@ -142,7 +142,7 @@ public class WebSocketConstants {
     public static final String STATUS_CODE = "Status code:";
 
     // Close Frame Records
-    public static final BString CLOSE_FRAME_TYPE = StringUtils.fromString("type");
+    public static final String CLOSE_FRAME_TYPE = "type";
     public static final BString CLOSE_FRAME_STATUS_CODE = StringUtils.fromString("status");
     public static final BString CLOSE_FRAME_REASON = StringUtils.fromString("reason");
     public static final String PREDEFINED_CLOSE_FRAME_TYPE = "PredefinedCloseFrameType";
