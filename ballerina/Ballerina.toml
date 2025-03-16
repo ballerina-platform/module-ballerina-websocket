@@ -22,19 +22,19 @@ path = "../native/build/libs/websocket-native-2.14.0-SNAPSHOT.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
 version = "2.14.0"
-path = "./lib/http-native-2.14.0-20250305-195600-c559baa.jar"
+path = "./lib/http-native-2.14.0-20250311-152000-c0b9408.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "mime-native"
 version = "2.12.0"
-path = "./lib/mime-native-2.12.0-20250305-174800-8528404.jar"
+path = "./lib/mime-native-2.12.0-20250311-141300-98bc7d6.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "constraint-native"
 version = "1.7.0"
-path = "./lib/constraint-native-1.7.0-20250305-165400-52275bd.jar"
+path = "./lib/constraint-native-1.7.0-20250311-133400-acfb095.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
