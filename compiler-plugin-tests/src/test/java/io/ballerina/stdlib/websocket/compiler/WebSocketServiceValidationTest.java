@@ -382,6 +382,15 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testOnErrorWithCloseFramesReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_61");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
     public void testOnTextWithInvalidMandatoryInputParamAndWrongReturnWithoutTypeInclusion() {
         Package currentPackage = loadPackage("sample_package_33");
         PackageCompilation compilation = currentPackage.getCompilation();
