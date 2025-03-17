@@ -115,6 +115,7 @@ public class WebSocketConstants {
     public static final int STATUS_CODE_FOR_NO_STATUS_CODE_PRESENT = 1005;
 
     public static final int DEFAULT_MAX_FRAME_SIZE = 65536;
+    public static final int DEFAULT_CONNECTION_CLOSURE_TIMEOUT  = 60;
 
     // Warning suppression
     public static final String UNCHECKED = "unchecked";
