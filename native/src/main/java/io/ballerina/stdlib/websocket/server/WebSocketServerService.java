@@ -44,6 +44,7 @@ public class WebSocketServerService extends WebSocketService {
     private int idleTimeoutInSeconds = 0;
     private boolean enableValidation = true;
     private String dispatchingKey = null;
+    private int connectionClosureTimeout;
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
@@ -56,6 +57,8 @@ public class WebSocketServerService extends WebSocketService {
             negotiableSubProtocols = WebSocketUtil.findNegotiableSubProtocols(configAnnotation);
             idleTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
                     WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
+            connectionClosureTimeout = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
+                    WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT, 60);
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
             enableValidation = configAnnotation.getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
             if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY) != null) {
@@ -100,5 +103,9 @@ public class WebSocketServerService extends WebSocketService {
 
     public String getBasePath() {
         return basePath;
+    }
+
+    public int getConnectionClosureTimeout() {
+        return connectionClosureTimeout;
     }
 }

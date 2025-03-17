@@ -88,7 +88,7 @@ public isolated client class Caller {
     # within the waiting period, the connection is terminated immediately
     # + return - A `websocket:Error` if an error occurs when sending
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-        decimal timeout = 60) returns Error? {
+        decimal? timeout = ()) returns Error? {
         int code = 1000;
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
@@ -101,7 +101,7 @@ public isolated client class Caller {
         return self.externClose(code, reason is () ? "" : reason, timeout);
     }
 
-    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs) returns Error? = @java:Method {
+    isolated function externClose(int statusCode, string reason, decimal? timeoutInSecs = ()) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"
     } external;
 

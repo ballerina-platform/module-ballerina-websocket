@@ -28,6 +28,7 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +46,21 @@ public class Close {
     private static final Logger log = LoggerFactory.getLogger(Close.class);
 
     public static Object externClose(Environment env, BObject wsConnection, long statusCode, BString reason,
-            BDecimal timeoutInSecs) {
+                                     Object bTimeoutInSecs) {
         return env.yieldAndRun(() -> {
             CompletableFuture<Object> balFuture = new CompletableFuture<>();
             WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
                     .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
             WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                     WebSocketConstants.RESOURCE_NAME_CLOSE);
+            int timeoutInSecs = getConnectionClosureTimeout(bTimeoutInSecs, connectionInfo);
             try {
                 CountDownLatch countDownLatch = new CountDownLatch(1);
                 List<BError> errors = new ArrayList<>(1);
                 ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                         connectionInfo, countDownLatch);
                 connectionInfo.getWebSocketConnection().readNextFrame();
-                waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
+                waitForTimeout(errors, timeoutInSecs, countDownLatch, connectionInfo);
                 closeFuture.channel().close().addListener(future -> {
                     WebSocketUtil.setListenerOpenField(connectionInfo);
                     if (errors.isEmpty()) {
@@ -79,6 +81,16 @@ public class Close {
             }
             return ModuleUtils.getResult(balFuture);
         });
+    }
+
+    private static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
+        int connectionClosureTimeout = 60;
+        if (bTimeoutInSecs instanceof BDecimal) {
+            return (int) ((BDecimal) bTimeoutInSecs).floatValue();
+        } else if (connectionInfo.getService() instanceof WebSocketServerService webSocketServerService) {
+            return webSocketServerService.getConnectionClosureTimeout();
+        }
+        return connectionClosureTimeout;
     }
 
     private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
