@@ -226,7 +226,7 @@ public isolated client class Client {
         }
     }
 
-    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
+    isolated function externClose(int statusCode, string reason, decimal? timeoutInSecs)
                          returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"
     } external;
