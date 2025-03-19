@@ -180,7 +180,7 @@ public class Utils {
         for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
             if (symbol.typeKind() == TypeDescKind.STREAM) {
                 hasStreamType = true;
-            } else if (symbol.typeKind() != TypeDescKind.ERROR) {
+            } else if (symbol.typeKind() != TypeDescKind.ERROR && !isCloseFrameRecordType(symbol)) {
                 hasOtherType = true;
             }
         }

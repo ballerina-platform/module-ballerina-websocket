@@ -564,6 +564,14 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY);
     }
 
+    @Test
+    public void testRemoteFunctionWithStreamAndCloseFrameReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_62");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
