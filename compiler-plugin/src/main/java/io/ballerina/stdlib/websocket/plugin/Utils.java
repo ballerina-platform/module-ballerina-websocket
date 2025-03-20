@@ -452,13 +452,12 @@ public class Utils {
     }
 
     private static boolean isCloseFrameRecordType(TypeSymbol typeSymbol) {
-        if (typeSymbol instanceof TypeReferenceTypeSymbol) {
+        if (typeSymbol instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
             if (typeSymbol.nameEquals(CLOSE_FRAME) &&
                     typeSymbol.getModule().flatMap(Symbol::getName).orElse("").equals(PACKAGE_WEBSOCKET)) {
                 return true;
             }
-            typeSymbol = ((TypeReferenceTypeSymbol) typeSymbol).typeDescriptor();
-            return isCloseFrameRecordType(typeSymbol);
+            return isCloseFrameRecordType(typeReferenceTypeSymbol.typeDescriptor());
         } else if (typeSymbol instanceof RecordTypeSymbol bRecordTypeSymbol) {
             if (bRecordTypeSymbol.fieldDescriptors().containsKey(CLOSE_FRAME_TYPE)) {
                 TypeSymbol objectType = bRecordTypeSymbol.fieldDescriptors().get(CLOSE_FRAME_TYPE).typeDescriptor();
@@ -468,11 +467,7 @@ public class Utils {
                                 objectType.nameEquals(CUSTOM_CLOSE_FRAME_TYPE));
             }
         } else if (typeSymbol instanceof IntersectionTypeSymbol intersectionTypeSymbol) {
-            for (TypeSymbol memberType : intersectionTypeSymbol.memberTypeDescriptors()) {
-                if (isCloseFrameRecordType(memberType)) {
-                    return true;
-                }
-            }
+            return isCloseFrameRecordType(intersectionTypeSymbol.effectiveTypeDescriptor());
         }
         return false;
     }
