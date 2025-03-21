@@ -18,8 +18,12 @@
 package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
+import io.ballerina.compiler.api.symbols.IntersectionTypeSymbol;
 import io.ballerina.compiler.api.symbols.ParameterSymbol;
+import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
@@ -37,7 +41,6 @@ import io.ballerina.projects.plugins.codeaction.CodeActionContext;
 import io.ballerina.projects.plugins.codeaction.CodeActionExecutionContext;
 import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.projects.plugins.codeaction.DocumentEdit;
-import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
@@ -55,7 +58,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.CLOSE_FRAME_TYPE;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.CUSTOM_CLOSE_FRAME_TYPE;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.PACKAGE_WEBSOCKET;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.PREDEFINED_CLOSE_FRAME_TYPE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CLOSE_FRAME;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.COLON;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.PIPE;
 
 /**
  * Class for util functions related to compiler plugin.
@@ -76,14 +85,14 @@ public class Utils {
         ModulePartNode modulePartNode = ctx.syntaxTree().rootNode();
         for (ImportDeclarationNode importDeclaration : modulePartNode.imports()) {
             if (importDeclaration.moduleName().get(0).toString().split(" ")[0]
-                    .compareTo(WebSocketConstants.PACKAGE_WEBSOCKET) == 0) {
+                    .compareTo(PACKAGE_WEBSOCKET) == 0) {
                 if (importDeclaration.prefix().isPresent()) {
                     return importDeclaration.prefix().get().children().get(1).toString();
                 }
                 break;
             }
         }
-        return WebSocketConstants.PACKAGE_WEBSOCKET;
+        return PACKAGE_WEBSOCKET;
     }
 
     public static void validateOnOpenFunction(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
@@ -94,7 +103,7 @@ public class Utils {
                 String paramSignature = inputParam.typeDescriptor().signature();
                 if (!paramSignature.startsWith(PREFIX) || !paramSignature.endsWith(CALLER)) {
                     reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAMS_FOR_ON_OPEN,
-                            resourceNode.location(), resourceNode.location(), WebSocketConstants.PACKAGE_WEBSOCKET);
+                            resourceNode.location(), resourceNode.location(), PACKAGE_WEBSOCKET);
                 }
             }
         }
@@ -171,7 +180,7 @@ public class Utils {
         for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
             if (symbol.typeKind() == TypeDescKind.STREAM) {
                 hasStreamType = true;
-            } else if (symbol.typeKind() != TypeDescKind.ERROR) {
+            } else if (symbol.typeKind() != TypeDescKind.ERROR && !isCloseFrameRecordType(symbol)) {
                 hasOtherType = true;
             }
         }
@@ -204,25 +213,28 @@ public class Utils {
                 }
             }
         }
-        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), PluginConstants.ON_ERROR,
+        validateReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), PluginConstants.ON_ERROR,
                 resourceNode, ctx);
     }
 
-    private static void validateErrorReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
+    private static void validateReturnTypes(TypeSymbol returnTypeSymbol, String functionName,
             FunctionDefinitionNode resourceNode, SyntaxNodeAnalysisContext ctx) {
+        String allowedTypes = String.format("%s%s%s%s", PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL) + PIPE +
+                String.format("%s%s%s%s", PACKAGE_WEBSOCKET, COLON, CLOSE_FRAME, OPTIONAL);
         if (returnTypeSymbol.typeKind() == TypeDescKind.UNION) {
             for (TypeSymbol symbol : (((UnionTypeSymbol) returnTypeSymbol).memberTypeDescriptors())) {
-                if (!(symbol.typeKind() == TypeDescKind.ERROR) && !(symbol.typeKind() == TypeDescKind.NIL)
-                        && !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.signature()
-                        .endsWith(SyntaxKind.COLON_TOKEN.stringValue() + ERROR))) {
-                    repoteDiagnostics(String.format("%s%s%s%s",
-                                    WebSocketConstants.PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL),
-                            resourceNode, ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
+                if (!(symbol.typeKind() == TypeDescKind.ERROR) &&
+                        !(isCloseFrameRecordType(symbol)) &&
+                        !(symbol.typeKind() == TypeDescKind.NIL) &&
+                        !(symbol.typeKind() == TypeDescKind.TYPE_REFERENCE && symbol.signature()
+                                .endsWith(SyntaxKind.COLON_TOKEN.stringValue() + ERROR))) {
+                    repoteDiagnostics(allowedTypes, resourceNode, ctx,
+                            PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
                 }
             }
-        } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL)) {
-            repoteDiagnostics(String.format("%s%s%s%s", WebSocketConstants.PACKAGE_WEBSOCKET, COLON, ERROR, OPTIONAL),
-                    resourceNode, ctx, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
+        } else if (!(returnTypeSymbol.typeKind() == TypeDescKind.NIL) && !isCloseFrameRecordType(returnTypeSymbol)) {
+            repoteDiagnostics(allowedTypes, resourceNode, ctx,
+                    PluginConstants.CompilationErrors.INVALID_RETURN_TYPES, functionName);
         }
     }
 
@@ -247,7 +259,7 @@ public class Utils {
                 }
             }
         }
-        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), PluginConstants.ON_CLOSE,
+        validateReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), PluginConstants.ON_CLOSE,
                 resourceNode, ctx);
     }
 
@@ -271,8 +283,8 @@ public class Utils {
             reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_INPUT_PARAM_FOR_ON_IDLE_TIMEOUT,
                     resourceNode.location(), inputParams.get(0).typeDescriptor().signature());
         }
-        validateErrorReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(),
-                PluginConstants.ON_IDLE_TIMEOUT, resourceNode, ctx);
+        validateReturnTypes(functionTypeSymbol.returnTypeDescriptor().get(), PluginConstants.ON_IDLE_TIMEOUT,
+                resourceNode, ctx);
     }
 
     static void validateOnDataFunctions(FunctionTypeSymbol functionTypeSymbol, SyntaxNodeAnalysisContext ctx,
@@ -347,7 +359,7 @@ public class Utils {
     }
 
     private static String getModuleId(ParameterSymbol inputParam) {
-        String moduleId = WebSocketConstants.PACKAGE_WEBSOCKET;
+        String moduleId = PACKAGE_WEBSOCKET;
         if (inputParam.typeDescriptor().typeKind() == TypeDescKind.TYPE_REFERENCE
                 || inputParam.typeDescriptor().typeKind() == TypeDescKind.ERROR) {
             moduleId = inputParam.typeDescriptor().getModule().get().id().toString();
@@ -437,5 +449,26 @@ public class Utils {
         CodeActionArgument locationArg = CodeActionArgument.from(Utils.NODE_LOCATION,
                 diagnostic.location().lineRange());
         return Optional.of(CodeActionInfo.from(codeAction, List.of(locationArg)));
+    }
+
+    private static boolean isCloseFrameRecordType(TypeSymbol typeSymbol) {
+        if (typeSymbol instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
+            if (typeSymbol.nameEquals(CLOSE_FRAME) &&
+                    typeSymbol.getModule().flatMap(Symbol::getName).orElse("").equals(PACKAGE_WEBSOCKET)) {
+                return true;
+            }
+            return isCloseFrameRecordType(typeReferenceTypeSymbol.typeDescriptor());
+        } else if (typeSymbol instanceof RecordTypeSymbol bRecordTypeSymbol) {
+            if (bRecordTypeSymbol.fieldDescriptors().containsKey(CLOSE_FRAME_TYPE)) {
+                TypeSymbol objectType = bRecordTypeSymbol.fieldDescriptors().get(CLOSE_FRAME_TYPE).typeDescriptor();
+                String moduleName = objectType.getModule().flatMap(Symbol::getName).orElse("");
+                return moduleName.equals(PACKAGE_WEBSOCKET) &&
+                        (objectType.nameEquals(PREDEFINED_CLOSE_FRAME_TYPE) ||
+                                objectType.nameEquals(CUSTOM_CLOSE_FRAME_TYPE));
+            }
+        } else if (typeSymbol instanceof IntersectionTypeSymbol intersectionTypeSymbol) {
+            return isCloseFrameRecordType(intersectionTypeSymbol.effectiveTypeDescriptor());
+        }
+        return false;
     }
 }

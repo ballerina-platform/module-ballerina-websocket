@@ -43,6 +43,7 @@ public class PluginConstants {
     static final String LISTENER_IDENTIFIER = "Listener";
     static final String DISPATCHER_ANNOTATION = "dispatcherKey";
     static final String DISPATCHER_STREAM_ID_ANNOTATION = "dispatcherStreamId";
+    static final String CLOSE_FRAME = "CloseFrame";
 
     /**
      * Compilation Errors of WebSocket module.

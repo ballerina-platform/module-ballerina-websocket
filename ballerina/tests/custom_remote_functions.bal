@@ -28,7 +28,7 @@ service on customDispatchingLis {
 
 service class SingleMessageService {
     *Service;
-    remote function onPing(Caller caller, json data) returns Error? {
+    remote function onPingMessage(Caller caller, json data) returns Error? {
         io:println(data);
         check caller->writeMessage({"event": "pong"});
     }
