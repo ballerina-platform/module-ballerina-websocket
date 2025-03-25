@@ -141,20 +141,23 @@ public final class WebSocketResourceCallback implements Handler {
         int statusCode = closeFrameRecord.getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE).intValue();
         String reason = closeFrameRecord.containsKey(WebSocketConstants.CLOSE_FRAME_REASON) ?
                 closeFrameRecord.getStringValue(WebSocketConstants.CLOSE_FRAME_REASON).getValue() : "";
-        if (!isValidStatusCode(statusCode)) {
-            log.error("Failed to send close frame. Invalid status code: {}", statusCode);
-            return;
-        }
         try {
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            List<BError> errors = new ArrayList<>(1);
-            ChannelFuture closeFuture = initiateConnectionClosure(errors, statusCode, reason,
-                    connectionInfo, countDownLatch);
-            connectionInfo.getWebSocketConnection().readNextFrame();
-            waitForTimeout(errors, CLOSE_FRAME_DEFAULT_TIMEOUT, countDownLatch, connectionInfo);
-            closeFuture.channel().close().addListener(future -> {
-                WebSocketUtil.setListenerOpenField(connectionInfo);
-            });
+            if (isValidStatusCode(statusCode)) {
+                CountDownLatch countDownLatch = new CountDownLatch(1);
+                List<BError> errors = new ArrayList<>(1);
+                ChannelFuture closeFuture = initiateConnectionClosure(errors, statusCode, reason,
+                        connectionInfo, countDownLatch);
+                connectionInfo.getWebSocketConnection().readNextFrame();
+                waitForTimeout(errors, CLOSE_FRAME_DEFAULT_TIMEOUT, countDownLatch, connectionInfo);
+                closeFuture.channel().close().addListener(future -> {
+                    WebSocketUtil.setListenerOpenField(connectionInfo);
+                });
+            } else {
+                log.error("Failed to send close frame. Invalid status code: {}", statusCode);
+                connectionInfo.getWebSocketConnection().getChannel().close().addListener(future -> {
+                    WebSocketUtil.setListenerOpenField(connectionInfo);
+                });
+            }
         } catch (Exception e) {
             log.error("Error occurred when sending close frame", e);
             dispatchOnError(connectionInfo, e,
