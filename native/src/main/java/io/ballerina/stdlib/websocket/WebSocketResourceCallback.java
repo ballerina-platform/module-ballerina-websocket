@@ -141,6 +141,10 @@ public final class WebSocketResourceCallback implements Handler {
         int statusCode = closeFrameRecord.getIntValue(WebSocketConstants.CLOSE_FRAME_STATUS_CODE).intValue();
         String reason = closeFrameRecord.containsKey(WebSocketConstants.CLOSE_FRAME_REASON) ?
                 closeFrameRecord.getStringValue(WebSocketConstants.CLOSE_FRAME_REASON).getValue() : "";
+        if (!isValidStatusCode(statusCode)) {
+            log.error("Failed to send close frame. Invalid status code: {}", statusCode);
+            return;
+        }
         try {
             CountDownLatch countDownLatch = new CountDownLatch(1);
             List<BError> errors = new ArrayList<>(1);
@@ -156,6 +160,11 @@ public final class WebSocketResourceCallback implements Handler {
             dispatchOnError(connectionInfo, e,
                     connectionInfo.getWebSocketEndpoint().get(WebSocketConstants.INITIALIZED_BY_SERVICE).equals(true));
         }
+    }
+
+    private static boolean isValidStatusCode(int statusCode) {
+        return !(statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
+                statusCode <= 2999 || statusCode > 4999);
     }
 
     private void sendPong(BArray result, PromiseCombiner promiseCombiner) {
