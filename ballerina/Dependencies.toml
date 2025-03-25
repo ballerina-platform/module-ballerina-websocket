@@ -5,8 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.0-20250311-124800-b9003fed"
-
+distribution-version = "2201.12.0"
 
 [[package]]
 org = "ballerina"
@@ -343,7 +342,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "websocket"
-version = "2.14.0"
+version = "2.14.1"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "constraint"},
