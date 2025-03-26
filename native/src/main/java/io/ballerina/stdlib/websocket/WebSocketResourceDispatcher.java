@@ -97,6 +97,7 @@ import static io.ballerina.runtime.api.types.TypeTags.NULL_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.UNCHECKED;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.hasByteArrayType;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
@@ -406,19 +407,25 @@ public class WebSocketResourceDispatcher {
                 return;
             }
             String dispatchingKey = ((WebSocketServerService) wsService).getDispatchingKey();
-            Optional<String> customRemoteMethodName = getCustomRemoteMethodName(dispatchingKey, stringAggregator);
+            Optional<String> dispatchingValue = getDispatchingValue(dispatchingKey, stringAggregator);
+            Optional<String> customRemoteMethodName = dispatchingValue
+                    .map(WebSocketResourceDispatcher::createCustomRemoteFunction);
             MethodType onTextMessageResource = null;
             BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
             Object dispatchingService = wsService.getWsService(connectionInfo.getWebSocketConnection().getChannelId());
             MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
             for (MethodType remoteFunc : remoteFunctions) {
-                String funcName = remoteFunc.getName();
-                if (customRemoteMethodName.isPresent() && funcName.equals(customRemoteMethodName.get())) {
+                String funcDispatcherValue = getFunctionDispatchingValue(remoteFunc);
+                if (dispatchingValue.isPresent() && funcDispatcherValue.equals(dispatchingValue.get())) {
                     onTextMessageResource = remoteFunc;
                     break;
                 }
-                if (funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
-                        funcName.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
+                if (customRemoteMethodName.isPresent() && funcDispatcherValue.equals(customRemoteMethodName.get())) {
+                    onTextMessageResource = remoteFunc;
+                    break;
+                }
+                if (funcDispatcherValue.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
+                        funcDispatcherValue.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
                     onTextMessageResource = remoteFunc;
                 }
             }
@@ -557,16 +564,16 @@ public class WebSocketResourceDispatcher {
         }
     }
 
-    private static Optional<String> getCustomRemoteMethodName(String dispatchingKey,
+    private static Optional<String> getDispatchingValue(String dispatchingKey,
                                                               WebSocketConnectionInfo.StringAggregator
                                                                       stringAggregator) {
         return Optional.ofNullable(dispatchingKey)
                 .flatMap(key -> {
                     try {
-                        BString dispatchingValue = ((BMap) FromJsonString.fromJsonString(
+                        String dispatchingValue = ((BMap) FromJsonString.fromJsonString(
                                 StringUtils.fromString(stringAggregator.getAggregateString())))
-                                .getStringValue(StringUtils.fromString(dispatchingKey));
-                        return Optional.of(createCustomRemoteFunction(dispatchingValue.getValue()));
+                                .getStringValue(StringUtils.fromString(dispatchingKey)).getValue();
+                        return Optional.of(dispatchingValue);
                     } catch (RuntimeException e) {
                         return Optional.empty();
                     }
@@ -588,6 +595,18 @@ public class WebSocketResourceDispatcher {
             builder.append(word);
         }
         return builder.toString();
+    }
+
+    @SuppressWarnings(UNCHECKED)
+    public static String getFunctionDispatchingValue(MethodType remoteFunc) {
+        BMap<BString, Object> annotations = (BMap<BString, Object>) remoteFunc.getAnnotation(StringUtils.fromString(
+                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION));
+        if (annotations != null && annotations.containsKey(WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE)) {
+            String dispatchingValue = annotations.
+                    getStringValue(WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE).getValue();
+            return createCustomRemoteFunction(dispatchingValue);
+        }
+        return remoteFunc.getName();
     }
 
     private static void sendDataBindingError(WebSocketConnection webSocketConnection, String errorMessage) {
