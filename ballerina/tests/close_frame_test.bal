@@ -37,6 +37,7 @@ listener Listener l112 = new (22092);
 listener Listener l113 = new (22093);
 listener Listener l114 = new (22094);
 listener Listener l115 = new (22095);
+listener Listener l116 = new (22096);
 
 service /onCloseFrame on l102 {
     resource function get .() returns Service|UpgradeError {
@@ -128,6 +129,12 @@ service /onCloseFrame on l114 {
 service /onCloseFrame on l115 {
     resource function get .() returns Service|UpgradeError {
         return new WsService115();
+    }
+}
+
+service /onCloseFrame on l116 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService116();
     }
 }
 
@@ -249,6 +256,14 @@ service class WsService115 {
     remote function onMessage(string data) returns stream<int|NormalClosure> {
         (int|NormalClosure)[] arr = [1, 2, NORMAL_CLOSURE];
         return arr.toStream();
+    }
+}
+
+service class WsService116 {
+    *Service;
+
+    remote function onMessage(string data) returns CustomCloseFrame {
+        return {status: 5555};
     }
 }
 
@@ -464,4 +479,18 @@ public function testCloseFrameInStream() returns Error? {
         test:assertEquals(res3.message(), getErrorMessage(NORMAL_CLOSURE));
     }
     test:assertTrue(isConnectionClosed(wsClient));
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testCloseFrameWithInvalidStatusCode() returns Error? {
+    Client wsClient = check new ("ws://localhost:22096/onCloseFrame");
+    check wsClient->writeMessage("Hi");
+    anydata|Error res = wsClient->readMessage();
+    test:assertTrue(res is Error);
+    if res is Error {
+        // Should receive 1006 (Abnormal Closure)
+        test:assertEquals(res.message(), "Connection closed Status code: 1006");
+    }
 }
