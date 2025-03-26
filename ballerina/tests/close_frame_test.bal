@@ -36,6 +36,7 @@ listener Listener l111 = new (22091);
 listener Listener l112 = new (22092);
 listener Listener l113 = new (22093);
 listener Listener l114 = new (22094);
+listener Listener l115 = new (22095);
 
 service /onCloseFrame on l102 {
     resource function get .() returns Service|UpgradeError {
@@ -121,6 +122,12 @@ service /onCloseFrame on l113 {
 service /onCloseFrame on l114 {
     resource function get .() returns Service|UpgradeError {
         return new WsService114();
+    }
+}
+
+service /onCloseFrame on l115 {
+    resource function get .() returns Service|UpgradeError {
+        return new WsService115();
     }
 }
 
@@ -233,6 +240,15 @@ service class WsService114 {
 
     remote function onIdleTimeout() returns NormalClosure {
         return NORMAL_CLOSURE;
+    }
+}
+
+service class WsService115 {
+    *Service;
+
+    remote function onMessage(string data) returns stream<int|NormalClosure> {
+        (int|NormalClosure)[] arr = [1, 2, NORMAL_CLOSURE];
+        return arr.toStream();
     }
 }
 
@@ -426,6 +442,26 @@ public function testOnIdleTimeout() returns Error? {
     test:assertTrue(res is Error);
     if res is Error {
         test:assertEquals(res.message(), getErrorMessage(NORMAL_CLOSURE));
+    }
+    test:assertTrue(isConnectionClosed(wsClient));
+}
+
+@test:Config {
+    groups: ["closeFrame"]
+}
+public function testCloseFrameInStream() returns Error? {
+    Client wsClient = check new ("ws://localhost:22095/onCloseFrame");
+    check wsClient->writeMessage("Hi");
+    anydata|Error res1 = wsClient->readMessage();
+    test:assertEquals(res1, 1);
+
+    anydata|Error res2 = wsClient->readMessage();
+    test:assertEquals(res2, 2);
+
+    anydata|Error res3 = wsClient->readMessage();
+    test:assertTrue(res3 is Error);
+    if res3 is Error {
+        test:assertEquals(res3.message(), getErrorMessage(NORMAL_CLOSURE));
     }
     test:assertTrue(isConnectionClosed(wsClient));
 }
