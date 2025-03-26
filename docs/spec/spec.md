@@ -396,13 +396,7 @@ dispatching error remote function = "onHeartbeatError"
 - If there are spaces and underscores between message types, those will be removed and made camel case("un subscribe" -> "onUnSubscribe").
 - The 'on' word is added as the predecessor and the remote function name is in the camel case("heartbeat" -> "onHeartbeat").
 
-3. Handling Special Dispatching Values:
-
-* For certain predefined message types, the corresponding remote function follows a fixed naming convention:
-  * "ping" -> "onPingMessage"
-  * "pong" -> "onPongMessage"
-
-4. If an unmatching message type receives where a matching remote function is not implemented in the WebSocket service by the user, it gets dispatched to the default `onMessage` remote function if it is implemented. Or else it will get ignored.
+3. If an unmatching message type receives where a matching remote function is not implemented in the WebSocket service by the user, it gets dispatched to the default `onMessage` remote function if it is implemented. Or else it will get ignored.
 
 #### 3.2.3. Return types
 
