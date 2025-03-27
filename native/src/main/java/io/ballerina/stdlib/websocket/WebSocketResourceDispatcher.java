@@ -97,7 +97,6 @@ import static io.ballerina.runtime.api.types.TypeTags.NULL_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.UNCHECKED;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.hasByteArrayType;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
@@ -413,29 +412,24 @@ public class WebSocketResourceDispatcher {
             MethodType onTextMessageResource = null;
             BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
             Object dispatchingService = wsService.getWsService(connectionInfo.getWebSocketConnection().getChannelId());
-            MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
-            for (MethodType remoteFunc : remoteFunctions) {
-                String funcDispatcherValue = getFunctionDispatchingValue(remoteFunc);
-                if (dispatchingValue.isPresent() && funcDispatcherValue.equals(dispatchingValue.get())) {
-                    onTextMessageResource = remoteFunc;
-                    break;
-                }
-                if (customRemoteMethodName.isPresent() && funcDispatcherValue.equals(customRemoteMethodName.get())) {
-                    onTextMessageResource = remoteFunc;
-                    break;
-                }
-                if (funcDispatcherValue.equals(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE) ||
-                        funcDispatcherValue.equals(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
-                    onTextMessageResource = remoteFunc;
-                }
+            Map<String, MethodType> dispatchingFunctions = wsService
+                    .getDispatchingFunctions(connectionInfo.getWebSocketConnection().getChannelId());
+            if (dispatchingValue.isPresent() && dispatchingFunctions.containsKey(dispatchingValue.get())) {
+                onTextMessageResource = dispatchingFunctions.get(dispatchingValue.get());
+            } else if (customRemoteMethodName.isPresent()
+                    && dispatchingFunctions.containsKey(customRemoteMethodName.get())) {
+                onTextMessageResource = dispatchingFunctions.get(customRemoteMethodName.get());
+            } else if (dispatchingFunctions.containsKey(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE)) {
+                onTextMessageResource = dispatchingFunctions.get(WebSocketConstants.RESOURCE_NAME_ON_TEXT_MESSAGE);
+            } else if (dispatchingFunctions.containsKey(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE)) {
+                onTextMessageResource = dispatchingFunctions.get(WebSocketConstants.RESOURCE_NAME_ON_MESSAGE);
             }
-            boolean hasOnError = Arrays.stream(remoteFunctions).anyMatch(remoteFunc -> remoteFunc.getName()
-                    .equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR));
+            boolean hasOnError = dispatchingFunctions.containsKey(WebSocketConstants.RESOURCE_NAME_ON_ERROR);
             String errorMethodName = null;
             boolean hasOnCustomError = false;
             if (customRemoteMethodName.isPresent()) {
                 errorMethodName = customRemoteMethodName.get() + "Error";
-                hasOnCustomError = hasCustomErrorRemoteFunction(remoteFunctions, errorMethodName);
+                hasOnCustomError = dispatchingFunctions.containsKey(errorMethodName);
             }
             if (onTextMessageResource == null) {
                 stringAggregator.resetAggregateString();
@@ -537,15 +531,6 @@ public class WebSocketResourceDispatcher {
         return bValue;
     }
 
-    private static boolean hasCustomErrorRemoteFunction(MethodType[] remoteFunctions, String errorMethodName) {
-        for (MethodType remoteFunc : remoteFunctions) {
-            if (remoteFunc.getName().equals(errorMethodName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static void handleError(WebSocketConnectionInfo connectionInfo, BError error, boolean hasOnCustomError,
                                     String errorMethodName, boolean hasOnError) throws IllegalAccessException {
         if (hasOnCustomError) {
@@ -595,18 +580,6 @@ public class WebSocketResourceDispatcher {
             builder.append(word);
         }
         return builder.toString();
-    }
-
-    @SuppressWarnings(UNCHECKED)
-    public static String getFunctionDispatchingValue(MethodType remoteFunc) {
-        BMap<BString, Object> annotations = (BMap<BString, Object>) remoteFunc.getAnnotation(StringUtils.fromString(
-                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION));
-        if (annotations != null && annotations.containsKey(WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE)) {
-            String dispatchingValue = annotations.
-                    getStringValue(WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE).getValue();
-            return createCustomRemoteFunction(dispatchingValue);
-        }
-        return remoteFunc.getName();
     }
 
     private static void sendDataBindingError(WebSocketConnection webSocketConnection, String errorMessage) {
