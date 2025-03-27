@@ -19,7 +19,6 @@ package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.concurrent.StrandMetadata;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
@@ -42,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import static io.ballerina.runtime.api.utils.StringUtils.fromString;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromByteArray;
@@ -97,8 +97,8 @@ public final class WebSocketResourceCallback implements Handler {
             });
         } else if (result == null) {
             webSocketConnection.readNextFrame();
-        } else if (result instanceof BXml) {
-            sendTextMessage(StringUtils.fromString(result.toString()), promiseCombiner);
+        } else if (result instanceof BXml bXml) {
+            sendTextMessage(fromString(bXml.getTextValue()), promiseCombiner);
         } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_CLOSE) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR) &&
