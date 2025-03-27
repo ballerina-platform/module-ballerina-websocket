@@ -98,7 +98,7 @@ public final class WebSocketResourceCallback implements Handler {
         } else if (result == null) {
             webSocketConnection.readNextFrame();
         } else if (result instanceof BXml bXml) {
-            sendTextMessage(fromString(bXml.getTextValue()), promiseCombiner);
+            sendTextMessage(fromString(bXml.toString()), promiseCombiner);
         } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_CLOSE) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR) &&
