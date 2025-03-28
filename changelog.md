@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- [Introduce Service Config Annotation for connectionClosureTimeout in Websocket module](https://github.com/ballerina-platform/ballerina-library/issues/7697)
+
 ### Fixed
 
 - [Fix JSON response parsing issue with escaped double quotes](https://github.com/ballerina-platform/ballerina-library/issues/7720)
