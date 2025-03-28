@@ -24,13 +24,13 @@ type Subscribe record {|
 @ServiceConfig {
     dispatcherKey: "event"
 }
-service / on new Listener(22101) {
+service / on new Listener(22103) {
     resource function get .() returns Service|UpgradeError {
-        return new WsService22101();
+        return new WsService22103();
     }
 }
 
-service class WsService22101 {
+service class WsService22103 {
     *Service;
 
     remote function onSubscribe(Subscribe message) returns string {
@@ -49,7 +49,7 @@ service class WsService22101 {
     groups: ["dispatcherConfigAnnotation"]
 }
 public function testDispatcherConfigAnnotation() returns Error? {
-    Client wsClient = check new ("ws://localhost:22101/");
+    Client wsClient = check new ("ws://localhost:22103/");
     check wsClient->writeMessage({event: "subscribe", data: "test"});
     string res = check wsClient->readMessage();
     test:assertEquals(res, "onSubscribeMessage");
