@@ -27,6 +27,7 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.values.BXml;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
@@ -59,6 +60,7 @@ import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocket
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.getByteChunk;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.release;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil.observeError;
+import static org.ballerinalang.langlib.value.ToJsonString.toJsonString;
 
 /**
  * Callback impl for web socket.
@@ -125,11 +127,13 @@ public final class WebSocketResourceCallback implements Handler {
             sendCloseFrame(result, connectionInfo);
         } else if (result == null) {
             webSocketConnection.readNextFrame();
+        } else if (result instanceof BXml bXml) {
+            sendTextMessage(fromString(bXml.toString()), promiseCombiner);
         } else if (!resource.equals(WebSocketConstants.RESOURCE_NAME_ON_PONG) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_CLOSE) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_ERROR) &&
                 !resource.equals(WebSocketConstants.RESOURCE_NAME_ON_IDLE_TIMEOUT)) {
-            sendTextMessage(fromString(result.toString()), promiseCombiner);
+            sendTextMessage(toJsonString(result), promiseCombiner);
         } else {
             log.error("invalid return type");
         }

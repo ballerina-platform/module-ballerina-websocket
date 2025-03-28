@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - [Implement websocket close frame support](https://github.com/ballerina-platform/ballerina-library/issues/7578)
 
+### Fixed
+
+- [Fix JSON response parsing issue with escaped double quotes](https://github.com/ballerina-platform/ballerina-library/issues/7720)
+
 ### Changed
 
 - [Move SSL context creation to the client initialization](https://github.com/ballerina-platform/ballerina-library/issues/1798)
