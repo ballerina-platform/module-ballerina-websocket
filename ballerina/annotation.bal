@@ -30,11 +30,11 @@
 # + validation - Enable/disable constraint validation
 # + dispatcherKey - The key which is going to be used for dispatching to custom remote functions.
 # + dispatcherStreamId - The identifier used to distinguish between requests and their corresponding responses in a multiplexing scenario.
-# + connectionClosureTimeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
-# connection. If the timeout exceeds, then the connection is terminated even though a close frame
-# is not received from the remote endpoint. If the value < 0 (e.g., -1), then the connection waits
-# until a close frame is received. If the WebSocket frame is received from the remote endpoint
-# within the waiting period, the connection is terminated immediately.
+# + connectionClosureTimeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint 
+# before closing the connection. If the timeout exceeds, then the connection is terminated even though a close frame is
+# not received from the remote endpoint. If the value < 0 (e.g., -1), then the connection waits until a close frame is
+# received. If the WebSocket frame is received from the remote endpoint within the waiting period, the connection is
+# terminated immediately.
 public type WSServiceConfig record {|
     string[] subProtocols = [];
     decimal idleTimeout = 0;
