@@ -86,12 +86,13 @@ public class Close {
     }
 
     private static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
+        int timeoutInSecs = DEFAULT_CONNECTION_CLOSURE_TIMEOUT;
         if (bTimeoutInSecs instanceof BDecimal) {
-            return (int) ((BDecimal) bTimeoutInSecs).floatValue();
+            timeoutInSecs = (int) ((BDecimal) bTimeoutInSecs).floatValue();
         } else if (connectionInfo.getService() instanceof WebSocketServerService webSocketServerService) {
-            return webSocketServerService.getConnectionClosureTimeout();
+            timeoutInSecs = webSocketServerService.getConnectionClosureTimeout();
         }
-        return DEFAULT_CONNECTION_CLOSURE_TIMEOUT;
+        return timeoutInSecs;
     }
 
     private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
