@@ -25,5 +25,5 @@ public type WsDispatcherConfig record {|
     string value;
 |};
 
-# The annotation which is used to configure WebSocket remote functions.
+# The annotation which is used to configure the dispatching rules for WebSocket remote functions.
 public const annotation WsDispatcherConfig DispatcherConfig on function;
