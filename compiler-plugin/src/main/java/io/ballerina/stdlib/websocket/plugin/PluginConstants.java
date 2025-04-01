@@ -80,6 +80,8 @@ public class PluginConstants {
                 "WEBSOCKET_216"),
         RE_DECLARED_REMOTE_FUNCTIONS("Cannot have `{0}` because the message type `{1}` is already " +
                 "associated with `{2}` remote function", "WEBSOCKET_217"),
+        DUPLICATED_DISPATCHER_CONFIG_VALUE("DispatcherConfig annotation value `{0}` is already " +
+                "exists", "WEBSOCKET_218"),
         INVALID_RESOURCE_ERROR("There should be only one `get` resource for the service",
                 "WEBSOCKET_101"),
         MORE_THAN_ONE_RESOURCE_PARAM_ERROR("There should be only http:Request as a parameter",

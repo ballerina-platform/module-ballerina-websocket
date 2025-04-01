@@ -37,6 +37,7 @@ import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +45,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_CONFIG_VALUE;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
 
 /**
@@ -123,18 +125,25 @@ public class WebSocketServiceValidator {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_MESSAGE_GENERATION_HINT);
         }
 
+        Set<String> seenAnnotationValues = new HashSet<>();
         for (Node node : classDefNode.members()) {
             if (node instanceof FunctionDefinitionNode funcDefinitionNode) {
                 String funcName = funcDefinitionNode.functionName().toString();
                 Optional<String> annoDispatchingValue =
                         getDispatcherConfigAnnotatedFunctionName(funcDefinitionNode, ctx);
                 if (annoDispatchingValue.isPresent()) {
-                    String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
-                    if (functionSet.containsKey(customRemoteFunctionName) &&
-                            !customRemoteFunctionName.equals(funcName) &&
-                            !specialRemoteMethods.contains(customRemoteFunctionName)) {
-                        Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),
-                                customRemoteFunctionName, annoDispatchingValue.get(), funcName);
+                    if (seenAnnotationValues.contains(annoDispatchingValue.get())) {
+                        Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_CONFIG_VALUE,
+                                funcDefinitionNode.location(), annoDispatchingValue.get());
+                    } else {
+                        seenAnnotationValues.add(annoDispatchingValue.get());
+                        String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
+                        if (functionSet.containsKey(customRemoteFunctionName) &&
+                                !customRemoteFunctionName.equals(funcName) &&
+                                !specialRemoteMethods.contains(customRemoteFunctionName)) {
+                            Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),
+                                    customRemoteFunctionName, annoDispatchingValue.get(), funcName);
+                        }
                     }
                 }
             }

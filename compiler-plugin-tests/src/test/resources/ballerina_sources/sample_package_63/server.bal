@@ -43,4 +43,11 @@ service class WsService {
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
     }
+
+    @websocket:DispatcherConfig {
+        value: "subscribe"
+    }
+    remote function onSubscribeText(Subscribe message) returns string {
+        return "onSubscribeText";
+    }
 }
