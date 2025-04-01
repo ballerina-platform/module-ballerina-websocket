@@ -20,24 +20,41 @@ package io.ballerina.stdlib.websocket.plugin;
 import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
 
 /**
  * A class for validating websocket service.
  */
 public class WebSocketServiceValidator {
     public static final String GENERIC_FUNCTION = "generic function";
+    private final Set<String> specialRemoteMethods = Set.of(PluginConstants.ON_OPEN, PluginConstants.ON_CLOSE,
+            PluginConstants.ON_ERROR, PluginConstants.ON_IDLE_TIMEOUT, PluginConstants.ON_TEXT_MESSAGE,
+            PluginConstants.ON_BINARY_MESSAGE, PluginConstants.ON_MESSAGE, PluginConstants.ON_PING_MESSAGE,
+            PluginConstants.ON_PONG_MESSAGE);
     private SyntaxNodeAnalysisContext ctx;
 
     WebSocketServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
@@ -70,7 +87,7 @@ public class WebSocketServiceValidator {
                     classDefNode.location(), PluginConstants.ON_TEXT_MESSAGE);
         }
         if (functionSet.containsKey(PluginConstants.ON_MESSAGE) &&
-                        functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
+                functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
             Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS,
                     classDefNode.location(), PluginConstants.ON_BINARY_MESSAGE);
         }
@@ -105,6 +122,75 @@ public class WebSocketServiceValidator {
                 !functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_MESSAGE_GENERATION_HINT);
         }
+
+        for (Node node : classDefNode.members()) {
+            if (node instanceof FunctionDefinitionNode funcDefinitionNode) {
+                String funcName = funcDefinitionNode.functionName().toString();
+                Optional<String> annoDispatchingValue =
+                        getDispatcherConfigAnnotatedFunctionName(funcDefinitionNode, ctx);
+                if (annoDispatchingValue.isPresent()) {
+                    String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
+                    if (functionSet.containsKey(customRemoteFunctionName) &&
+                            !customRemoteFunctionName.equals(funcName) &&
+                            !specialRemoteMethods.contains(customRemoteFunctionName)) {
+                        Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),
+                                customRemoteFunctionName, annoDispatchingValue.get(), funcName);
+                    }
+                }
+            }
+        }
+    }
+
+    private static Optional<String> getDispatcherConfigAnnotatedFunctionName(FunctionDefinitionNode node,
+                                                                             SyntaxNodeAnalysisContext ctx) {
+        if (node.metadata().isEmpty()) {
+            return Optional.empty();
+        }
+        for (AnnotationNode annotationNode : node.metadata().get().annotations()) {
+            Optional<Symbol> annotationType = ctx.semanticModel().symbol(annotationNode);
+            if (annotationType.isEmpty()) {
+                continue;
+            }
+            if (!annotationType.get().getModule().flatMap(Symbol::getName)
+                    .orElse("").equals(WebSocketConstants.PACKAGE_WEBSOCKET) ||
+                    !annotationType.get().getName().orElse("")
+                            .equals(WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION)) {
+                continue;
+            }
+            if (annotationNode.annotValue().isEmpty()) {
+                return Optional.empty();
+            }
+            MappingConstructorExpressionNode annotationValue = annotationNode.annotValue().get();
+            for (Node field : annotationValue.fields()) {
+                if (field instanceof SpecificFieldNode specificFieldNode) {
+                    String filedName = specificFieldNode.fieldName().toString().strip();
+                    Optional<ExpressionNode> filedValue = specificFieldNode.valueExpr();
+                    if (filedName.equals(ANNOTATION_ATTR_DISPATCHER_VALUE) &&
+                            filedValue.isPresent()) {
+                        return Optional.of(filedValue.get().toString().strip()
+                                .replaceAll("\"", ""));
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static String createCustomRemoteFunction(String dispatchingValue) {
+        dispatchingValue = "on " + dispatchingValue;
+        StringBuilder builder = new StringBuilder();
+        String[] words = dispatchingValue.split("[\\W_]+");
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (i == 0) {
+                word = word.isEmpty() ? word : word.toLowerCase(Locale.ENGLISH);
+            } else {
+                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1)
+                        .toLowerCase(Locale.ENGLISH);
+            }
+            builder.append(word);
+        }
+        return builder.toString();
     }
 
     private void filterRemoteFunctions(FunctionDefinitionNode functionDefinitionNode) {

@@ -555,6 +555,16 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY);
     }
 
+    @Test
+    public void testDispatcherConfigAnnotation() {
+        Package currentPackage = loadPackage("sample_package_63");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
