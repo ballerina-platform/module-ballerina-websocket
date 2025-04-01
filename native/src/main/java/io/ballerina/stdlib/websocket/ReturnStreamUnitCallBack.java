@@ -39,6 +39,8 @@ import io.netty.util.concurrent.PromiseCombiner;
 import java.util.Map;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
+import static io.ballerina.stdlib.websocket.WebSocketResourceCallback.isCloseFrameRecord;
+import static io.ballerina.stdlib.websocket.WebSocketResourceCallback.sendCloseFrame;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromText;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.release;
@@ -71,7 +73,12 @@ public class ReturnStreamUnitCallBack implements Handler {
                 webSocketConnection.terminateConnection(1011,
                         String.format("streaming failed: %s", content));
             } else {
-                content = ((BMap) response).get(StringUtils.fromString("value")).toString();
+                Object contentObj = ((BMap) response).get(StringUtils.fromString("value"));
+                if (isCloseFrameRecord(contentObj)) {
+                    sendCloseFrame(contentObj, connectionInfo);
+                    return;
+                }
+                content = contentObj.toString();
                 sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
                 Thread.startVirtualThread(() -> {
                     Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
