@@ -112,7 +112,7 @@ public class Close {
         });
     }
 
-    private static void waitForTimeout(List<BError> errors, int timeoutInSecs,
+    public static void waitForTimeout(List<BError> errors, int timeoutInSecs,
             CountDownLatch latch, WebSocketConnectionInfo connectionInfo) {
         try {
             if (timeoutInSecs < 0) {
