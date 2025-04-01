@@ -52,7 +52,7 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_DISPATCHER_KEY = StringUtils.fromString("dispatcherKey");
 
     public static final String WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION = "DispatcherConfig";
-    public static final BString ANNOTATION_ATTR_DISPATCHER_VALUE = StringUtils.fromString("value");
+    public static final String ANNOTATION_ATTR_DISPATCHER_VALUE = "value";
 
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final String LOG_MESSAGE = "{} {}";
