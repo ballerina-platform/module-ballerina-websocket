@@ -37,6 +37,7 @@ import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -47,6 +48,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_STREAM_ID_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
@@ -73,6 +75,11 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         if (disptacherStreamIdAnnotation && !disptacherKeyAnnotation) {
             reportDiagnostics(ctx, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY,
                     serviceDeclarationNode.location());
+        }
+        Optional<Double> timeoutValue = getConnectionClosureTimeoutValue(serviceDeclarationNode, ctx.semanticModel());
+        if (timeoutValue.isPresent() && timeoutValue.get() < 0 && timeoutValue.get().intValue() != -1) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_CONNECTION_CLOSURE_TIMEOUT,
+                    serviceDeclarationNode.metadata().get().location());
         }
 
         String modulePrefix = Utils.getPrefix(ctx);
@@ -117,6 +124,38 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
                 .anyMatch(ann -> isAnnotationPresent(ann, semanticModel, annotationName));
+    }
+
+    private Optional<Double> getConnectionClosureTimeoutValue(ServiceDeclarationNode serviceNode,
+                                                              SemanticModel semanticModel) {
+        Optional<MetadataNode> metadata = serviceNode.metadata();
+        if (metadata.isEmpty()) {
+            return Optional.empty();
+        }
+        MetadataNode metaData = metadata.get();
+        NodeList<AnnotationNode> annotations = metaData.annotations();
+        return annotations.stream()
+                .filter(ann -> isAnnotationPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .map(ann -> getAnnotationValue(ann, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .map(Double::parseDouble);
+    }
+
+    private Optional<String> getAnnotationValue(AnnotationNode annotation, String annotationName) {
+        if (annotation.annotValue().isEmpty()) {
+            return Optional.empty();
+        }
+        return annotation.annotValue().get()
+                .fields().stream()
+                .map(field -> (SpecificFieldNode) field)
+                .filter(field -> field.fieldName().toString().contains(annotationName))
+                .map(field -> field.valueExpr().map(Object::toString))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(s -> s.strip().replaceAll("\"", ""))
+                .findFirst();
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {
