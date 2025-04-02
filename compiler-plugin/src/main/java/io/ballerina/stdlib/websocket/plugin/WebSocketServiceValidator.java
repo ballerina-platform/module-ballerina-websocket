@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_CONFIG_VALUE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
 
 /**
@@ -138,7 +139,10 @@ public class WebSocketServiceValidator {
                     } else {
                         seenAnnotationValues.add(annoDispatchingValue.get());
                         String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
-                        if (functionSet.containsKey(customRemoteFunctionName) &&
+                        if (specialRemoteMethods.contains(funcName)) {
+                            Utils.reportDiagnostics(ctx, INVALID_FUNCTION_ANNOTATION, funcDefinitionNode.location(),
+                                    funcName);
+                        } else if (functionSet.containsKey(customRemoteFunctionName) &&
                                 !customRemoteFunctionName.equals(funcName) &&
                                 !specialRemoteMethods.contains(customRemoteFunctionName)) {
                             Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),

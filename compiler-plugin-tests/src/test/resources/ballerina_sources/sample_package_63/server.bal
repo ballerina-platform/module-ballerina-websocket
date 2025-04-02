@@ -50,4 +50,11 @@ service class WsService {
     remote function onSubscribeText(Subscribe message) returns string {
         return "onSubscribeText";
     }
+
+    @websocket:DispatcherConfig {
+        value: "ping"
+    }
+    remote function onPing(Subscribe message) returns string {
+        return "onPing";
+    }
 }
