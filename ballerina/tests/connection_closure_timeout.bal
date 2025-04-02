@@ -1,4 +1,4 @@
-//  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org).
+//  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
 //
 //  WSO2 LLC. licenses this file to you under the Apache License,
 //  Version 2.0 (the "License"); you may not use this file except
@@ -19,8 +19,11 @@ import ballerina/test;
 
 listener Listener connectionClosureTimeoutListener = new (22100);
 
+map<Caller> callers = {};
+
 @ServiceConfig {
-    connectionClosureTimeout: 10
+    dispatcherKey: "event",
+    connectionClosureTimeout: 5
 }
 service / on connectionClosureTimeoutListener {
     resource function get .() returns Service|UpgradeError {
@@ -31,20 +34,51 @@ service / on connectionClosureTimeoutListener {
 service class ConnectionClosureTimeoutService {
     *Service;
 
-    remote function onMessage(Caller caller, string data) returns error? {
+    remote function onSubscribe(Caller caller) returns error? {
+        callers["onSubscribe"] = caller;
         _ = start caller->close();
-        runtime:sleep(1);
-        test:assertTrue(caller.isOpen());
-        runtime:sleep(10);
-        test:assertTrue(!caller.isOpen());
+    }
+
+    remote function onChat(Caller caller) returns NormalClosure? {
+        callers["onChat"] = caller;
+        return NORMAL_CLOSURE;
+    }
+
+    remote function onIsClosed(record {string event; string name;} data) returns boolean|error {
+        Caller? caller = callers[data.name];
+        if caller is Caller {
+            return !caller.isOpen();
+        }
+        return error("Caller not found");
     }
 }
 
 @test:Config {
     groups: ["connectionClosureTimeout"]
 }
-public function testConnectionClosureTimeoutFromServer() returns Error? {
-    Client wsClient = check new ("ws://localhost:22100/");
-    check wsClient->writeMessage("Hi");
-    runtime:sleep(20);
+public function testConnectionClosureTimeoutCaller() returns error? {
+    Client wsClient1 = check new ("ws://localhost:22100/");
+    check wsClient1->writeMessage({event: "subscribe"});
+    runtime:sleep(8);
+
+    // Check if the connection is closed using another client
+    Client wsClient2 = check new ("ws://localhost:22100/");
+    check wsClient2->writeMessage({event: "is_closed", name: "onSubscribe"});
+    boolean isClosed = check wsClient2->readMessage();
+    test:assertTrue(isClosed);
+}
+
+@test:Config {
+    groups: ["connectionClosureTimeout"]
+}
+public function testConnectionClosureTimeoutCloseFrames() returns error? {
+    Client wsClient1 = check new ("ws://localhost:22100/");
+    check wsClient1->writeMessage({event: "chat"});
+    runtime:sleep(8);
+
+    // Check if the connection is closed using another client
+    Client wsClient2 = check new ("ws://localhost:22100/");
+    check wsClient2->writeMessage({event: "is_closed", name: "onChat"});
+    boolean isClosed = check wsClient2->readMessage();
+    test:assertTrue(isClosed);
 }
