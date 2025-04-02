@@ -32,7 +32,6 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_KEY;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.DEFAULT_CONNECTION_CLOSURE_TIMEOUT;
 
 /**
  * WebSocket service for service dispatching.
@@ -59,7 +58,7 @@ public class WebSocketServerService extends WebSocketService {
             idleTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
                     WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
             connectionClosureTimeout = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
-                    WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT, DEFAULT_CONNECTION_CLOSURE_TIMEOUT);
+                    WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT);
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
             enableValidation = configAnnotation.getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
             if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY) != null) {

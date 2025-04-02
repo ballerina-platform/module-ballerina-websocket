@@ -105,9 +105,10 @@ public isolated client class Client {
     # + reason - Reason for closing the connection
     # + timeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
     # connection. If the timeout exceeds, then the connection is terminated even though a close frame
-    # is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
-    # waits until a close frame is received. If the WebSocket frame is received from the remote
-    # endpoint within the waiting period, the connection is terminated immediately
+    # is not received from the remote endpoint. If the value is -1, then the connection
+    # waits until a close frame is received, and any other negative value results in an error.
+    # If the WebSocket frame is received from the remote endpoint within the waiting period,
+    # the connection is terminated immediately
     # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
         int code = 1000;
@@ -118,6 +119,10 @@ public isolated client class Client {
                 return error ConnectionClosureError(errorMessage);
             }
             code = statusCode;
+        }
+        if (timeout < 0d && timeout != -1d) {
+            string errorMessage = "Invalid timeout value: " + timeout.toString();
+            return error Error(errorMessage);
         }
         return self.externClose(code, reason is () ? "" : reason, timeout);
     }

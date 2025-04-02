@@ -39,8 +39,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static io.ballerina.stdlib.websocket.WebSocketConstants.DEFAULT_CONNECTION_CLOSURE_TIMEOUT;
-
 /**
  * {@code Get} is the GET action implementation of the HTTP Connector.
  */
@@ -86,7 +84,7 @@ public class Close {
     }
 
     public static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
-        int timeoutInSecs = DEFAULT_CONNECTION_CLOSURE_TIMEOUT;
+        int timeoutInSecs = 0;
         if (bTimeoutInSecs instanceof BDecimal) {
             timeoutInSecs = (int) ((BDecimal) bTimeoutInSecs).floatValue();
         } else if (connectionInfo.getService() instanceof WebSocketServerService webSocketServerService) {

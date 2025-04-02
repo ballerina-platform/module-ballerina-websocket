@@ -17,15 +17,14 @@
 import ballerina/lang.runtime;
 import ballerina/test;
 
-listener Listener connectionClosureTimeoutListener = new (22100);
-
 map<Caller> callers = {};
+error negativeTimeoutErrorMessage = error("");
 
 @ServiceConfig {
     dispatcherKey: "event",
     connectionClosureTimeout: 5
 }
-service / on connectionClosureTimeoutListener {
+service / on new Listener(22100) {
     resource function get .() returns Service|UpgradeError {
         return new ConnectionClosureTimeoutService();
     }
@@ -36,12 +35,19 @@ service class ConnectionClosureTimeoutService {
 
     remote function onSubscribe(Caller caller) returns error? {
         callers["onSubscribe"] = caller;
-        _ = start caller->close();
+        check caller->close();
     }
 
     remote function onChat(Caller caller) returns NormalClosure? {
         callers["onChat"] = caller;
         return NORMAL_CLOSURE;
+    }
+
+    remote function onNegativeTimeout(Caller caller) returns error? {
+        Error? close = caller->close(timeout = -10);
+        if close is Error {
+            negativeTimeoutErrorMessage = close;
+        }
     }
 
     remote function onIsClosed(record {string event; string name;} data) returns boolean|error {
@@ -50,6 +56,10 @@ service class ConnectionClosureTimeoutService {
             return !caller.isOpen();
         }
         return error("Caller not found");
+    }
+
+    remote function onNegativeTimeoutErrorMessage(string data) returns string {
+        return negativeTimeoutErrorMessage.message();
     }
 }
 
@@ -81,4 +91,19 @@ public function testConnectionClosureTimeoutCloseFrames() returns error? {
     check wsClient2->writeMessage({event: "is_closed", name: "onChat"});
     boolean isClosed = check wsClient2->readMessage();
     test:assertTrue(isClosed);
+}
+
+@test:Config {
+    groups: ["connectionClosureTimeout"]
+}
+public function testConnectionClosureTimeoutCallerNegativeTimeout() returns error? {
+    Client wsClient1 = check new ("ws://localhost:22100/");
+    check wsClient1->writeMessage({event: "negative_timeout"});
+    runtime:sleep(1);
+
+    // Check error in the service using another client
+    Client wsClient2 = check new ("ws://localhost:22100/");
+    check wsClient2->writeMessage({event: "negative_timeout_error_message"});
+    string errorMessage = check wsClient2->readMessage();
+    test:assertEquals(errorMessage, "Invalid timeout value: -10");
 }
