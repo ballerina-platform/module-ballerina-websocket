@@ -85,7 +85,7 @@ public class Close {
         });
     }
 
-    private static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
+    public static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
         int timeoutInSecs = DEFAULT_CONNECTION_CLOSURE_TIMEOUT;
         if (bTimeoutInSecs instanceof BDecimal) {
             timeoutInSecs = (int) ((BDecimal) bTimeoutInSecs).floatValue();
@@ -95,8 +95,8 @@ public class Close {
         return timeoutInSecs;
     }
 
-    private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
-            String reason, WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
+    public static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode, String reason,
+            WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
         WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
         ChannelFuture closeFuture;
         closeFuture = webSocketConnection.initiateConnectionClosure(statusCode, reason);
