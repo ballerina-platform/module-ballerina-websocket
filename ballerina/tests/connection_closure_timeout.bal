@@ -107,3 +107,15 @@ public function testConnectionClosureTimeoutCallerNegativeTimeout() returns erro
     string errorMessage = check wsClient2->readMessage();
     test:assertEquals(errorMessage, "Invalid timeout value: -10");
 }
+
+@test:Config {
+    groups: ["connectionClosureTimeout"]
+}
+public function testConnectionClosureTimeoutNegativeValueInClient() returns error? {
+    Client wsClient1 = check new ("ws://localhost:22100/");
+    Error? close = wsClient1->close(timeout = -10);
+    test:assertTrue(close is error);
+    if close is error {
+        test:assertEquals(close.message(), "Invalid timeout value: -10");
+    }
+}
