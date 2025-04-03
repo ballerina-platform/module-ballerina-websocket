@@ -33,24 +33,34 @@ service / on new Listener(22103) {
 service class WsService22103 {
     *Service;
 
-    remote function onSubscribe(Subscribe message) returns string {
-        return "onSubscribe";
-    }
-
     @DispatcherConfig {
         value: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
     }
+
+    remote function onSubscribeMessageError(Caller caller, error message) returns error? {
+        check caller->writeMessage("onSubscribeMessageError");
+    }
 }
 
 @test:Config {
     groups: ["dispatcherConfigAnnotation"]
 }
-public function testDispatcherConfigAnnotation() returns Error? {
+public function testDispatcherConfigAnnotation() returns error? {
     Client wsClient = check new ("ws://localhost:22103/");
     check wsClient->writeMessage({event: "subscribe", data: "test"});
     string res = check wsClient->readMessage();
     test:assertEquals(res, "onSubscribeMessage");
+}
+
+@test:Config {
+    groups: ["dispatcherConfigAnnotation"]
+}
+public function testDispatcherConfigAnnotationWithCustomOnError() returns error? {
+    Client wsClient = check new ("ws://localhost:22103/");
+    check wsClient->writeMessage({event: "subscribe", invalidField: "test"});
+    string res = check wsClient->readMessage();
+    test:assertEquals(res, "onSubscribeMessageError");
 }

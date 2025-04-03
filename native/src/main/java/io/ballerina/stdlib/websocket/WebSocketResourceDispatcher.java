@@ -427,7 +427,10 @@ public class WebSocketResourceDispatcher {
             boolean hasOnError = dispatchingFunctions.containsKey(WebSocketConstants.RESOURCE_NAME_ON_ERROR);
             String errorMethodName = null;
             boolean hasOnCustomError = false;
-            if (customRemoteMethodName.isPresent()) {
+            if (onTextMessageResource != null) {
+                errorMethodName = onTextMessageResource.getName() + "Error";
+                hasOnCustomError = dispatchingFunctions.containsKey(errorMethodName);
+            } else if (customRemoteMethodName.isPresent()) {
                 errorMethodName = customRemoteMethodName.get() + "Error";
                 hasOnCustomError = dispatchingFunctions.containsKey(errorMethodName);
             }
