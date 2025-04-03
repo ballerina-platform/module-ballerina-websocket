@@ -37,21 +37,21 @@ service class WsService {
         return "onSubscribe";
     }
 
-    @websocket:DispatcherConfig {
+    @websocket:DispatcherMapping {
         value: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
     }
 
-    @websocket:DispatcherConfig {
+    @websocket:DispatcherMapping {
         value: "subscribe"
     }
     remote function onSubscribeText(Subscribe message) returns string {
         return "onSubscribeText";
     }
 
-    @websocket:DispatcherConfig {
+    @websocket:DispatcherMapping {
         value: "ping"
     }
     remote function onPing(Subscribe message) returns string {

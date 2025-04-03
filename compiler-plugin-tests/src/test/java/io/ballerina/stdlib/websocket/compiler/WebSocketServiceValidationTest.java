@@ -556,7 +556,7 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
-    public void testDispatcherConfigAnnotation() {
+    public void testDispatcherMappingAnnotation() {
         Package currentPackage = loadPackage("sample_package_63");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
@@ -564,7 +564,7 @@ public class WebSocketServiceValidationTest {
         Diagnostic firstDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS);
         Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
-        assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_CONFIG_VALUE);
+        assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_VALUE);
         Diagnostic thirdDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[2];
         assertDiagnostic(thirdDiagnostic, PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION);
     }

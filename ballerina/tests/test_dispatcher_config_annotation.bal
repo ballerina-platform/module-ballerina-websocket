@@ -33,7 +33,7 @@ service / on new Listener(22103) {
 service class WsService22103 {
     *Service;
 
-    @DispatcherConfig {
+    @DispatcherMapping {
         value: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
@@ -48,7 +48,7 @@ service class WsService22103 {
 @test:Config {
     groups: ["dispatcherConfigAnnotation"]
 }
-public function testDispatcherConfigAnnotation() returns error? {
+public function testDispatcherMappingAnnotation() returns error? {
     Client wsClient = check new ("ws://localhost:22103/");
     check wsClient->writeMessage({event: "subscribe", data: "test"});
     string res = check wsClient->readMessage();
@@ -58,7 +58,7 @@ public function testDispatcherConfigAnnotation() returns error? {
 @test:Config {
     groups: ["dispatcherConfigAnnotation"]
 }
-public function testDispatcherConfigAnnotationWithCustomOnError() returns error? {
+public function testDispatcherMappingAnnotationWithCustomOnError() returns error? {
     Client wsClient = check new ("ws://localhost:22103/");
     check wsClient->writeMessage({event: "subscribe", invalidField: "test"});
     string res = check wsClient->readMessage();

@@ -71,7 +71,7 @@ public class WebSocketService {
         Map<String, MethodType> dispatchingFunctions = new ConcurrentHashMap<>();
         Set<String> seenRemoteFunctionNames = new HashSet<>();
         MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
-        // 1. DispatcherConfig values have the highest priority
+        // 1. DispatcherMapping values have the highest priority
         for (MethodType remoteFunc : remoteFunctions) {
             Optional<String> dispatchingValue = getAnnotationDispatchingValue(remoteFunc);
             if (dispatchingValue.isPresent()) {
@@ -91,7 +91,7 @@ public class WebSocketService {
     @SuppressWarnings(UNCHECKED)
     public static Optional<String> getAnnotationDispatchingValue(MethodType remoteFunc) {
         BMap<BString, Object> annotations = (BMap<BString, Object>) remoteFunc.getAnnotation(fromString(
-                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION));
+                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_MAPPING_ANNOTATION));
         if (annotations != null && annotations.containsKey(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE))) {
             String dispatchingValue = annotations.
                     getStringValue(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE)).getValue();
