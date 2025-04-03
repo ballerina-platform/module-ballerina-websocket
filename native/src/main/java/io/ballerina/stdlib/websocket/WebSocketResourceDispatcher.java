@@ -91,12 +91,14 @@ import static io.ballerina.runtime.api.types.TypeTags.BYTE_TAG;
 import static io.ballerina.runtime.api.types.TypeTags.ERROR_TAG;
 import static io.ballerina.runtime.api.types.TypeTags.INTERSECTION_TAG;
 import static io.ballerina.runtime.api.types.TypeTags.INT_TAG;
+import static io.ballerina.runtime.api.types.TypeTags.NULL_TAG;
 import static io.ballerina.runtime.api.types.TypeTags.OBJECT_TYPE_TAG;
 import static io.ballerina.runtime.api.types.TypeTags.STRING_TAG;
-import static io.ballerina.runtime.api.types.TypeTags.NULL_TAG;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.CONSTRAINT_VALIDATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.HEADER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PARAM_ANNOT_PREFIX;
+import static io.ballerina.stdlib.websocket.WebSocketResourceCallback.isCloseFrameRecord;
+import static io.ballerina.stdlib.websocket.WebSocketResourceCallback.sendCloseFrame;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 import static io.ballerina.stdlib.websocket.WebSocketUtil.hasByteArrayType;
 import static io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants.ERROR_TYPE_MESSAGE_RECEIVED;
@@ -1008,7 +1010,9 @@ public class WebSocketResourceDispatcher {
             public void notifySuccess(Object result) {
                 try {
                     WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
-                    if (webSocketConnection.isOpen()) {
+                    if (isCloseFrameRecord(result)) {
+                        sendCloseFrame(result, connectionInfo);
+                    } else if (webSocketConnection.isOpen()) {
                         webSocketConnection.readNextFrame();
                     }
                 } catch (IllegalAccessException e) {
@@ -1082,7 +1086,9 @@ public class WebSocketResourceDispatcher {
             Handler onIdleTimeoutCallback = new Handler() {
                 @Override
                 public void notifySuccess(Object result) {
-                    // Do nothing.
+                    if (isCloseFrameRecord(result)) {
+                        sendCloseFrame(result, connectionInfo);
+                    }
                 }
 
                 @Override

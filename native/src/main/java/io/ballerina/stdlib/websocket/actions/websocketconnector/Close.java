@@ -81,7 +81,7 @@ public class Close {
         });
     }
 
-    private static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
+    public static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
             String reason, WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
         WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
         ChannelFuture closeFuture;
@@ -98,7 +98,7 @@ public class Close {
         });
     }
 
-    private static void waitForTimeout(List<BError> errors, int timeoutInSecs,
+    public static void waitForTimeout(List<BError> errors, int timeoutInSecs,
             CountDownLatch latch, WebSocketConnectionInfo connectionInfo) {
         try {
             if (timeoutInSecs < 0) {
