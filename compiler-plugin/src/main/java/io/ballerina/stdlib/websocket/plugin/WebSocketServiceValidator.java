@@ -176,9 +176,9 @@ public class WebSocketServiceValidator {
             MappingConstructorExpressionNode annotationValue = annotationNode.annotValue().get();
             for (Node field : annotationValue.fields()) {
                 if (field instanceof SpecificFieldNode specificFieldNode) {
-                    String filedName = specificFieldNode.fieldName().toString().strip();
+                    String fieldName = specificFieldNode.fieldName().toString().strip();
                     Optional<ExpressionNode> filedValue = specificFieldNode.valueExpr();
-                    if (filedName.equals(ANNOTATION_ATTR_DISPATCHER_VALUE) &&
+                    if (fieldName.equals(ANNOTATION_ATTR_DISPATCHER_VALUE) &&
                             filedValue.isPresent()) {
                         return Optional.of(filedValue.get().toString().strip()
                                 .replaceAll("\"", ""));
