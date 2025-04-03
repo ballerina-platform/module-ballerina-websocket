@@ -19,7 +19,6 @@
 package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -29,6 +28,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -99,19 +99,18 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         }
     }
 
-    private boolean isAnnotationPresent(AnnotationNode annotation, SemanticModel semanticModel,
-                                              String annotationName) {
-        Optional<Symbol> symbolOpt = semanticModel.symbol(annotation);
-        if (symbolOpt.isEmpty()) {
+    private boolean isAnnotationFieldPresent(AnnotationNode annotation, SemanticModel semanticModel,
+                                             String annotationName) {
+        if (annotation.annotValue().isEmpty()) {
             return false;
         }
-
-        Symbol symbol = symbolOpt.get();
-        if (!(symbol instanceof AnnotationSymbol)) {
-            return false;
-        }
-
-        return annotation.annotValue().toString().contains(annotationName);
+        return annotation.annotValue().get()
+                .fields().stream()
+                .map(s -> ((SpecificFieldNode) s).fieldName())
+                .map(s -> (IdentifierToken) s)
+                .map(semanticModel::symbol).filter(Optional::isPresent).map(Optional::get)
+                .map(Symbol::getName).filter(Optional::isPresent).map(Optional::get)
+                .anyMatch(s -> s.equals(annotationName));
     }
 
     private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
@@ -122,7 +121,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         MetadataNode metaData = serviceNode.metadata().get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
-                .anyMatch(ann -> isAnnotationPresent(ann, semanticModel, annotationName));
+                .anyMatch(ann -> isAnnotationFieldPresent(ann, semanticModel, annotationName));
     }
 
     private Optional<Double> getConnectionClosureTimeoutValue(ServiceDeclarationNode serviceNode,
@@ -132,7 +131,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         }
         NodeList<AnnotationNode> annotations = serviceNode.metadata().get().annotations();
         return annotations.stream()
-                .filter(ann -> isAnnotationPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .filter(ann -> isAnnotationFieldPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
                 .map(ann -> getAnnotationValue(ann, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
