@@ -120,7 +120,7 @@ public isolated client class Client {
             }
             code = statusCode;
         }
-        if (timeout < 0d && timeout != -1d) {
+        if timeout < 0d && timeout != -1d {
             string errorMessage = "Invalid timeout value: " + timeout.toString();
             return error Error(errorMessage);
         }

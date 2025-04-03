@@ -98,7 +98,7 @@ public isolated client class Caller {
             }
             code = statusCode;
         }
-        if (timeout is decimal && timeout < 0d && timeout != -1d) {
+        if timeout is decimal && timeout < 0d && timeout != -1d {
             string errorMessage = "Invalid timeout value: " + timeout.toString();
             return error Error(errorMessage);
         }
