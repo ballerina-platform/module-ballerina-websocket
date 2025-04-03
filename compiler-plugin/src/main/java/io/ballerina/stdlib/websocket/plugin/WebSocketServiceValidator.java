@@ -38,13 +38,13 @@ import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
+import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.createCustomRemoteFunction;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_VALUE;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
@@ -187,23 +187,6 @@ public class WebSocketServiceValidator {
             }
         }
         return Optional.empty();
-    }
-
-    private static String createCustomRemoteFunction(String dispatchingValue) {
-        dispatchingValue = "on " + dispatchingValue;
-        StringBuilder builder = new StringBuilder();
-        String[] words = dispatchingValue.split("[\\W_]+");
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
-            if (i == 0) {
-                word = word.isEmpty() ? word : word.toLowerCase(Locale.ENGLISH);
-            } else {
-                word = word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1)
-                        .toLowerCase(Locale.ENGLISH);
-            }
-            builder.append(word);
-        }
-        return builder.toString();
     }
 
     private void filterRemoteFunctions(FunctionDefinitionNode functionDefinitionNode) {

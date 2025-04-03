@@ -570,7 +570,7 @@ public class WebSocketResourceDispatcher {
                 });
     }
 
-    private static String createCustomRemoteFunction(String dispatchingValue) {
+    public static String createCustomRemoteFunction(String dispatchingValue) {
         dispatchingValue = "on " + dispatchingValue;
         StringBuilder builder = new StringBuilder();
         String[] words = dispatchingValue.split("[\\W_]+");
