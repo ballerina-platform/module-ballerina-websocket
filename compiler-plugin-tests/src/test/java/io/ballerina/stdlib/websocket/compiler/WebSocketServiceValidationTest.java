@@ -570,6 +570,7 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
 
     @Test
     public void testDispatcherMappingAnnotation() {
