@@ -116,11 +116,10 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
 
     private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
                                                   SemanticModel semanticModel, String annotationName) {
-        Optional<MetadataNode> metadata = serviceNode.metadata();
-        if (metadata.isEmpty()) {
+        if (serviceNode.metadata().isEmpty()) {
             return false;
         }
-        MetadataNode metaData = metadata.get();
+        MetadataNode metaData = serviceNode.metadata().get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
                 .anyMatch(ann -> isAnnotationPresent(ann, semanticModel, annotationName));
@@ -128,12 +127,10 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
 
     private Optional<Double> getConnectionClosureTimeoutValue(ServiceDeclarationNode serviceNode,
                                                               SemanticModel semanticModel) {
-        Optional<MetadataNode> metadata = serviceNode.metadata();
-        if (metadata.isEmpty()) {
+        if (serviceNode.metadata().isEmpty()) {
             return Optional.empty();
         }
-        MetadataNode metaData = metadata.get();
-        NodeList<AnnotationNode> annotations = metaData.annotations();
+        NodeList<AnnotationNode> annotations = serviceNode.metadata().get().annotations();
         return annotations.stream()
                 .filter(ann -> isAnnotationPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
                 .map(ann -> getAnnotationValue(ann, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
