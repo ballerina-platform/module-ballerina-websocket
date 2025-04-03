@@ -201,7 +201,13 @@ public class WebSocketUtil {
     }
 
     public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key) {
-        return (int) ((BDecimal) config.get(key)).floatValue();
+        try {
+            return (int) ((BDecimal) config.get(key)).floatValue();
+        } catch (ArithmeticException e) {
+            logger.warn("The value set for {} needs to be less than {} .The {} value is set to {} ", key,
+                    Integer.MAX_VALUE, key, Integer.MAX_VALUE);
+            return Integer.MAX_VALUE;
+        }
     }
 
     public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key, int defaultValue) {
