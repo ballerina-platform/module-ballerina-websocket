@@ -14,44 +14,44 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-import ballerina/websocket;
+import ballerina/websocket as ws;
 
 type Subscribe record {|
     string event = "subscribe";
     string data;
 |};
 
-@websocket:ServiceConfig {
+@ws:ServiceConfig {
     dispatcherKey: "event"
 }
-service / on new websocket:Listener(9090) {
-    resource function get .() returns websocket:Service|websocket:UpgradeError {
+service / on new ws:Listener(9090) {
+    resource function get .() returns ws:Service|ws:UpgradeError {
         return new WsService();
     }
 }
 
 service class WsService {
-    *websocket:Service;
+    *ws:Service;
 
     remote function onSubscribe(Subscribe message) returns string {
         return "onSubscribe";
     }
 
-    @websocket:DispatcherMapping {
+    @ws:DispatcherMapping {
         value: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
     }
 
-    @websocket:DispatcherMapping {
+    @ws:DispatcherMapping {
         value: "subscribe"
     }
     remote function onSubscribeText(Subscribe message) returns string {
         return "onSubscribeText";
     }
 
-    @websocket:DispatcherMapping {
+    @ws:DispatcherMapping {
         value: "ping"
     }
     remote function onPing(Subscribe message) returns string {
