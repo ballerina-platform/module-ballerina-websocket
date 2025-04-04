@@ -129,24 +129,24 @@ public class WebSocketServiceValidator {
         Set<String> seenAnnotationValues = new HashSet<>();
         for (Node node : classDefNode.members()) {
             if (node instanceof FunctionDefinitionNode funcDefinitionNode) {
-                String funcName = funcDefinitionNode.functionName().toString();
+                Optional<String> funcName = ctx.semanticModel().symbol(funcDefinitionNode).flatMap(Symbol::getName);
                 Optional<String> annoDispatchingValue =
                         getDispatcherMappingAnnotatedFunctionName(funcDefinitionNode, ctx);
-                if (annoDispatchingValue.isPresent()) {
+                if (funcName.isPresent() && annoDispatchingValue.isPresent()) {
                     if (seenAnnotationValues.contains(annoDispatchingValue.get())) {
                         Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_MAPPING_VALUE,
                                 funcDefinitionNode.location(), annoDispatchingValue.get());
                     } else {
                         seenAnnotationValues.add(annoDispatchingValue.get());
                         String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
-                        if (specialRemoteMethods.contains(funcName)) {
+                        if (specialRemoteMethods.contains(funcName.get())) {
                             Utils.reportDiagnostics(ctx, INVALID_FUNCTION_ANNOTATION, funcDefinitionNode.location(),
-                                    funcName);
+                                    funcName.get());
                         } else if (functionSet.containsKey(customRemoteFunctionName) &&
-                                !customRemoteFunctionName.equals(funcName) &&
+                                !customRemoteFunctionName.equals(funcName.get()) &&
                                 !specialRemoteMethods.contains(customRemoteFunctionName)) {
                             Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),
-                                    customRemoteFunctionName, annoDispatchingValue.get(), funcName);
+                                    customRemoteFunctionName, annoDispatchingValue.get(), funcName.get());
                         }
                     }
                 }
