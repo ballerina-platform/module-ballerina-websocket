@@ -133,20 +133,25 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         NodeList<AnnotationNode> annotations = serviceNode.metadata().get().annotations();
         return annotations.stream()
                 .filter(ann -> isAnnotationFieldPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
-                .map(ann -> getAnnotationValue(ann, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .map(ann -> getAnnotationValue(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
                 .map(Double::parseDouble);
     }
 
-    private Optional<String> getAnnotationValue(AnnotationNode annotation, String annotationName) {
+    private Optional<String> getAnnotationValue(AnnotationNode annotation, SemanticModel semanticModel,
+                                                String annotationName) {
         if (annotation.annotValue().isEmpty()) {
             return Optional.empty();
         }
         for (MappingFieldNode field : annotation.annotValue().get().fields()) {
             if (field instanceof SpecificFieldNode specificFieldNode) {
-                if (!specificFieldNode.fieldName().toString().strip().equals(annotationName)){
+                Optional<Symbol> symbol = semanticModel.symbol(specificFieldNode);
+                if (symbol.isEmpty()) {
+                    continue;
+                }
+                if (symbol.get().getName().isEmpty() || !annotationName.equals(symbol.get().getName().get())) {
                     continue;
                 }
                 if (specificFieldNode.valueExpr().isEmpty()) {
