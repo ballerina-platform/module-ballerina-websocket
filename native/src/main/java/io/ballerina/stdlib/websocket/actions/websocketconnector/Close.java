@@ -53,8 +53,8 @@ public class Close {
                     .getNativeData(WebSocketConstants.NATIVE_DATA_WEBSOCKET_CONNECTION_INFO);
             WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                     WebSocketConstants.RESOURCE_NAME_CLOSE);
-            int timeoutInSecs = getConnectionClosureTimeout(bTimeoutInSecs, connectionInfo);
             try {
+                int timeoutInSecs = getConnectionClosureTimeout(bTimeoutInSecs, connectionInfo);
                 CountDownLatch countDownLatch = new CountDownLatch(1);
                 List<BError> errors = new ArrayList<>(1);
                 ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
@@ -84,13 +84,17 @@ public class Close {
     }
 
     public static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
-        int timeoutInSecs = 0;
-        if (bTimeoutInSecs instanceof BDecimal) {
-            timeoutInSecs = (int) ((BDecimal) bTimeoutInSecs).floatValue();
-        } else if (connectionInfo.getService() instanceof WebSocketServerService webSocketServerService) {
-            timeoutInSecs = webSocketServerService.getConnectionClosureTimeout();
+        try {
+            int timeoutInSecs = 0;
+            if (bTimeoutInSecs instanceof BDecimal) {
+                timeoutInSecs = Integer.parseInt(bTimeoutInSecs.toString());
+            } else if (connectionInfo.getService() instanceof WebSocketServerService webSocketServerService) {
+                timeoutInSecs = webSocketServerService.getConnectionClosureTimeout();
+            }
+            return timeoutInSecs;
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid timeout value: " + bTimeoutInSecs, e);
         }
-        return timeoutInSecs;
     }
 
     public static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode, String reason,
