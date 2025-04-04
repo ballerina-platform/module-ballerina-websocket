@@ -46,7 +46,7 @@ service class WsService22103 {
 }
 
 @test:Config {
-    groups: ["dispatcherConfigAnnotation"]
+    groups: ["dispatcherMappingAnnotation"]
 }
 public function testDispatcherMappingAnnotation() returns error? {
     Client wsClient = check new ("ws://localhost:22103/");
@@ -56,7 +56,7 @@ public function testDispatcherMappingAnnotation() returns error? {
 }
 
 @test:Config {
-    groups: ["dispatcherConfigAnnotation"]
+    groups: ["dispatcherMappingAnnotation"]
 }
 public function testDispatcherMappingAnnotationWithCustomOnError() returns error? {
     Client wsClient = check new ("ws://localhost:22103/");
