@@ -71,7 +71,6 @@ public class WebSocketService {
         Map<String, MethodType> dispatchingFunctions = new ConcurrentHashMap<>();
         Set<String> seenRemoteFunctionNames = new HashSet<>();
         MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
-        // 1. DispatcherMapping values have the highest priority
         for (MethodType remoteFunc : remoteFunctions) {
             Optional<String> dispatchingValue = getAnnotationDispatchingValue(remoteFunc);
             if (dispatchingValue.isPresent()) {
@@ -79,7 +78,6 @@ public class WebSocketService {
                 seenRemoteFunctionNames.add(remoteFunc.getName());
             }
         }
-        // 2. Custom remote function names have the next priority
         for (MethodType remoteFunc : remoteFunctions) {
             if (!seenRemoteFunctionNames.contains(remoteFunc.getName())) {
                 dispatchingFunctions.put(remoteFunc.getName(), remoteFunc);
