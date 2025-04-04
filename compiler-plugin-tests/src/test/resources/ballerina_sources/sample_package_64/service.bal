@@ -28,3 +28,24 @@ service / on new websocket:Listener(9090) {
 service isolated class WsService {
     *websocket:Service;
 }
+
+// We ignore the compiler validation for below services since value is provided via a variable
+decimal connectionClosureTimeout = 5.0;
+
+@websocket:ServiceConfig {
+    connectionClosureTimeout: connectionClosureTimeout
+}
+service / on new websocket:Listener(9090) {
+    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
+        return new WsService();
+    }
+}
+
+@websocket:ServiceConfig {
+    connectionClosureTimeout
+}
+service / on new websocket:Listener(9090) {
+    resource isolated function get .() returns websocket:Service|websocket:UpgradeError {
+        return new WsService();
+    }
+}

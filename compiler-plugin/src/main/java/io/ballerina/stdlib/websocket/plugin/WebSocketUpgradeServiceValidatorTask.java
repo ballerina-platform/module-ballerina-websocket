@@ -29,6 +29,7 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -143,15 +144,21 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         if (annotation.annotValue().isEmpty()) {
             return Optional.empty();
         }
-        return annotation.annotValue().get()
-                .fields().stream()
-                .map(field -> (SpecificFieldNode) field)
-                .filter(field -> field.fieldName().toString().contains(annotationName))
-                .map(field -> field.valueExpr().map(Object::toString))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(s -> s.strip().replaceAll("\"", ""))
-                .findFirst();
+        for (MappingFieldNode field : annotation.annotValue().get().fields()) {
+            if (field instanceof SpecificFieldNode specificFieldNode) {
+                if (!specificFieldNode.fieldName().toString().strip().equals(annotationName)){
+                    continue;
+                }
+                if (specificFieldNode.valueExpr().isEmpty()) {
+                    return Optional.empty();
+                }
+                if (specificFieldNode.valueExpr().get().kind() != SyntaxKind.UNARY_EXPRESSION) {
+                    return Optional.empty();
+                }
+                return Optional.of(specificFieldNode.valueExpr().get().toString().strip());
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {
