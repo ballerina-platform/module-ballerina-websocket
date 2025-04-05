@@ -48,11 +48,11 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import static io.ballerina.runtime.api.utils.StringUtils.fromString;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.CLOSE_FRAME_DEFAULT_TIMEOUT;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.CLOSE_FRAME_TYPE;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.PACKAGE_WEBSOCKET;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.STREAMING_NEXT_FUNCTION;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
+import static io.ballerina.stdlib.websocket.actions.websocketconnector.Close.getConnectionClosureTimeout;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.Close.initiateConnectionClosure;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.Close.waitForTimeout;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromByteArray;
@@ -152,7 +152,8 @@ public final class WebSocketResourceCallback implements Handler {
                 ChannelFuture closeFuture = initiateConnectionClosure(errors, statusCode, reason,
                         connectionInfo, countDownLatch);
                 connectionInfo.getWebSocketConnection().readNextFrame();
-                waitForTimeout(errors, CLOSE_FRAME_DEFAULT_TIMEOUT, countDownLatch, connectionInfo);
+                int timeoutInSecs = getConnectionClosureTimeout(null, connectionInfo);
+                waitForTimeout(errors, timeoutInSecs, countDownLatch, connectionInfo);
                 closeFuture.channel().close().addListener(future -> {
                     WebSocketUtil.setListenerOpenField(connectionInfo);
                 });

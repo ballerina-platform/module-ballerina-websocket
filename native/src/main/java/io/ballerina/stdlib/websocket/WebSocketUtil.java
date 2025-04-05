@@ -200,6 +200,20 @@ public class WebSocketUtil {
 
     }
 
+    public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key) {
+        String value = config.get(key).toString();
+        int timeout;
+        try {
+            timeout = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw WebSocketUtil.createErrorByType(new Exception("Invalid timeout value: " + value));
+        }
+        if (timeout < 0 && timeout != -1) {
+            throw WebSocketUtil.createErrorByType(new Exception("Invalid timeout value: " + value));
+        }
+        return timeout;
+    }
+
     public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key, int defaultValue) {
         try {
             int timeout = (int) ((BDecimal) config.get(key)).floatValue();
