@@ -83,7 +83,7 @@ public function testLongFrameError() returns Error? {
    runtime:sleep(0.5);
    var err = wsClientEp->ping(pingData);
    if err is error {
-       test:assertEquals(err.message(), "ProtocolError: io.netty.handler.codec.TooLongFrameException: " +
+       test:assertEquals(err.message(), "CorruptedFrameError: io.netty.handler.codec.TooLongFrameException: " +
            "invalid payload for PING (payload length must be <= 125, was 148");
    } else {
        test:assertFail("Mismatched output");
