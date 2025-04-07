@@ -234,6 +234,8 @@ public type WSServiceConfig record {|
 |};
 ```
 
+> **Note:** The `connectionClosureTimeout` is validated at compile-time for literal values and at runtime for non-literal values such as variables.
+
 ### 3.2. [WebSocket Service](#32-websocket-service)
 
 Once the WebSocket upgrade is accepted by the UpgradeService, it returns a `websocket:Service`. This service has a fixed set of remote methods that do not have any configs. Receiving messages will get dispatched to the relevant remote method. Each remote method is explained below.
