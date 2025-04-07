@@ -28,10 +28,10 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
@@ -105,13 +105,24 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         if (annotation.annotValue().isEmpty()) {
             return false;
         }
-        return annotation.annotValue().get()
-                .fields().stream()
-                .map(s -> ((SpecificFieldNode) s).fieldName())
-                .map(s -> (IdentifierToken) s)
-                .map(semanticModel::symbol).filter(Optional::isPresent).map(Optional::get)
-                .map(Symbol::getName).filter(Optional::isPresent).map(Optional::get)
-                .anyMatch(s -> s.equals(annotationName));
+        for (MappingFieldNode field : annotation.annotValue().get().fields()) {
+            if (field.kind() != SyntaxKind.SPECIFIC_FIELD) {
+                continue;
+            }
+            Node fieldNameNode = ((SpecificFieldNode) field).fieldName();
+            if (fieldNameNode.kind() != SyntaxKind.IDENTIFIER_TOKEN) {
+                continue;
+            }
+            Optional<Symbol> symbol = semanticModel.symbol(fieldNameNode);
+            if (symbol.isEmpty()) {
+                continue;
+            }
+            if (symbol.get().getName().isEmpty() || !annotationName.equals(symbol.get().getName().get())) {
+                continue;
+            }
+            return true;
+        }
+        return false;
     }
 
     private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
