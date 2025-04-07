@@ -28,10 +28,8 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BValue;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.ballerina.runtime.api.utils.StringUtils.fromString;
@@ -67,20 +65,14 @@ public class WebSocketService {
         }
     }
 
-    private Map<String, MethodType> getDispatchingFunctionMap(Object dispatchingService) {
+    private Map<String, MethodType> getDispatchingFunctionMap(ServiceType dispatchingService) {
         Map<String, MethodType> dispatchingFunctions = new ConcurrentHashMap<>();
-        Set<String> seenRemoteFunctionNames = new HashSet<>();
-        MethodType[] remoteFunctions = ((ServiceType) (((BValue) dispatchingService).getType())).getMethods();
-        for (MethodType remoteFunc : remoteFunctions) {
-            Optional<String> dispatchingValue = getAnnotationDispatchingValue(remoteFunc);
+        for (MethodType method : dispatchingService.getMethods()) {
+            Optional<String> dispatchingValue = getAnnotationDispatchingValue(method);
             if (dispatchingValue.isPresent()) {
-                dispatchingFunctions.put(dispatchingValue.get(), remoteFunc);
-                seenRemoteFunctionNames.add(remoteFunc.getName());
-            }
-        }
-        for (MethodType remoteFunc : remoteFunctions) {
-            if (!seenRemoteFunctionNames.contains(remoteFunc.getName())) {
-                dispatchingFunctions.put(remoteFunc.getName(), remoteFunc);
+                dispatchingFunctions.put(dispatchingValue.get(), method);
+            } else {
+                dispatchingFunctions.put(method.getName(), method);
             }
         }
         return dispatchingFunctions;
@@ -112,7 +104,8 @@ public class WebSocketService {
 
     public void addWsService(String channelId, Object dispatchingService) {
         this.wsServices.put(channelId, dispatchingService);
-        this.wsServicesDispatchingFunctions.put(channelId, getDispatchingFunctionMap(dispatchingService));
+        this.wsServicesDispatchingFunctions.put(channelId,
+                getDispatchingFunctionMap(((ServiceType) (((BValue) dispatchingService).getType()))));
     }
 
     public Object getWsService(String key) {
