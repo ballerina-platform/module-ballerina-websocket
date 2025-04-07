@@ -183,14 +183,14 @@ public class WebSocketServiceValidator {
             }
             seenAnnotationValues.add(annoDispatchingValue.get());
             String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
-            if (specialRemoteMethods.contains(funcName.get())) {
+            if (this.specialRemoteMethods.contains(funcName.get())) {
                 Utils.reportDiagnostics(ctx, INVALID_FUNCTION_ANNOTATION, funcDefinitionNode.location(),
                         funcName.get());
                 continue;
             }
             if (functionSet.containsKey(customRemoteFunctionName) &&
                     !customRemoteFunctionName.equals(funcName.get()) &&
-                    !specialRemoteMethods.contains(customRemoteFunctionName)) {
+                    !this.specialRemoteMethods.contains(customRemoteFunctionName)) {
                 Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),
                         customRemoteFunctionName, annoDispatchingValue.get(), funcName.get());
             }
