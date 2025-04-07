@@ -146,7 +146,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             return Optional.empty();
         }
         for (MappingFieldNode field : annotation.annotValue().get().fields()) {
-            if (field.kind().equals(SyntaxKind.SPECIFIC_FIELD)) {
+            if (field.kind() == SyntaxKind.SPECIFIC_FIELD) {
                 SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
                 Optional<Symbol> symbol = semanticModel.symbol(specificFieldNode);
                 if (symbol.isEmpty()) {
