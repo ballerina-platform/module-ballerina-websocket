@@ -19,7 +19,6 @@
 package io.ballerina.stdlib.websocket.plugin;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -29,14 +28,17 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -47,6 +49,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_STREAM_ID_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
@@ -74,6 +77,11 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             reportDiagnostics(ctx, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY,
                     serviceDeclarationNode.location());
         }
+        Optional<Double> timeoutValue = getConnectionClosureTimeoutValue(serviceDeclarationNode, ctx.semanticModel());
+        if (timeoutValue.isPresent() && timeoutValue.get() < 0 && timeoutValue.get().intValue() != -1) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_CONNECTION_CLOSURE_TIMEOUT,
+                    serviceDeclarationNode.metadata().get().location());
+        }
 
         String modulePrefix = Utils.getPrefix(ctx);
         Optional<Symbol> serviceDeclarationSymbol = ctx.semanticModel().symbol(serviceDeclarationNode);
@@ -92,31 +100,82 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
         }
     }
 
-    private boolean isAnnotationPresent(AnnotationNode annotation, SemanticModel semanticModel,
-                                              String annotationName) {
-        Optional<Symbol> symbolOpt = semanticModel.symbol(annotation);
-        if (symbolOpt.isEmpty()) {
+    private boolean isAnnotationFieldPresent(AnnotationNode annotation, SemanticModel semanticModel,
+                                             String annotationName) {
+        if (annotation.annotValue().isEmpty()) {
             return false;
         }
-
-        Symbol symbol = symbolOpt.get();
-        if (!(symbol instanceof AnnotationSymbol)) {
-            return false;
+        for (MappingFieldNode field : annotation.annotValue().get().fields()) {
+            if (field.kind() != SyntaxKind.SPECIFIC_FIELD) {
+                continue;
+            }
+            Node fieldNameNode = ((SpecificFieldNode) field).fieldName();
+            if (fieldNameNode.kind() != SyntaxKind.IDENTIFIER_TOKEN) {
+                continue;
+            }
+            Optional<Symbol> symbol = semanticModel.symbol(fieldNameNode);
+            if (symbol.isEmpty()) {
+                continue;
+            }
+            if (symbol.get().getName().isEmpty() || !annotationName.equals(symbol.get().getName().get())) {
+                continue;
+            }
+            return true;
         }
-
-        return annotation.annotValue().toString().contains(annotationName);
+        return false;
     }
 
     private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
                                                   SemanticModel semanticModel, String annotationName) {
-        Optional<MetadataNode> metadata = serviceNode.metadata();
-        if (metadata.isEmpty()) {
+        if (serviceNode.metadata().isEmpty()) {
             return false;
         }
-        MetadataNode metaData = metadata.get();
+        MetadataNode metaData = serviceNode.metadata().get();
         NodeList<AnnotationNode> annotations = metaData.annotations();
         return annotations.stream()
-                .anyMatch(ann -> isAnnotationPresent(ann, semanticModel, annotationName));
+                .anyMatch(ann -> isAnnotationFieldPresent(ann, semanticModel, annotationName));
+    }
+
+    private Optional<Double> getConnectionClosureTimeoutValue(ServiceDeclarationNode serviceNode,
+                                                              SemanticModel semanticModel) {
+        if (serviceNode.metadata().isEmpty()) {
+            return Optional.empty();
+        }
+        NodeList<AnnotationNode> annotations = serviceNode.metadata().get().annotations();
+        return annotations.stream()
+                .filter(ann -> isAnnotationFieldPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .map(ann -> getAnnotationValue(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .map(Double::parseDouble);
+    }
+
+    private Optional<String> getAnnotationValue(AnnotationNode annotation, SemanticModel semanticModel,
+                                                String annotationName) {
+        if (annotation.annotValue().isEmpty()) {
+            return Optional.empty();
+        }
+        for (MappingFieldNode field : annotation.annotValue().get().fields()) {
+            if (field.kind() == SyntaxKind.SPECIFIC_FIELD) {
+                SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
+                Optional<Symbol> symbol = semanticModel.symbol(specificFieldNode);
+                if (symbol.isEmpty()) {
+                    continue;
+                }
+                if (symbol.get().getName().isEmpty() || !annotationName.equals(symbol.get().getName().get())) {
+                    continue;
+                }
+                if (specificFieldNode.valueExpr().isEmpty()) {
+                    return Optional.empty();
+                }
+                if (specificFieldNode.valueExpr().get().kind() != SyntaxKind.UNARY_EXPRESSION) {
+                    return Optional.empty();
+                }
+                return Optional.of(specificFieldNode.valueExpr().get().toString().strip());
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {

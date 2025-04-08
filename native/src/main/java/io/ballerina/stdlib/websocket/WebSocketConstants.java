@@ -45,6 +45,7 @@ public class WebSocketConstants {
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeout");
+    public static final String ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT = "connectionClosureTimeout";
     public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeout");
     public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
@@ -145,7 +146,6 @@ public class WebSocketConstants {
     public static final BString CLOSE_FRAME_REASON = StringUtils.fromString("reason");
     public static final String PREDEFINED_CLOSE_FRAME_TYPE = "PredefinedCloseFrameType";
     public static final String CUSTOM_CLOSE_FRAME_TYPE = "CustomCloseFrameType";
-    public static final int CLOSE_FRAME_DEFAULT_TIMEOUT = 60;
 
     private WebSocketConstants() {
     }
