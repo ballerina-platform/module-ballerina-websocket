@@ -21,6 +21,7 @@ package io.ballerina.stdlib.websocket;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.types.RemoteMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -45,7 +46,7 @@ public class WebSocketService {
     protected Runtime runtime;
     private final Map<String, MethodType> resourcesMap = new ConcurrentHashMap<>();
     private Map<String, Object> wsServices = new ConcurrentHashMap<>();
-    private Map<String, Map<String, MethodType>> wsServicesDispatchingFunctions = new ConcurrentHashMap<>();
+    private Map<String, Map<String, RemoteMethodType>> wsServicesDispatchingFunctions = new ConcurrentHashMap<>();
 
     public WebSocketService(Runtime runtime) {
         this.runtime = runtime;
@@ -65,21 +66,24 @@ public class WebSocketService {
         }
     }
 
-    private Map<String, MethodType> getDispatchingFunctionMap(ServiceType dispatchingService) {
-        Map<String, MethodType> dispatchingFunctions = new ConcurrentHashMap<>();
+    private Map<String, RemoteMethodType> getDispatchingFunctionMap(ServiceType dispatchingService) {
+        Map<String, RemoteMethodType> dispatchingFunctions = new ConcurrentHashMap<>();
         for (MethodType method : dispatchingService.getMethods()) {
-            Optional<String> dispatchingValue = getAnnotationDispatchingValue(method);
+            if (!(method instanceof RemoteMethodType remoteMethodType)) {
+                continue;
+            }
+            Optional<String> dispatchingValue = getAnnotationDispatchingValue(remoteMethodType);
             if (dispatchingValue.isPresent()) {
-                dispatchingFunctions.put(dispatchingValue.get(), method);
+                dispatchingFunctions.put(dispatchingValue.get(), remoteMethodType);
             } else {
-                dispatchingFunctions.put(method.getName(), method);
+                dispatchingFunctions.put(remoteMethodType.getName(), remoteMethodType);
             }
         }
         return dispatchingFunctions;
     }
 
     @SuppressWarnings(UNCHECKED)
-    public static Optional<String> getAnnotationDispatchingValue(MethodType remoteFunc) {
+    public static Optional<String> getAnnotationDispatchingValue(RemoteMethodType remoteFunc) {
         BMap<BString, Object> annotations = (BMap<BString, Object>) remoteFunc.getAnnotation(fromString(
                 ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_MAPPING_ANNOTATION));
         if (annotations != null && annotations.containsKey(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE))) {
@@ -112,7 +116,7 @@ public class WebSocketService {
         return this.wsServices.get(key);
     }
 
-    public Map<String, MethodType> getDispatchingFunctions(String key) {
+    public Map<String, RemoteMethodType> getDispatchingFunctions(String key) {
         return this.wsServicesDispatchingFunctions.get(key);
     }
 }

@@ -28,6 +28,7 @@ import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Parameter;
 import io.ballerina.runtime.api.types.PredefinedTypes;
+import io.ballerina.runtime.api.types.RemoteMethodType;
 import io.ballerina.runtime.api.types.ResourceMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.types.Type;
@@ -414,7 +415,7 @@ public class WebSocketResourceDispatcher {
             MethodType onTextMessageResource = null;
             BObject wsEndpoint = connectionInfo.getWebSocketEndpoint();
             Object dispatchingService = wsService.getWsService(connectionInfo.getWebSocketConnection().getChannelId());
-            Map<String, MethodType> dispatchingFunctions = wsService
+            Map<String, RemoteMethodType> dispatchingFunctions = wsService
                     .getDispatchingFunctions(connectionInfo.getWebSocketConnection().getChannelId());
             if (dispatchingValue.isPresent() && dispatchingFunctions.containsKey(dispatchingValue.get())) {
                 onTextMessageResource = dispatchingFunctions.get(dispatchingValue.get());
