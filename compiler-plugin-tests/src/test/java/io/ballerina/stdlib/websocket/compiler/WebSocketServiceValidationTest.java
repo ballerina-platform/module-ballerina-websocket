@@ -572,6 +572,16 @@ public class WebSocketServiceValidationTest {
         Assert.assertEquals(diagnosticResult.errorCount(), 0);
     }
 
+    @Test
+    public void testConnectionClosureTimeoutInTheServiceConfig() {
+        Package currentPackage = loadPackage("sample_package_64");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_CONNECTION_CLOSURE_TIMEOUT);
+    }
+
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {
         Assert.assertEquals(diagnostic.diagnosticInfo().code(), error.getErrorCode());
         Assert.assertEquals(diagnostic.diagnosticInfo().messageFormat(),
