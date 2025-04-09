@@ -111,7 +111,9 @@ public class PluginConstants {
         CONTRADICTING_RETURN_TYPES("Contradicting return types provided for `{0}` remote function, cannot contain" +
                 " stream type with other types", "WEBSOCKET_119"),
         DISPATCHER_STREAM_ID_WITHOUT_KEY("The `dispatcherStreamId` annotation is used without `dispatcherKey` " +
-                "annotation", "WEBSOCKET_120");
+                "annotation", "WEBSOCKET_120"),
+        INVALID_CONNECTION_CLOSURE_TIMEOUT("Invalid connection closure timeout provided for the service",
+                "WEBSOCKET_121");
 
         private final String error;
         private final String errorCode;

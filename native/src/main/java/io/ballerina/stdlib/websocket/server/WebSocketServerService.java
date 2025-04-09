@@ -20,7 +20,6 @@ package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.ObjectType;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -30,6 +29,8 @@ import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 
+import static io.ballerina.runtime.api.utils.StringUtils.fromString;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_KEY;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED;
 
@@ -44,6 +45,7 @@ public class WebSocketServerService extends WebSocketService {
     private int idleTimeoutInSeconds = 0;
     private boolean enableValidation = true;
     private String dispatchingKey = null;
+    private int connectionClosureTimeout;
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
@@ -56,6 +58,8 @@ public class WebSocketServerService extends WebSocketService {
             negotiableSubProtocols = WebSocketUtil.findNegotiableSubProtocols(configAnnotation);
             idleTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
                     WebSocketConstants.ANNOTATION_ATTR_IDLE_TIMEOUT, 0);
+            connectionClosureTimeout = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
+                    fromString(ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT));
             maxFrameSize = WebSocketUtil.findMaxFrameSize(configAnnotation);
             enableValidation = configAnnotation.getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
             if (configAnnotation.getStringValue(ANNOTATION_ATTR_DISPATCHER_KEY) != null) {
@@ -70,7 +74,7 @@ public class WebSocketServerService extends WebSocketService {
 
     @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
-        return (BMap<BString, Object>) serviceType.getAnnotation(StringUtils.fromString(
+        return (BMap<BString, Object>) serviceType.getAnnotation(fromString(
                 ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
     }
 
@@ -100,5 +104,9 @@ public class WebSocketServerService extends WebSocketService {
 
     public String getBasePath() {
         return basePath;
+    }
+
+    public int getConnectionClosureTimeout() {
+        return connectionClosureTimeout;
     }
 }

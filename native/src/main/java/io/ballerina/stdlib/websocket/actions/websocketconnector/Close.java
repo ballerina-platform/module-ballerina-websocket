@@ -28,6 +28,7 @@ import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+import io.ballerina.stdlib.websocket.server.WebSocketServerService;
 import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class Close {
     private static final Logger log = LoggerFactory.getLogger(Close.class);
 
     public static Object externClose(Environment env, BObject wsConnection, long statusCode, BString reason,
-            BDecimal timeoutInSecs) {
+                                     Object bTimeoutInSecs) {
         return env.yieldAndRun(() -> {
             CompletableFuture<Object> balFuture = new CompletableFuture<>();
             WebSocketConnectionInfo connectionInfo = (WebSocketConnectionInfo) wsConnection
@@ -53,12 +54,13 @@ public class Close {
             WebSocketObservabilityUtil.observeResourceInvocation(env, connectionInfo,
                     WebSocketConstants.RESOURCE_NAME_CLOSE);
             try {
+                int timeoutInSecs = getConnectionClosureTimeout(bTimeoutInSecs, connectionInfo);
                 CountDownLatch countDownLatch = new CountDownLatch(1);
                 List<BError> errors = new ArrayList<>(1);
                 ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                         connectionInfo, countDownLatch);
                 connectionInfo.getWebSocketConnection().readNextFrame();
-                waitForTimeout(errors, (int) timeoutInSecs.floatValue(), countDownLatch, connectionInfo);
+                waitForTimeout(errors, timeoutInSecs, countDownLatch, connectionInfo);
                 closeFuture.channel().close().addListener(future -> {
                     WebSocketUtil.setListenerOpenField(connectionInfo);
                     if (errors.isEmpty()) {
@@ -81,8 +83,22 @@ public class Close {
         });
     }
 
-    public static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode,
-            String reason, WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
+    public static int getConnectionClosureTimeout(Object bTimeoutInSecs, WebSocketConnectionInfo connectionInfo) {
+        try {
+            int timeoutInSecs = 0;
+            if (bTimeoutInSecs instanceof BDecimal) {
+                timeoutInSecs = Integer.parseInt(bTimeoutInSecs.toString());
+            } else if (connectionInfo.getService() instanceof WebSocketServerService webSocketServerService) {
+                timeoutInSecs = webSocketServerService.getConnectionClosureTimeout();
+            }
+            return timeoutInSecs;
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid timeout value: " + bTimeoutInSecs, e);
+        }
+    }
+
+    public static ChannelFuture initiateConnectionClosure(List<BError> errors, int statusCode, String reason,
+            WebSocketConnectionInfo connectionInfo, CountDownLatch latch) throws IllegalAccessException {
         WebSocketConnection webSocketConnection = connectionInfo.getWebSocketConnection();
         ChannelFuture closeFuture;
         closeFuture = webSocketConnection.initiateConnectionClosure(statusCode, reason);
