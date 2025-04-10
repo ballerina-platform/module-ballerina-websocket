@@ -43,6 +43,7 @@ public class WebSocketConstants {
     public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
 
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
+    public static final String WEBSOCKET_ANNOTATION_CONFIGURATION_RECORD = "WSServiceConfig";
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeout");
     public static final String ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT = "connectionClosureTimeout";
