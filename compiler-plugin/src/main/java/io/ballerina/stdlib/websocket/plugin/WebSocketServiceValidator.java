@@ -171,6 +171,10 @@ public class WebSocketServiceValidator {
                 continue;
             }
             FunctionDefinitionNode funcDefinitionNode = (FunctionDefinitionNode) node;
+            if (funcDefinitionNode.qualifierList().stream()
+                    .noneMatch(token -> token.text().equals(Qualifier.REMOTE.getValue()))) {
+                continue;
+            }
             Optional<String> funcName = ctx.semanticModel().symbol(funcDefinitionNode).flatMap(Symbol::getName);
             Optional<String> annoDispatchingValue = getDispatcherMappingAnnotatedFunctionName(funcDefinitionNode, ctx);
             if (funcName.isEmpty() || annoDispatchingValue.isEmpty()) {
