@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.websocket.server;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -28,16 +29,22 @@ import io.ballerina.stdlib.websocket.ModuleUtils;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.ballerina.runtime.api.utils.StringUtils.fromString;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_KEY;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.UNCHECKED;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION_RECORD;
 
 /**
  * WebSocket service for service dispatching.
  */
 public class WebSocketServerService extends WebSocketService {
+    private static final Logger log = LoggerFactory.getLogger(WebSocketServerService.class);
 
     private String[] negotiableSubProtocols = null;
     private String basePath;
@@ -45,11 +52,23 @@ public class WebSocketServerService extends WebSocketService {
     private int idleTimeoutInSeconds = 0;
     private boolean enableValidation = true;
     private String dispatchingKey = null;
-    private int connectionClosureTimeout;
+    private int connectionClosureTimeout = getDefaultConnectionClosureTimeout();
 
     public WebSocketServerService(BObject service, Runtime runtime, String basePath) {
         super(service, runtime);
         populateConfigs(basePath);
+    }
+
+    public static int getDefaultConnectionClosureTimeout() {
+        try {
+            BMap<BString, Object> configAnnotation = ValueCreator
+                    .createRecordValue(ModuleUtils.getWebsocketModule(), WEBSOCKET_ANNOTATION_CONFIGURATION_RECORD);
+            return WebSocketUtil.findTimeoutInSeconds(configAnnotation,
+                    fromString(ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT));
+        } catch (Exception e) {
+            log.error("Unable to get default connection closure timeout", e);
+        }
+        return 0;
     }
 
     private void populateConfigs(String basePath) {
@@ -67,15 +86,16 @@ public class WebSocketServerService extends WebSocketService {
             }
         }
         service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_MAX_FRAME_SIZE.toString(), maxFrameSize);
-        service.addNativeData(WebSocketConstants.ANNOTATION_ATTR_VALIDATION_ENABLED.toString(), enableValidation);
+        service.addNativeData(ANNOTATION_ATTR_VALIDATION_ENABLED.toString(), enableValidation);
         // This will be overridden if there is an upgrade path
         setBasePathToServiceObj(basePath);
     }
 
-    @SuppressWarnings(WebSocketConstants.UNCHECKED) private BMap<BString, Object> getServiceConfigAnnotation() {
+    @SuppressWarnings(UNCHECKED)
+    private BMap<BString, Object> getServiceConfigAnnotation() {
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         return (BMap<BString, Object>) serviceType.getAnnotation(fromString(
-                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_ANNOTATION_CONFIGURATION));
+                ModuleUtils.getPackageIdentifier() + ":" + WEBSOCKET_ANNOTATION_CONFIGURATION));
     }
 
     public String[] getNegotiableSubProtocols() {
