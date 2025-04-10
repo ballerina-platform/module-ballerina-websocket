@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerina/io;
 
 map<Caller> callers = {};
 error negativeTimeoutErrorMessage = error("");
@@ -67,6 +68,7 @@ service class ConnectionClosureTimeoutService {
     groups: ["connectionClosureTimeout"]
 }
 public function testConnectionClosureTimeoutCaller() returns error? {
+    io:println("Testing connection closure timeout with caller");
     Client wsClient1 = check new ("ws://localhost:22100/");
     check wsClient1->writeMessage({event: "subscribe"});
     runtime:sleep(8);
@@ -76,6 +78,7 @@ public function testConnectionClosureTimeoutCaller() returns error? {
     check wsClient2->writeMessage({event: "is_closed", name: "onSubscribe"});
     boolean isClosed = check wsClient2->readMessage();
     test:assertTrue(isClosed);
+    io:println("Connection closure timeout test with caller passed");
 }
 
 @test:Config {
