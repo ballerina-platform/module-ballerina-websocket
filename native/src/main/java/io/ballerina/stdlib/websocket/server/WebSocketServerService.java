@@ -60,15 +60,16 @@ public class WebSocketServerService extends WebSocketService {
     }
 
     public static int getDefaultConnectionClosureTimeout() {
+        int defaultTimeout = 0;
         try {
             BMap<BString, Object> configAnnotation = ValueCreator
                     .createRecordValue(ModuleUtils.getWebsocketModule(), WEBSOCKET_ANNOTATION_CONFIGURATION_RECORD);
-            return WebSocketUtil.findTimeoutInSeconds(configAnnotation,
+            defaultTimeout = WebSocketUtil.findTimeoutInSeconds(configAnnotation,
                     fromString(ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT));
         } catch (Exception e) {
             log.error("Unable to get default connection closure timeout", e);
         }
-        return 0;
+        return defaultTimeout;
     }
 
     private void populateConfigs(String basePath) {
