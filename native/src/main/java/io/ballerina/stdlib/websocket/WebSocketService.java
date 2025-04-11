@@ -19,6 +19,7 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.flags.SymbolFlags;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RemoteMethodType;
@@ -69,9 +70,10 @@ public class WebSocketService {
     private Map<String, RemoteMethodType> getDispatchingFunctionMap(ServiceType dispatchingService) {
         Map<String, RemoteMethodType> dispatchingFunctions = new ConcurrentHashMap<>();
         for (MethodType method : dispatchingService.getMethods()) {
-            if (!(method instanceof RemoteMethodType remoteMethodType)) {
+            if (!(SymbolFlags.isFlagOn(method.getFlags(), SymbolFlags.REMOTE))) {
                 continue;
             }
+            RemoteMethodType remoteMethodType = (RemoteMethodType) method;
             Optional<String> dispatchingValue = getAnnotationDispatchingValue(remoteMethodType);
             if (dispatchingValue.isPresent()) {
                 dispatchingFunctions.put(dispatchingValue.get(), remoteMethodType);
