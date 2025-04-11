@@ -20,28 +20,83 @@ package io.ballerina.stdlib.websocket.plugin;
 import io.ballerina.compiler.api.symbols.FunctionTypeSymbol;
 import io.ballerina.compiler.api.symbols.MethodSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ClassDefinitionNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
+import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
+import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.createCustomRemoteFunction;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_VALUE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
 
 /**
  * A class for validating websocket service.
  */
 public class WebSocketServiceValidator {
     public static final String GENERIC_FUNCTION = "generic function";
+    private final Set<String> specialRemoteMethods = Set.of(PluginConstants.ON_OPEN, PluginConstants.ON_CLOSE,
+            PluginConstants.ON_ERROR, PluginConstants.ON_IDLE_TIMEOUT, PluginConstants.ON_TEXT_MESSAGE,
+            PluginConstants.ON_BINARY_MESSAGE, PluginConstants.ON_MESSAGE, PluginConstants.ON_PING_MESSAGE,
+            PluginConstants.ON_PONG_MESSAGE);
     private SyntaxNodeAnalysisContext ctx;
 
     WebSocketServiceValidator(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         this.ctx = syntaxNodeAnalysisContext;
+    }
+
+    private static Optional<String> getDispatcherMappingAnnotatedFunctionName(FunctionDefinitionNode node,
+                                                                              SyntaxNodeAnalysisContext ctx) {
+        if (node.metadata().isEmpty()) {
+            return Optional.empty();
+        }
+        for (AnnotationNode annotationNode : node.metadata().get().annotations()) {
+            Optional<Symbol> annotationType = ctx.semanticModel().symbol(annotationNode);
+            if (annotationType.isEmpty()) {
+                continue;
+            }
+            if (!annotationType.get().getModule().flatMap(Symbol::getName)
+                    .orElse("").equals(WebSocketConstants.PACKAGE_WEBSOCKET) ||
+                    !annotationType.get().getName().orElse("")
+                            .equals(WebSocketConstants.WEBSOCKET_DISPATCHER_MAPPING_ANNOTATION)) {
+                continue;
+            }
+            if (annotationNode.annotValue().isEmpty()) {
+                return Optional.empty();
+            }
+            MappingConstructorExpressionNode annotationValue = annotationNode.annotValue().get();
+            for (Node field : annotationValue.fields()) {
+                if (!field.kind().equals(SyntaxKind.SPECIFIC_FIELD)) {
+                    continue;
+                }
+                String fieldName = ((SpecificFieldNode) field).fieldName().toString().strip();
+                Optional<ExpressionNode> filedValue = ((SpecificFieldNode) field).valueExpr();
+                if (!fieldName.equals(ANNOTATION_ATTR_DISPATCHER_VALUE) || filedValue.isEmpty()) {
+                    continue;
+                }
+                return Optional.of(filedValue.get().toString().replaceAll("\"", "").strip());
+            }
+        }
+        return Optional.empty();
     }
 
     public void validate() {
@@ -70,7 +125,7 @@ public class WebSocketServiceValidator {
                     classDefNode.location(), PluginConstants.ON_TEXT_MESSAGE);
         }
         if (functionSet.containsKey(PluginConstants.ON_MESSAGE) &&
-                        functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
+                functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
             Utils.reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS,
                     classDefNode.location(), PluginConstants.ON_BINARY_MESSAGE);
         }
@@ -104,6 +159,45 @@ public class WebSocketServiceValidator {
                 !functionSet.containsKey(PluginConstants.ON_TEXT_MESSAGE) &&
                 !functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_MESSAGE_GENERATION_HINT);
+        }
+        validateDispatcherMappingAnnotations(classDefNode, functionSet);
+    }
+
+    private void validateDispatcherMappingAnnotations(ClassDefinitionNode classDefNode,
+                                                      Map<String, Boolean> functionSet) {
+        Set<String> seenAnnotationValues = new HashSet<>();
+        for (Node node : classDefNode.members()) {
+            if (!node.kind().equals(SyntaxKind.OBJECT_METHOD_DEFINITION)) {
+                continue;
+            }
+            FunctionDefinitionNode funcDefinitionNode = (FunctionDefinitionNode) node;
+            if (funcDefinitionNode.qualifierList().stream()
+                    .noneMatch(token -> token.text().equals(Qualifier.REMOTE.getValue()))) {
+                continue;
+            }
+            Optional<String> funcName = ctx.semanticModel().symbol(funcDefinitionNode).flatMap(Symbol::getName);
+            Optional<String> annoDispatchingValue = getDispatcherMappingAnnotatedFunctionName(funcDefinitionNode, ctx);
+            if (funcName.isEmpty() || annoDispatchingValue.isEmpty()) {
+                continue;
+            }
+            if (seenAnnotationValues.contains(annoDispatchingValue.get())) {
+                Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_MAPPING_VALUE,
+                        funcDefinitionNode.location(), annoDispatchingValue.get());
+                continue;
+            }
+            seenAnnotationValues.add(annoDispatchingValue.get());
+            String customRemoteFunctionName = createCustomRemoteFunction(annoDispatchingValue.get());
+            if (this.specialRemoteMethods.contains(funcName.get())) {
+                Utils.reportDiagnostics(ctx, INVALID_FUNCTION_ANNOTATION, funcDefinitionNode.location(),
+                        funcName.get());
+                continue;
+            }
+            if (functionSet.containsKey(customRemoteFunctionName) &&
+                    !customRemoteFunctionName.equals(funcName.get()) &&
+                    !this.specialRemoteMethods.contains(customRemoteFunctionName)) {
+                Utils.reportDiagnostics(ctx, RE_DECLARED_REMOTE_FUNCTIONS, classDefNode.location(),
+                        customRemoteFunctionName, annoDispatchingValue.get(), funcName.get());
+            }
         }
     }
 

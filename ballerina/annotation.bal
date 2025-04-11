@@ -14,10 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-///////////////////////////
-/// Service Annotations ///
-///////////////////////////
-
 # Configurations for a WebSocket service.
 #
 # + subProtocols - Negotiable sub protocol by the service
@@ -48,3 +44,13 @@ public type WSServiceConfig record {|
 
 # The annotation which is used to configure a WebSocket service.
 public annotation WSServiceConfig ServiceConfig on service;
+
+# Configurations used to define dispatching rules for remote functions.
+#
+# + value - The value which is going to be used for dispatching to custom remote functions.
+public type WsDispatcherMapping record {|
+    string value;
+|};
+
+# The annotation which is used to configure the dispatching rules for WebSocket remote functions.
+public const annotation WsDispatcherMapping DispatcherMapping on function;
