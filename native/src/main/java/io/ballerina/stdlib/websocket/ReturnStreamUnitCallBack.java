@@ -66,36 +66,32 @@ public class ReturnStreamUnitCallBack implements Handler {
 
     @Override
     public void notifySuccess(Object response) {
-        if (response != null) {
-            PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
-            if (response instanceof BError) {
-                String content = ((BError) response).getMessage();
-                webSocketConnection.terminateConnection(1011,
-                        String.format("streaming failed: %s", content));
-            } else {
-                Object contentObj = ((BMap) response).get(StringUtils.fromString("value"));
-                if (isCloseFrameRecord(contentObj)) {
-                    sendCloseFrame(contentObj, connectionInfo);
-                    return;
-                }
-                if (contentObj instanceof BString bString) {
-                    sendTextMessageStream(bString, promiseCombiner);
-                } else {
-                    sendTextMessageStream(toJsonString(contentObj), promiseCombiner);
-                }
-                Thread.startVirtualThread(() -> {
-                    Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
-                    StrandMetadata strandMetadata = new StrandMetadata(true, properties);
-                    try {
-                        Object result = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
-                        this.notifySuccess(result);
-                    } catch (BError bError) {
-                        this.notifyFailure(bError);
-                    }
-                });
-            }
+        PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
+        if (response instanceof BError) {
+            String content = ((BError) response).getMessage();
+            webSocketConnection.terminateConnection(1011,
+                    String.format("streaming failed: %s", content));
         } else {
-            webSocketConnection.readNextFrame();
+            Object contentObj = ((BMap) response).get(StringUtils.fromString("value"));
+            if (isCloseFrameRecord(contentObj)) {
+                sendCloseFrame(contentObj, connectionInfo);
+                return;
+            }
+            if (contentObj instanceof BString bString) {
+                sendTextMessageStream(bString, promiseCombiner);
+            } else {
+                sendTextMessageStream(toJsonString(contentObj), promiseCombiner);
+            }
+            Thread.startVirtualThread(() -> {
+                Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
+                StrandMetadata strandMetadata = new StrandMetadata(true, properties);
+                try {
+                    Object result = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
+                    this.notifySuccess(result);
+                } catch (BError bError) {
+                    this.notifyFailure(bError);
+                }
+            });
         }
     }
 
