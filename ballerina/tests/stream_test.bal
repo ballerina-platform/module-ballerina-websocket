@@ -21,7 +21,7 @@ public type ChatMessage record {|
     string message = "";
 |};
 
-listener Listener streamLis = new(21402);
+listener Listener streamLis = new (21402);
 
 service /onStream on streamLis {
     resource function get .() returns Service|UpgradeError {
@@ -31,23 +31,25 @@ service /onStream on streamLis {
 
 service class StreamStringSvc {
     *Service;
+
     remote function onMessage(Caller caller, json data) returns stream<string> {
-      string[] greets = ["Hi Sam", "Hey Sam", "GM Sam"];
-      return greets.toStream();
+        string[] greets = ["Hi Sam", "Hey Sam", "GM Sam"];
+        return greets.toStream();
     }
 }
 
 service /onRecordStream on streamLis {
     resource function get .() returns Service|UpgradeError {
-       return new StreamRecordSvc();
+        return new StreamRecordSvc();
     }
 }
 
 service class StreamRecordSvc {
     *Service;
+
     remote function onMessage(Caller caller, json data) returns stream<ChatMessage> {
-        ChatMessage mes1 = {name:"Sam", message:"Hi"};
-        ChatMessage mes2 = {name:"Sam", message:"GM"};
+        ChatMessage mes1 = {name: "Sam", message: "Hi"};
+        ChatMessage mes2 = {name: "Sam", message: "GM"};
         ChatMessage[] chatMsges = [mes1, mes2];
         return chatMsges.toStream();
     }
@@ -55,60 +57,65 @@ service class StreamRecordSvc {
 
 class EvenNumberGenerator {
     int i = 0;
-    public isolated function next() returns record {| int value; |}|error? {
+
+    public isolated function next() returns record {|int value;|}|error? {
         self.i += 2;
         if self.i > 4 {
             return;
         }
-        return { value: self.i };
+        return {value: self.i};
     }
 }
 
 service /onIntStreamWithError on streamLis {
     resource function get .() returns Service|UpgradeError {
-       return new StreamIntWithErrorSvc();
+        return new StreamIntWithErrorSvc();
     }
 }
 
 service class StreamIntWithErrorSvc {
     *Service;
+
     remote function onMessage(Caller caller, json data) returns stream<int, error?> {
-       EvenNumberGenerator evenGen = new();
-       stream<int, error?> evenNumberStream = new(evenGen);
-       return evenNumberStream;
+        EvenNumberGenerator evenGen = new ();
+        stream<int, error?> evenNumberStream = new (evenGen);
+        return evenNumberStream;
     }
 }
 
 class ErrorGenerator {
     int i = 0;
-    public isolated function next() returns record {| int value; |}|error? {
+
+    public isolated function next() returns record {|int value;|}|error? {
         return error("panic from next");
     }
 }
 
 service /onErrorStream on streamLis {
     resource function get .() returns Service|UpgradeError {
-       return new StreamErrorSvc();
+        return new StreamErrorSvc();
     }
 }
 
 service class StreamErrorSvc {
     *Service;
+
     remote function onMessage(Caller caller, json data) returns stream<int, error?> {
-       ErrorGenerator errGen = new();
-       stream<int, error?> errNumberStream = new(errGen);
-       return errNumberStream;
+        ErrorGenerator errGen = new ();
+        stream<int, error?> errNumberStream = new (errGen);
+        return errNumberStream;
     }
 }
 
 service /onJsonStream on streamLis {
     resource function get .() returns Service|UpgradeError {
-       return new StreamJsonSvc();
+        return new StreamJsonSvc();
     }
 }
 
 service class StreamJsonSvc {
     *Service;
+
     remote function onMessage(Caller caller, json data) returns stream<json, error?> {
         json[] jsonMsges = [{"x": 1, "y": 2}, {"x": 4, "y": 5}];
         return jsonMsges.toStream();
@@ -117,12 +124,13 @@ service class StreamJsonSvc {
 
 service /onJsonStreamOnOpen on streamLis {
     resource function get .() returns Service|UpgradeError {
-       return new StreamJsonOpenSvc();
+        return new StreamJsonOpenSvc();
     }
 }
 
 service class StreamJsonOpenSvc {
     *Service;
+
     remote function onOpen(Caller caller) returns stream<json, error?> {
         json[] jsonMsges = [{"x": 1, "y": 2}, {"x": 4, "y": 5}];
         return jsonMsges.toStream();
@@ -131,7 +139,7 @@ service class StreamJsonOpenSvc {
 
 @test:Config {}
 public function testStreamString() returns Error? {
-    Client wsClient = check new("ws://localhost:21402/onStream/");
+    Client wsClient = check new ("ws://localhost:21402/onStream/");
     string[] greets = ["Hi", "Hey", "GM"];
     check wsClient->writeMessage(greets);
     string data = check wsClient->readTextMessage();
@@ -144,18 +152,18 @@ public function testStreamString() returns Error? {
 
 @test:Config {}
 public function testRecord() returns Error? {
-    Client wsClient = check new("ws://localhost:21402/onRecordStream/");
+    Client wsClient = check new ("ws://localhost:21402/onRecordStream/");
     string[] greets = ["Hi", "Hey", "GM"];
     check wsClient->writeMessage(greets);
     ChatMessage data = check wsClient->readMessage();
-    test:assertEquals(data, {name:"Sam", message:"Hi"});
+    test:assertEquals(data, {name: "Sam", message: "Hi"});
     ChatMessage data2 = check wsClient->readMessage();
-    test:assertEquals(data2, {name:"Sam", message:"GM"});
+    test:assertEquals(data2, {name: "Sam", message: "GM"});
 }
 
 @test:Config {}
 public function testIntWithError() returns Error? {
-    Client wsClient = check new("ws://localhost:21402/onIntStreamWithError/");
+    Client wsClient = check new ("ws://localhost:21402/onIntStreamWithError/");
     string[] greets = ["Hi", "Hey", "GM"];
     check wsClient->writeMessage(greets);
     json data = check wsClient->readMessage();
@@ -166,7 +174,7 @@ public function testIntWithError() returns Error? {
 
 @test:Config {}
 public function testError() returns Error? {
-    Client wsClient = check new("ws://localhost:21402/onErrorStream/");
+    Client wsClient = check new ("ws://localhost:21402/onErrorStream/");
     string[] greets = ["Hi", "Hey", "GM"];
     check wsClient->writeMessage(greets);
     string|error data = wsClient->readMessage();
@@ -178,7 +186,7 @@ public function testError() returns Error? {
 
 @test:Config {}
 public function testStreamJson() returns Error? {
-    Client wsClient = check new("ws://localhost:21402/onJsonStream/");
+    Client wsClient = check new ("ws://localhost:21402/onJsonStream/");
     string[] greets = ["Hi", "Hey", "GM"];
     check wsClient->writeMessage(greets);
     json data = check wsClient->readMessage();
@@ -189,7 +197,7 @@ public function testStreamJson() returns Error? {
 
 @test:Config {}
 public function testStreamJsonOnOpen() returns Error? {
-    Client wsClient = check new("ws://localhost:21402/onJsonStreamOnOpen/");
+    Client wsClient = check new ("ws://localhost:21402/onJsonStreamOnOpen/");
     json data = check wsClient->readMessage();
     test:assertEquals(data, {"x": 1, "y": 2});
     json data2 = check wsClient->readMessage();
