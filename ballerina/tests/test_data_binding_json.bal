@@ -20,6 +20,9 @@ final readonly & json jsonMessageWithEscapedQuotes = {
     "message": "Cannot query field \"invalidField\" on type \"Subscription\"."
 };
 
+@ServiceConfig {
+    dispatcherKey: "event"
+}
 service / on new Listener(22101) {
 
     resource function get .() returns Service|UpgradeError {
@@ -33,12 +36,24 @@ service class WsService22101 {
     remote function onMessage(string message) returns json {
         return jsonMessageWithEscapedQuotes;
     }
+
+    remote function onSubscribe(string message) returns stream<json> {
+        return [jsonMessageWithEscapedQuotes].toStream();
+    }
 }
 
 @test:Config {}
 public function testEscapedDoubleQuoteInJson() returns error? {
     Client wsClient = check new ("ws://localhost:22101");
     check wsClient->writeMessage("Hello");
+    json response = check wsClient->readMessage();
+    test:assertEquals(response, jsonMessageWithEscapedQuotes);
+}
+
+@test:Config {}
+public function testEscapedDoubleQuoteInJsonStream() returns error? {
+    Client wsClient = check new ("ws://localhost:22101");
+    check wsClient->writeMessage({event: "subscribe", data: "test"});
     json response = check wsClient->readMessage();
     test:assertEquals(response, jsonMessageWithEscapedQuotes);
 }
