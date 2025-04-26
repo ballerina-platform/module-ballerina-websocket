@@ -138,6 +138,9 @@ service class StreamJsonOpenSvc {
     }
 }
 
+@ServiceConfig {
+    dispatcherKey: "event"
+}
 service /onConcurrentRequest on streamLis {
     resource function get .() returns Service|UpgradeError {
         return new ConcurrentRequestSvc();
@@ -147,14 +150,14 @@ service /onConcurrentRequest on streamLis {
 service class ConcurrentRequestSvc {
     *Service;
 
-    remote function onOpen(Caller caller) returns stream<int, error?> {
+    remote function onSubscribe(string message) returns stream<int, error?> {
         return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].toStream().'map(function(int i) returns int {
             runtime:sleep(1);
             return i;
         });
     }
 
-    remote function onMessage(Caller caller) returns int {
+    remote function onMessage(string message) returns int {
         return -1;
     }
 }
@@ -229,6 +232,7 @@ public function testStreamJsonOnOpen() returns Error? {
 @test:Config {}
 public function testConcurrentRequestDuringStreamResponse() returns Error? {
     Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
     int data = check wsClient->readMessage();
     test:assertEquals(data, 1);
     check wsClient->writeMessage("Hello");
