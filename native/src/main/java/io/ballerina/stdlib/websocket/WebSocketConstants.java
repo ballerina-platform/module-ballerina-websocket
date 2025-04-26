@@ -53,8 +53,8 @@ public class WebSocketConstants {
     public static final BString ANNOTATION_ATTR_VALIDATION_ENABLED = StringUtils.fromString("validation");
     public static final BString ANNOTATION_ATTR_DISPATCHER_KEY = StringUtils.fromString("dispatcherKey");
 
-    public static final String WEBSOCKET_DISPATCHER_MAPPING_ANNOTATION = "DispatcherMapping";
-    public static final String ANNOTATION_ATTR_DISPATCHER_VALUE = "value";
+    public static final String WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION = "DispatcherConfig";
+    public static final String ANNOTATION_ATTR_PAYLOAD_TYPE = "payloadType";
 
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final String LOG_MESSAGE = "{} {}";
