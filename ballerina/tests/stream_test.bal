@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.runtime;
 import ballerina/test;
 
 public type ChatMessage record {|
@@ -137,6 +138,27 @@ service class StreamJsonOpenSvc {
     }
 }
 
+service /onConcurrentRequest on streamLis {
+    resource function get .() returns Service|UpgradeError {
+        return new ConcurrentRequestSvc();
+    }
+}
+
+service class ConcurrentRequestSvc {
+    *Service;
+
+    remote function onOpen(Caller caller) returns stream<int, error?> {
+        return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].toStream().'map(function(int i) returns int {
+            runtime:sleep(1);
+            return i;
+        });
+    }
+
+    remote function onMessage(Caller caller) returns int {
+        return -1;
+    }
+}
+
 @test:Config {}
 public function testStreamString() returns Error? {
     Client wsClient = check new ("ws://localhost:21402/onStream/");
@@ -202,4 +224,21 @@ public function testStreamJsonOnOpen() returns Error? {
     test:assertEquals(data, {"x": 1, "y": 2});
     json data2 = check wsClient->readMessage();
     test:assertEquals(data2, {"x": 4, "y": 5});
+}
+
+@test:Config {}
+public function testConcurrentRequestDuringStreamResponse() returns Error? {
+    Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
+    int data = check wsClient->readMessage();
+    test:assertEquals(data, 1);
+    check wsClient->writeMessage("Hello");
+    while true {
+        int res = check wsClient->readMessage();
+        if res >= 10 {
+            test:assertFail("Did not receive -1 as the response from the service");
+        }
+        if res == -1 {
+            return;
+        }
+    }
 }
