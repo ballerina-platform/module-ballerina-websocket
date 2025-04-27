@@ -1,4 +1,0 @@
-[[dependency]]
-org = "ballerina"
-name = "websocket"
-version = "2.15.0"
