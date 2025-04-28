@@ -238,11 +238,11 @@ public function testConcurrentRequestDuringStreamResponse() returns Error? {
     check wsClient->writeMessage("Hello");
     while true {
         int res = check wsClient->readMessage();
-        if res >= 10 {
-            test:assertFail("Did not receive -1 as the response from the service");
-        }
         if res == -1 {
             return;
+        }
+        if res >= 10 {
+            test:assertFail("onMessage response was not received before the end of the stream");
         }
     }
 }
