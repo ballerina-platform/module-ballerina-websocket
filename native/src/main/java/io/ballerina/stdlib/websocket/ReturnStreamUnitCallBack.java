@@ -94,8 +94,6 @@ public class ReturnStreamUnitCallBack implements Handler {
                     }
                 });
             }
-        } else {
-            webSocketConnection.readNextFrame();
         }
     }
 
