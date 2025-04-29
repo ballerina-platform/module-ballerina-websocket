@@ -118,6 +118,7 @@ public final class WebSocketResourceCallback implements Handler {
                 StrandMetadata strandMetadata = new StrandMetadata(true, properties);
                 try {
                     Object res = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
+                    webSocketConnection.readNextFrame();
                     returnStreamUnitCallBack.notifySuccess(res);
                 } catch (BError bError) {
                     returnStreamUnitCallBack.notifyFailure(bError);
