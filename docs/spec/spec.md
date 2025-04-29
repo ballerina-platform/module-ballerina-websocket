@@ -391,11 +391,11 @@ For example, if the message is `{"event": "heartbeat"}` it will get dispatched t
 
 3. Custom Dispatching with `@websocket:DispatcherConfig` annotation
 
-    The `@websocket:DispatcherConfig` annotation allows users to explicitly define the dispatching behavior for remote functions. If an incoming message type matches the payloadType in the annotation, the respective remote function will be invoked.
+    The `@websocket:DispatcherConfig` annotation allows users to explicitly define the dispatching behavior for remote functions. If an incoming message type matches the dispatcherValue in the annotation, the respective remote function will be invoked.
 
     ```ballerina
     @websocket:DispatcherConfig {
-        payloadType: "subscribe"
+        dispatcherValue: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
@@ -428,7 +428,7 @@ dispatching error remote function = "onHeartbeatError"
 
 ```ballerina
 @websocket:DispatcherConfig {
-    payloadType: "subscribe"
+    dispatcherValue: "subscribe"
 }
 remote function onSubscribeMessage(Subscribe message) returns error? {
 }

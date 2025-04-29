@@ -34,7 +34,7 @@ service class WsService22103 {
     *Service;
 
     @DispatcherConfig {
-        payloadType: "subscribe"
+        dispatcherValue: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";

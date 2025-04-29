@@ -47,9 +47,9 @@ public annotation WSServiceConfig ServiceConfig on service;
 
 # Configurations used to define dispatching rules for remote functions.
 #
-# + payloadType - The value which is going to be used for dispatching to custom remote functions.
+# + dispatcherValue - The value which is going to be used for dispatching to custom remote functions.
 public type WsDispatcherConfig record {|
-    string payloadType;
+    string dispatcherValue;
 |};
 
 # The annotation which is used to configure the dispatching rules for WebSocket remote functions.

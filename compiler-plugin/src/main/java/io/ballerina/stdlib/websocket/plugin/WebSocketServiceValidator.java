@@ -43,9 +43,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_PAYLOAD_TYPE;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.createCustomRemoteFunction;
-import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_MESSAGE_TYPE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
 
@@ -90,7 +90,7 @@ public class WebSocketServiceValidator {
                 }
                 String fieldName = ((SpecificFieldNode) field).fieldName().toString().strip();
                 Optional<ExpressionNode> filedValue = ((SpecificFieldNode) field).valueExpr();
-                if (!fieldName.equals(ANNOTATION_ATTR_PAYLOAD_TYPE) || filedValue.isEmpty()) {
+                if (!fieldName.equals(ANNOTATION_ATTR_DISPATCHER_VALUE) || filedValue.isEmpty()) {
                     continue;
                 }
                 return Optional.of(filedValue.get().toString().replaceAll("\"", "").strip());
@@ -181,7 +181,7 @@ public class WebSocketServiceValidator {
                 continue;
             }
             if (seenAnnotationValues.contains(annoDispatchingValue.get())) {
-                Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_MAPPING_MESSAGE_TYPE,
+                Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE,
                         funcDefinitionNode.location(), annoDispatchingValue.get());
                 continue;
             }

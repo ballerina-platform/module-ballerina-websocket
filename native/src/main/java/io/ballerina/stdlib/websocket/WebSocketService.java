@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.ballerina.runtime.api.utils.StringUtils.fromString;
-import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_PAYLOAD_TYPE;
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
 import static io.ballerina.stdlib.websocket.WebSocketConstants.UNCHECKED;
 
 /**
@@ -88,9 +88,9 @@ public class WebSocketService {
     public static Optional<String> getAnnotationDispatchingValue(RemoteMethodType remoteFunc) {
         BMap<BString, Object> annotations = (BMap<BString, Object>) remoteFunc.getAnnotation(fromString(
                 ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION));
-        if (annotations != null && annotations.containsKey(fromString(ANNOTATION_ATTR_PAYLOAD_TYPE))) {
+        if (annotations != null && annotations.containsKey(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE))) {
             String dispatchingValue = annotations.
-                    getStringValue(fromString(ANNOTATION_ATTR_PAYLOAD_TYPE)).getValue();
+                    getStringValue(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE)).getValue();
             return Optional.of(dispatchingValue);
         }
         return Optional.empty();

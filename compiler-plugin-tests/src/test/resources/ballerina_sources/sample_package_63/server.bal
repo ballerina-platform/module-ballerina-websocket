@@ -38,21 +38,21 @@ service class WsService {
     }
 
     @ws:DispatcherConfig {
-        payloadType: "subscribe"
+        dispatcherValue: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
     }
 
     @ws:DispatcherConfig {
-        payloadType: "subscribe"
+        dispatcherValue: "subscribe"
     }
     remote function onSubscribeText(Subscribe message) returns string {
         return "onSubscribeText";
     }
 
     @ws:DispatcherConfig {
-        payloadType: "ping"
+        dispatcherValue: "ping"
     }
     remote function onPing(Subscribe message) returns string {
         return "onPing";

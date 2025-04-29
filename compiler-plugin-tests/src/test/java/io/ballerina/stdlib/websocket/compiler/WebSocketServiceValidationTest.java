@@ -582,7 +582,7 @@ public class WebSocketServiceValidationTest {
         assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS);
         Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
         assertDiagnostic(secondDiagnostic,
-                PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_MESSAGE_TYPE);
+                PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE);
         Diagnostic thirdDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[2];
         assertDiagnostic(thirdDiagnostic, PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION);
     }
