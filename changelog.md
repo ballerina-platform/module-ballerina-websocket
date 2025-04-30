@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- [Rename @websocket:DispatcherMapping annotation to a more generic name](https://github.com/ballerina-platform/ballerina-library/issues/7839)
 - [Move SSL context creation to the client initialization](https://github.com/ballerina-platform/ballerina-library/issues/1798)
 
 ## [2.13.1] - 2025-02-11
