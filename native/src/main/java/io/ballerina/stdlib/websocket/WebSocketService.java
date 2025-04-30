@@ -87,7 +87,7 @@ public class WebSocketService {
     @SuppressWarnings(UNCHECKED)
     public static Optional<String> getAnnotationDispatchingValue(RemoteMethodType remoteFunc) {
         BMap<BString, Object> annotations = (BMap<BString, Object>) remoteFunc.getAnnotation(fromString(
-                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_MAPPING_ANNOTATION));
+                ModuleUtils.getPackageIdentifier() + ":" + WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION));
         if (annotations != null && annotations.containsKey(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE))) {
             String dispatchingValue = annotations.
                     getStringValue(fromString(ANNOTATION_ATTR_DISPATCHER_VALUE)).getValue();

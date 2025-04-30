@@ -37,22 +37,22 @@ service class WsService {
         return "onSubscribe";
     }
 
-    @ws:DispatcherMapping {
-        value: "subscribe"
+    @ws:DispatcherConfig {
+        dispatcherValue: "subscribe"
     }
     remote function onSubscribeMessage(Subscribe message) returns string {
         return "onSubscribeMessage";
     }
 
-    @ws:DispatcherMapping {
-        value: "subscribe"
+    @ws:DispatcherConfig {
+        dispatcherValue: "subscribe"
     }
     remote function onSubscribeText(Subscribe message) returns string {
         return "onSubscribeText";
     }
 
-    @ws:DispatcherMapping {
-        value: "ping"
+    @ws:DispatcherConfig {
+        dispatcherValue: "ping"
     }
     remote function onPing(Subscribe message) returns string {
         return "onPing";
