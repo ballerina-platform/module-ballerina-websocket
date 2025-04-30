@@ -47,7 +47,7 @@ public annotation WSServiceConfig ServiceConfig on service;
 
 # Configurations used to define dispatching rules for remote functions.
 #
-# + dispatcherValue - The value which is going to be used for dispatching to custom remote functions.
+# + dispatcherValue - The dispatcher value which is going to be used for dispatching to custom remote functions.
 public type WsDispatcherConfig record {|
     string dispatcherValue;
 |};
