@@ -44,6 +44,7 @@ import static io.ballerina.stdlib.websocket.WebSocketResourceCallback.sendCloseF
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.dispatchOnError;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.fromText;
 import static io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector.release;
+import static org.ballerinalang.langlib.value.ToJsonString.toJsonString;
 
 /**
  * Call back class registered for returning streams.
@@ -67,9 +68,8 @@ public class ReturnStreamUnitCallBack implements Handler {
     public void notifySuccess(Object response) {
         if (response != null) {
             PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
-            String content;
             if (response instanceof BError) {
-                content = ((BError) response).getMessage();
+                String content = ((BError) response).getMessage();
                 webSocketConnection.terminateConnection(1011,
                         String.format("streaming failed: %s", content));
             } else {
@@ -78,8 +78,11 @@ public class ReturnStreamUnitCallBack implements Handler {
                     sendCloseFrame(contentObj, connectionInfo);
                     return;
                 }
-                content = contentObj.toString();
-                sendTextMessageStream(StringUtils.fromString(content), promiseCombiner);
+                if (contentObj instanceof BString bString) {
+                    sendTextMessageStream(bString, promiseCombiner);
+                } else {
+                    sendTextMessageStream(toJsonString(contentObj), promiseCombiner);
+                }
                 Thread.startVirtualThread(() -> {
                     Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
                     StrandMetadata strandMetadata = new StrandMetadata(true, properties);
@@ -91,8 +94,6 @@ public class ReturnStreamUnitCallBack implements Handler {
                     }
                 });
             }
-        } else {
-            webSocketConnection.readNextFrame();
         }
     }
 

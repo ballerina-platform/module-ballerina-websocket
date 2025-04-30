@@ -79,9 +79,9 @@ public class PluginConstants {
                 "WEBSOCKET_215"),
         INVALID_REMOTE_FUNCTIONS("Cannot have `{0}` with `onMessage` remote function",
                 "WEBSOCKET_216"),
-        RE_DECLARED_REMOTE_FUNCTIONS("Cannot have `{0}` because the message type `{1}` is already " +
+        RE_DECLARED_REMOTE_FUNCTIONS("Cannot have `{0}` because the dispatcher value `{1}` is already " +
                 "associated with `{2}` remote function", "WEBSOCKET_217"),
-        DUPLICATED_DISPATCHER_MAPPING_VALUE("DispatcherMapping annotation value `{0}` is already " +
+        DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE("DispatcherConfig annotation dispatcherValue `{0}` is already " +
                 "exists", "WEBSOCKET_218"),
         INVALID_FUNCTION_ANNOTATION("Invalid annotation provided for `{0}` remote function. "
                 + "This annotation can only be used with the custom dispatcher functions", "WEBSOCKET_219"),

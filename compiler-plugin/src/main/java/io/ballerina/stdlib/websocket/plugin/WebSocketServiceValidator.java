@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_DISPATCHER_VALUE;
 import static io.ballerina.stdlib.websocket.WebSocketResourceDispatcher.createCustomRemoteFunction;
-import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_VALUE;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS;
 
@@ -64,7 +64,7 @@ public class WebSocketServiceValidator {
         this.ctx = syntaxNodeAnalysisContext;
     }
 
-    private static Optional<String> getDispatcherMappingAnnotatedFunctionName(FunctionDefinitionNode node,
+    private static Optional<String> getDispatcherConfigAnnotatedFunctionName(FunctionDefinitionNode node,
                                                                               SyntaxNodeAnalysisContext ctx) {
         if (node.metadata().isEmpty()) {
             return Optional.empty();
@@ -77,7 +77,7 @@ public class WebSocketServiceValidator {
             if (!annotationType.get().getModule().flatMap(Symbol::getName)
                     .orElse("").equals(WebSocketConstants.PACKAGE_WEBSOCKET) ||
                     !annotationType.get().getName().orElse("")
-                            .equals(WebSocketConstants.WEBSOCKET_DISPATCHER_MAPPING_ANNOTATION)) {
+                            .equals(WebSocketConstants.WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION)) {
                 continue;
             }
             if (annotationNode.annotValue().isEmpty()) {
@@ -160,10 +160,10 @@ public class WebSocketServiceValidator {
                 !functionSet.containsKey(PluginConstants.ON_BINARY_MESSAGE)) {
             reportDiagnostic(classDefNode, PluginConstants.CompilationErrors.ON_MESSAGE_GENERATION_HINT);
         }
-        validateDispatcherMappingAnnotations(classDefNode, functionSet);
+        validateDispatcherConfigAnnotations(classDefNode, functionSet);
     }
 
-    private void validateDispatcherMappingAnnotations(ClassDefinitionNode classDefNode,
+    private void validateDispatcherConfigAnnotations(ClassDefinitionNode classDefNode,
                                                       Map<String, Boolean> functionSet) {
         Set<String> seenAnnotationValues = new HashSet<>();
         for (Node node : classDefNode.members()) {
@@ -176,12 +176,12 @@ public class WebSocketServiceValidator {
                 continue;
             }
             Optional<String> funcName = ctx.semanticModel().symbol(funcDefinitionNode).flatMap(Symbol::getName);
-            Optional<String> annoDispatchingValue = getDispatcherMappingAnnotatedFunctionName(funcDefinitionNode, ctx);
+            Optional<String> annoDispatchingValue = getDispatcherConfigAnnotatedFunctionName(funcDefinitionNode, ctx);
             if (funcName.isEmpty() || annoDispatchingValue.isEmpty()) {
                 continue;
             }
             if (seenAnnotationValues.contains(annoDispatchingValue.get())) {
-                Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_MAPPING_VALUE,
+                Utils.reportDiagnostics(ctx, DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE,
                         funcDefinitionNode.location(), annoDispatchingValue.get());
                 continue;
             }

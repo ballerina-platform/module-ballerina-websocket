@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- [Fix WebSocket service delays handling of new remote calls until streaming response completes](https://github.com/ballerina-platform/ballerina-library/issues/7844)
 - [Fix JSON response parsing issue with escaped double quotes](https://github.com/ballerina-platform/ballerina-library/issues/7720)
 
 ### Changed
