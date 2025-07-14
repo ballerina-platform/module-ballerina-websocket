@@ -68,7 +68,7 @@ public class Register extends AbstractWebsocketNativeFunction {
     private static String getBasePath(Object serviceName) {
         if (serviceName instanceof BArray) {
             List<String> strings = Arrays.stream(((BArray) serviceName).getStringArray()).map(
-                    HttpUtil::unescapeAndEncodeValue).collect(Collectors.toList());
+                    HttpUtil::unescapeAndEncodePath).collect(Collectors.toList());
             String basePath = String.join(WebSocketConstants.BACK_SLASH, strings);
             return HttpUtil.sanitizeBasePath(basePath);
         } else if (serviceName instanceof BString) {

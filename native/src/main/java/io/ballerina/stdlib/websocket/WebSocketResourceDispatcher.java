@@ -85,7 +85,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.ballerina.runtime.api.types.TypeTags.ARRAY_TAG;
 import static io.ballerina.runtime.api.types.TypeTags.BYTE_TAG;
@@ -129,8 +128,14 @@ public class WebSocketResourceDispatcher {
         ResourceMethodType resourceFunction = ((ServiceType) TypeUtils.getType(wsService.getBalService()))
                 .getResourceMethods()[0];
         String[] resourcePath = resourceFunction.getResourcePath();
-        List<String> resourceParams = Arrays.stream(resourcePath).map(
-                HttpUtil::unescapeAndEncodeValue).collect(Collectors.toList());
+        List<String> resourceParams = Arrays.stream(resourcePath)
+            .map(value ->
+                (value.equals(WebSocketConstants.REST_PARAM_IDENTIFIER) ||
+                 value.equals(WebSocketConstants.PATH_PARAM_IDENTIFIER))
+                    ? value
+                    : HttpUtil.unescapeAndEncodeValue(value)
+            )
+            .toList();
 
         BObject inRequest = ValueCreatorUtils.createRequestObject();
         BObject inRequestEntity = ValueCreatorUtils.createEntityObject();
@@ -143,7 +148,7 @@ public class WebSocketResourceDispatcher {
             subPath = sanitizeSubPath(subPath).substring(1);
             subPaths = subPath.split(WebSocketConstants.BACK_SLASH);
         }
-        if (!resourceParams.get(0).equals(".")) {
+        if (!resourceParams.get(0).equals(WebSocketConstants.REST_PARAM_IDENTIFIER)) {
             if (resourceParams.size() != subPaths.length) {
                 webSocketHandshaker.cancelHandshake(404, errMsg);
                 return;
