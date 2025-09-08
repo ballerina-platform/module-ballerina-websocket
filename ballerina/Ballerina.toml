@@ -1,7 +1,7 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "2.14.1"
+version = "2.14.2"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
@@ -15,14 +15,14 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
-version = "2.14.1"
-path = "../native/build/libs/websocket-native-2.14.1.jar"
+version = "2.14.2"
+path = "../native/build/libs/websocket-native-2.14.2-SNAPSHOT.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
-version = "2.14.3"
-path = "./lib/http-native-2.14.3.jar"
+version = "2.14.5"
+path = "./lib/http-native-2.14.5-20250908-122700-4e25094.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -39,51 +39,51 @@ path = "./lib/constraint-native-1.7.0.jar"
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-common"
-version = "4.1.124.Final"
-path = "./lib/netty-common-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-common-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-buffer"
-version = "4.1.124.Final"
-path = "./lib/netty-buffer-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-buffer-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-transport"
-version = "4.1.124.Final"
-path = "./lib/netty-transport-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-transport-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-resolver"
-version = "4.1.124.Final"
-path = "./lib/netty-resolver-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-resolver-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-handler"
-version = "4.1.124.Final"
-path = "./lib/netty-handler-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-handler-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-codec-http"
-version = "4.1.124.Final"
-path = "./lib/netty-codec-http-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-codec-http-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-codec"
-version = "4.1.124.Final"
-path = "./lib/netty-codec-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-codec-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.netty"
 artifactId = "netty-handler-proxy"
-version = "4.1.124.Final"
-path = "./lib/netty-handler-proxy-4.1.124.Final.jar"
+version = "4.1.126.Final"
+path = "./lib/netty-handler-proxy-4.1.126.Final.jar"
 
 [[platform.java21.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.14.1.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.14.2-SNAPSHOT.jar"
 scope = "testOnly"
