@@ -7,7 +7,7 @@ keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
 icon = "icon.png"
 license = ["Apache-2.0"]
-distribution = "2201.12.0"
+distribution = "2201.13.0"
 
 [platform.java21]
 graalvmCompatible = true
@@ -22,7 +22,7 @@ path = "../native/build/libs/websocket-native-2.15.0-SNAPSHOT.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "http-native"
 version = "2.15.0"
-path = "./lib/http-native-2.15.0-20250908-130100-164351e.jar"
+path = "./lib/http-native-2.15.0-20250922-135300-204bee5.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
