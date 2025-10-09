@@ -22,6 +22,7 @@ import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.FiniteType;
 import io.ballerina.runtime.api.types.IntersectionType;
 import io.ballerina.runtime.api.types.MapType;
 import io.ballerina.runtime.api.types.MethodType;
@@ -273,6 +274,8 @@ public class WebSocketResourceDispatcher {
                         } else {
                             if (qParamType.getTag() == STRING_TAG) {
                                 bValues[index++] = queryValueArr.getBString(0);
+                            } else if (isEnumType(qParamType)) {
+                                bValues[index++] = convertStringToEnum(queryValueArr.getBString(0), qParamType);
                             } else {
                                 bValues[index++] = FromJsonStringWithType.fromJsonStringWithType(queryValueArr
                                         .getBString(0), ValueCreator.createTypedescValue(qParamType));
@@ -1140,6 +1143,31 @@ public class WebSocketResourceDispatcher {
                 callback.notifyFailure(bError);
             }
         });
+    }
+
+    private static boolean isEnumType(Type type) {
+        Type referredType = TypeUtils.getReferredType(type);
+        return referredType instanceof FiniteType || type.getTag() == TypeTags.FINITE_TYPE_TAG;
+    }
+
+    private static Object convertStringToEnum(BString queryValue, Type enumType) {
+        FiniteType finiteType = (FiniteType) TypeUtils.getReferredType(enumType);
+        String stringValue = queryValue.getValue();
+        
+        // Check if the string matches any enum value in the finite type's value space
+        for (Object value : finiteType.getValueSpace()) {
+            if (value instanceof BString) {
+                if (((BString) value).getValue().equals(stringValue)) {
+                    return value;
+                }
+            } else if (value.toString().equals(stringValue)) {
+                return value;
+            }
+        }
+        
+        // If no match found, throw an exception that will be caught and result in a 404
+        throw new IllegalArgumentException("Invalid enum value: '" + stringValue + "' for type: " + 
+                                         enumType.getName());
     }
 
     private static boolean isIsolated(BObject serviceObj, String remoteMethod) {
