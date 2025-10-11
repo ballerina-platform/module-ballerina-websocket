@@ -41,7 +41,7 @@ public final class QueryParam {
     }
 
     private void validateQueryParamType() throws WebSocketConnectorException {
-        if (isValidBasicType(typeTag) || isEnumType(type) || (typeTag == TypeTags.ARRAY_TAG && isValidBasicType(
+        if (isValidBasicType(typeTag) || WebSocketUtil.isEnumType(type) || (typeTag == TypeTags.ARRAY_TAG && isValidBasicType(
                 ((ArrayType) type).getElementType().getTag()))) {
             return;
         }
@@ -51,11 +51,6 @@ public final class QueryParam {
     private boolean isValidBasicType(int typeTag) {
         return typeTag == TypeTags.STRING_TAG || typeTag == TypeTags.INT_TAG || typeTag == TypeTags.FLOAT_TAG ||
                 typeTag == TypeTags.BOOLEAN_TAG || typeTag == TypeTags.DECIMAL_TAG;
-    }
-
-    private boolean isEnumType(Type type) {
-        Type referredType = TypeUtils.getReferredType(type);
-        return referredType instanceof FiniteType || typeTag == TypeTags.FINITE_TYPE_TAG;
     }
 
     public boolean isNilable() {
