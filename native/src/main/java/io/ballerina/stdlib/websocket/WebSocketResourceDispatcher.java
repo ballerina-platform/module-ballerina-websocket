@@ -274,8 +274,8 @@ public class WebSocketResourceDispatcher {
                         } else {
                             if (qParamType.getTag() == STRING_TAG) {
                                 bValues[index++] = queryValueArr.getBString(0);
-                            } else if (isEnumType(qParamType)) {
-                                bValues[index++] = convertStringToEnum(queryValueArr.getBString(0), qParamType);
+                            } else if (WebSocketUtil.isEnumType(qParamType)) {
+                                bValues[index++] = convertStringToEnum(queryValueArr.getBString(0), (FiniteType) TypeUtils.getReferredType(qParamType));
                             } else {
                                 bValues[index++] = FromJsonStringWithType.fromJsonStringWithType(queryValueArr
                                         .getBString(0), ValueCreator.createTypedescValue(qParamType));
@@ -1145,13 +1145,7 @@ public class WebSocketResourceDispatcher {
         });
     }
 
-    private static boolean isEnumType(Type type) {
-        Type referredType = TypeUtils.getReferredType(type);
-        return referredType instanceof FiniteType || type.getTag() == TypeTags.FINITE_TYPE_TAG;
-    }
-
-    private static Object convertStringToEnum(BString queryValue, Type enumType) {
-        FiniteType finiteType = (FiniteType) TypeUtils.getReferredType(enumType);
+    private static Object convertStringToEnum(BString queryValue, FiniteType finiteType) {
         String stringValue = queryValue.getValue();
         
         // Check if the string matches any enum value in the finite type's value space
@@ -1167,7 +1161,7 @@ public class WebSocketResourceDispatcher {
         
         // If no match found, throw an exception that will be caught and result in a 404
         throw new IllegalArgumentException("Invalid enum value: '" + stringValue + "' for type: " + 
-                                         enumType.getName());
+                                         finiteType.getName());
     }
 
     private static boolean isIsolated(BObject serviceObj, String remoteMethod) {
