@@ -18,10 +18,8 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.types.ArrayType;
-import io.ballerina.runtime.api.types.FiniteType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.TypeTags;
-import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorException;
 
 /**
@@ -41,8 +39,9 @@ public final class QueryParam {
     }
 
     private void validateQueryParamType() throws WebSocketConnectorException {
-        if (isValidBasicType(typeTag) || WebSocketUtil.isEnumType(type) || (typeTag == TypeTags.ARRAY_TAG && isValidBasicType(
-                ((ArrayType) type).getElementType().getTag()))) {
+        if (isValidBasicType(typeTag) || WebSocketUtil.isEnumType(type) ||
+                (typeTag == TypeTags.ARRAY_TAG && isValidBasicType(
+                        ((ArrayType) type).getElementType().getTag()))) {
             return;
         }
         throw new WebSocketConnectorException("Incompatible query parameter type: '" + type.getName() + "'");
