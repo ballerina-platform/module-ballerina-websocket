@@ -39,8 +39,9 @@ public final class QueryParam {
     }
 
     private void validateQueryParamType() throws WebSocketConnectorException {
-        if (isValidBasicType(typeTag) || (typeTag == TypeTags.ARRAY_TAG && isValidBasicType(
-                ((ArrayType) type).getElementType().getTag()))) {
+        if (isValidBasicType(typeTag) || WebSocketUtil.isEnumType(type) ||
+                (typeTag == TypeTags.ARRAY_TAG && isValidBasicType(
+                        ((ArrayType) type).getElementType().getTag()))) {
             return;
         }
         throw new WebSocketConnectorException("Incompatible query parameter type: '" + type.getName() + "'");

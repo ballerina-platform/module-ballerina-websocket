@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.FiniteType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.TypeTags;
@@ -557,6 +558,11 @@ public class WebSocketUtil {
 
     public static Object getNegotiatedSubProtocol(Environment env, BObject wsSyncClient) {
         return StringUtils.fromString((String) wsSyncClient.getNativeData(WebSocketConstants.NEGOTIATED_SUBPROTOCOL));
+    }
+
+    public static boolean isEnumType(Type type) {
+        Type referredType = TypeUtils.getReferredType(type);
+        return referredType instanceof FiniteType;
     }
 
     private WebSocketUtil() {

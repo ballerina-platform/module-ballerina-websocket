@@ -27,6 +27,23 @@ decimal l88Cde = 1.0;
 string l88Name = "";
 boolean l88Bool = false;
 
+// Enum types for testing enum query parameters
+enum WsType {
+    ORDER_TYPE,
+    CARGO_TYPE
+}
+
+enum Status {
+    ACTIVE,
+    INACTIVE
+}
+
+// Global variables for enum tests
+WsType capturedWsType = ORDER_TYPE;
+Status capturedStatus = ACTIVE;
+string capturedEnumId = "";
+WsType? capturedOptionalType = ();
+
 listener Listener l83 = new(21083);
 
 service /onTextString on l83 {
@@ -120,6 +137,37 @@ listener Listener l93 = new(21093);
 
 service /onTextString on l93 {
     resource function get foo(decimal xyz) returns Service|UpgradeError {
+        return new WsService83();
+    }
+}
+
+// Enum query parameter services
+listener Listener enumListener1 = new(21150);
+
+service /ws on enumListener1 {
+    resource function get .(string id, WsType 'type) returns Service|UpgradeError {
+        capturedEnumId = id;
+        capturedWsType = 'type;
+        return new WsService83();
+    }
+}
+
+listener Listener enumListener2 = new(21151);
+
+service /enumtest/multi on enumListener2 {
+    resource function get .(WsType wsType, Status status) returns Service|UpgradeError {
+        capturedWsType = wsType;
+        capturedStatus = status;
+        return new WsService83();
+    }
+}
+
+listener Listener enumListener3 = new(21152);
+
+service /enumtest/optional on enumListener3 {
+    resource function get .(string id, WsType? 'type) returns Service|UpgradeError {
+        capturedEnumId = id;
+        capturedOptionalType = 'type;
         return new WsService83();
     }
 }
@@ -266,4 +314,78 @@ public function testMandatoryDecimalQueryParamBindingError() returns Error? {
     } else {
         test:assertFail("Expected an resource not found error");
     }
+}
+
+// Enum query parameter tests
+@test:Config {}
+public function testEnumQueryParamWithOrderType() returns Error? {
+    Client wsClient = check new("ws://localhost:21150/ws?id=123&type=ORDER_TYPE");
+    test:assertEquals(capturedEnumId, "123", "ID should match");
+    test:assertEquals(capturedWsType, ORDER_TYPE, "Type should be ORDER_TYPE");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testEnumQueryParamWithCargoType() returns Error? {
+    Client wsClient = check new("ws://localhost:21150/ws?id=456&type=CARGO_TYPE");
+    test:assertEquals(capturedEnumId, "456", "ID should match");
+    test:assertEquals(capturedWsType, CARGO_TYPE, "Type should be CARGO_TYPE");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testEnumQueryParamInvalidValue() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21150/ws?id=789&type=INVALID_TYPE");
+    if wsClient is Error {
+        test:assertTrue(wsClient.message().includes("Invalid handshake"), 
+            "Should fail with invalid handshake error for invalid enum value");
+    } else {
+        test:assertFail("Expected an error for invalid enum value");
+    }
+}
+
+@test:Config {}
+public function testEnumQueryParamMissingValue() returns Error? {
+    Client|Error wsClient = new("ws://localhost:21150/ws?id=789");
+    if wsClient is Error {
+        test:assertTrue(wsClient.message().includes("Invalid handshake") || 
+                       wsClient.message().includes("Bad Request"), 
+            "Should fail with error for missing mandatory enum parameter");
+    } else {
+        test:assertFail("Expected an error for missing mandatory enum parameter");
+    }
+}
+
+@test:Config {}
+public function testMultipleEnumQueryParams() returns Error? {
+    Client wsClient = check new("ws://localhost:21151/enumtest/multi?wsType=ORDER_TYPE&status=ACTIVE");
+    test:assertEquals(capturedWsType, ORDER_TYPE, "WsType should be ORDER_TYPE");
+    test:assertEquals(capturedStatus, ACTIVE, "Status should be ACTIVE");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testMultipleEnumQueryParamsDifferentValues() returns Error? {
+    Client wsClient = check new("ws://localhost:21151/enumtest/multi?wsType=CARGO_TYPE&status=INACTIVE");
+    test:assertEquals(capturedWsType, CARGO_TYPE, "WsType should be CARGO_TYPE");
+    test:assertEquals(capturedStatus, INACTIVE, "Status should be INACTIVE");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testOptionalEnumQueryParamWithValue() returns Error? {
+    capturedOptionalType = (); // Reset
+    Client wsClient = check new("ws://localhost:21152/enumtest/optional?id=opt1&type=ORDER_TYPE");
+    test:assertEquals(capturedEnumId, "opt1", "ID should match");
+    test:assertEquals(capturedOptionalType, ORDER_TYPE, "Optional type should be ORDER_TYPE");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
+}
+
+@test:Config {}
+public function testOptionalEnumQueryParamWithoutValue() returns Error? {
+    capturedOptionalType = ORDER_TYPE; // Reset to non-nil value
+    Client wsClient = check new("ws://localhost:21152/enumtest/optional?id=opt2");
+    test:assertEquals(capturedEnumId, "opt2", "ID should match");
+    test:assertEquals(capturedOptionalType, (), "Optional type should be nil when not provided");
+    error? result = wsClient->close(statusCode = 1000, reason = "Close the connection", timeout = 0);
 }
