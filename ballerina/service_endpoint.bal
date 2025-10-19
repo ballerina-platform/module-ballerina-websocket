@@ -79,6 +79,11 @@ public class Listener {
         self.instanceId = uuid();
         self.config = config;
         if 'listener is http:Listener {
+            http:HttpVersion version = 'listener.getConfig().httpVersion;
+			if version!=http:HTTP_1_1{
+                string errorMessage = "HTTP listener has non compatible HTTP version: " + version.toString();
+				return error Error(errorMessage);
+			}
            self.httpListener = 'listener;
         } else {
            self.port = 'listener;
