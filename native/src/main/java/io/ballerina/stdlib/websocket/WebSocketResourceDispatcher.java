@@ -275,7 +275,8 @@ public class WebSocketResourceDispatcher {
                             if (qParamType.getTag() == STRING_TAG) {
                                 bValues[index++] = queryValueArr.getBString(0);
                             } else if (WebSocketUtil.isEnumType(qParamType)) {
-                                bValues[index++] = convertStringToEnum(queryValueArr.getBString(0), (FiniteType) TypeUtils.getReferredType(qParamType));
+                                FiniteType finiteType = (FiniteType) TypeUtils.getReferredType(qParamType);
+                                bValues[index++] = convertStringToEnum(queryValueArr.getBString(0), finiteType);
                             } else {
                                 bValues[index++] = FromJsonStringWithType.fromJsonStringWithType(queryValueArr
                                         .getBString(0), ValueCreator.createTypedescValue(qParamType));
