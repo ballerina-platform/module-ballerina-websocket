@@ -9,4 +9,4 @@ path = "../compiler-plugin/build/libs/websocket-compiler-plugin-2.15.0-SNAPSHOT.
 path = "../native/build/libs/websocket-native-2.15.0-SNAPSHOT.jar"
 
 [[dependency]]
-path = "./lib/http-native-2.15.0-20250922-135300-204bee5.jar"
+path = "./lib/http-native-2.15.0.jar"
