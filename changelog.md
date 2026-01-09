@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- [Address `CVE-2025-67735` security vulnerability in Netty](https://github.com/ballerina-platform/ballerina-library/issues/8538)
+
+## [2.15.0] - 2025-11-06
+
 ### Added
 
 - [Support Custom Remote Function Mapping via Annotation](https://github.com/ballerina-platform/ballerina-library/issues/7733)
