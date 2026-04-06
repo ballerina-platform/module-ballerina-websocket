@@ -30,6 +30,7 @@ import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 
 public class WebSocketObserverContext extends ObserverContext {
 
+    private static final String PROTOCOL = "ws";
     private String connectionId = WebSocketObservabilityConstants.UNKNOWN;
     private String servicePathOrClientUrl = WebSocketObservabilityConstants.UNKNOWN;
 
@@ -54,6 +55,7 @@ public class WebSocketObserverContext extends ObserverContext {
         String clientOrServerContext = WebSocketObservabilityUtil.getClientOrServerContext(connectionInfo);
         addTag(WebSocketObservabilityConstants.TAG_CONTEXT, clientOrServerContext);
         addTag(WebSocketObservabilityConstants.TAG_SERVICE, servicePathOrClientUrl);
+        addTag(ObservabilityConstants.TAG_KEY_PROTOCOL, PROTOCOL);
     }
 
     String getConnectionId() {

@@ -18,6 +18,7 @@
 
 package io.ballerina.stdlib.websocket.plugin;
 
+import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
@@ -25,13 +26,19 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.MappingFieldNode;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
@@ -42,7 +49,11 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.util.List;
 import java.util.Optional;
 
+import static io.ballerina.stdlib.websocket.WebSocketConstants.ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_ANNOTATION;
+import static io.ballerina.stdlib.websocket.plugin.PluginConstants.DISPATCHER_STREAM_ID_ANNOTATION;
 import static io.ballerina.stdlib.websocket.plugin.PluginConstants.ORG_NAME;
+import static io.ballerina.stdlib.websocket.plugin.Utils.reportDiagnostics;
 
 /**
  * Validates a Ballerina WebSocket Upgrade Service.
@@ -58,6 +69,19 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             }
         }
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) ctx.node();
+        boolean disptacherKeyAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel(), DISPATCHER_ANNOTATION);
+        boolean disptacherStreamIdAnnotation = getDispatcherConfigAnnotation(serviceDeclarationNode,
+                ctx.semanticModel(), DISPATCHER_STREAM_ID_ANNOTATION);
+        if (disptacherStreamIdAnnotation && !disptacherKeyAnnotation) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY,
+                    serviceDeclarationNode.location());
+        }
+        Optional<Double> timeoutValue = getConnectionClosureTimeoutValue(serviceDeclarationNode, ctx.semanticModel());
+        if (timeoutValue.isPresent() && timeoutValue.get() < 0 && timeoutValue.get().intValue() != -1) {
+            reportDiagnostics(ctx, PluginConstants.CompilationErrors.INVALID_CONNECTION_CLOSURE_TIMEOUT,
+                    serviceDeclarationNode.metadata().get().location());
+        }
 
         String modulePrefix = Utils.getPrefix(ctx);
         Optional<Symbol> serviceDeclarationSymbol = ctx.semanticModel().symbol(serviceDeclarationNode);
@@ -69,11 +93,89 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                     ListenerInitExpressionNodeVisitor visitor = new ListenerInitExpressionNodeVisitor(ctx);
                     serviceDeclarationNode.syntaxTree().rootNode().accept(visitor);
                     validateListenerArguments(ctx, visitor);
-                    validateService(ctx, modulePrefix);
+                    validateService(ctx, modulePrefix, disptacherKeyAnnotation);
                     return;
                 }
             }
         }
+    }
+
+    private boolean isAnnotationFieldPresent(AnnotationNode annotation, SemanticModel semanticModel,
+                                             String annotationName) {
+        if (annotation.annotValue().isEmpty()) {
+            return false;
+        }
+        for (MappingFieldNode field : annotation.annotValue().get().fields()) {
+            if (field.kind() != SyntaxKind.SPECIFIC_FIELD) {
+                continue;
+            }
+            Node fieldNameNode = ((SpecificFieldNode) field).fieldName();
+            if (fieldNameNode.kind() != SyntaxKind.IDENTIFIER_TOKEN) {
+                continue;
+            }
+            Optional<Symbol> symbol = semanticModel.symbol(fieldNameNode);
+            if (symbol.isEmpty()) {
+                continue;
+            }
+            if (symbol.get().getName().isEmpty() || !annotationName.equals(symbol.get().getName().get())) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean getDispatcherConfigAnnotation(ServiceDeclarationNode serviceNode,
+                                                  SemanticModel semanticModel, String annotationName) {
+        if (serviceNode.metadata().isEmpty()) {
+            return false;
+        }
+        MetadataNode metaData = serviceNode.metadata().get();
+        NodeList<AnnotationNode> annotations = metaData.annotations();
+        return annotations.stream()
+                .anyMatch(ann -> isAnnotationFieldPresent(ann, semanticModel, annotationName));
+    }
+
+    private Optional<Double> getConnectionClosureTimeoutValue(ServiceDeclarationNode serviceNode,
+                                                              SemanticModel semanticModel) {
+        if (serviceNode.metadata().isEmpty()) {
+            return Optional.empty();
+        }
+        NodeList<AnnotationNode> annotations = serviceNode.metadata().get().annotations();
+        return annotations.stream()
+                .filter(ann -> isAnnotationFieldPresent(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .map(ann -> getAnnotationValue(ann, semanticModel, ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .map(Double::parseDouble);
+    }
+
+    private Optional<String> getAnnotationValue(AnnotationNode annotation, SemanticModel semanticModel,
+                                                String annotationName) {
+        if (annotation.annotValue().isEmpty()) {
+            return Optional.empty();
+        }
+        for (MappingFieldNode field : annotation.annotValue().get().fields()) {
+            if (field.kind() == SyntaxKind.SPECIFIC_FIELD) {
+                SpecificFieldNode specificFieldNode = (SpecificFieldNode) field;
+                Optional<Symbol> symbol = semanticModel.symbol(specificFieldNode);
+                if (symbol.isEmpty()) {
+                    continue;
+                }
+                if (symbol.get().getName().isEmpty() || !annotationName.equals(symbol.get().getName().get())) {
+                    continue;
+                }
+                if (specificFieldNode.valueExpr().isEmpty()) {
+                    return Optional.empty();
+                }
+                if (specificFieldNode.valueExpr().get().kind() != SyntaxKind.UNARY_EXPRESSION) {
+                    return Optional.empty();
+                }
+                return Optional.of(specificFieldNode.valueExpr().get().toString().strip());
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean isListenerBelongsToWebSocketModule(TypeSymbol listenerType) {
@@ -124,7 +226,7 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
             if (secondArgSyntaxKind != null && !(firstArgSyntaxKind == SyntaxKind.NUMERIC_LITERAL && (
                     secondArgSyntaxKind == SyntaxKind.SIMPLE_NAME_REFERENCE
                             || secondArgSyntaxKind == SyntaxKind.MAPPING_CONSTRUCTOR))) {
-                Utils.reportDiagnostics(context, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS,
+                reportDiagnostics(context, PluginConstants.CompilationErrors.INVALID_LISTENER_INIT_PARAMS,
                         location, WebSocketConstants.PACKAGE_WEBSOCKET);
             }
         }
@@ -135,10 +237,10 @@ public class WebSocketUpgradeServiceValidatorTask implements AnalysisTask<Syntax
                 && Utils.equals(moduleSymbol.id().orgName(), ORG_NAME);
     }
 
-    private void validateService(SyntaxNodeAnalysisContext ctx, String modulePrefix) {
+    private void validateService(SyntaxNodeAnalysisContext ctx, String modulePrefix, boolean disptacherAnnotation) {
         WebSocketUpgradeServiceValidator wsServiceValidator;
         wsServiceValidator = new WebSocketUpgradeServiceValidator(ctx,
                 modulePrefix + SyntaxKind.COLON_TOKEN.stringValue());
-        wsServiceValidator.validate();
+        wsServiceValidator.validate(disptacherAnnotation);
     }
 }

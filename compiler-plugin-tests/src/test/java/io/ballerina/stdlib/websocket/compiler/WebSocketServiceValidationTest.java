@@ -262,7 +262,7 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Assert.assertEquals(diagnosticResult.errorCount(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
@@ -370,7 +370,7 @@ public class WebSocketServiceValidationTest {
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 4);
+        Assert.assertEquals(diagnosticResult.errorCount(), 4);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_ERROR_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
@@ -382,17 +382,25 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testOnErrorWithCloseFramesReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_61");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
     public void testOnTextWithInvalidMandatoryInputParamAndWrongReturnWithoutTypeInclusion() {
         Package currentPackage = loadPackage("sample_package_33");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        Assert.assertEquals(diagnosticResult.errors().size(), 2);
+        Assert.assertEquals(diagnosticResult.errorCount(), 2);
         Diagnostic diagnostic1 = (Diagnostic) diagnosticResult.errors().toArray()[0];
         assertDiagnostic(diagnostic1, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_TEXT_WITH_ONE_PARAMS);
         Diagnostic diagnostic2 = (Diagnostic) diagnosticResult.errors().toArray()[1];
         assertDiagnostic(diagnostic2, PluginConstants.CompilationErrors.INVALID_RETURN_TYPES_ON_DATA);
-
     }
 
     @Test
@@ -436,12 +444,157 @@ public class WebSocketServiceValidationTest {
     }
 
     @Test
+    public void testReadOnlyBinaryMessage() {
+        Package currentPackage = loadPackage("sample_package_40");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errors().size(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_BINARY);
+    }
+
+    @Test
     public void testOnPongAndOnPing() {
         Package currentPackage = loadPackage("sample_package_39");
         PackageCompilation compilation = currentPackage.getCompilation();
 
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
         Assert.assertEquals(diagnosticResult.errors().size(), 0);
+    }
+
+    @Test
+    public void testOnMessageWithValidDataBindingInput() {
+        Package currentPackage = loadPackage("sample_package_44");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testOnMessageWithAnyData() {
+        Package currentPackage = loadPackage("sample_package_45");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testInitFunctionsInService() {
+        Package currentPackage = loadPackage("sample_package_41");
+        PackageCompilation compilation = currentPackage.getCompilation();
+
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testInitFunctionsInFirstService() {
+        Package currentPackage = loadPackage("sample_package_42");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testOnMessageWithOnTextAndOnBinary() {
+        Package currentPackage = loadPackage("sample_package_54");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 2);
+        Diagnostic firstDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS);
+        Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
+        assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.INVALID_REMOTE_FUNCTIONS);
+    }
+
+    @Test
+    public void testUnionTypes() {
+        Package currentPackage = loadPackage("sample_package_55");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testReturningStreamTypeFromOnOpen() {
+        Package currentPackage = loadPackage("sample_package_56");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testCustomRemoteFunctions() {
+        Package currentPackage = loadPackage("sample_package_57");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+    }
+
+    @Test
+    public void testRemoteFunctionsContradictingReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_58");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 5);
+        Diagnostic firstDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.INVALID_INPUT_FOR_ON_MESSAGE);
+        Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
+        assertDiagnostic(secondDiagnostic, PluginConstants.CompilationErrors.CONTRADICTING_RETURN_TYPES);
+    }
+
+    @Test
+    public void testReturnStreamContainingErrorSubstringInSignature() {
+        Package currentPackage = loadPackage("sample_package_59");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testDispatcherStreamIdWithoutDispatcherKey() {
+        Package currentPackage = loadPackage("sample_package_60");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.DISPATCHER_STREAM_ID_WITHOUT_KEY);
+    }
+
+    @Test
+    public void testRemoteFunctionWithStreamAndCloseFrameReturnTypes() {
+        Package currentPackage = loadPackage("sample_package_62");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0);
+    }
+
+    @Test
+    public void testDispatcherConfigAnnotation() {
+        Package currentPackage = loadPackage("sample_package_63");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 3);
+        Diagnostic firstDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(firstDiagnostic, PluginConstants.CompilationErrors.RE_DECLARED_REMOTE_FUNCTIONS);
+        Diagnostic secondDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[1];
+        assertDiagnostic(secondDiagnostic,
+                PluginConstants.CompilationErrors.DUPLICATED_DISPATCHER_MAPPING_DISPATCHER_VALUE);
+        Diagnostic thirdDiagnostic = (Diagnostic) diagnosticResult.errors().toArray()[2];
+        assertDiagnostic(thirdDiagnostic, PluginConstants.CompilationErrors.INVALID_FUNCTION_ANNOTATION);
+    }
+
+    @Test
+    public void testConnectionClosureTimeoutInTheServiceConfig() {
+        Package currentPackage = loadPackage("sample_package_64");
+        PackageCompilation compilation = currentPackage.getCompilation();
+        DiagnosticResult diagnosticResult = compilation.diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 1);
+        Diagnostic diagnostic = (Diagnostic) diagnosticResult.errors().toArray()[0];
+        assertDiagnostic(diagnostic, PluginConstants.CompilationErrors.INVALID_CONNECTION_CLOSURE_TIMEOUT);
     }
 
     private void assertDiagnostic(Diagnostic diagnostic, PluginConstants.CompilationErrors error) {

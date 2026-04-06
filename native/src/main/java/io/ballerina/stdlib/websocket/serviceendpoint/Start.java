@@ -60,7 +60,8 @@ public class Start extends AbstractWebsocketNativeFunction {
             serverConnectorFuture.sync();
         } catch (Exception ex) {
             throw WebSocketUtil.createWebsocketError(
-                    "failed to start server connector '" + serverConnector.getConnectorID() + "': " + ex.getMessage(),
+                    String.format("failed to start the listener on '%s': %s", serverConnector.getConnectorID(),
+                            ex.getMessage()),
                     WebSocketConstants.ErrorCode.Error);
         }
 

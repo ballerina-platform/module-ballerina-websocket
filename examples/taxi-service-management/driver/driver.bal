@@ -22,7 +22,7 @@ import ballerina/websocket;
 public function main() returns error? {
     string username = io:readln("Enter username: ");
     websocket:Client driverClient = check new(string `ws://localhost:9091/taxi/${username}`);
-    string connectedMsg = check driverClient->readTextMessage();
+    string connectedMsg = check driverClient->readMessage();
     io:println(connectedMsg);
     check updateLocation(driverClient);
 }
@@ -35,6 +35,6 @@ function updateLocation(websocket:Client driver) returns error? {
         float lon = random:createDecimal() + 79.0;
         float lat = random:createDecimal() + 6.0;
         string location = "'Latitude'=" + lat.toString() + " 'Longititude'=" + lon.toString();
-        check driver->writeTextMessage(location);
+        check driver->writeMessage(location);
     }
 }

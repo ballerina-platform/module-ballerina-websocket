@@ -23,7 +23,7 @@ apply plugin: 'java'
 description = 'Ballerina - WebSocket Examples'
 
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
-def examples = ["chat-application/client", "chat-application/server", "taxi-service-management/server", "taxi-service-management/rider", "taxi-service-management/driver"]
+def examples = ["chat-application/client", "chat-application/server", "taxi-service-management/server", "taxi-service-management/rider", "taxi-service-management/driver", "tic-tac-toe/server"]
 
 dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
@@ -38,11 +38,16 @@ clean {
     }
 }
 
+def graalvmFlag = ""
+
 task testExamples {
+    if (project.hasProperty('balGraalVMTest')) {
+        graalvmFlag = '--graalvm'
+    }
     doLast {
         def moduleVersion = "${project.version}".replace("-SNAPSHOT", "")
         examples.each { example ->
-            def dependenciesTomlFile = new File("${project.projectDir}/resources/Dependencies.toml")
+            def dependenciesTomlFile = new File("${project.projectDir}/_resources/Dependencies.toml")
             def dependenciesTomlFileInExample = new File("${project.projectDir}/${example}/Dependencies.toml")
             def newDependenciesTomlText = dependenciesTomlFile.text.replace("@project.version@", moduleVersion)
             dependenciesTomlFileInExample.text = newDependenciesTomlText
@@ -50,9 +55,9 @@ task testExamples {
                 exec {
                     workingDir project.projectDir
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                        commandLine 'cmd', '/c', "${ballerinaDist}/bin/bal.bat test ${example} && exit %%ERRORLEVEL%%"
+                        commandLine 'cmd', '/c', "${ballerinaDist}/bin/bal.bat test ${graalvmFlag} ${example} && exit %%ERRORLEVEL%%"
                     } else {
-                        commandLine 'sh', '-c', "${ballerinaDist}/bin/bal test ${example}"
+                        commandLine 'sh', '-c', "${ballerinaDist}/bin/bal test ${graalvmFlag} ${example}"
                     }
                 }
             } catch (Exception e) {
@@ -76,7 +81,7 @@ task buildExamples {
     doLast {
         def moduleVersion = "${project.version}".replace("-SNAPSHOT", "")
         examples.each { example ->
-            def dependenciesTomlFile = new File("${project.projectDir}/resources/Dependencies.toml")
+            def dependenciesTomlFile = new File("${project.projectDir}/_resources/Dependencies.toml")
             def dependenciesTomlFileInExample = new File("${project.projectDir}/${example}/Dependencies.toml")
             def newDependenciesTomlText = dependenciesTomlFile.text.replace("@project.version@", moduleVersion)
             dependenciesTomlFileInExample.text = newDependenciesTomlText

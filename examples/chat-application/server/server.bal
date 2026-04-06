@@ -38,7 +38,7 @@ service class ChatServer {
 
     remote function onOpen(websocket:Caller caller) returns error? {
         string welcomeMsg = "Hi " + self.username + "! You have successfully connected to the chat";
-        websocket:Error? err = check caller->writeTextMessage(welcomeMsg);
+        check caller->writeMessage(welcomeMsg);
         string msg = self.username + " connected to chat";
         check broadcast(msg);
         caller.setAttribute(USERNAME, self.username);
@@ -47,7 +47,7 @@ service class ChatServer {
         }
     }
 
-    remote function onTextMessage(websocket:Caller caller, string text) returns error? {
+    remote function onMessage(websocket:Caller caller, string text) returns error? {
         string msg = check getUsername(caller, USERNAME) + ": " + text;
         io:println(msg);
         @strand {
@@ -70,7 +70,7 @@ service class ChatServer {
 // Function to perform the broadcasting of text messages.
 function broadcast(string text) returns error? {
     foreach websocket:Caller con in connectionsMap {
-        websocket:Error? err = con->writeTextMessage(text);
+        websocket:Error? err = con->writeMessage(text);
         if err is websocket:Error {
             io:println("Error sending message to the :" + check getUsername(con, USERNAME) +
                         ". Reason: " + err.message());

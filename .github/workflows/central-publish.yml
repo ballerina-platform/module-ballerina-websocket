@@ -2,36 +2,20 @@ name: Publish to the Ballerina central
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Select Environment
+        required: true
+        options:
+          - DEV CENTRAL
+          - STAGE CENTRAL
 
 jobs:
-  publish-release:
-    runs-on: ubuntu-latest
-    if: github.repository_owner == 'ballerina-platform'
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: 11
-      - name: Build with Gradle
-        env:
-          packageUser: ${{ github.actor }}
-          packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build -x check -x test
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '/github/workspace/ballerina/lib'
-          format: 'table'
-          timeout: '10m0s'
-          exit-code: '1'
-      - name: Publish artifact
-        env:
-          BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
-          packageUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-          packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.BALLERINA_BOT_TOKEN }}
-        run: |
-          ./gradlew clean build -PpublishToCentral=true
+  call_workflow:
+    name: Run Central Publish Workflow
+    if: ${{ github.repository_owner == 'ballerina-platform' }}
+    uses: ballerina-platform/ballerina-library/.github/workflows/central-publish-template.yml@main
+    secrets: inherit
+    with:
+      environment: ${{ github.event.inputs.environment }}

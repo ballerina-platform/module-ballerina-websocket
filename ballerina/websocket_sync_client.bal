@@ -46,7 +46,8 @@ public isolated client class Client {
             maxFrameSize: config.maxFrameSize,
             webSocketCompressionEnabled: config.webSocketCompressionEnabled,
             handShakeTimeout: config.handShakeTimeout,
-            retryConfig: config.retryConfig
+            retryConfig: config.retryConfig,
+            validation: config.validation
         };
         self.config = inferredConfig.cloneReadOnly();
         var pingPongHandler = config["pingPongHandler"];
@@ -103,10 +104,11 @@ public isolated client class Client {
     # + statusCode - Status code for closing the connection
     # + reason - Reason for closing the connection
     # + timeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
-    #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
-    #                   is not received from the remote endpoint. If the value is < 0 (e.g., -1), then the connection
-    #                   waits until a close frame is received. If the WebSocket frame is received from the remote
-    #                   endpoint within the waiting period, the connection is terminated immediately.
+    # connection. If the timeout exceeds, then the connection is terminated even though a close frame
+    # is not received from the remote endpoint. If the value is -1, then the connection
+    # waits until a close frame is received, and any other negative value results in an error.
+    # If the WebSocket frame is received from the remote endpoint within the waiting period,
+    # the connection is terminated immediately
     # + return - A `websocket:Error` if an error occurs while closing the WebSocket connection
     remote isolated function close(int? statusCode = 1000, string? reason = (), decimal timeout = 60) returns Error? {
         int code = 1000;
@@ -117,6 +119,10 @@ public isolated client class Client {
                 return error ConnectionClosureError(errorMessage);
             }
             code = statusCode;
+        }
+        if timeout < 0d && timeout != -1d {
+            string errorMessage = "Invalid timeout value: " + timeout.toString();
+            return error Error(errorMessage);
         }
         return self.externClose(code, reason is () ? "" : reason, timeout);
     }
@@ -189,29 +195,43 @@ public isolated client class Client {
         'class: "io.ballerina.stdlib.websocket.client.SyncInitEndpoint"
     } external;
 
-    # Reads text messages in a synchronous manner
+    # Reads text messages in a synchronous manner.
     #
     # + return  - The text data sent by the server or a `websocket:Error` if an error occurs when receiving
     remote isolated function readTextMessage() returns string|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
-    # Reads binary data in a synchronous manner
+    # Reads binary data in a synchronous manner.
     #
     # + return  - The binary data sent by the server or an `websocket:Error` if an error occurs when receiving
     remote isolated function readBinaryMessage() returns byte[]|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
-    # Reads data from the WebSocket connection
+    # Reads data from the WebSocket connection.
     #
-    # + return - A `string` if a text message is received, `byte[]` if a binary message is received or a `websocket:Error`
-    #            if an error occurs when receiving
-    remote isolated function readMessage() returns string|byte[]|Error = @java:Method {
+    # + targetType - The payload type (sybtype of `anydata`), which is expected to be returned after data binding
+    # + return - The data sent by the server or a `websocket:Error` if an error occurs when receiving
+    remote isolated function readMessage(typedesc<anydata> targetType = <>) returns targetType|Error = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketSyncConnector"
     } external;
 
-    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs)
+    # Writes messages to the connection. If an error occurs while sending the message to the connection, that message
+    # will be lost.
+    #
+    # + data - Data to be sent
+    # + return  - A `websocket:Error` if an error occurs when sending
+    remote isolated function writeMessage(anydata data) returns Error? {
+        string|byte[] serializedData = getSerializedData(data);
+        if serializedData is string {
+            return self.externWriteTextMessage(serializedData);
+        } else {
+            return self.externWriteBinaryMessage(serializedData);
+        }
+    }
+
+    isolated function externClose(int statusCode, string reason, decimal? timeoutInSecs)
                          returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"
     } external;
@@ -224,6 +244,16 @@ public isolated client class Client {
     isolated function externGetNegotiatedSubProtocol() returns string? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.WebSocketUtil",
         name: "getNegotiatedSubProtocol"
+    } external;
+
+    isolated function externWriteTextMessage(string data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector",
+        name: "writeTextMessage"
+    } external;
+
+    isolated function externWriteBinaryMessage(byte[] data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector",
+        name: "writeBinaryMessage"
     } external;
 }
 
@@ -241,16 +271,17 @@ public type ClientConfiguration record {|
 # + writeTimeout - Write timeout (in seconds) of the client
 # + secureSocket - SSL/TLS-related options
 # + maxFrameSize - The maximum payload size of a WebSocket frame in bytes.
-#                  If this is not set, is negative, or is zero, the default frame size of 65536 will be used
+# If this is not set, is negative, or is zero, the default frame size of 65536 will be used
 # + webSocketCompressionEnabled - Enable support for compression in the WebSocket
 # + handShakeTimeout - Time (in seconds) that a connection waits to get the response of
-#                               the WebSocket handshake. If the timeout exceeds, then the connection is terminated with
-#                               an error. If the value < 0, then the value sets to the default value(300)
+# the WebSocket handshake. If the timeout exceeds, then the connection is terminated with
+# an error. If the value < 0, then the value sets to the default value(300)
 # + cookies - An Array of `http:Cookie`
 # + auth - Configurations related to client authentication
 # + pingPongHandler - A service to handle the ping/pong frames.
-#                     Resources in this service gets called on the receipt of ping/pong frames from the server
-# + retryConfig - Retry related configurations.
+# Resources in this service gets called on the receipt of ping/pong frames from the server
+# + retryConfig - Retry-related configurations
+# + validation - Enable/disable constraint validation
 public type CommonClientConfiguration record {|
     string[] subProtocols = [];
     map<string> customHeaders = {};
@@ -264,6 +295,7 @@ public type CommonClientConfiguration record {|
     ClientAuthConfig auth?;
     PingPongService pingPongHandler?;
     WebSocketRetryConfig? retryConfig = ();
+    boolean validation = true;
 |};
 
 # Configures the SSL/TLS options to be used for WebSocket client.
@@ -276,7 +308,7 @@ public type ClientSecureSocket record {|
 # + maxCount - The maximum number of retry attempts. If the count is zero, the client will retry indefinitely
 # + interval - The number of seconds to delay before attempting to reconnect
 # + backOffFactor - The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems
-#                persist
+# persist
 # + maxWaitInterval - Maximum time of the retry interval in seconds
 public type WebSocketRetryConfig record {|
     int maxCount = 0;
@@ -295,6 +327,7 @@ type ClientInferredConfig record {|
     boolean webSocketCompressionEnabled;
     decimal handShakeTimeout;
     WebSocketRetryConfig? retryConfig;
+    boolean validation;
 |};
 
 # Adds cookies to the custom header.
@@ -359,6 +392,17 @@ isolated function getClone(http:Cookie cookie, time:Utc createdTime, time:Utc la
     options.createdTime = createdTime;
     options.lastAccessedTime = lastAccessedTime;
     return new http:Cookie(cookie.name, cookie.value, options);
+}
+
+isolated function getSerializedData(anydata data) returns string|byte[] {
+    if data is string {
+        return data;
+    } else if data is xml {
+        return data.toString();
+    } else if data is byte[] {
+        return data;
+    }
+    return data.toJsonString();
 }
 
 const EQUALS = "=";

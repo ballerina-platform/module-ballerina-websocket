@@ -18,7 +18,8 @@
 
 package io.ballerina.stdlib.websocket.server;
 
-import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -32,7 +33,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 /**
  * The onUpgrade resource callback.
  */
-public class OnUpgradeResourceCallback implements Callback {
+public class OnUpgradeResourceCallback {
     private final WebSocketHandshaker webSocketHandshaker;
     private final WebSocketServerService wsService;
     private final WebSocketConnectionManager connectionManager;
@@ -44,23 +45,24 @@ public class OnUpgradeResourceCallback implements Callback {
         this.connectionManager = connectionManager;
     }
 
-    @Override
     public void notifySuccess(Object result) {
         if (result instanceof BError) {
-            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
-                webSocketHandshaker.cancelHandshake(401, ((BError) result).getErrorMessage().toString());
+            BError error = (BError) result;
+            if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(401, error.getErrorMessage().toString());
                 return;
             }
-            if (((BError) result).getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
-                webSocketHandshaker.cancelHandshake(403, ((BError) result).getErrorMessage().toString());
+            if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
+                webSocketHandshaker.cancelHandshake(403, error.getErrorMessage().toString());
                 return;
             }
-            webSocketHandshaker.cancelHandshake(400, ((BError) result).getErrorMessage().toString());
+            webSocketHandshaker.cancelHandshake(400, error.getErrorMessage().toString());
             return;
         }
         if (!webSocketHandshaker.isCancelled() && !webSocketHandshaker.isHandshakeStarted()) {
             HttpHeaders headers = null;
-            if (((BObject) result).getType().getFields().get(WebSocketConstants.CUSTOM_HEADERS.toString()) != null) {
+            ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(result));
+            if (type.getFields().get(WebSocketConstants.CUSTOM_HEADERS.toString()) != null) {
                 BMap<BString, BString> headersMap = (BMap) ((BObject) result).get(WebSocketConstants.CUSTOM_HEADERS);
                 headers = populateAndGetHttpHeaders(headersMap);
             }
@@ -71,16 +73,15 @@ public class OnUpgradeResourceCallback implements Callback {
         }
     }
 
-    @Override
     public void notifyFailure(BError error) {
         // These checks are added to release the failure path since there is an authn/authz failure and responded
         // with 401/403 internally.
-        if (error.getMessage().equals("401 received by auth desugar.")) {
-            webSocketHandshaker.cancelHandshake(401, error.getMessage());
+        if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthnError.errorCode())) {
+            webSocketHandshaker.cancelHandshake(401, null);
             return;
         }
-        if (error.getMessage().equals("403 received by auth desugar.")) {
-            webSocketHandshaker.cancelHandshake(403, error.getMessage());
+        if (error.getType().getName().equals(WebSocketConstants.ErrorCode.AuthzError.errorCode())) {
+            webSocketHandshaker.cancelHandshake(403, null);
             return;
         }
         // When panicked from the upgrade service.

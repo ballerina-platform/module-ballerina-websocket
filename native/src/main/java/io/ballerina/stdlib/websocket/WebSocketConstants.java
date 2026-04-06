@@ -18,9 +18,9 @@
 
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.types.MapType;
+import io.ballerina.runtime.api.types.PredefinedTypes;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.http.api.nativeimpl.ModuleUtils;
@@ -43,11 +43,18 @@ public class WebSocketConstants {
     public static final String WEBSOCKET_CLIENT_NAME = PACKAGE_WEBSOCKET + SEPARATOR + WEBSOCKET_CALLER;
 
     public static final String WEBSOCKET_ANNOTATION_CONFIGURATION = "ServiceConfig";
+    public static final String WEBSOCKET_ANNOTATION_CONFIGURATION_RECORD = "WSServiceConfig";
     public static final BString ANNOTATION_ATTR_SUB_PROTOCOLS = StringUtils.fromString("subProtocols");
     public static final BString ANNOTATION_ATTR_IDLE_TIMEOUT = StringUtils.fromString("idleTimeout");
+    public static final String ANNOTATION_ATTR_CONNECTION_CLOSURE_TIMEOUT = "connectionClosureTimeout";
     public static final BString ANNOTATION_ATTR_READ_IDLE_TIMEOUT = StringUtils.fromString("readTimeout");
     public static final BString ANNOTATION_ATTR_TIMEOUT = StringUtils.fromString("timeout");
     public static final BString ANNOTATION_ATTR_MAX_FRAME_SIZE = StringUtils.fromString("maxFrameSize");
+    public static final BString ANNOTATION_ATTR_VALIDATION_ENABLED = StringUtils.fromString("validation");
+    public static final BString ANNOTATION_ATTR_DISPATCHER_KEY = StringUtils.fromString("dispatcherKey");
+
+    public static final String WEBSOCKET_DISPATCHER_CONFIG_ANNOTATION = "DispatcherConfig";
+    public static final String ANNOTATION_ATTR_DISPATCHER_VALUE = "dispatcherValue";
 
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final String LOG_MESSAGE = "{} {}";
@@ -56,6 +63,7 @@ public class WebSocketConstants {
     public static final String RESOURCE_NAME_ON_OPEN = "onOpen";
     public static final String RESOURCE_NAME_ON_TEXT_MESSAGE = "onTextMessage";
     public static final String RESOURCE_NAME_ON_BINARY_MESSAGE = "onBinaryMessage";
+    public static final String RESOURCE_NAME_ON_MESSAGE = "onMessage";
     public static final String RESOURCE_NAME_ON_PING = "onPing";
     public static final String RESOURCE_NAME_ON_PONG = "onPong";
     public static final String RESOURCE_NAME_ON_CLOSE = "onClose";
@@ -82,6 +90,7 @@ public class WebSocketConstants {
     public static final String CALL_BACK_SERVICE = "callbackService";
 
     public static final BString CLIENT_ENDPOINT_CONFIG = StringUtils.fromString("config");
+    public static final String CONSTRAINT_VALIDATION = "validation";
     public static final String CONNECTOR_FACTORY = "connectorFactory";
     public static final String FAILOVER_WEBSOCKET_CLIENT = "WebSocketFailoverClient";
     public static final BString ENDPOINT_CONFIG_SECURE_SOCKET = StringUtils.fromString("secureSocket");
@@ -121,6 +130,7 @@ public class WebSocketConstants {
     public static final String CONNECTOR_STARTED = "CONNECTOR_STARTED";
     public static final String HTTP_LISTENER = "httpListener";
 
+    public static final String BYTE_ARRAY = "byte[]";
     public static final String PARAM_TYPE_STRING = "string";
     public static final String PARAM_TYPE_BOOLEAN = "boolean";
     public static final String PARAM_TYPE_INT = "int";
@@ -129,6 +139,18 @@ public class WebSocketConstants {
     public static final String PARAM_ANNOT_PREFIX = "$param$.";
     public static final String HEADER_ANNOTATION = COLON + ANN_NAME_HEADER;
     public static final String BALLERINA_HTTP_HEADER = ModuleUtils.getHttpPackageIdentifier() + COLON + ANN_NAME_HEADER;
+    public static final String REST_PARAM_IDENTIFIER = ".";
+    public static final String PATH_PARAM_IDENTIFIER = "^";
+    public static final String STREAMING_NEXT_FUNCTION = "next";
+    public static final String CONNECTION_CLOSED = "Connection closed";
+    public static final String STATUS_CODE = "Status code:";
+
+    // Close Frame Records
+    public static final String CLOSE_FRAME_TYPE = "type";
+    public static final BString CLOSE_FRAME_STATUS_CODE = StringUtils.fromString("status");
+    public static final BString CLOSE_FRAME_REASON = StringUtils.fromString("reason");
+    public static final String PREDEFINED_CLOSE_FRAME_TYPE = "PredefinedCloseFrameType";
+    public static final String CUSTOM_CLOSE_FRAME_TYPE = "CustomCloseFrameType";
 
     private WebSocketConstants() {
     }
@@ -141,7 +163,7 @@ public class WebSocketConstants {
         ConnectionClosureError("ConnectionClosureError"),
         InvalidHandshakeError("InvalidHandshakeError"),
         PayloadTooLargeError("PayloadTooLargeError"),
-        ProtocolError("ProtocolError"),
+        CorruptedFrameError("CorruptedFrameError"),
         ConnectionError("ConnectionError"),
         InvalidContinuationFrameError("InvalidContinuationFrameError"),
         HandshakeTimedOut("HandshakeTimedOut"),
@@ -149,6 +171,7 @@ public class WebSocketConstants {
         SslError("SslError"),
         AuthzError("AuthzError"),
         AuthnError("AuthnError"),
+        PayloadValidationError("PayloadValidationError"),
         Error("Error");
 
         private String errorCode;

@@ -3,7 +3,109 @@ This file contains all the notable changes done to the Ballerina WebSocket packa
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.15.1] - 2026-01-09
+
+### Fixed
+
+- [Address `CVE-2025-67735` security vulnerability in Netty](https://github.com/ballerina-platform/ballerina-library/issues/8538)
+
+## [2.15.0] - 2025-11-06
+
+### Added
+
+- [Support Custom Remote Function Mapping via Annotation](https://github.com/ballerina-platform/ballerina-library/issues/7733)
+- [Introduce Service Config Annotation for connectionClosureTimeout in Websocket module](https://github.com/ballerina-platform/ballerina-library/issues/7697)
+- [Implement websocket close frame support](https://github.com/ballerina-platform/ballerina-library/issues/7578)
+
+### Fixed
+
+- [Fix WebSocket service delays handling of new remote calls until streaming response completes](https://github.com/ballerina-platform/ballerina-library/issues/7844)
+- [Fix JSON response parsing issue with escaped double quotes](https://github.com/ballerina-platform/ballerina-library/issues/7720)
+- [Address `CVE-2025-58056` and `CVE-2025-58057` security vulnerabilities in Netty](https://github.com/ballerina-platform/ballerina-library/issues/8214)
+
+### Changed
+
+- [Move SSL context creation to the client initialization](https://github.com/ballerina-platform/ballerina-library/issues/1798)
+
+## [2.13.1] - 2025-02-11
+
+### Fixed
+
+- [Address Netty security vulnerabilities: `CVE-2025-24970` and `CVE-2025-25193`](https://github.com/ballerina-platform/ballerina-library/issues/7571)
+
+## [2.13.0] - 2025-02-07
+
+### Fixed
+
+- [Address CVE-2024-47535 vulnerability](https://github.com/ballerina-platform/ballerina-library/issues/7358)
+
+## [2.12.0] - 2024-08-20
+
+### Added
+- [Implement custom error remote functions for onXXXError](https://github.com/ballerina-platform/ballerina-library/issues/6625)
+- [Introduce dispatcherStreamId annotation](https://github.com/ballerina-platform/ballerina-library/issues/6757)
+
+## [2.10.0] - 2023-09-15
+
+### Fixed
+- [Fix Compilation Error for Stream Type With "Error" Substring in Signature](https://github.com/ballerina-platform/ballerina-standard-library/issues/4518)
+
+## [2.9.0] - 2023-06-30
+
+### Fixed
+- [Address CVE-2023-34462 netty Vulnerability](https://github.com/ballerina-platform/ballerina-standard-library/issues/4599)
+
+## [2.8.0] - 2023-06-01
+
+### Fixed
+- [Dispatch `onError` remote function when there is a data binding failure](https://github.com/ballerina-platform/ballerina-standard-library/issues/4403)
+
+## [2.7.1] - 2023-04-25
+
+### Fixed
+- [Fix dispatching failure when a `-` is used in the service path](https://github.com/ballerina-platform/ballerina-standard-library/issues/4320)
+- [Fix the hanging issue when closing the connection while reading the message](https://github.com/ballerina-platform/ballerina-standard-library/issues/3962)
+- [Fix the dispatching issue when custom dispatching has `onMessage`](https://github.com/ballerina-platform/ballerina-standard-library/issues/4355)
+
+
+## [2.6.0] - 2023-02-27
+
+### Added
+- [Implement dispatching to custom remote functions](https://github.com/ballerina-platform/ballerina-standard-library/issues/3670)
+
+### Fixed
+- [Fix data binding failure when a union type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3909)
+- [Fix data binding failure when a enum type is used](https://github.com/ballerina-platform/ballerina-standard-library/issues/3707)
+- [Fix hanging issue of readMessage when it is called after connection closure](https://github.com/ballerina-platform/ballerina-standard-library/issues/3962)
+
+## [2.5.0] - 2022-11-29
+
+### Added
+- [Support returning streams from WebSocket services](https://github.com/ballerina-platform/ballerina-standard-library/issues/2909)
+
+### Changed
+- [API Docs Updated](https://github.com/ballerina-platform/ballerina-standard-library/issues/3463)
+
+### Fixed
+- [Fix client returning irrelevant error message when given an ip address as the url](https://github.com/ballerina-platform/ballerina-standard-library/issues/3534)
+
+## [2.4.0] - 2022-09-08
+
+### Added
+- [Incorporate constraint validation](https://github.com/ballerina-platform/ballerina-standard-library/issues/3058)
+
+### Fixed
+- [Fix server sending 500 status code when the client invokes it with an incorrect URL](https://github.com/ballerina-platform/ballerina-standard-library/issues/3296)
+
+## [2201.1.1] - 2022-06-30
+
+### Added
+- [Add data binding support for WebSocket](https://github.com/ballerina-platform/ballerina-standard-library/issues/2761)
+
+### Fixed
+- [Fix the client connection closure issue](https://github.com/ballerina-platform/ballerina-standard-library/issues/2836)
+
+## [2.2.1] - 2022-03-02
 
 ### Changed
 - [Mark Websocket Service type as distinct](https://github.com/ballerina-platform/ballerina-standard-library/issues/2398)

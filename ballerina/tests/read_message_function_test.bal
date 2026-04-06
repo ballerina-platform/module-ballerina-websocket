@@ -73,7 +73,7 @@ public function testSyncClientReadMessage() returns error? {
          readMessageByteOutput = readMessageByteOutput + resp4.toString();
       }
 
-      byte[]|string|Error resp5 = check wsClient->readTextMessage();
+      byte[]|string|Error resp5 = check wsClient->readMessage();
       if resp5 is string {
          readMessageStringOutput = readMessageStringOutput + resp5;
       }

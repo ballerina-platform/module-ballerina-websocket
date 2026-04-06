@@ -17,7 +17,6 @@
 // NOTE: All the tokens/credentials used in this test are dummy tokens/credentials and used only for testing purposes.
 
 import ballerina/http;
-import ballerina/regex;
 
 const string KEYSTORE_PATH = "tests/certsAndKeys/ballerinaKeystore.p12";
 const string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
@@ -25,6 +24,11 @@ const string TRUSTSTORE_PATH = "tests/certsAndKeys/ballerinaTruststore.p12";
 const string ACCESS_TOKEN_1 = "2YotnFZFEjr1zCsicMWpAA";
 const string ACCESS_TOKEN_2 = "1zCsicMWpAA2YotnFZFEjr";
 const string ACCESS_TOKEN_3 = "invalid-token";
+
+type AuthResponse record {|
+    *http:Ok;
+    json body?;
+|};
 
 // The mock authorization server, based with https://hub.docker.com/repository/docker/ldclakmal/ballerina-sts
 listener http:Listener sts = new(9445, {
@@ -37,35 +41,34 @@ listener http:Listener sts = new(9445, {
 });
 
 service /oauth2 on sts {
-    resource function post token() returns json {
-        json response = {
-            "access_token": ACCESS_TOKEN_1,
-            "token_type": "example",
-            "expires_in": 3600,
-            "example_parameter": "example_value"
+    resource function post token() returns AuthResponse {
+        return { 
+            body: {
+                "access_token": ACCESS_TOKEN_1,
+                "token_type": "example",
+                "expires_in": 3600,
+                "example_parameter": "example_value"
+            }    
         };
-        return response;
     }
 
-    resource function post introspect(http:Request request) returns json {
+    resource function post introspect(http:Request request) returns AuthResponse {
         string|http:ClientError payload = request.getTextPayload();
         if payload is string {
-            string[] parts = regex:split(payload, "&");
+            string[] parts = re`&`.split(payload);
             foreach string part in parts {
                 if part.indexOf("token=") is int {
-                    string token = regex:split(part, "=")[1];
+                    string token = re`=`.split(part)[1];
                     if token == ACCESS_TOKEN_1 {
-                        json response = { "active": true, "exp": 3600, "scp": "write update" };
-                        return response;
+                        return { body: {"active": true, "exp": 3600, "scp": "write update" }};
                     } else if token == ACCESS_TOKEN_2 {
-                        json response = { "active": true, "exp": 3600, "scp": "read" };
-                        return response;
+                        return { body: { "active": true, "exp": 3600, "scp": "read" }};
                     } else {
-                        json response = { "active": false };
-                        return response;
+                        return {body: { "active": false }};
                     }
                 }
             }
         }
+        return {};
     }
 }

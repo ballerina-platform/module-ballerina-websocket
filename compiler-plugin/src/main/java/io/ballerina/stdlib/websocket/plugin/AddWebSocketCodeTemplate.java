@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.websocket.plugin;
 
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NonTerminalNode;
 import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
@@ -31,7 +30,6 @@ import io.ballerina.projects.plugins.codeaction.CodeActionInfo;
 import io.ballerina.projects.plugins.codeaction.DocumentEdit;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.text.LineRange;
-import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocumentChange;
 import io.ballerina.tools.text.TextEdit;
 import io.ballerina.tools.text.TextRange;
@@ -46,14 +44,13 @@ import java.util.Optional;
  */
 public class AddWebSocketCodeTemplate implements CodeAction {
 
-    public static final String NODE_LOCATION = "node.location";
     public static final String LS = System.lineSeparator();
     public static final String RESOURCE_TEXT = LS + "\tresource function get .() returns " +
             "websocket:Service|websocket:Error " +
             "{" + LS + "\t\treturn new WsService();" + LS + "\t}" + LS;
     public static final String SERVICE_TEXT = LS + LS + "service class WsService {" + LS +
             "\t*websocket:Service;" + LS + LS +
-            "\tremote isolated function onTextMessage(websocket:Caller caller, string text) " +
+            "\tremote function onMessage(websocket:Caller caller, anydata data) " +
             "returns websocket:Error? {"  + LS +
             "\t}" + LS +
             "}";
@@ -69,7 +66,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
         if (diagnostic.location() == null) {
             return Optional.empty();
         }
-        CodeActionArgument locationArg = CodeActionArgument.from(NODE_LOCATION,
+        CodeActionArgument locationArg = CodeActionArgument.from(Utils.NODE_LOCATION,
                 diagnostic.location().lineRange());
         return Optional.of(CodeActionInfo.from("Insert service template", List.of(locationArg)));
     }
@@ -78,7 +75,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
     public List<DocumentEdit> execute(CodeActionExecutionContext codeActionExecutionContext) {
         LineRange lineRange = null;
         for (CodeActionArgument argument : codeActionExecutionContext.arguments()) {
-            if (NODE_LOCATION.equals(argument.key())) {
+            if (Utils.NODE_LOCATION.equals(argument.key())) {
                 lineRange = argument.valueAs(LineRange.class);
             }
         }
@@ -88,7 +85,7 @@ public class AddWebSocketCodeTemplate implements CodeAction {
         }
 
         SyntaxTree syntaxTree = codeActionExecutionContext.currentDocument().syntaxTree();
-        NonTerminalNode node = findNode(syntaxTree, lineRange);
+        NonTerminalNode node = Utils.findNode(syntaxTree, lineRange);
         if (!(node instanceof ServiceDeclarationNode)) {
             return Collections.emptyList();
         }
@@ -119,16 +116,5 @@ public class AddWebSocketCodeTemplate implements CodeAction {
     @Override
     public String name() {
         return "ADD_RESOURCE_CODE_SNIPPET";
-    }
-
-    public static NonTerminalNode findNode(SyntaxTree syntaxTree, LineRange lineRange) {
-        if (lineRange == null) {
-            return null;
-        }
-
-        TextDocument textDocument = syntaxTree.textDocument();
-        int start = textDocument.textPositionFrom(lineRange.startLine());
-        int end = textDocument.textPositionFrom(lineRange.endLine());
-        return ((ModulePartNode) syntaxTree.rootNode()).findNode(TextRange.from(start, end - start), true);
     }
 }

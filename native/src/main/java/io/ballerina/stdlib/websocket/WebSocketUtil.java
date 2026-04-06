@@ -19,13 +19,16 @@
 package io.ballerina.stdlib.websocket;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.TypeTags;
+import io.ballerina.runtime.api.types.UnionType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
@@ -59,11 +62,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -117,9 +123,9 @@ public class WebSocketUtil {
         webSocketClient.set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, webSocketConnection.isOpen());
     }
 
-    public static void handleWebSocketCallback(Future balFuture,
-            ChannelFuture webSocketChannelFuture, Logger log,
-                WebSocketConnectionInfo connectionInfo, AtomicBoolean futureCompleted) {
+    public static void handleWebSocketCallback(CompletableFuture<Object> balFuture,
+                                               ChannelFuture webSocketChannelFuture, Logger log,
+                                               WebSocketConnectionInfo connectionInfo, AtomicBoolean futureCompleted) {
         webSocketChannelFuture.addListener(future -> {
             Throwable cause = future.cause();
             if (!future.isSuccess() && cause != null) {
@@ -136,7 +142,7 @@ public class WebSocketUtil {
         });
     }
 
-    public static void handlePingWebSocketCallback(Future balFuture,
+    public static void handlePingWebSocketCallback(CompletableFuture<Object> balFuture,
                         ChannelFuture webSocketChannelFuture, Logger log,
                         WebSocketConnectionInfo connectionInfo, AtomicBoolean pingCallbackCompleted) {
         webSocketChannelFuture.addListener(future -> {
@@ -149,14 +155,15 @@ public class WebSocketUtil {
                     balFuture.complete(null);
                     pingCallbackCompleted.set(true);
                 }
-                if (connectionInfo.getWebSocketEndpoint().getType().getName().equals(SYNC_CLIENT)) {
+                if (TypeUtils.getType(connectionInfo.getWebSocketEndpoint()).getName().equals(SYNC_CLIENT)) {
                     connectionInfo.getWebSocketConnection().readNextFrame();
                 }
             }
         });
     }
 
-    public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo, Future balFuture,
+    public static void setCallbackFunctionBehaviour(WebSocketConnectionInfo connectionInfo,
+                                                    CompletableFuture<Object> balFuture,
             Throwable error, AtomicBoolean futureCompleted) {
         if (!futureCompleted.get()) {
             balFuture.complete(WebSocketUtil.createErrorByType(error));
@@ -193,6 +200,20 @@ public class WebSocketUtil {
 
     }
 
+    public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key) {
+        String value = config.get(key).toString();
+        int timeout;
+        try {
+            timeout = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw WebSocketUtil.createErrorByType(new Exception("Invalid timeout value: " + value));
+        }
+        if (timeout < 0 && timeout != -1) {
+            throw WebSocketUtil.createErrorByType(new Exception("Invalid timeout value: " + value));
+        }
+        return timeout;
+    }
+
     public static int findTimeoutInSeconds(BMap<BString, Object> config, BString key, int defaultValue) {
         try {
             int timeout = (int) ((BDecimal) config.get(key)).floatValue();
@@ -218,6 +239,26 @@ public class WebSocketUtil {
         return err.getMessage();
     }
 
+    public static BString getBString(byte[] byteArray) {
+        return StringUtils.fromString(
+                new String(byteArray, StandardCharsets.UTF_8));
+    }
+
+    public static boolean hasStringType(Type targetType) {
+        if (targetType instanceof UnionType) {
+            List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
+            return memberTypes.stream().anyMatch(member -> member.getTag() ==
+                    TypeTags.STRING_TAG | member.getTag() == TypeTags.FINITE_TYPE_TAG);
+        }
+        return false;
+    }
+
+    public static boolean hasByteArrayType(Type targetType) {
+        List<Type> memberTypes = ((UnionType) targetType).getMemberTypes();
+        return memberTypes.stream().anyMatch(member -> member.getTag() == TypeTags.ARRAY_TAG
+                && member.toString().equals(WebSocketConstants.BYTE_ARRAY));
+    }
+
     /**
      * Creates the appropriate ballerina errors using for the given throwable.
      *
@@ -236,7 +277,7 @@ public class WebSocketUtil {
             if (status == WebSocketCloseStatus.MESSAGE_TOO_BIG) {
                 errorCode = WebSocketConstants.ErrorCode.PayloadTooLargeError.errorCode();
             } else {
-                errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
+                errorCode = WebSocketConstants.ErrorCode.CorruptedFrameError.errorCode();
             }
         } else if (throwable instanceof SSLException) {
             cause = createErrorCause(throwable.getMessage(), WebSocketConstants.ErrorCode.SslError.errorCode(),
@@ -254,7 +295,7 @@ public class WebSocketUtil {
         } else if (throwable instanceof TooLongFrameException) {
             errorCode = WebSocketConstants.ErrorCode.PayloadTooLargeError.errorCode();
         } else if (throwable instanceof CodecException) {
-            errorCode = WebSocketConstants.ErrorCode.ProtocolError.errorCode();
+            errorCode = WebSocketConstants.ErrorCode.CorruptedFrameError.errorCode();
         } else if (throwable instanceof WebSocketHandshakeException) {
             errorCode = WebSocketConstants.ErrorCode.InvalidHandshakeError.errorCode();
         } else if (throwable instanceof IOException) {
@@ -288,7 +329,8 @@ public class WebSocketUtil {
      */
     public static WebSocketService validateAndCreateWebSocketService(Runtime runtime, BObject callbackService) {
         if (callbackService != null) {
-            Type param = (callbackService).getType().getMethods()[0].getParameterTypes()[0];
+            ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(callbackService));
+            Type param = objectType.getMethods()[0].getParameters()[0].type;
             if (param == null || !(WebSocketConstants.WEBSOCKET_CLIENT_NAME.equals(param.toString()) ||
                     WEBSOCKET_FAILOVER_CLIENT_NAME.equals(param.toString()))) {
                 throw WebSocketUtil.getWebSocketError("The callback service should be a PingPongService",
@@ -320,14 +362,22 @@ public class WebSocketUtil {
                         null, null);
     }
 
+    public static BError createWebsocketErrorWithCause(String message, WebSocketConstants.ErrorCode errorType,
+                                                       BError cause) {
+        return ErrorCreator.createError(ModuleUtils.getWebsocketModule(), errorType.errorCode(),
+                StringUtils.fromString(message), cause, null);
+    }
+
     /**
      * Reconnect when the WebSocket connection is lost while reading or initial handshake.
      *
      * @param connectionInfo - Information about the connection.
      * @param balFuture - Ballerina future to be completed.
+     * @param futureCompleted - Value to check whether the future has already completed.
      * @return If attempts reconnection, then return true.
      */
-    public static boolean reconnect(WebSocketConnectionInfo connectionInfo, Future balFuture) {
+    public static boolean reconnect(WebSocketConnectionInfo connectionInfo, CompletableFuture<Object> balFuture,
+                                    AtomicBoolean futureCompleted) {
         BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
         RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
                 RETRY_CONFIG.toString());
@@ -344,7 +394,7 @@ public class WebSocketUtil {
             String time = formatter.format(date.getTime());
             logger.debug(WebSocketConstants.LOG_MESSAGE, time, "reconnecting...");
             createDelay(calculateWaitingTime(interval, maxInterval, backOfFactor, noOfReconnectAttempts));
-            establishWebSocketConnection(webSocketClient, wsService, balFuture);
+            establishWebSocketConnection(webSocketClient, wsService, balFuture, futureCompleted);
             return true;
         }
         logger.debug(WebSocketConstants.LOG_MESSAGE, "Maximum retry attempts but couldn't connect to the server: ",
@@ -362,7 +412,7 @@ public class WebSocketUtil {
      * @param binMessage - The binary message that needs to be sent after a successful retry.
      * @return If attempts reconnection, then return true.
      */
-    public static boolean reconnectForWrite(WebSocketConnectionInfo connectionInfo, Future balFuture,
+    public static boolean reconnectForWrite(WebSocketConnectionInfo connectionInfo, CompletableFuture<Object> balFuture,
                                             AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
         BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
         RetryContext retryConnectorConfig = (RetryContext) webSocketClient.getNativeData(WebSocketConstants.
@@ -396,8 +446,10 @@ public class WebSocketUtil {
      * @param txtMessage - The text message that needs to be sent after a successful retry.
      * @param binMessage - The binary message that needs to be sent after a successful retry.
      */
-    public static void establishWebSocketConnectionForWrite(BObject webSocketClient, Future balFuture,
-                                                 AtomicBoolean futureCompleted, String txtMessage, BArray binMessage) {
+    public static void establishWebSocketConnectionForWrite(BObject webSocketClient,
+                                                            CompletableFuture<Object> balFuture,
+                                                            AtomicBoolean futureCompleted, String txtMessage,
+                                                            BArray binMessage) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
                 getNativeData(WebSocketConstants.CLIENT_LISTENER);
         WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.
@@ -417,13 +469,14 @@ public class WebSocketUtil {
 
     /**
      * Establish connection with the endpoint. This is used for read and initial handshake.
-     *
-     * @param webSocketClient - The WebSocket client.
+     *  @param webSocketClient - The WebSocket client.
      * @param wsService - the WebSocket service.
      * @param balFuture - Ballerina future to be completed.
+     * @param callbackCompleted - Value to check whether the future has already completed.
      */
     public static void establishWebSocketConnection(BObject webSocketClient, WebSocketService wsService,
-                                                    Future balFuture) {
+                                                    CompletableFuture<Object> balFuture,
+                                                    AtomicBoolean callbackCompleted) {
         SyncClientConnectorListener clientConnectorListener = (SyncClientConnectorListener) webSocketClient.
                 getNativeData(WebSocketConstants.CLIENT_LISTENER);
         WebSocketClientConnector clientConnector = (WebSocketClientConnector) webSocketClient.
@@ -433,10 +486,11 @@ public class WebSocketUtil {
         if (WebSocketUtil.hasRetryConfig(webSocketClient)) {
             handshakeFuture.setClientHandshakeListener(new RetryWebSocketClientHandshakeListener(webSocketClient,
                     wsService, clientConnectorListener, balFuture,
-                    (RetryContext) webSocketClient.getNativeData(WebSocketConstants.RETRY_CONFIG.toString())));
+                    (RetryContext) webSocketClient.getNativeData(WebSocketConstants.RETRY_CONFIG.toString()),
+                    callbackCompleted));
         } else {
             handshakeFuture.setClientHandshakeListener(new WebSocketHandshakeListener(webSocketClient, wsService,
-                    clientConnectorListener, balFuture));
+                    clientConnectorListener, balFuture, callbackCompleted));
         }
     }
 
@@ -464,7 +518,7 @@ public class WebSocketUtil {
     /**
      * Calculate the waiting time.
      *
-     * @param interval- Interval to wait before trying to reconnect.
+     * @param interval - Interval to wait before trying to reconnect.
      * @param maxInterval - Maximum interval to wait before trying to reconnect.
      * @param backOfFactor - The rate of increase of to reconnect delay.
      * @param reconnectAttempts - The number of reconnecting attempts.

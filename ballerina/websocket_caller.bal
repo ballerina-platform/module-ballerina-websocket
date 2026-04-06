@@ -31,7 +31,7 @@ public isolated client class Caller {
     # Pushes text messages to the connection. If an error occurs while sending the text message to the connection, that message
     # will be lost.
     #
-    # + data - Data to be sent
+    # + data - Data to be sent.
     # + return  - A `websocket:Error` if an error occurs when sending
     remote isolated function writeTextMessage(string data) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
@@ -45,6 +45,20 @@ public isolated client class Caller {
     remote isolated function writeBinaryMessage(byte[] data) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector"
     } external;
+
+    # Writes messages to the connection. If an error occurs while sending the message to the connection, that message
+    # will be lost.
+    #
+    # + data - Data to be sent
+    # + return  - A `websocket:Error` if an error occurs when sending
+    remote isolated function writeMessage(anydata data) returns Error? {
+        string|byte[] serializedData = getSerializedData(data);
+        if serializedData is string {
+            return self.externWriteTextMessage(serializedData);
+        } else {
+            return self.externWriteBinaryMessage(serializedData);
+        }
+    }
 
     # Pings the connection. If an error occurs while sending the ping frame to the server, that frame will be lost.
     #
@@ -68,13 +82,13 @@ public isolated client class Caller {
     # + statusCode - Status code for closing the connection
     # + reason - Reason for closing the connection
     # + timeout - Time to wait (in seconds) for the close frame to be received from the remote endpoint before closing the
-    #                   connection. If the timeout exceeds, then the connection is terminated even though a close frame
-    #                   is not received from the remote endpoint. If the value < 0 (e.g., -1), then the connection waits
-    #                   until a close frame is received. If the WebSocket frame is received from the remote endpoint
-    #                   within the waiting period, the connection is terminated immediately.
+    # connection. If the timeout exceeds, then the connection is terminated even though a close frame
+    # is not received from the remote endpoint. If the value is -1, then the connection waits
+    # until a close frame is received, and any other negative value results in an error. If the WebSocket frame is received
+    # from the remote endpoint within the waiting period, the connection is terminated immediately
     # + return - A `websocket:Error` if an error occurs when sending
     remote isolated function close(int? statusCode = 1000, string? reason = (),
-        decimal timeout = 60) returns Error? {
+        decimal? timeout = ()) returns Error? {
         int code = 1000;
         if (statusCode is int) {
             if (statusCode <= 999 || statusCode >= 1004 && statusCode <= 1006 || statusCode >= 1012 &&
@@ -84,11 +98,25 @@ public isolated client class Caller {
             }
             code = statusCode;
         }
+        if timeout is decimal && timeout < 0d && timeout != -1d {
+            string errorMessage = "Invalid timeout value: " + timeout.toString();
+            return error Error(errorMessage);
+        }
         return self.externClose(code, reason is () ? "" : reason, timeout);
     }
 
-    isolated function externClose(int statusCode, string reason, decimal timeoutInSecs) returns Error? = @java:Method {
+    isolated function externClose(int statusCode, string reason, decimal? timeoutInSecs = ()) returns Error? = @java:Method {
         'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.Close"
+    } external;
+
+    isolated function externWriteTextMessage(string data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector",
+        name: "writeTextMessage"
+    } external;
+
+    isolated function externWriteBinaryMessage(byte[] data) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.websocket.actions.websocketconnector.WebSocketConnector",
+        name: "writeBinaryMessage"
     } external;
 
     # Sets a connection related attribute.

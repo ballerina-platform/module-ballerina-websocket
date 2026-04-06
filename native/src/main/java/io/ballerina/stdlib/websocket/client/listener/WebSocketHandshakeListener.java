@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.websocket.client.listener;
 
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.websocket.ClientHandshakeListener;
@@ -29,6 +28,9 @@ import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The `WebSocketHandshakeListener` implements the `{@link ClientHandshakeListener}` interface directly.
@@ -41,14 +43,17 @@ public class WebSocketHandshakeListener implements ClientHandshakeListener {
     private final SyncClientConnectorListener connectorListener;
     private final BObject webSocketClient;
     private WebSocketConnectionInfo connectionInfo;
-    private Future balFuture;
+    private final CompletableFuture<Object> balFuture;
+    AtomicBoolean callbackCompleted;
 
     public WebSocketHandshakeListener(BObject webSocketClient, WebSocketService wsService,
-            SyncClientConnectorListener connectorListener, Future future) {
+                                      SyncClientConnectorListener connectorListener, CompletableFuture<Object> future,
+                                      AtomicBoolean callbackCompleted) {
         this.webSocketClient = webSocketClient;
         this.wsService = wsService;
         this.connectorListener = connectorListener;
         this.balFuture = future;
+        this.callbackCompleted = callbackCompleted;
     }
 
     @Override
@@ -58,7 +63,10 @@ public class WebSocketHandshakeListener implements ClientHandshakeListener {
         setWebSocketOpenConnectionInfo(webSocketConnection, webSocketClient, wsService);
         connectorListener.setConnectionInfo(connectionInfo);
         webSocketConnection.removeReadIdleStateHandler();
-        balFuture.complete(null);
+        if (!callbackCompleted.get()) {
+            balFuture.complete(null);
+            callbackCompleted.set(true);
+        }
         WebSocketObservabilityUtil.observeConnection(connectionInfo);
     }
 
@@ -68,7 +76,10 @@ public class WebSocketHandshakeListener implements ClientHandshakeListener {
             webSocketClient.addNativeData(WebSocketConstants.HTTP_RESPONSE, HttpUtil.createResponseStruct(response));
         }
         setWebSocketOpenConnectionInfo(null, webSocketClient, wsService);
-        balFuture.complete(WebSocketUtil.createErrorByType(t));
+        if (!callbackCompleted.get()) {
+            balFuture.complete(WebSocketUtil.createErrorByType(t));
+            callbackCompleted.set(true);
+        }
     }
 
     private void setWebSocketOpenConnectionInfo(WebSocketConnection webSocketConnection,

@@ -39,12 +39,12 @@ isolated service class DriverService {
 
     remote isolated function onOpen(websocket:Caller caller) returns websocket:Error? {
         string welcomeMsg = "Hi " + self.driverName + "! Your location will be shared with the riders";
-        check caller->writeTextMessage(welcomeMsg);
+        check caller->writeMessage(welcomeMsg);
         broadcast("Driver " + self.driverName + " ready for a ride");
     }
 
-    // 'onTextMessage' remote function will receive the location updates from drivers.
-    remote function onTextMessage(websocket:Caller caller, string location) returns websocket:Error? {
+    // 'onMessage' remote function will receive the location updates from drivers.
+    remote function onMessage(websocket:Caller caller, string location) returns websocket:Error? {
         @strand {
             thread:"any"
         }
@@ -79,7 +79,7 @@ service class RiderService {
 
     remote function onOpen(websocket:Caller caller) returns websocket:Error? {
         string welcomeMsg = "Hi " + self.clientName + "! You have successfully connected.";
-        check caller->writeTextMessage(welcomeMsg);
+        check caller->writeMessage(welcomeMsg);
         lock {
             clientsMap[caller.getConnectionId()] = caller;
         }
@@ -96,7 +96,7 @@ service class RiderService {
 isolated function broadcast(string msg) {
     lock {
         foreach var con in clientsMap {
-            websocket:Error? err = con->writeTextMessage(msg);
+            websocket:Error? err = con->writeMessage(msg);
             if err is websocket:Error {
                 io:println("Error sending message:" + err.message());
             }

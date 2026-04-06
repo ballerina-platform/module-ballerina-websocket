@@ -26,3 +26,13 @@ public function testMalformedUrl() returns Error? {
         test:assertFail("Expected a malformed URL error");
     }
 }
+
+@test:Config {}
+public function testUrlWithIpAddress() returns Error? {
+    Client|Error wsClient = new("127.0.0.1:9090/echo");
+    if wsClient is Error {
+        test:assertEquals(wsClient.message(), "Error: Illegal character in scheme name at index 0: 127.0.0.1:9090/echo");
+    } else {
+        test:assertFail("Expected an URL error");
+    }
+}

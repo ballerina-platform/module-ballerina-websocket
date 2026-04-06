@@ -24,7 +24,7 @@ public function main() returns error? {
    
    // Continuously read the location updates coming from the server.
     while true {
-        string textResp = check riderClient->readTextMessage();
+        string textResp = check riderClient->readMessage();
         io:println(textResp);
     }
 }

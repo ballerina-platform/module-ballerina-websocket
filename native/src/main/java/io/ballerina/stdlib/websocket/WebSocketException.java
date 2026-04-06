@@ -18,9 +18,9 @@
 
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.PredefinedTypes;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -31,7 +31,7 @@ import io.ballerina.runtime.api.values.BString;
  *
  * @since 0.995
  */
-public class WebSocketException extends RuntimeException {
+public final class WebSocketException extends RuntimeException {
     private final String message;
     private BError wsError;
 

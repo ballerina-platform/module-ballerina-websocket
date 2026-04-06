@@ -19,7 +19,6 @@
 package io.ballerina.stdlib.websocket.client;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -29,12 +28,15 @@ import io.ballerina.stdlib.http.api.HttpUtil;
 import io.ballerina.stdlib.http.transport.contract.HttpWsConnectorFactory;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConnector;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketClientConnectorConfig;
+import io.ballerina.stdlib.websocket.ModuleUtils;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketService;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
 import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 
 import java.net.URI;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Initialize the WebSocket Synchronous Client.
@@ -45,50 +47,63 @@ public class SyncInitEndpoint {
     private static final String MAX_WAIT_INTERVAL = "maxWaitInterval";
     private static final String MAX_COUNT = "maxCount";
     private static final String BACK_OF_FACTOR = "backOffFactor";
+
     public static Object initEndpoint(Environment env, BObject wsSyncClient) {
-        final Future balFuture = env.markAsync();
-        try {
-            @SuppressWarnings(WebSocketConstants.UNCHECKED) BMap<BString, Object> clientEndpointConfig = wsSyncClient
-                    .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
-            String remoteUrl = wsSyncClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
-            BObject callbackService = wsSyncClient.getObjectValue(WebSocketConstants.SYNC_CLIENT_SERVICE_CONFIG);
-            WebSocketService wsService = WebSocketUtil
-                    .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
-            HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
-            WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
-            String scheme = URI.create(remoteUrl).getScheme();
-            if (scheme == null) {
-                balFuture.complete(WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
-                        null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
-                return null;
-            }
-            populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
-            if (WebSocketUtil.hasRetryConfig(wsSyncClient)) {
+        return env.yieldAndRun(() -> {
+            final CompletableFuture<Object> balFuture = new CompletableFuture<>();
+            AtomicBoolean callbackCompleted = new AtomicBoolean(false);
+            try {
                 @SuppressWarnings(WebSocketConstants.UNCHECKED)
-                BMap<BString, Object> retryConfig = (BMap<BString, Object>) clientEndpointConfig
-                        .getMapValue(WebSocketConstants.RETRY_CONFIG);
-                RetryContext retryConnectorConfig = new RetryContext();
-                populateRetryConnectorConfig(retryConfig, retryConnectorConfig);
-                wsSyncClient.addNativeData(WebSocketConstants.RETRY_CONFIG.toString(), retryConnectorConfig);
+                BMap<BString, Object> clientEndpointConfig = wsSyncClient
+                        .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG);
+                String remoteUrl = wsSyncClient.getStringValue(WebSocketConstants.CLIENT_URL_CONFIG).getValue();
+                BObject callbackService = wsSyncClient.getObjectValue(WebSocketConstants.SYNC_CLIENT_SERVICE_CONFIG);
+                WebSocketService wsService = WebSocketUtil
+                        .validateAndCreateWebSocketService(env.getRuntime(), callbackService);
+                HttpWsConnectorFactory connectorFactory = HttpUtil.createHttpWsConnectionFactory();
+                WebSocketClientConnectorConfig clientConnectorConfig = new WebSocketClientConnectorConfig(remoteUrl);
+                String scheme = URI.create(remoteUrl).getScheme();
+                if (scheme == null) {
+                    balFuture.complete(WebSocketUtil.getWebSocketError("Malformed URL: " + remoteUrl,
+                            null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                    callbackCompleted.set(true);
+                    return ModuleUtils.getResult(balFuture);
+                }
+                populateSyncClientConnectorConfig(clientEndpointConfig, clientConnectorConfig, scheme);
+                if (WebSocketUtil.hasRetryConfig(wsSyncClient)) {
+                    @SuppressWarnings(WebSocketConstants.UNCHECKED)
+                    BMap<BString, Object> retryConfig = (BMap<BString, Object>) clientEndpointConfig
+                            .getMapValue(WebSocketConstants.RETRY_CONFIG);
+                    RetryContext retryConnectorConfig = new RetryContext();
+                    populateRetryConnectorConfig(retryConfig, retryConnectorConfig);
+                    wsSyncClient.addNativeData(WebSocketConstants.RETRY_CONFIG.toString(), retryConnectorConfig);
+                }
+                WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnectorWithSSL(
+                        clientConnectorConfig);
+                wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
+                wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
+                wsSyncClient.addNativeData(WebSocketConstants.CALL_BACK_SERVICE, wsService);
+                wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
+                        clientConnectorConfig.getMaxFrameSize());
+                SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
+                wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
+                WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture, callbackCompleted);
+            } catch (Exception e) {
+                if (e instanceof BError) {
+                    if (!callbackCompleted.get()) {
+                        balFuture.complete(e);
+                        callbackCompleted.set(true);
+                    }
+                } else {
+                    if (!callbackCompleted.get()) {
+                        balFuture.complete(WebSocketUtil.getWebSocketError(
+                                e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
+                        callbackCompleted.set(true);
+                    }
+                }
             }
-            WebSocketClientConnector clientConnector = connectorFactory.createWsClientConnector(clientConnectorConfig);
-            wsSyncClient.addNativeData(WebSocketConstants.CONNECTOR_FACTORY, connectorFactory);
-            wsSyncClient.addNativeData(WebSocketConstants.CLIENT_CONNECTOR, clientConnector);
-            wsSyncClient.addNativeData(WebSocketConstants.CALL_BACK_SERVICE, wsService);
-            wsSyncClient.addNativeData(WebSocketConstants.NATIVE_DATA_MAX_FRAME_SIZE,
-                    clientConnectorConfig.getMaxFrameSize());
-            SyncClientConnectorListener syncClientConnectorListener = new SyncClientConnectorListener();
-            wsSyncClient.addNativeData(WebSocketConstants.CLIENT_LISTENER, syncClientConnectorListener);
-            WebSocketUtil.establishWebSocketConnection(wsSyncClient, wsService, balFuture);
-        } catch (Exception e) {
-            if (e instanceof BError) {
-                balFuture.complete(e);
-            } else {
-                balFuture.complete(WebSocketUtil
-                        .getWebSocketError(e.getMessage(), null, WebSocketConstants.ErrorCode.Error.errorCode(), null));
-            }
-        }
-        return null;
+            return ModuleUtils.getResult(balFuture);
+        });
     }
 
     private static void populateSyncClientConnectorConfig(BMap<BString, Object> clientEndpointConfig,

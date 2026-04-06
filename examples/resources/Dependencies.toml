@@ -1,4 +1,0 @@
-[[dependency]]
-org = "ballerina"
-name = "websocket"
-version = "@project.version@"

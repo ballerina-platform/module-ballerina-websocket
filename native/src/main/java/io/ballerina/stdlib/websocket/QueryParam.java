@@ -17,15 +17,15 @@
  */
 package io.ballerina.stdlib.websocket;
 
-import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnectorException;
 
 /**
  * Represents an inbound request query parameter details.
  */
-public class QueryParam {
+public final class QueryParam {
 
     private final int typeTag;
     private final boolean nilable;

@@ -33,8 +33,8 @@ service class OnIdleTimeoutService {
         check caller->writeTextMessage(data);
     }
 
-    remote isolated function onClose(Caller caller, string data) returns Error? {
-        check caller->writeTextMessage(data);
+    remote isolated function onClose(Caller caller) returns Error? {
+        check caller->close();
     }
 }
 

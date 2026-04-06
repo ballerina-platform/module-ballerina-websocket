@@ -16,10 +16,10 @@
  */
 
 plugins {
-    id "com.github.spotbugs" version "4.0.5"
-    id "com.github.johnrengelman.shadow" version "5.2.0"
-    id "de.undercouch.download" version "4.0.4"
-    id "net.researchgate.release" version "2.8.0"
+    id "com.github.spotbugs" version "${spotbugsPluginVersion}"
+    id "com.github.johnrengelman.shadow" version "${shadowJarPluginVersion}"
+    id "de.undercouch.download" version "${downloadPluginVersion}"
+    id "net.researchgate.release" version "${releasePluginVersion}"
 }
 
 ext.ballerinaLangVersion = project.ballerinaLangVersion
@@ -27,7 +27,6 @@ ext.stdlibMimeVersion = project.stdlibMimeVersion
 ext.stdlibIoVersion = project.stdlibIoVersion
 ext.stdlibHttpVersion = project.stdlibHttpVersion
 ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibRegexVersion = project.stdlibRegexVersion
 ext.stdlibAuthVersion = project.stdlibAuthVersion
 ext.stdlibJwtVersion = project.stdlibJwtVersion
 ext.stdlibOAuth2Version = project.stdlibOAuth2Version
@@ -39,6 +38,7 @@ ext.stdlibFileVersion = project.stdlibFileVersion
 ext.stdlibOsVersion = project.stdlibOsVersion
 ext.stdlibTaskVersion = project.stdlibTaskVersion
 ext.stdlibUuidVersion = project.stdlibUuidVersion
+ext.stdlibConstraintVersion = project.stdlibConstraintVersion
 
 ext.slf4jVersion = project.slf4jVersion
 ext.ballerinaTomlParserVersion = project.ballerinaTomlParserVersion
@@ -101,6 +101,7 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:io-ballerina:${stdlibIoVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:mime-ballerina:${stdlibMimeVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:http-ballerina:${stdlibHttpVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
 
         // Transitive dependencies
         ballerinaStdLibs "io.ballerina.stdlib:os-ballerina:${stdlibOsVersion}"
@@ -111,11 +112,13 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:auth-ballerina:${stdlibAuthVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:cache-ballerina:${stdlibCacheVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:regex-ballerina:${stdlibRegexVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:crypto-ballerina:${stdlibCryptoVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:file-ballerina:${stdlibFileVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:time-ballerina:${stdlibTimeVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:url-ballerina:${stdlibUrlVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
+        ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
+        ballerinaStdLibs "io.ballerina.lib:data.jsondata-ballerina:${stdlibDataJsonDataVersion}"
     }
 }
 
