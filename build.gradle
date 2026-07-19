@@ -53,6 +53,10 @@ allprojects {
     apply plugin: 'jacoco'
     apply plugin: 'maven-publish'
 
+    jacoco {
+        toolVersion = "${jacocoVersion}"
+    }
+
     repositories {
         mavenLocal()
         maven {
@@ -138,6 +142,6 @@ release {
     }
 }
 
-task build {
+tasks.named('build') {
     dependsOn('websocket-ballerina:build')
 }
