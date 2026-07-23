@@ -251,17 +251,31 @@ public function testConcurrentRequestDuringStreamResponse() returns Error? {
 // *first* stream element (see testConcurrentRequestDuringStreamResponse above), then never again for the
 // rest of the stream. That meant only a request sent immediately after the first element was ever
 // guaranteed to be processed; every later request would sit queued and undelivered for the lifetime of the
-// stream. This test sends a request after each of several stream elements (not just the first) to make
-// sure inbound frames keep being read throughout.
+// stream. This test sends a request after each of several distinct stream elements (not just the first)
+// and confirms every one eventually gets a response - without assuming a request's response is the very
+// next message read, since a stream element and a request's response can legitimately interleave in
+// either order.
 @test:Config {}
 public function testMultipleConcurrentRequestsDuringStreamResponse() returns Error? {
     Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
     check wsClient->writeMessage({event: "subscribe"});
-    foreach int i in 1 ... 5 {
-        int data = check wsClient->readMessage();
-        test:assertEquals(data, i);
-        check wsClient->writeMessage("Hello");
+    int requestsToSend = 5;
+    int requestsSent = 0;
+    int acksReceived = 0;
+    int lastStreamValue = 0;
+    while acksReceived < requestsToSend {
         int res = check wsClient->readMessage();
-        test:assertEquals(res, -1, string `onMessage response was not received right after stream element ${i}`);
+        if res == -1 {
+            acksReceived += 1;
+            continue;
+        }
+        test:assertTrue(res > lastStreamValue,
+                string `expected an increasing stream value greater than ${lastStreamValue}, got ${res}`);
+        lastStreamValue = res;
+        if requestsSent < requestsToSend {
+            check wsClient->writeMessage("Hello");
+            requestsSent += 1;
+        }
     }
+    test:assertEquals(requestsSent, requestsToSend);
 }
