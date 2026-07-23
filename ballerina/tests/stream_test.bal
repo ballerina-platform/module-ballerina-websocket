@@ -246,3 +246,28 @@ public function testConcurrentRequestDuringStreamResponse() returns Error? {
         }
     }
 }
+
+@test:Config {}
+public function testMultipleConcurrentRequestsDuringStreamResponse() returns Error? {
+    Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+    int requestsToSend = 5;
+    int requestsSent = 0;
+    int acksReceived = 0;
+    int lastStreamValue = 0;
+    while acksReceived < requestsToSend {
+        int res = check wsClient->readMessage();
+        if res == -1 {
+            acksReceived += 1;
+            continue;
+        }
+        test:assertTrue(res > lastStreamValue,
+                string `expected an increasing stream value greater than ${lastStreamValue}, got ${res}`);
+        lastStreamValue = res;
+        if requestsSent < requestsToSend {
+            check wsClient->writeMessage("Hello");
+            requestsSent += 1;
+        }
+    }
+    test:assertEquals(requestsSent, requestsToSend);
+}
