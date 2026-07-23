@@ -247,14 +247,6 @@ public function testConcurrentRequestDuringStreamResponse() returns Error? {
     }
 }
 
-// Regression test for a bug where the server only re-armed reading of the next inbound frame after the
-// *first* stream element (see testConcurrentRequestDuringStreamResponse above), then never again for the
-// rest of the stream. That meant only a request sent immediately after the first element was ever
-// guaranteed to be processed; every later request would sit queued and undelivered for the lifetime of the
-// stream. This test sends a request after each of several distinct stream elements (not just the first)
-// and confirms every one eventually gets a response - without assuming a request's response is the very
-// next message read, since a stream element and a request's response can legitimately interleave in
-// either order.
 @test:Config {}
 public function testMultipleConcurrentRequestsDuringStreamResponse() returns Error? {
     Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
