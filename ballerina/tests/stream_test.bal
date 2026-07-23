@@ -246,3 +246,22 @@ public function testConcurrentRequestDuringStreamResponse() returns Error? {
         }
     }
 }
+
+// Regression test for a bug where the server only re-armed reading of the next inbound frame after the
+// *first* stream element (see testConcurrentRequestDuringStreamResponse above), then never again for the
+// rest of the stream. That meant only a request sent immediately after the first element was ever
+// guaranteed to be processed; every later request would sit queued and undelivered for the lifetime of the
+// stream. This test sends a request after each of several stream elements (not just the first) to make
+// sure inbound frames keep being read throughout.
+@test:Config {}
+public function testMultipleConcurrentRequestsDuringStreamResponse() returns Error? {
+    Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+    foreach int i in 1 ... 5 {
+        int data = check wsClient->readMessage();
+        test:assertEquals(data, i);
+        check wsClient->writeMessage("Hello");
+        int res = check wsClient->readMessage();
+        test:assertEquals(res, -1, string `onMessage response was not received right after stream element ${i}`);
+    }
+}
