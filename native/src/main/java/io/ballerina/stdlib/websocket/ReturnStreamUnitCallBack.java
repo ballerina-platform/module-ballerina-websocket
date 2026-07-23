@@ -89,10 +89,6 @@ public class ReturnStreamUnitCallBack implements Handler {
                     try {
                         Object result = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
                         // Re-arm the next inbound frame read for every stream element, not just the first
-                        // (WebSocketResourceCallback#notifySuccess does this for the first element). Without
-                        // this, autoRead stays disabled for the lifetime of the stream after element #1, so
-                        // frames arriving on this connection (e.g. a client ping) are queued forever and never
-                        // dispatched by WebSocketMessageQueueHandler.
                         webSocketConnection.readNextFrame();
                         this.notifySuccess(result);
                     } catch (BError bError) {
