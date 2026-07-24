@@ -83,13 +83,17 @@ public class ReturnStreamUnitCallBack implements Handler {
                 } else {
                     sendTextMessageStream(toJsonString(contentObj), promiseCombiner);
                 }
+                // Re-arm the inbound read credit as soon as the current element has been dispatched
+                // for sending, rather than after the next element's (potentially slow/blocking) fetch
+                // completes. This keeps the read gate open for the full duration of that fetch so
+                // unrelated inbound frames (e.g. ping/pong heartbeats) are not starved behind the
+                // stream's own production cadence.
+                webSocketConnection.readNextFrame();
                 Thread.startVirtualThread(() -> {
                     Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
                     StrandMetadata strandMetadata = new StrandMetadata(true, properties);
                     try {
                         Object result = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
-                        // Re-arm the next inbound frame read for every stream element, not just the first
-                        webSocketConnection.readNextFrame();
                         this.notifySuccess(result);
                     } catch (BError bError) {
                         this.notifyFailure(bError);
