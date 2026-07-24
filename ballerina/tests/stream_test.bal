@@ -299,12 +299,11 @@ public function testMultipleConcurrentRequestsDuringStreamResponse() returns Err
 
 @test:Config {}
 public function testConcurrentRequestNotStarvedDuringSlowStreamProduction() returns Error? {
+    // Covers the bootstrap path: request lands during the first element's fetch.
     Client wsClient = check new ("ws://localhost:21402/onSlowConcurrentRequest/");
     check wsClient->writeMessage({event: "subscribe"});
 
-    // Send the unrelated request on its own timer, independent of stream element arrival,
-    // so it lands in the middle of a slow (2s) per-element production cycle instead of right
-    // at the boundary where the inbound read credit happens to be freshly re-armed.
+    // Independent timer so this lands mid-fetch, not at a re-arm boundary.
     runtime:sleep(1);
     time:Utc sendTime = time:utcNow();
     check wsClient->writeMessage("Hello");
@@ -320,4 +319,30 @@ public function testConcurrentRequestNotStarvedDuringSlowStreamProduction() retu
             string `expected the concurrent "onMessage" request to be acknowledged promptly (< 0.5s) even ` +
             string `while the stream is mid-production (2s per element), but the ack took ${elapsedSeconds}s. ` +
             "This indicates the inbound read credit was starved behind the stream's per-element production cadence.");
+}
+
+@test:Config {}
+public function testConcurrentRequestNotStarvedDuringSlowStreamProductionAfterFirstElement() returns Error? {
+    // Covers the recursive path: request lands during the second element's fetch.
+    Client wsClient = check new ("ws://localhost:21402/onSlowConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+    int data = check wsClient->readMessage();
+    test:assertEquals(data, 1);
+
+    runtime:sleep(1);
+    time:Utc sendTime = time:utcNow();
+    check wsClient->writeMessage("Hello");
+
+    while true {
+        int res = check wsClient->readMessage();
+        if res == -1 {
+            break;
+        }
+    }
+    decimal elapsedSeconds = time:utcDiffSeconds(time:utcNow(), sendTime);
+    test:assertTrue(elapsedSeconds < 0.5d,
+            string `expected the concurrent "onMessage" request to be acknowledged promptly (< 0.5s) even ` +
+            string `while the stream is mid-production (2s per element) after the first element, but the ack ` +
+            string `took ${elapsedSeconds}s. This indicates the inbound read credit was starved behind the ` +
+            "stream's recursive per-element production cadence.");
 }

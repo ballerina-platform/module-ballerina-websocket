@@ -113,8 +113,7 @@ public final class WebSocketResourceCallback implements Handler {
             BObject bObject = ((BStream) result).getIteratorObj();
             ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
                     connectionInfo, webSocketConnection);
-            // Re-arm the inbound read credit before fetching the first element so a slow/blocking
-            // first fetch does not starve unrelated inbound frames (e.g. ping/pong heartbeats).
+            // Re-arm before the first fetch, not after, so a slow fetch doesn't starve other reads.
             webSocketConnection.readNextFrame();
             Thread.startVirtualThread(() -> {
                 Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
