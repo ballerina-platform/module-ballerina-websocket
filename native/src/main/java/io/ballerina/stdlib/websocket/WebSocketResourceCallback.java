@@ -113,12 +113,13 @@ public final class WebSocketResourceCallback implements Handler {
             BObject bObject = ((BStream) result).getIteratorObj();
             ReturnStreamUnitCallBack returnStreamUnitCallBack = new ReturnStreamUnitCallBack(bObject, runtime,
                     connectionInfo, webSocketConnection);
+            // Re-arm before the first fetch, not after, so a slow fetch doesn't starve other reads.
+            webSocketConnection.readNextFrame();
             Thread.startVirtualThread(() -> {
                 Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
                 StrandMetadata strandMetadata = new StrandMetadata(true, properties);
                 try {
                     Object res = runtime.callMethod(bObject, STREAMING_NEXT_FUNCTION, strandMetadata);
-                    webSocketConnection.readNextFrame();
                     returnStreamUnitCallBack.notifySuccess(res);
                 } catch (BError bError) {
                     returnStreamUnitCallBack.notifyFailure(bError);
