@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerina/time;
 
 public type ChatMessage record {|
     string name = "";
@@ -162,6 +163,30 @@ service class ConcurrentRequestSvc {
     }
 }
 
+@ServiceConfig {
+    dispatcherKey: "event"
+}
+service /onSlowConcurrentRequest on streamLis {
+    resource function get .() returns Service|UpgradeError {
+        return new SlowConcurrentRequestSvc();
+    }
+}
+
+service class SlowConcurrentRequestSvc {
+    *Service;
+
+    remote function onSubscribe(string message) returns stream<int, error?> {
+        return [1, 2, 3].toStream().'map(function(int i) returns int {
+            runtime:sleep(2);
+            return i;
+        });
+    }
+
+    remote function onMessage(string message) returns int {
+        return -1;
+    }
+}
+
 @test:Config {}
 public function testStreamString() returns Error? {
     Client wsClient = check new ("ws://localhost:21402/onStream/");
@@ -270,4 +295,29 @@ public function testMultipleConcurrentRequestsDuringStreamResponse() returns Err
         }
     }
     test:assertEquals(requestsSent, requestsToSend);
+}
+
+@test:Config {}
+public function testConcurrentRequestNotStarvedDuringSlowStreamProduction() returns Error? {
+    Client wsClient = check new ("ws://localhost:21402/onSlowConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+
+    // Send the unrelated request on its own timer, independent of stream element arrival,
+    // so it lands in the middle of a slow (2s) per-element production cycle instead of right
+    // at the boundary where the inbound read credit happens to be freshly re-armed.
+    runtime:sleep(1);
+    time:Utc sendTime = time:utcNow();
+    check wsClient->writeMessage("Hello");
+
+    while true {
+        int res = check wsClient->readMessage();
+        if res == -1 {
+            break;
+        }
+    }
+    decimal elapsedSeconds = time:utcDiffSeconds(time:utcNow(), sendTime);
+    test:assertTrue(elapsedSeconds < 0.5d,
+            string `expected the concurrent "onMessage" request to be acknowledged promptly (< 0.5s) even ` +
+            string `while the stream is mid-production (2s per element), but the ack took ${elapsedSeconds}s. ` +
+            "This indicates the inbound read credit was starved behind the stream's per-element production cadence.");
 }
