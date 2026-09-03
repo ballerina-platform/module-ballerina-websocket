@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - [Fix inbound control/heartbeat frames starved by the read-gate while a stream resource is producing](https://github.com/ballerina-platform/ballerina-library/issues/8929)
+- [Update Netty version to 4.1.137.Final](https://github.com/ballerina-platform/ballerina-library/issues/9093)
 
 ## [2.15.5] - 2026-07-24
 
