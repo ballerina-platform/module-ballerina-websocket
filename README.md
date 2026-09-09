@@ -1,5 +1,4 @@
-Ballerina Websocket Library
-===================
+# Ballerina Websocket Library
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-websocket/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/actions/workflows/build-timestamped-master.yml)
   [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-websocket/branch/main/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-websocket)
@@ -8,7 +7,9 @@ Ballerina Websocket Library
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-websocket.svg)](https://github.com/ballerina-platform/module-ballerina-websocket/commits/main)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/websocket.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fwebsocket)
 
-The WebSocket library facilitates connecting and interacting with WebSocket endpoints over the network, providing robust support for both client and server-side communication.
+## Overview
+
+This module provides APIs for connecting to and interacting with WebSocket endpoints, through two types of network entry points: the `Client` and the `Listener`.
 
 ## Client
 
@@ -230,7 +231,7 @@ Execute the commands below to build from source.
    
 ## Contributing to Ballerina
 
-As an open source project, Ballerina welcomes contributions from the community. 
+As an open-source project, Ballerina welcomes contributions from the community. 
 
 For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
 

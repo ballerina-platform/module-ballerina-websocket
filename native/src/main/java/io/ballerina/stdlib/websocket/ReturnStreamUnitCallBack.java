@@ -83,6 +83,8 @@ public class ReturnStreamUnitCallBack implements Handler {
                 } else {
                     sendTextMessageStream(toJsonString(contentObj), promiseCombiner);
                 }
+                // Re-arm before the next (possibly slow) fetch, not after, so reads aren't starved meanwhile.
+                webSocketConnection.readNextFrame();
                 Thread.startVirtualThread(() -> {
                     Map<String, Object> properties = ModuleUtils.getProperties(STREAMING_NEXT_FUNCTION);
                     StrandMetadata strandMetadata = new StrandMetadata(true, properties);

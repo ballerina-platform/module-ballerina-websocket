@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerina/time;
 
 public type ChatMessage record {|
     string name = "";
@@ -162,6 +163,30 @@ service class ConcurrentRequestSvc {
     }
 }
 
+@ServiceConfig {
+    dispatcherKey: "event"
+}
+service /onSlowConcurrentRequest on streamLis {
+    resource function get .() returns Service|UpgradeError {
+        return new SlowConcurrentRequestSvc();
+    }
+}
+
+service class SlowConcurrentRequestSvc {
+    *Service;
+
+    remote function onSubscribe(string message) returns stream<int, error?> {
+        return [1, 2, 3].toStream().'map(function(int i) returns int {
+            runtime:sleep(2);
+            return i;
+        });
+    }
+
+    remote function onMessage(string message) returns int {
+        return -1;
+    }
+}
+
 @test:Config {}
 public function testStreamString() returns Error? {
     Client wsClient = check new ("ws://localhost:21402/onStream/");
@@ -245,4 +270,79 @@ public function testConcurrentRequestDuringStreamResponse() returns Error? {
             test:assertFail("onMessage response was not received before the end of the stream");
         }
     }
+}
+
+@test:Config {}
+public function testMultipleConcurrentRequestsDuringStreamResponse() returns Error? {
+    Client wsClient = check new ("ws://localhost:21402/onConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+    int requestsToSend = 5;
+    int requestsSent = 0;
+    int acksReceived = 0;
+    int lastStreamValue = 0;
+    while acksReceived < requestsToSend {
+        int res = check wsClient->readMessage();
+        if res == -1 {
+            acksReceived += 1;
+            continue;
+        }
+        test:assertTrue(res > lastStreamValue,
+                string `expected an increasing stream value greater than ${lastStreamValue}, got ${res}`);
+        lastStreamValue = res;
+        if requestsSent < requestsToSend {
+            check wsClient->writeMessage("Hello");
+            requestsSent += 1;
+        }
+    }
+    test:assertEquals(requestsSent, requestsToSend);
+}
+
+@test:Config {}
+public function testConcurrentRequestNotStarvedDuringSlowStreamProduction() returns Error? {
+    // Covers the bootstrap path: request lands during the first element's fetch.
+    Client wsClient = check new ("ws://localhost:21402/onSlowConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+
+    // Independent timer so this lands mid-fetch, not at a re-arm boundary.
+    runtime:sleep(1);
+    time:Utc sendTime = time:utcNow();
+    check wsClient->writeMessage("Hello");
+
+    while true {
+        int res = check wsClient->readMessage();
+        if res == -1 {
+            break;
+        }
+    }
+    decimal elapsedSeconds = time:utcDiffSeconds(time:utcNow(), sendTime);
+    test:assertTrue(elapsedSeconds < 0.5d,
+            string `expected the concurrent "onMessage" request to be acknowledged promptly (< 0.5s) even ` +
+            string `while the stream is mid-production (2s per element), but the ack took ${elapsedSeconds}s. ` +
+            "This indicates the inbound read credit was starved behind the stream's per-element production cadence.");
+}
+
+@test:Config {}
+public function testConcurrentRequestNotStarvedDuringSlowStreamProductionAfterFirstElement() returns Error? {
+    // Covers the recursive path: request lands during the second element's fetch.
+    Client wsClient = check new ("ws://localhost:21402/onSlowConcurrentRequest/");
+    check wsClient->writeMessage({event: "subscribe"});
+    int data = check wsClient->readMessage();
+    test:assertEquals(data, 1);
+
+    runtime:sleep(1);
+    time:Utc sendTime = time:utcNow();
+    check wsClient->writeMessage("Hello");
+
+    while true {
+        int res = check wsClient->readMessage();
+        if res == -1 {
+            break;
+        }
+    }
+    decimal elapsedSeconds = time:utcDiffSeconds(time:utcNow(), sendTime);
+    test:assertTrue(elapsedSeconds < 0.5d,
+            string `expected the concurrent "onMessage" request to be acknowledged promptly (< 0.5s) even ` +
+            string `while the stream is mid-production (2s per element) after the first element, but the ack ` +
+            string `took ${elapsedSeconds}s. This indicates the inbound read credit was starved behind the ` +
+            "stream's recursive per-element production cadence.");
 }

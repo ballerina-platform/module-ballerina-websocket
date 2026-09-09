@@ -1,8 +1,13 @@
 ## Overview
 
-This module provides APIs for connecting and interacting with WebSocket endpoints. 
+This module provides APIs for connecting to and interacting with WebSocket endpoints, through two types of network entry points: the `Client` and the `Listener`.
 
-This module facilitates two types of network entry points as the `Client` and `Listener`. 
+## Key Features
+
+- WebSocket Client and Listener for bi-directional communication
+- Control message handling (ping/pong, close)
+- Support for permessage-deflate compression
+- TLS support for secure WebSocket communication
 
 ### Client
 
