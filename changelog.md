@@ -3,6 +3,28 @@ This file contains all the notable changes done to the Ballerina WebSocket packa
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- [[#9132] Updated Keywords and Reformat README for Connector Store Discoverability](https://github.com/ballerina-platform/ballerina-library/issues/9132)
+
+### Fixed
+
+- [Fix inbound control/heartbeat frames starved by the read-gate while a stream resource is producing](https://github.com/ballerina-platform/ballerina-library/issues/8929)
+- [Update Netty version to 4.1.137.Final](https://github.com/ballerina-platform/ballerina-library/issues/9093)
+
+## [2.15.5] - 2026-07-24
+
+### Fixed
+
+- [Update Netty version to 4.1.136.Final and Netty tcnative version to 2.0.79.Final](https://github.com/ballerina-platform/ballerina-library/issues/8924)
+
+## [2.15.4] - 2026-07-23
+
+### Fixed
+
+- [Fix streaming response permanently blocking inbound frame reads after the first element](https://github.com/ballerina-platform/ballerina-library/issues/8923)
+
 ## [2.15.3] - 2026-05-11
 
 ### Fixed

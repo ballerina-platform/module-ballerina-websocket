@@ -3,11 +3,12 @@ org = "ballerina"
 name = "websocket"
 version = "@toml.version@"
 authors = ["Ballerina"]
-keywords = ["ws", "network", "bi-directional", "streaming", "service", "client"]
+keywords = ["ws", "network", "bi-directional", "streaming", "service", "client", "Type/Connector", "Type/Trigger", "Name/WebSocket", "Area/Built-in", "Area/Communication"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
 icon = "icon.png"
 license = ["Apache-2.0"]
 distribution = "2201.13.0"
+include = ["metadata/**"]
 
 [platform.java21]
 graalvmCompatible = true

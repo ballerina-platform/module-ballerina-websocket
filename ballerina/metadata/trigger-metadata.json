@@ -1,0 +1,386 @@
+{
+  "version": "v1.0",
+
+  "listeners": [
+    {
+      "id": "$listener",
+      "doc": "HTTP based listener that accepts the WebSocket upgrade request and, once accepted, drives the resulting connection service.",
+      "type": { "name": "Listener" },
+      "services": ["$upgradeService"],
+      "multipleServicesAllowed": true,
+      "multipleServicesOfSameTypeAllowed": true
+    }
+  ],
+
+  "serviceTypes": [
+    {
+      "id": "$upgradeService",
+      "doc": "Handles the initial HTTP upgrade request and decides which connection service will own the resulting WebSocket connection.",
+      "type": { "name": "UpgradeService" },
+      "concrete": false,
+      "multipleListenersAllowed": true,
+      "identifier": { "presence": "required", "form": ["basePath"] },
+      "handlers": {
+        "backedByConcreteType": false,
+        "options": [
+          {
+            "id": "$upgradeService.get",
+            "name": "get",
+            "kind": "resource",
+            "doc": "The only handler an upgrade service has. Runs on the initial HTTP request and decides whether to upgrade the connection. Return the service that will handle the resulting connection, or an UpgradeError to reject the upgrade.",
+            "presence": "required",
+            "accessor": { "presence": "required", "values": ["get"] },
+            "path": { "presence": "required" },
+            "params": [
+              {
+                "id": "$upgradeService.get.request",
+                "name": "request",
+                "doc": "The HTTP request that initiated the upgrade, inspect its headers here to authenticate or route before accepting.",
+                "type": {
+                  "name": "Request",
+                  "packageInfo": { "org": "ballerina", "packageName": "http", "moduleName": "http", "version": "2.16.5" }
+                },
+                "presence": "optional"
+              }
+            ],
+            "returns": { "id": "$upgradeService.get.returns", "type": [{ "name": "Service" }, { "name": "UpgradeError" }] }
+          }
+        ]
+      }
+    },
+    {
+      "id": "$service",
+      "doc": "The WebSocket connection service returned by the upgrade handler. Its declared handlers are invoked over the lifetime of one connection.",
+      "type": { "name": "Service" },
+      "concrete": false,
+      "multipleListenersAllowed": false,
+      "annotations": ["$serviceConfig"],
+      "handlers": {
+        "backedByConcreteType": false,
+        "options": [
+          {
+            "id": "$service.onOpen",
+            "name": "onOpen",
+            "kind": "remote",
+            "doc": "Invoked once, after the handshake completes and the connection is established.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onOpen.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              }
+            ],
+            "returns": { "id": "$service.onOpen.returns", "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }] }
+          },
+          {
+            "id": "$service.onMessage",
+            "name": "onMessage",
+            "kind": "remote",
+            "doc": "Invoked for every inbound message, text or binary alike. Declaring this handler rules out onTextMessage and onBinaryMessage, it already covers both. It is also the fallback for a custom message type that matched no dispatched handler.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onMessage.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onMessage.data",
+                "name": "data",
+                "doc": "The inbound message. A text frame deserializes straight to the declared type. A binary frame is read as bytes and then deserialized, unless the declared type is byte[]. A binding failure closes the connection with status 1003.",
+                "type": { "name": "anydata", "builtin": true },
+                "presence": "required",
+                "dataBinding": { "typedescs": [{ "constraint": { "name": "anydata", "builtin": true }, "shapes": [{ "form": "bare" }] }] }
+              }
+            ],
+            "returns": {
+              "id": "$service.onMessage.returns",
+              "type": [
+                { "name": "anydata", "builtin": true },
+                { "name": "CloseFrame" },
+                { "name": "error", "builtin": true },
+                { "name": "()", "builtin": true }
+              ],
+              "dataBinding": { "typedescs": [{ "constraint": { "name": "anydata", "builtin": true }, "shapes": [{ "form": "bare" }] }] }
+            }
+          },
+          {
+            "id": "$service.onTextMessage",
+            "name": "onTextMessage",
+            "kind": "remote",
+            "doc": "Invoked for every inbound text frame.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onTextMessage.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onTextMessage.text",
+                "name": "text",
+                "doc": "The text frame's content.",
+                "type": { "name": "string", "builtin": true },
+                "presence": "required"
+              }
+            ],
+            "returns": {
+              "id": "$service.onTextMessage.returns",
+              "type": [
+                { "name": "anydata", "builtin": true },
+                { "name": "CloseFrame" },
+                { "name": "error", "builtin": true },
+                { "name": "()", "builtin": true }
+              ],
+              "dataBinding": { "typedescs": [{ "constraint": { "name": "anydata", "builtin": true }, "shapes": [{ "form": "bare" }] }] }
+            }
+          },
+          {
+            "id": "$service.onBinaryMessage",
+            "name": "onBinaryMessage",
+            "kind": "remote",
+            "doc": "Invoked for every inbound binary frame.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onBinaryMessage.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onBinaryMessage.data",
+                "name": "data",
+                "doc": "The binary frame's content.",
+                "type": { "shape": "array", "elementType": { "name": "byte", "builtin": true } },
+                "presence": "required"
+              }
+            ],
+            "returns": {
+              "id": "$service.onBinaryMessage.returns",
+              "type": [
+                { "name": "anydata", "builtin": true },
+                { "name": "CloseFrame" },
+                { "name": "error", "builtin": true },
+                { "name": "()", "builtin": true }
+              ],
+              "dataBinding": { "typedescs": [{ "constraint": { "name": "anydata", "builtin": true }, "shapes": [{ "form": "bare" }] }] }
+            }
+          },
+          {
+            "id": "$service.onPing",
+            "name": "onPing",
+            "kind": "remote",
+            "doc": "Invoked when the peer sends a ping frame. Declaring it makes replying your responsibility, without it the library sends the pong automatically.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onPing.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onPing.data",
+                "name": "data",
+                "doc": "The ping frame's application data.",
+                "type": { "shape": "array", "elementType": { "name": "byte", "builtin": true } },
+                "presence": "required"
+              }
+            ],
+            "returns": { "id": "$service.onPing.returns", "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }] }
+          },
+          {
+            "id": "$service.onPong",
+            "name": "onPong",
+            "kind": "remote",
+            "doc": "Invoked when the peer sends a pong frame, normally in reply to a ping this service sent.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onPong.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onPong.data",
+                "name": "data",
+                "doc": "The pong frame's application data.",
+                "type": { "shape": "array", "elementType": { "name": "byte", "builtin": true } },
+                "presence": "required"
+              }
+            ],
+            "returns": { "id": "$service.onPong.returns", "type": { "name": "()", "builtin": true } }
+          },
+          {
+            "id": "$service.onIdleTimeout",
+            "name": "onIdleTimeout",
+            "kind": "remote",
+            "doc": "Invoked when no message has arrived for the idleTimeout set in the service config. The listener's own timeout does not trigger it, that one covers only the initial upgrade request.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onIdleTimeout.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              }
+            ],
+            "returns": {
+              "id": "$service.onIdleTimeout.returns",
+              "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }]
+            }
+          },
+          {
+            "id": "$service.onClose",
+            "name": "onClose",
+            "kind": "remote",
+            "doc": "Invoked when a close frame arrives from the peer.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onClose.caller",
+                "name": "caller",
+                "doc": "Handle for this connection, already closing, sends will not reach the peer.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onClose.statusCode",
+                "name": "statusCode",
+                "doc": "The WebSocket close status code the peer sent.",
+                "type": { "name": "int", "builtin": true },
+                "presence": "required"
+              },
+              {
+                "id": "$service.onClose.reason",
+                "name": "reason",
+                "doc": "The human-readable close reason the peer sent.",
+                "type": { "name": "string", "builtin": true },
+                "presence": "required"
+              }
+            ],
+            "returns": { "id": "$service.onClose.returns", "type": { "name": "()", "builtin": true } }
+          },
+          {
+            "id": "$service.onError",
+            "name": "onError",
+            "kind": "remote",
+            "doc": "Invoked when the connection fails, always preceded by a connection closure with the matching close frame. Also the fallback for a binding failure when no matching custom error handler is declared.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onError.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.onError.err",
+                "name": "err",
+                "doc": "The failure that interrupted the connection.",
+                "type": { "name": "error", "builtin": true },
+                "presence": "required"
+              }
+            ],
+            "returns": { "id": "$service.onError.returns", "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }] }
+          },
+          {
+            "id": "$service.dispatched",
+            "name": "*",
+            "kind": "remote",
+            "addMode": "many",
+            "doc": "A custom dispatched handler. When the service config sets a dispatcherKey, the value of that field in an inbound message picks the handler by name: the value is camel cased and prefixed with on, so an event of \"heartbeat\" reaches onHeartbeat. A DispatcherConfig annotation overrides that derivation with an explicit dispatcherValue. A message matching nothing falls back to onMessage, or is ignored when that is absent too.",
+            "annotations": ["$dispatcherConfig"],
+            "params": [
+              {
+                "id": "$service.dispatched.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.dispatched.message",
+                "name": "message",
+                "doc": "The inbound message, bound to the declared type.",
+                "type": { "name": "anydata", "builtin": true },
+                "presence": "required",
+                "dataBinding": { "typedescs": [{ "constraint": { "name": "anydata", "builtin": true }, "shapes": [{ "form": "bare" }] }] }
+              }
+            ],
+            "returns": {
+              "id": "$service.dispatched.returns",
+              "type": [
+                { "name": "anydata", "builtin": true },
+                { "name": "CloseFrame" },
+                { "name": "error", "builtin": true },
+                { "name": "()", "builtin": true }
+              ],
+              "dataBinding": { "typedescs": [{ "constraint": { "name": "anydata", "builtin": true }, "shapes": [{ "form": "bare" }] }] }
+            }
+          },
+          {
+            "id": "$service.dispatchedError",
+            "name": "*",
+            "kind": "remote",
+            "addMode": "many",
+            "doc": "A custom error handler, paired to a dispatched handler by name: that handler's name plus Error, so onHeartbeat pairs with onHeartbeatError. It receives the binding failure for that message type. Without it the failure falls back to onError.",
+            "params": [
+              {
+                "id": "$service.dispatchedError.caller",
+                "name": "caller",
+                "doc": "Handle for sending messages back over this connection.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              },
+              {
+                "id": "$service.dispatchedError.err",
+                "name": "err",
+                "doc": "The failure that prevented the message from binding.",
+                "type": { "name": "error", "builtin": true },
+                "presence": "required"
+              }
+            ],
+            "returns": {
+              "id": "$service.dispatchedError.returns",
+              "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }]
+            }
+          }
+        ]
+      },
+      "rules": [
+        {
+          "id": "$textMessageVsGeneric",
+          "rule": "structure.atMostOne",
+          "message": "onMessage and onTextMessage cannot coexist, onMessage already receives text frames.",
+          "subjects": [{ "kind": "handler", "id": "$service.onMessage" }, { "kind": "handler", "id": "$service.onTextMessage" }]
+        },
+        {
+          "id": "$binaryMessageVsGeneric",
+          "rule": "structure.atMostOne",
+          "message": "onMessage and onBinaryMessage cannot coexist, onMessage already receives binary frames.",
+          "subjects": [{ "kind": "handler", "id": "$service.onMessage" }, { "kind": "handler", "id": "$service.onBinaryMessage" }]
+        }
+      ]
+    }
+  ],
+
+  "annotations": [
+    { "id": "$serviceConfig", "type": { "name": "ServiceConfig" }, "attachPoint": "service", "presence": "optional" },
+    { "id": "$dispatcherConfig", "type": { "name": "DispatcherConfig" }, "attachPoint": "function", "presence": "optional" }
+  ]
+}
