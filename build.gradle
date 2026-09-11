@@ -141,6 +141,14 @@ release {
     }
 }
 
-tasks.named('build') {
-    dependsOn('websocket-ballerina:build')
+if (tasks.names.contains('build')) {
+    tasks.named('build') {
+        dependsOn('websocket-ballerina:build')
+
+    }
+} else {
+    tasks.register('build') {
+        dependsOn('websocket-ballerina:build')
+
+    }
 }
