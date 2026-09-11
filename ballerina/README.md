@@ -2,7 +2,7 @@
 
 This module provides APIs for connecting to and interacting with WebSocket endpoints, through two types of network entry points: the `Client` and the `Listener`.
 
-## Key Features
+### Key Features
 
 - WebSocket Client and Listener for bi-directional communication
 - Control message handling (ping/pong, close)
