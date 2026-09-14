@@ -89,7 +89,10 @@ dependencies {
     externalJars(group: 'io.netty', name: 'netty-handler', version: "${nettyVersion}") {
         transitive = false
     }
-    externalJars(group: 'io.netty', name: 'netty-codec', version: "${nettyVersion}") {
+    externalJars(group: 'io.netty', name: 'netty-codec-base', version: "${nettyVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'io.netty', name: 'netty-codec-compression', version: "${nettyVersion}") {
         transitive = false
     }
     externalJars(group: 'io.netty', name: 'netty-codec-http', version: "${nettyVersion}") {
