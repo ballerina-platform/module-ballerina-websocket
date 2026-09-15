@@ -93,7 +93,7 @@ public class Close {
             }
             return timeoutInSecs;
         } catch (Exception e) {
-            throw new RuntimeException("Invalid timeout value: " + bTimeoutInSecs, e);
+            throw new IllegalArgumentException("Invalid timeout value: " + bTimeoutInSecs, e);
         }
     }
 
