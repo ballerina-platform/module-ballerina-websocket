@@ -30,6 +30,7 @@ module io.ballerina.stdlib.websocket {
     requires io.netty.codec.http;
     requires io.netty.transport;
     requires io.netty.codec;
+    requires io.netty.codec.compression;
     requires io.netty.common;
     requires io.netty.buffer;
     requires io.ballerina.stdlib.constraint;
