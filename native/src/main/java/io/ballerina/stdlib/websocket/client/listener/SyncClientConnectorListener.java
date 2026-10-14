@@ -114,10 +114,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         break;
                 }
                 stringAggregator.resetAggregateString();
-                if (!completeRead(readCallback, readCompleted, toReadResult(message)) && closing) {
-                    // No read claimed this frame; keep draining so close() sees the close-frame echo.
-                    connectionInfo.getWebSocketConnection().readNextFrame();
-                }
+                completeRead(readCallback, readCompleted, toReadResult(message));
+                requestNextFrameIfClosing();
             } else {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 connectionInfo.getWebSocketConnection().readNextFrame();
@@ -131,6 +129,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 completeRead(readCallback, readCompleted, WebSocketUtil
                         .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
             }
+            requestNextFrameIfClosing();
         }
     }
 
@@ -176,6 +175,18 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         return true;
     }
 
+    // close() requests a single frame for its echo, so keep draining past buffered data frames while closing.
+    private void requestNextFrameIfClosing() {
+        if (!closing) {
+            return;
+        }
+        try {
+            connectionInfo.getWebSocketConnection().readNextFrame();
+        } catch (IllegalAccessException e) {
+            // The connection is already gone; there is nothing left to drain.
+        }
+    }
+
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
         CompletableFuture<Object> readCallback = this.callback;
@@ -219,10 +230,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 ValueCreator.createTypedescValue(targetType));
                         break;
                 }
-                if (!completeRead(readCallback, readCompleted, toReadResult(message)) && closing) {
-                    // No read claimed this frame; keep draining so close() sees the close-frame echo.
-                    connectionInfo.getWebSocketConnection().readNextFrame();
-                }
+                completeRead(readCallback, readCompleted, toReadResult(message));
+                requestNextFrameIfClosing();
             } else {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
                 connectionInfo.getWebSocketConnection().readNextFrame();
@@ -230,6 +239,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         } catch (IllegalAccessException | IOException e) {
             completeRead(readCallback, readCompleted, WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+            requestNextFrameIfClosing();
         }
     }
 
