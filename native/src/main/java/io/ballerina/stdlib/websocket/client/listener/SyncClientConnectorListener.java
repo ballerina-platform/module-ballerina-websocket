@@ -74,6 +74,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
+        CompletableFuture<Object> readCallback = this.callback;
+        AtomicBoolean readCompleted = this.futureCompleted;
         Type targetType = null;
         if (this.targetType != null) {
             targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
@@ -111,58 +113,67 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         break;
                 }
                 stringAggregator.resetAggregateString();
-                if (!futureCompleted.get()) {
-                    if (message instanceof BError) {
-                        callback.complete(WebSocketUtil
-                                .createWebsocketError(String.format("data binding failed: %s", message),
-                                        WebSocketConstants.ErrorCode.Error));
-                    } else if (this.targetType != null) {
-                        boolean validationEnabled = connectionInfo.getWebSocketEndpoint()
-                                .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG)
-                                .getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
-                        validateConstraints(message, validationEnabled);
-                    } else {
-                        callback.complete(message);
-                    }
-                    futureCompleted.set(true);
-                    connectionInfo.getCallbacks().remove(callback);
-                }
-                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+                completeRead(readCallback, readCompleted, toReadResult(message));
             } else {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
         } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
-                callback.complete(WebSocketUtil
+                completeRead(readCallback, readCompleted, WebSocketUtil
                         .createWebsocketError(String.format("data binding failed: %s", e),
                                 WebSocketConstants.ErrorCode.Error));
             } else {
-                callback.complete(WebSocketUtil
+                completeRead(readCallback, readCompleted, WebSocketUtil
                         .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
             }
-            futureCompleted.set(true);
         }
     }
 
-    private void validateConstraints(Object message, boolean validationEnabled) {
-        if (validationEnabled) {
-            Object validationResult = Constraints.validate(message, this.targetType);
-            if (validationResult instanceof BError) {
-                callback.complete(WebSocketUtil.createWebsocketErrorWithCause(
-                        String.format("data validation failed: %s", validationResult),
-                        WebSocketConstants.ErrorCode.PayloadValidationError,
-                        (BError) validationResult));
-            } else {
-                callback.complete(message);
-            }
-        } else {
-            callback.complete(message);
+    private Object toReadResult(Object message) {
+        if (message instanceof BError) {
+            return WebSocketUtil.createWebsocketError(String.format("data binding failed: %s", message),
+                    WebSocketConstants.ErrorCode.Error);
+        }
+        BTypedesc readTargetType = this.targetType;
+        if (readTargetType == null) {
+            return message;
+        }
+        boolean validationEnabled = connectionInfo.getWebSocketEndpoint()
+                .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG)
+                .getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
+        if (!validationEnabled) {
+            return message;
+        }
+        Object validationResult = Constraints.validate(message, readTargetType);
+        if (validationResult instanceof BError) {
+            return WebSocketUtil.createWebsocketErrorWithCause(
+                    String.format("data validation failed: %s", validationResult),
+                    WebSocketConstants.ErrorCode.PayloadValidationError, (BError) validationResult);
+        }
+        return message;
+    }
+
+    // Claims the read, cleans up its per-read state, and only then completes the future: completing wakes the
+    // reader, whose next readMessage() replaces the callback and re-adds the idle handler.
+    private void completeRead(CompletableFuture<Object> readCallback, AtomicBoolean readCompleted, Object result) {
+        if (readCallback == null || readCompleted == null || !readCompleted.compareAndSet(false, true)) {
+            return;
+        }
+        try {
+            connectionInfo.getCallbacks().remove(readCallback);
+            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+        } catch (IllegalAccessException e) {
+            // The connection is already gone; the read still has to be completed.
+        } finally {
+            readCallback.complete(result);
         }
     }
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
+        CompletableFuture<Object> readCallback = this.callback;
+        AtomicBoolean readCompleted = this.futureCompleted;
         Type targetType = null;
         if (this.targetType != null) {
             targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
@@ -202,29 +213,14 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 ValueCreator.createTypedescValue(targetType));
                         break;
                 }
-                if (message instanceof BError) {
-                    callback.complete(WebSocketUtil
-                            .createWebsocketError(String.format("data binding failed: %s", message),
-                                    WebSocketConstants.ErrorCode.Error));
-                } else if (this.targetType != null) {
-                    boolean validationEnabled = connectionInfo.getWebSocketEndpoint()
-                            .getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG)
-                            .getBooleanValue(ANNOTATION_ATTR_VALIDATION_ENABLED);
-                    validateConstraints(message, validationEnabled);
-                } else {
-                    callback.complete(message);
-                }
-                futureCompleted.set(true);
-                connectionInfo.getCallbacks().remove(callback);
-                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
+                completeRead(readCallback, readCompleted, toReadResult(message));
             } else {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
         } catch (IllegalAccessException | IOException e) {
-            callback.complete(WebSocketUtil
+            completeRead(readCallback, readCompleted, WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
-            futureCompleted.set(true);
         }
     }
 
@@ -298,13 +294,8 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
-        try {
-            callback.complete(WebSocketUtil
-                    .createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
-            connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
-        } catch (IllegalAccessException e) {
-            // Ignore as it is not possible have an Illegal access
-        }
+        completeRead(this.callback, this.futureCompleted, WebSocketUtil
+                .createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
     }
 
     @Override
