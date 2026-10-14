@@ -62,7 +62,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     private WebSocketConnectionInfo connectionInfo = null;
     private CompletableFuture<Object> callback;
     private BTypedesc targetType;
-    private AtomicBoolean futureCompleted;
+    private AtomicBoolean futureCompleted = new AtomicBoolean(true);
     private volatile boolean closing = false;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
 
@@ -162,7 +162,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     // reader, whose next readMessage() replaces the callback and re-adds the idle handler.
     private boolean completeRead(CompletableFuture<Object> readCallback, AtomicBoolean readCompleted,
                                  Object result) {
-        if (readCallback == null || readCompleted == null || !readCompleted.compareAndSet(false, true)) {
+        if (readCallback == null || !readCompleted.compareAndSet(false, true)) {
             return false;
         }
         try {
