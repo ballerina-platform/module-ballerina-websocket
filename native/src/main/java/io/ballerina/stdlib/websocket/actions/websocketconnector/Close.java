@@ -25,6 +25,7 @@ import io.ballerina.stdlib.http.transport.contract.websocket.WebSocketConnection
 import io.ballerina.stdlib.websocket.ModuleUtils;
 import io.ballerina.stdlib.websocket.WebSocketConstants;
 import io.ballerina.stdlib.websocket.WebSocketUtil;
+import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityConstants;
 import io.ballerina.stdlib.websocket.observability.WebSocketObservabilityUtil;
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
@@ -59,6 +60,10 @@ public class Close {
                 List<BError> errors = new ArrayList<>(1);
                 ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
                         connectionInfo, countDownLatch);
+                if (wsConnection.getNativeData(WebSocketConstants.CLIENT_LISTENER)
+                        instanceof SyncClientConnectorListener syncListener) {
+                    syncListener.markClosing();
+                }
                 connectionInfo.getWebSocketConnection().readNextFrame();
                 waitForTimeout(errors, timeoutInSecs, countDownLatch, connectionInfo);
                 closeFuture.channel().close().addListener(future -> {

@@ -63,6 +63,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
     private CompletableFuture<Object> callback;
     private BTypedesc targetType;
     private AtomicBoolean futureCompleted;
+    private volatile boolean closing = false;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
 
     public void setConnectionInfo(WebSocketConnectionInfo connectionInfo) {
@@ -113,7 +114,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         break;
                 }
                 stringAggregator.resetAggregateString();
-                completeRead(readCallback, readCompleted, toReadResult(message));
+                if (!completeRead(readCallback, readCompleted, toReadResult(message)) && closing) {
+                    // No read claimed this frame; keep draining so close() sees the close-frame echo.
+                    connectionInfo.getWebSocketConnection().readNextFrame();
+                }
             } else {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
                 connectionInfo.getWebSocketConnection().readNextFrame();
@@ -156,9 +160,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     // Claims the read, cleans up its per-read state, and only then completes the future: completing wakes the
     // reader, whose next readMessage() replaces the callback and re-adds the idle handler.
-    private void completeRead(CompletableFuture<Object> readCallback, AtomicBoolean readCompleted, Object result) {
+    private boolean completeRead(CompletableFuture<Object> readCallback, AtomicBoolean readCompleted,
+                                 Object result) {
         if (readCallback == null || readCompleted == null || !readCompleted.compareAndSet(false, true)) {
-            return;
+            return false;
         }
         try {
             connectionInfo.getCallbacks().remove(readCallback);
@@ -168,6 +173,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         } finally {
             readCallback.complete(result);
         }
+        return true;
     }
 
     @Override
@@ -213,7 +219,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 ValueCreator.createTypedescValue(targetType));
                         break;
                 }
-                completeRead(readCallback, readCompleted, toReadResult(message));
+                if (!completeRead(readCallback, readCompleted, toReadResult(message)) && closing) {
+                    // No read claimed this frame; keep draining so close() sees the close-frame echo.
+                    connectionInfo.getWebSocketConnection().readNextFrame();
+                }
             } else {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
                 connectionInfo.getWebSocketConnection().readNextFrame();
@@ -320,6 +329,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     public void setTargetType(BTypedesc targetType) {
         this.targetType = targetType;
+    }
+
+    public void markClosing() {
+        this.closing = true;
     }
 
     public void setFutureCompleted(AtomicBoolean futureCompleted) {
