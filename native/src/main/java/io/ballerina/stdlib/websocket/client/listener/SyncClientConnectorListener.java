@@ -235,9 +235,15 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
-        } catch (IllegalAccessException | IOException e) {
-            completeRead(read, WebSocketUtil
-                    .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+        } catch (IllegalAccessException | IOException | BError e) {
+            if (e instanceof BError) {
+                completeRead(read, WebSocketUtil
+                        .createWebsocketError(String.format("data binding failed: %s", e),
+                                WebSocketConstants.ErrorCode.Error));
+            } else {
+                completeRead(read, WebSocketUtil
+                        .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
+            }
             requestNextFrameIfClosing();
         }
     }
