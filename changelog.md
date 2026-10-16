@@ -3,17 +3,23 @@ This file contains all the notable changes done to the Ballerina WebSocket packa
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.16.1] - 2026-10-16
 
 ### Changed
 - [[#9301] Regroup standard library packages under new Area categories](https://github.com/ballerina-platform/ballerina-library/issues/9301)
+
+### Fixed
+- [Fix sync client `readMessage()` hanging when it is called again right after the previous read completes, and `close()` timing out when data frames are buffered](https://github.com/ballerina-platform/ballerina-library/issues/7529)
+
+## [2.16.0] - 2026-10-09
+
+### Changed
 - [Migrate to Netty 4.2.18.Final ahead of the Netty 4.1 end of life](https://github.com/ballerina-platform/ballerina-library/issues/9152)
 - Replace the `netty-codec` dependency with `netty-codec-base` and `netty-codec-compression`, following the Netty 4.2 module split. The WebSocket permessage-deflate handlers need the compression artifact at runtime
 - [[#9132] Updated Keywords and Reformat README for Connector Store Discoverability](https://github.com/ballerina-platform/ballerina-library/issues/9132)
 
 ### Fixed
 
-- [Fix sync client `readMessage()` hanging when it is called again right after the previous read completes, and `close()` timing out when data frames are buffered](https://github.com/ballerina-platform/ballerina-library/issues/7529)
 - [Fix inbound control/heartbeat frames starved by the read-gate while a stream resource is producing](https://github.com/ballerina-platform/ballerina-library/issues/8929)
 - [Update Netty version to 4.1.137.Final](https://github.com/ballerina-platform/ballerina-library/issues/9093)
 
