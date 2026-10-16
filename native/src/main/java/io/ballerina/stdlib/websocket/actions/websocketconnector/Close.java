@@ -58,12 +58,12 @@ public class Close {
                 int timeoutInSecs = getConnectionClosureTimeout(bTimeoutInSecs, connectionInfo);
                 CountDownLatch countDownLatch = new CountDownLatch(1);
                 List<BError> errors = new ArrayList<>(1);
-                ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
-                        connectionInfo, countDownLatch);
                 if (wsConnection.getNativeData(WebSocketConstants.CLIENT_LISTENER)
                         instanceof SyncClientConnectorListener syncListener) {
                     syncListener.markClosing();
                 }
+                ChannelFuture closeFuture = initiateConnectionClosure(errors, (int) statusCode, reason.getValue(),
+                        connectionInfo, countDownLatch);
                 connectionInfo.getWebSocketConnection().readNextFrame();
                 waitForTimeout(errors, timeoutInSecs, countDownLatch, connectionInfo);
                 closeFuture.channel().close().addListener(future -> {
