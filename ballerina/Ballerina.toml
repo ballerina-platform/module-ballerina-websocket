@@ -1,7 +1,7 @@
 [package]
 org = "ballerina"
 name = "websocket"
-version = "2.16.0"
+version = "2.16.1"
 authors = ["Ballerina"]
 keywords = ["ws", "network", "bi-directional", "streaming", "service", "client", "Type/Connector", "Type/Trigger", "Name/WebSocket", "Area/Network & Protocols"]
 repository = "https://github.com/ballerina-platform/module-ballerina-websocket"
@@ -16,8 +16,8 @@ graalvmCompatible = true
 [[platform.java25.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "websocket-native"
-version = "2.16.0"
-path = "../native/build/libs/websocket-native-2.16.0.jar"
+version = "2.16.1"
+path = "../native/build/libs/websocket-native-2.16.1.jar"
 
 [[platform.java25.dependency]]
 groupId = "io.ballerina.stdlib"
@@ -92,5 +92,5 @@ version = "4.2.18.Final"
 path = "./lib/netty-handler-proxy-4.2.18.Final.jar"
 
 [[platform.java25.dependency]]
-path = "../test-utils/build/libs/websocket-test-utils-2.16.0.jar"
+path = "../test-utils/build/libs/websocket-test-utils-2.16.1.jar"
 scope = "testOnly"
