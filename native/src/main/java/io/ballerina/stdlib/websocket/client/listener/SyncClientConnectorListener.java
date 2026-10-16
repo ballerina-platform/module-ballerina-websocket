@@ -60,11 +60,13 @@ import static io.ballerina.stdlib.websocket.WebSocketUtil.getBString;
 public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     private WebSocketConnectionInfo connectionInfo = null;
-    private CompletableFuture<Object> callback;
-    private BTypedesc targetType;
-    private AtomicBoolean futureCompleted = new AtomicBoolean(true);
+    private volatile ReadState readState = NO_READ;
     private volatile boolean closing = false;
     private static final Logger logger = LoggerFactory.getLogger(SyncClientConnectorListener.class);
+    private static final ReadState NO_READ = new ReadState(null, null, new AtomicBoolean(true));
+
+    private record ReadState(CompletableFuture<Object> callback, BTypedesc targetType, AtomicBoolean completed) {
+    }
 
     public void setConnectionInfo(WebSocketConnectionInfo connectionInfo) {
         this.connectionInfo = connectionInfo;
@@ -75,11 +77,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketTextMessage webSocketTextMessage) {
-        CompletableFuture<Object> readCallback = this.callback;
-        AtomicBoolean readCompleted = this.futureCompleted;
+        ReadState read = this.readState;
         Type targetType = null;
-        if (this.targetType != null) {
-            targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
+        if (read.targetType() != null) {
+            targetType = TypeUtils.getReferredType(read.targetType().getDescribingType());
         }
         try {
             WebSocketConnectionInfo.StringAggregator stringAggregator = connectionInfo
@@ -114,7 +115,7 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                         break;
                 }
                 stringAggregator.resetAggregateString();
-                completeRead(readCallback, readCompleted, toReadResult(message));
+                completeRead(read, toReadResult(read, message));
                 requestNextFrameIfClosing();
             } else {
                 stringAggregator.appendAggregateString(webSocketTextMessage.getText());
@@ -122,23 +123,23 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
             }
         } catch (IllegalAccessException | BError e) {
             if (e instanceof BError) {
-                completeRead(readCallback, readCompleted, WebSocketUtil
+                completeRead(read, WebSocketUtil
                         .createWebsocketError(String.format("data binding failed: %s", e),
                                 WebSocketConstants.ErrorCode.Error));
             } else {
-                completeRead(readCallback, readCompleted, WebSocketUtil
+                completeRead(read, WebSocketUtil
                         .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
             }
             requestNextFrameIfClosing();
         }
     }
 
-    private Object toReadResult(Object message) {
+    private Object toReadResult(ReadState read, Object message) {
         if (message instanceof BError) {
             return WebSocketUtil.createWebsocketError(String.format("data binding failed: %s", message),
                     WebSocketConstants.ErrorCode.Error);
         }
-        BTypedesc readTargetType = this.targetType;
+        BTypedesc readTargetType = read.targetType();
         if (readTargetType == null) {
             return message;
         }
@@ -159,18 +160,17 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     // Claims the read, cleans up its per-read state, and only then completes the future: completing wakes the
     // reader, whose next readMessage() replaces the callback and re-adds the idle handler.
-    private boolean completeRead(CompletableFuture<Object> readCallback, AtomicBoolean readCompleted,
-                                 Object result) {
-        if (readCallback == null || !readCompleted.compareAndSet(false, true)) {
+    private boolean completeRead(ReadState read, Object result) {
+        if (read.callback() == null || !read.completed().compareAndSet(false, true)) {
             return false;
         }
         try {
-            connectionInfo.getCallbacks().remove(readCallback);
+            connectionInfo.getCallbacks().remove(read.callback());
             connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
         } catch (IllegalAccessException e) {
-            // The connection is already gone; the read still has to be completed.
+            connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
         } finally {
-            readCallback.complete(result);
+            read.callback().complete(result);
         }
         return true;
     }
@@ -189,11 +189,10 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketBinaryMessage webSocketBinaryMessage) {
-        CompletableFuture<Object> readCallback = this.callback;
-        AtomicBoolean readCompleted = this.futureCompleted;
+        ReadState read = this.readState;
         Type targetType = null;
-        if (this.targetType != null) {
-            targetType = TypeUtils.getReferredType(this.targetType.getDescribingType());
+        if (read.targetType() != null) {
+            targetType = TypeUtils.getReferredType(read.targetType().getDescribingType());
         }
         try {
             WebSocketConnectionInfo.ByteArrAggregator byteArrAggregator = connectionInfo
@@ -230,14 +229,14 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
                                 ValueCreator.createTypedescValue(targetType));
                         break;
                 }
-                completeRead(readCallback, readCompleted, toReadResult(message));
+                completeRead(read, toReadResult(read, message));
                 requestNextFrameIfClosing();
             } else {
                 byteArrAggregator.appendAggregateArr(webSocketBinaryMessage.getByteArray());
                 connectionInfo.getWebSocketConnection().readNextFrame();
             }
         } catch (IllegalAccessException | IOException e) {
-            completeRead(readCallback, readCompleted, WebSocketUtil
+            completeRead(read, WebSocketUtil
                     .createWebsocketError(e.getMessage(), WebSocketConstants.ErrorCode.ConnectionClosureError));
             requestNextFrameIfClosing();
         }
@@ -250,70 +249,63 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
 
     @Override
     public void onMessage(WebSocketCloseMessage webSocketCloseMessage) {
-        try {
-            if (callback != null && !futureCompleted.get()) {
-                int closeCode = webSocketCloseMessage.getCloseCode();
-                String closeReason = webSocketCloseMessage.getCloseReason() == null ||
-                        webSocketCloseMessage.getCloseReason().equals("") ?
-                        String.format("%s %s %d", WebSocketConstants.CONNECTION_CLOSED,
-                                WebSocketConstants.STATUS_CODE, closeCode) :
-                        String.format("%s: %s %d", webSocketCloseMessage.getCloseReason(),
-                                WebSocketConstants.STATUS_CODE, closeCode);
-                if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
-                    if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
-                            WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
-                        return;
-                    } else {
-                        if (closeCode != WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE) {
-                            logger.debug(WebSocketConstants.LOG_MESSAGE, "Reconnect attempt not made because of " +
-                                    "close initiated by the server: ", connectionInfo.getWebSocketEndpoint()
-                                    .getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
-                        }
-                    }
-                }
-                if (!futureCompleted.get()) {
-                    callback.complete(WebSocketUtil
-                            .createWebsocketError(closeReason, WebSocketConstants.ErrorCode.ConnectionClosureError));
-                    futureCompleted.set(true);
-                }
-                WebSocketConnection wsConnection = connectionInfo.getWebSocketConnection();
-                wsConnection.removeReadIdleStateHandler();
-                WebSocketResourceDispatcher.finishConnectionClosureIfOpen(wsConnection, closeCode, connectionInfo);
-                if (connectionInfo.getCallbacks().size() > 0) {
-                    connectionInfo.getCallbacks().forEach(callback -> {
-                        callback.complete(WebSocketUtil.createWebsocketError(WebSocketConstants.CONNECTION_CLOSED,
-                                WebSocketConstants.ErrorCode.ConnectionClosureError));
-                    });
+        ReadState read = this.readState;
+        if (read.callback() == null || read.completed().get()) {
+            return;
+        }
+        int closeCode = webSocketCloseMessage.getCloseCode();
+        String closeReason = webSocketCloseMessage.getCloseReason() == null ||
+                webSocketCloseMessage.getCloseReason().equals("") ?
+                String.format("%s %s %d", WebSocketConstants.CONNECTION_CLOSED,
+                        WebSocketConstants.STATUS_CODE, closeCode) :
+                String.format("%s: %s %d", webSocketCloseMessage.getCloseReason(),
+                        WebSocketConstants.STATUS_CODE, closeCode);
+        if (WebSocketUtil.hasRetryConfig(connectionInfo.getWebSocketEndpoint())) {
+            if (closeCode == WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE &&
+                    WebSocketUtil.reconnect(connectionInfo, read.callback(), read.completed())) {
+                return;
+            } else {
+                if (closeCode != WebSocketConstants.STATUS_CODE_ABNORMAL_CLOSURE) {
+                    logger.debug(WebSocketConstants.LOG_MESSAGE, "Reconnect attempt not made because of " +
+                            "close initiated by the server: ", connectionInfo.getWebSocketEndpoint()
+                            .getStringValue(WebSocketConstants.CLIENT_URL_CONFIG));
                 }
             }
+        }
+        completeRead(read, WebSocketUtil.createWebsocketError(closeReason,
+                WebSocketConstants.ErrorCode.ConnectionClosureError));
+        try {
+            WebSocketResourceDispatcher.finishConnectionClosureIfOpen(connectionInfo.getWebSocketConnection(),
+                    closeCode, connectionInfo);
+            if (connectionInfo.getCallbacks().size() > 0) {
+                connectionInfo.getCallbacks().forEach(callback -> {
+                    callback.complete(WebSocketUtil.createWebsocketError(WebSocketConstants.CONNECTION_CLOSED,
+                            WebSocketConstants.ErrorCode.ConnectionClosureError));
+                });
+            }
         } catch (IllegalAccessException e) {
-            callback.complete(WebSocketUtil.createWebsocketError("Connection already closed",
-                    WebSocketConstants.ErrorCode.ConnectionClosureError));
+            // The connection is already gone and the read has been completed above.
         }
     }
 
     @Override
     public void onError(WebSocketConnection webSocketConnection, Throwable throwable) {
-        try {
-            if (callback != null && !futureCompleted.get()) {
-                BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
-                if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
-                        WebSocketUtil.reconnect(connectionInfo, callback, futureCompleted)) {
-                    return;
-                }
-                callback.complete(WebSocketUtil
-                        .createWebsocketError(throwable.getMessage(), WebSocketConstants.ErrorCode.Error));
-                futureCompleted.set(true);
-                connectionInfo.getWebSocketConnection().removeReadIdleStateHandler();
-            }
-        } catch (IllegalAccessException e) {
-            connectionInfo.getWebSocketEndpoint().set(WebSocketConstants.LISTENER_IS_OPEN_FIELD, false);
+        ReadState read = this.readState;
+        if (read.callback() == null || read.completed().get()) {
+            return;
         }
+        BObject webSocketClient = connectionInfo.getWebSocketEndpoint();
+        if (WebSocketUtil.hasRetryConfig(webSocketClient) && throwable instanceof IOException &&
+                WebSocketUtil.reconnect(connectionInfo, read.callback(), read.completed())) {
+            return;
+        }
+        completeRead(read, WebSocketUtil.createWebsocketError(throwable.getMessage(),
+                WebSocketConstants.ErrorCode.Error));
     }
 
     @Override
     public void onIdleTimeout(WebSocketControlMessage controlMessage) {
-        completeRead(this.callback, this.futureCompleted, WebSocketUtil
+        completeRead(this.readState, WebSocketUtil
                 .createWebsocketError("Read timed out", WebSocketConstants.ErrorCode.ReadTimedOutError));
     }
 
@@ -333,20 +325,12 @@ public class SyncClientConnectorListener implements WebSocketConnectorListener {
         }
     }
 
-    public void setCallback(CompletableFuture<Object> callback) {
-        this.callback = callback;
-    }
-
-    public void setTargetType(BTypedesc targetType) {
-        this.targetType = targetType;
+    public void startRead(CompletableFuture<Object> callback, BTypedesc targetType) {
+        this.readState = new ReadState(callback, targetType, new AtomicBoolean(false));
     }
 
     public void markClosing() {
         this.closing = true;
-    }
-
-    public void setFutureCompleted(AtomicBoolean futureCompleted) {
-        this.futureCompleted = futureCompleted;
     }
 
     private Object cloneWithType(Type targetType, Object value) {
