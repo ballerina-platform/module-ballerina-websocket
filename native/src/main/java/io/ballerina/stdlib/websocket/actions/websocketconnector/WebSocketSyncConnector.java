@@ -25,7 +25,6 @@ import io.ballerina.stdlib.websocket.client.listener.SyncClientConnectorListener
 import io.ballerina.stdlib.websocket.server.WebSocketConnectionInfo;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Utilities related to websocket synchronous client connector read actions.
@@ -61,12 +60,8 @@ public class WebSocketSyncConnector {
         long readTimeoutInSeconds = WebSocketUtil.findTimeoutInSeconds(
                 connectionInfo.getWebSocketEndpoint().getMapValue(WebSocketConstants.CLIENT_ENDPOINT_CONFIG),
                 WebSocketConstants.ANNOTATION_ATTR_READ_IDLE_TIMEOUT, 0);
+        connectorListener.startRead(callback, targetType.length > 0 ? targetType[0] : null);
         connectionInfo.getWebSocketConnection().addReadIdleStateHandler(readTimeoutInSeconds);
-        connectorListener.setCallback(callback);
-        if (targetType.length > 0) {
-            connectorListener.setTargetType(targetType[0]);
-        }
-        connectorListener.setFutureCompleted(new AtomicBoolean(false));
         connectionInfo.getWebSocketConnection().readNextFrame();
     }
 
